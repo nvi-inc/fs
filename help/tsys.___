@@ -9,7 +9,7 @@ Settable parameters:
 
             list        List of modules for which Tsys will be computed.
                         Standard detector mnemonics allowed.  In
-                        addition: for VLBA/4/5/DBBC 'formif' and
+                        addition: for VLBA/4/5/DBBC/DBBC3 'formif' and
                         'formbbc' are permitted; for Mark III/IV/5,
                         'formif' and 'formvc' are permitted; station
                         detectors 'u5' and 'u6' are permitted.
@@ -24,36 +24,36 @@ Comments:
 The results are returned grouped in pairs of 'mnemonic,value' for each
 detector.  The output is collected into lines by IF channel.
 Detectors that have no IF assigned are displayed first followed by
-those for IFs '1'-'3' (Mark III/IV) or 'a'-'d' (VLBA/4/5/DBBC).  If
-the output for an IF would make a long output line, the output is
-split into more than one line.  For station detectors, the values are
-displayed on one line.
+those for IFs '1'-'3' (Mark III/IV), 'a'-'d' (VLBA/4/5/DBBC), or
+'a'-'h' (DBBC3).  If the output for an IF would make a long output
+line, the output is split into more than one line.  For station
+detectors, the values are displayed on one line.
 
 For Mark III/IV and LBA4 racks the detector mnemonics for the VCs are
 displayed as 'hs', where 'h' is the VC number as hex and 's' is for
-the sideband: 'd' (dual for upper/lower), 'u' (upper), 'l' (lower), a
+the side-band: 'd' (dual for upper/lower), 'u' (upper), 'l' (lower), a
 digit '3'-'7' for other VC detectors or 'x' for unknown.
 
-For VLBA/4/5/DBBC, additional mnemonics 'formif' and 'formbbc' are
-permitted in the 'list'.  These select the detectors for the IF
-channels and BBC sidebands currently being recorded by the formatter.
+For VLBA/4/5/DBBC/DBBC3, additional mnemonics 'formif' and 'formbbc'
+are permitted in the 'list'.  These select the detectors for the IF
+channels and BBC side-band currently being recorded by the formatter.
 For Mark III/IV/5, 'formvc' is accepted instead of 'formbbc', as well
 as 'formif'.
 
 A time-out or other error on one more devices for a Mark III/IV/5,
-LBA, VLBA/4/5 or DBBC detector will not prevent results from other
-detectors from being displayed.  A negative integer will be shown for
-each channel that had an error that prevented an actual measurement
-from being displayed.  An overflow value, larger than 999999.9 is
-displayed as dollar signs, '$$$$$$$$'.
+LBA, VLBA/4/5  detector will not prevent results from other detectors
+from being displayed.  A negative integer will be shown for each
+channel that had an error that prevented an actual measurement from
+being displayed.  An overflow value, larger than 999999.9 is displayed
+as dollar signs, '$$$$$$$$'.
 
 This command calculates and displays system temperatures for the
-different detectors.  The formula for Mark III/IV/5, LBA4, DBBC, and
-station detectors is:
+different detectors.  The formula for Mark III/IV/5, LBA4, and station
+detectors is:
  
             tsys = (tpi - tpzero) * (caltemp/tpdiff)
 
-For LBA and DBBC the formula is:
+For LBA, DBBC, and DBBC3 the formula is:
 
                  tsys = tpi * (caltemp/tpdiff)
 

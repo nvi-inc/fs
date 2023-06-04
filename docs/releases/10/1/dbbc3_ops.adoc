@@ -26,18 +26,22 @@
 :toclevels: 3
 :toc:
 :experimental:
+:downarrow: &downarrow;
 E. Himwich, J. Quick
-Version 4.8 - April 2023
+Version 5.2 - May 2023
 
 == Introduction
 
-This document describes FS DBBC3 support starting with FS _10.1_. It
-outlines the features and model for FS operations with the DBBC3.
+This document describes FS DBBC3 support in the latest FS version,
+_10.2_. It outlines the features and model for FS operations with the
+DBBC3. Some **NOTE**s are included to describe how support in FS
+_10.1_ is different. Versions before _10.1_ are not covered here.
 
-The FS supports the DDC_E, DDC_U, and DDC_V personalities. Support
-for the DDC_E personality was added in version _10.2_. The only
-version of DDC_V supported in FS _10.1_ was _v124_, but as of _10.2_
-other later versions are supported as well.
+The FS supports the DDC_E, DDC_U, and DDC_V personalities.
+
+NOTE: Support for the DDC_E personality was not available in FS
+_10.1_, nor was there support for any DDC_V versions other than
+_v124_, even then it was only for very early releases.
 
 The appendix <<Configuring the FS for use with a DBBC3>> gives the
 steps for customizing the FS. The appendix
@@ -76,10 +80,9 @@ to the end in the DBBC3 version. The meanings of the `_frequency_` and
 
 +
 
-WARNING: So far, operation has only been tested with polarity `2`. It
-is expected that other polarities will work but that has not yet been
-confirmed. This affects multicast data logging, the T~sys~ display,
-and use of _fivpt_ and _onoff_.
+NOTE: In FS _10.1_, operation had only been tested with polarity `2`
+and for early releases of DDC_U and DDC_V firmware. The support was
+discovered to be incompatible with some later DDC_V _v124_ releases.
 
 * `core3h` -- Low-level communication with Core3H boards
 
@@ -186,6 +189,17 @@ are very time consuming and their execution needs to be limited. This
 command is added by _drudg_ to _.snp_ files if selected by the
 `setup_proc` option in _skedf.ctl_ control file. Please see the
 <<Minimizing the use of setup procedures>> appendix for more details.
+
+* `tpi`, `tpical`, `tpdiff`, `tpzero`, `caltemp` and `tsys` -- Support
+non-continuous calibrations T~sys~ measurements.
+
++
+
++
+
+NOTE: If FS  _10.1_, `formbbc` and `formif` were not supported as
+mnemonics to specify DBBC3 detectors for channels/IFs that are
+configured for recording.
 
 * `tpicd` -- TPI (multicast) recording control daemon setup
 
@@ -471,6 +485,9 @@ Before observing, it is essential to check that the mode has been
 configured correctly. This will implicitly set the non-Core3H
 board aspects of the observing mode, which is also essential.
 
+IMPORTANT: The IF target levels need to verified for each observing
+mode. Please see <<IF target levels>>.
+
 The setup procedure can be executed (without the `force` parameter) to
 check that the setup is correct. Assuming the schedule procedure
 library has already been opened as described in the
@@ -504,6 +521,40 @@ configure the non-Core3H board aspects of the observing mode.
 
 ====
 
+== IF target levels
+
+Due to the very wide input bandpass (4 GHz) of the DBBC3,  it very
+important have the correct IF target levels. If they are too high, the
+samplers will saturate, which which will result in gain compression
+and loss of VLBI sensitivity. The nominal target for 4 GHz BW input
+signal is 32000. For a 1 GHz BW input signal around 22000 might be
+good. For 0.5 GHZ input BW signal, 10000 may be realistic.
+
+If you have continuous calibration, you can check for compression by
+adjusting the target level for each IF while watching the <<Tsys
+monitor display>> for that IF. Once setup for a mode, reduce the
+target level for that IF from 32000 until it reaches a reasonable
+minimum. If you have _spot_ calbration, you can do the same, but you
+will need to use the `caltsys` procedure to check T~sys~. The `onoff`
+command can also be useful for this; check that the `Comp`
+(compression) value is close to unity. You can also use a noise source
+to measure the change in TPI levels, with the gains locked, at
+different operating levels and find the highest value before it
+becomes non-linear. All of these methods rely on avoiding gain
+compression for the TPI counts. It is expected that eliminating
+compression for them with do the same for the VLBI data.
+
+If you find you need to set target levels other than `32000` and there
+are values that will work for all your bands and modes per IF, you can
+set them for _drudg_ using the `dbbc_if_target` option in _skedf.ctl_.
+See _st.default/control/skedf.ctl_
+(https://github.com/nvi-inc/fs/blob/main/st.default/control/skedf.ctl)
+for more information. If you cannot use the same targets for each
+mode, you will need to modify the IF setup procedures provided by
+_drudg_ for some cases. We are hoping to have a feature in a future
+release that will better automate this. If you need such a feature,
+please contact Ed to explain what is needed for your case.
+
 == Firmware version checking
 
 The FS checks that the DBBC3 firmware being used agrees with what is
@@ -527,18 +578,16 @@ The checks are made in two different situations:
 
 The version information is checked for each multicast reception. If
 there is no multicast being received, these errors will not be
-reported this way. In FS _10.1_, The errors detected for the multicast
-data are reported every 20 seconds; for _10.2_ and later, the minimum
-repprting interval is one minute.
+reported this way. The minimum reporting interval is one minute, but
+can be increased up to 10 minutes with the environment variable
+`FS_DBBC3_MULTICAST_VERSION_ERROR_MINUTES`. Please see the <<Other
+options>> section of the <<DBBC3 specific environment variables>>
+appendix below for the details.
 
 +
 
-Starting with FS _10.2_, you can change the interval of report the
-error in minutes from one up to 10 with the environment variable
-`FS_DBBC3_MULTICAST_VERSION_ERROR_MINUTES`. Please see the
-<<Other options>> section of the
-<<DBBC3 specific environment variables>> appendix below for the
-details.
+NOTE: In FS _10.1_, the interval for reporting version errors detected
+with the multicast data was 20 seconds and could not be adjusted.
 
 +
 
@@ -553,7 +602,7 @@ displayed with:
 
 +
 
-CAUTION: Suppressing the display of this error information will _not_
+WARNING: Suppressing the display of this error information will _not_
 prevent possible loss of data and/or other error messages if the
 firmware/version in the FS control files doesn't agree with what is
 loaded in the DBBC3.
@@ -572,7 +621,7 @@ parameter being used.
 This command is the last command executed by _drudg_ generated Core3H
 setup procedures. A firmware/version error will be nearly, in some
 cases actually, the last error shown. That should help make it easier
-to spot.
+to identify.
 
 ** A `core3h=__n__,...,force` command.
 
@@ -589,17 +638,18 @@ version whenever the formatter is configured.
 === equip.ctl
 
 For DBBC3 use, the rack type in _equip.ctl_ should be `dbbc3_ddc_e`
-(FS _10.2_ or later), `dbbc3_ddc_u`, or `dbbc3_ddc_v` depending on the
-firmware that is loaded.
+`dbbc3_ddc_u`, or `dbbc3_ddc_v` depending on the firmware that is
+loaded.
+
+NOTE: For FS _10.1_, `dbbc3_ddc_e` was not available.
 
 === dbbc3.ctl
 
 The DBBC3 specific control file parameters are in the _dbbc3.ctl_
 control file. An example of the contents is:
 
-CAUTION: The example below is for FS _10.2_. In FS _10.1_, the second
-non-comment line below, for the DDC_E firmware version, was not
-present,
+NOTE: In FS _10.1_, the second non-comment line below, for the DDC_E
+firmware version, was not present.
 
 ....
 * Two fields: BBCs/IF (8, 12, 16 or nominal (U:16,EV:8)), IFs (1-8)
@@ -663,21 +713,31 @@ _/usr2/fs/st.defaul/control/skedf.ctl_ example file.
 
 The T~sys~ monitor display is organized per IF and updates at a 1 Hz
 rate. The displayed information includes: LO, time, VDIF epoch, time
-difference between DBBC3 and the FS, PPS delay, T~sys~ for each
-IF/Core3H board as well as BBC frequencies and T~sys~ values. By
-default the display will cycle through the appropriate IFs, dwelling
-for two seconds on each. Selecting other configurations is described
-in the <<Commands>> subsection below.
+difference between DBBC3 and the FS, PPS delay, T~sys~ and
+polarization for each IF/Core3H board as well as BBC frequencies and
+T~sys~ values. By default the display will cycle through the
+appropriate IFs, dwelling for two seconds on each. Selecting other
+configurations is described in the <<Commands>> subsection below.
+
+If the LO and its polarization are defined for the displayed IF, the
+polarization will be shown as `(L)` or `+++(R)+++`.
+
+NOTE: `(L)` or `+++(R)+++` are displayed regardless of what
+polarization pair is in use: Left/Right, Horizontal/Vertical, or X/Y.
+Following the usual alphabetical order convention within a pair: `LR`,
+`HV`, and `XY`, you can assume: `L`=`H`=`X` and `R`=`V`=`Y`. Until the
+FS is updated to recognize pairs other than Left/Right, you need to
+know which pair is active to interpret what is shown.
 
 Except for `Time`, the values are from the previous second's
-multicast. Hence the T~sys~ values are from two seconds in the past.
-If the system is operating normally, `Time` shows a value one second
-more than in the previous second's multicast to avoid confusion with
-times displayed in other windows. (Logged values of the time are the
-raw received values.) This leads to the somewhat odd situation that
-for a Core3H board that is not synced, with non-DDC_V firmware, its
-`Time` value will be shown as `00:00:01` on the first day of the
-current VDIF epoch.
+multicast. Hence for continuous calibration, the T~sys~ values are
+from two seconds in the past. If the system is operating normally,
+`Time` shows a value one second more than in the previous second's
+multicast to avoid confusion with times displayed in other windows.
+(Logged values of the time are the raw received values.) This leads to
+the somewhat odd situation that for a Core3H board that is not synced,
+with non-DDC_V firmware, its `Time` value will be shown as `00:00:01`
+on the first day of the current VDIF epoch.
 
 [NOTE]
 ====
@@ -744,25 +804,94 @@ recorded is not fully defined. The T~sys~ display will show the most
 recently selected channels (new or old) to avoid having the values
 disappear momentarily if the old configuration is re-commanded.
 
+Finite values outside of the range, `-999.` to `999.9`, which won't
+fit in the available field width, are displayed as dollar signs, `$`.
+
+There are two regimes, described below: <<Continuous calibration>> and
+<<Spot (noncontinuous) calibration>>.
+
+==== Continuous calibration
+
 For all displayed (non-blank) BBC T~sys~ fields, the values will be
 shown if they can be calculated. If they can't be, a hint, in inverse
 video, for the cause of the problem will be displayed in the
 corresponding field instead. There may be more than one issue, but
 only the first encountered is reported. The order is:
 
-. `Nccal` -- continuous cal not enabled
 . `N bbc` -- the BBC is not configured
+
 . ``N lo `` -- the LO is not defined
+
 . `Ntcal` -- no Tcal value was found
 
-The T~sys~ values are calculated using the averaging method described
-in `*help=cont_cal*`.
+. `N cal` -- continuous calibration not enabled (and no spot
+measurement have been made yet)
 
-NOTE: As usual in the FS, an invalid value will be display as field
-dollar signs, `$`. That usually means that a value could be
-calculated, but there was a problem with the result: the result was
-too large for the field, was negative when only positive values are
-valid, or would have required dividing by zero.
++
+
+NOTE: In FS _10.1_, `Nccal` was used instead and only applied to
+continuous calibration.
+
+The T~sys~ values are calculated using the averaging method described
+in `*help=cont_cal*`. A special background color is used for the
+following errors, regardless of whether averaging is in use:
+
+* Negative values, including too large values with dollar signs, are
+shown with magenta.
+
+* If the "`on`" and "`off`" TPI values are equal, `` inf `` is shown
+with cyan.
+
+* If the "`on`" and/or "`off`" TPI values overflow (`65536` for BBCs),
+`ovrfl` is shown with cyan.
+
+* If the "`off`" TPI value is zero, `off=0` is shown with cyan.
+
+If filtering is use, there is a green background  when 1-2 values have
+been rejected in a row; yellow, 3-5; red; 6 or more. Invalid results
+(negative, infinity, overflow, and the "`off`" value being zero) are
+still displayed as such and included in the accumulated count of
+rejected values for the next time there is a valid result.
+
+If colors are not available for the terminal, inverse video is used
+instead.
+
+NOTE: In FS _10.1_, all invalid values (negative, infinity, overflow)
+were display as dollar signs and the "`off`" TPIs being zero was not
+recognized as an error condition.
+
+===== Diagnosing problems
+
+With the way T~sys~ data is displayed, certain problems can be readily
+identified as the values update:
+
+* Most, or all, values are negative -- the calibration polarity is
+incorrect
+
+* Most, or all, values are very large positive or negative values,
+including dollar signs, perhaps with some `` inf `` mixed in -- the
+diode is not firing
+
+* Some fields have `overfl` -- the gain is set too high for those BBCs
+
+* `off=0` is seen -- the FS has continuous calibration set to "`on`",
+but the DBBC3 has it "`off`".
+
+Turning off averaging (setting the `_samples_` parameter of `cont_cal`
+to zero), can be useful to troubleshooting. You will see the T~sys~
+values calculated sample-by-sample with no averaging or filtering.
+
+==== Spot (noncontinuous) calibration
+
+Spot calibration refers to explicitly turning the noise diode on and
+off to make calibration measurements. Incorrect values (negative,
+infinity, and overflow) and BBCs or LOs not configured are displayed
+as dollar signs, `$`. If the T~cal~ it not defined `Ntcal` is shown in
+inverse video. If no measurement has been made yet, `N cal` is shown
+in inverse video.
+
+NOTE: In FS _10.1_, information for spot calibration T~sys~ was not
+displayed.
 
 === Commands
 
@@ -774,8 +903,8 @@ The T~sys~ display accepts several one character commands:
 
 This might be useful, for example, when troubleshooting a single IF.
 
-* `*n*` -- next IF, wrapping at the end
-* `*p*` -- previous IF, wrapping at the end
+* `*n*` -- next IF, wrapping at the end. Single IF display is entered if not previously selected.
+* `*p*` -- previous IF, wrapping at the end. Single IF display is entered if not previously selected.
 * `*1*`-`*9*` -- seconds of display time for each IF (default is 2)
 * `*i*` -- toggle display of IF or RF frequency for BBCs (default is RF if the LO is defined; IF, if not)
 
@@ -785,10 +914,27 @@ If no LO is defined for an IF, it will not be possible to display the
 RF frequencies for the corresponding BBCs.
 
 * `*l*` -- toggle between `All` and `Rec`*/*`Def` modes (see the <<Modes>> subsection above for defaults)
+
++
+
+NOTE: If one IF was manually selected before the IF and BBC
+configuration was defined, it will not be possible to toggle between
+display modes until cycling has been restarted.
+
 * `*0*` -- reset to all defaults
 * `*?*` or `*/*` -- show help summary
 *  kbd:[esc] or kbd:[control+c] -- exit
 * Any other key (e.g., kbd:[space]) -- resume cycling
+
+TIP: Some key combinations, e.g., kbd:[Ctrl+Alt+{downarrow}], generate
+escape sequences. If they are used while _monit7_ has the focus, they
+will probably cause it to exit. We are looking into a programmatic way
+to prevent this. If this is annoying or you are not using the display
+server (in which case the FS will crash), you can mask out troublesome
+key combinations for _monit7_ in _~/.Xresources_ or possibly with the
+window manager. If _monit7_ exits while using the display server and
+you have it defined in _clpgm.ctl_, you can use `client=monit7` to
+reopen it.
 
 == Checking DBBC3 time
 
@@ -893,11 +1039,11 @@ their log entry labels, is logged:
 
 * `time` -- for each Core3H board in the system
 * `pps2dot` -- (`pps_delay`) in nanoseconds for each Core3H board
-* `tpcont`  -- Only if continuous cal _is_ in use -- TPI counts for each BBC and IF configured for recording.
+* `tpcont`  -- Only if continuous calibration _is_ in use -- TPI counts for each BBC and IF configured for recording.
 +
-The counts are given in the order of cal _on_ then _off_
-* `tpi`  -- Only if continuous cal is _not_ in use -- TPI counts for each BBC and IF configured for recording.
-* `tsys` -- Only if continuous cal _is_ in use -- T~sys~ for each BBC and IF configured for recording and T~sys~
+The counts are given in the order of diode _on_ then _off_
+* `tpi`  -- Only if continuous calibration is _not_ in use -- TPI counts for each BBC and IF configured for recording.
+* `tsys` -- Only if continuous calibration _is_ in use -- T~sys~ for each BBC and IF configured for recording
 
 +
 
@@ -906,6 +1052,18 @@ in `*help=cont_cal*`. They are logged every `_samples_` (from the
 `cont_cal` command) iterations of the `_cycle_` period for the `tpicd`
 command (see `*help=tpicd*`). In other words, the T~sys~ logging
 interval is the product of `_samples_` times `_cycle_`.
+
++
+
+Negative T~sys~ values will not be logged unless averaging is
+turned off since averaging rejects negative values. Other invalid
+values (overflow, infinity, and `off=0`) are logged as dollar signs,
+`$` when averaging is turned off, but not otherwise.
+
++
+
+NOTE: For FS _10.1_, negative T~sys~ values were recorded as dollar
+signs, `$`. Averaging was not implemented.
 
 Even when not being logged, multicast data is normally being received.
 A subset can be seen in the T~sys~ monitor display. The current value
@@ -996,16 +1154,18 @@ _/usr2/fs/st.default/control/skedf.ctl_ file.
 == Configuring the FS for use with a DBBC3
 
 This appendix provides the steps needed to configure the FS to support
-a DBBC3. You must have version FS _10.1_, or later, installed before
-using these directions. All steps, except as noted, are to be executed
-as _oper_.
+a DBBC3. All steps, except as noted, are to be executed as _oper_.
 
 . Update _equip.ctl_.
 
 +
 
-Change your rack type to `dbbc3_ddc_e` (FS _10.2_ or later),
-`dbbc3_ddc_u,` or `dbbc3_ddc_v`, as appropriate.
+Change your rack type to `dbbc3_ddc_e`, `dbbc3_ddc_u,` or
+`dbbc3_ddc_v`, as appropriate.
+
++
+
+NOTE: For FS _10.1_, `dbbc3_ddc_e` was not available.
 
 . Update _dbbc3.ctl_.
 
@@ -1346,13 +1506,15 @@ helpful.
 
 == DBBC3 specific environment variables
 
-Beginning in FS _10.2_, several environment variables are defined for
-use with the DBBC3. These are generally broken into two groups,
-described in sections <<Swaps of TPI and gain values>>, and
-<<Other options>>. These environment variables exist to help the end
-user adapt to variations in DBBC3 behaviour between different firmware
-releases.  Several variables are provided to give flexibility for
-handling different variations.
+Several environment variables are defined for use with the DBBC3.
+These are generally broken into two groups, described in sections
+<<Swaps of TPI and gain values>>, and <<Other options>>. These
+environment variables exist to help the end user adapt to variations
+in DBBC3 behaviour between different firmware releases. Several
+variables are provided to give flexibility for handling different
+variations.
+
+NOTE: None of these environment variables are supported in FS _10.1_.
 
 While some firmware releases may require setting a subset of these
 variables, we have set the default values so that the end user should
@@ -1541,6 +1703,8 @@ This appendix provides methods for verifying the
 <<Continuous calibration polarity>> and the
 <<USB/LSB TPI swap status>>
 
+NOTE: These procedures are not supported for FS _10.1_.
+
 === Continuous calibration polarity
 
 A polarity of `0` corresponds to the noise diode in the receiver being
@@ -1563,9 +1727,8 @@ polarity is with the output of a `bbc__NNN__` command. The following
 procedure should normally work. If the results do not agree with your
 expected polarity, please contact Ed.
 
-. If you are using FS _10.2_ or later, make sure the environment
-variable `FS_DBBC3_BBCNNN_ON_OFF_SWAP` is _not_ set, or if it is set,
-that it is set to `0`.
+. Make sure the environment variable `FS_DBBC3_BBCNNN_ON_OFF_SWAP` is
+_not_ set, or if it is set, that it is set to `0`.
 
 . Start the FS.
 
@@ -1616,9 +1779,9 @@ strong signal in only one side-band of one BBC.
 Follow the steps below. If the results do not show that the test
 signal is in the expected side-band, please contact Ed.
 
-. If you are using FS _10.2_ or later, make sure the environment
-variable `FS_DBBC3_MULTICAST_BBC_TPI_USB_LSB_SWAP` is _not_ set, or
-if it is set, that it is set to `1`.
+. Make sure the environment variable
+`FS_DBBC3_MULTICAST_BBC_TPI_USB_LSB_SWAP` is _not_ set, or if it is
+set, that it is set to `1`.
 
 . Start the FS.
 
@@ -1754,17 +1917,21 @@ recorder):
 [subs="+quotes"]
 ....
 _command_=datastream=clear
-_command_=datastream=add:{thread}:*
+_command_=datastream=add:ds{thread}:*
 _command_=datastream=reset
 ....
 
 +
 
-NOTE: As of FS version _10.2_, the `add` command was changed to
-`_command_=datastream=add:ds{thread}:*`. The `ds` is passed (case
-preserved) to _jive5ab_ to be used as part of the lowercase datastream
-label portion of the filename. This results in filenames like
-_ev024g_mc_no0009_dsds1_. The double _ds_ is intentional.
+The `ds` is passed (case preserved) to _jive5ab_ to be used as part of
+the lowercase datastream label portion of the filename. This results
+in filenames like _ev024g_mc_no0009_dsds1_. The double _ds_ is
+intentional.
+
++
+
+NOTE: In FS _10.1_, the `add` command was
+`_command_=datastream=add:{thread}:*`.
 
 +
 
