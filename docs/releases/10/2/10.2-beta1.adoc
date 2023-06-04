@@ -58,17 +58,32 @@ https://nvi-inc.github.io/fsl11/.
 less. This enables use of the new IVS 12-character session codes.
 
 * Several changes were made to DBBC3 support, including: DDC_E
-firmware is now recognized, information on IF target levels was added
-(see the <<../1/dbbc3_ops.adoc#_if_target_levels,IF target levels>>
-section of the <<../1/dbbc3_ops.adoc#,FS DBBC3 Operations Manual>> for
-the details), environment variables were added to modify the use of
-TPI values and control other features, support for spot
-(noncontinuous) calibration was completed, and averaging/filtering of
-continuous calibration data was added.
+firmware is now recognized, the interpretation of TPI data was
+adjusted to agree with what was empirically determined to be correct
+and environment variables were added to allow further adjustments and
+control other features, information on IF target levels was added (see
+the <<../1/dbbc3_ops.adoc#_if_target_levels,IF target levels>> section
+of the <<../1/dbbc3_ops.adoc#,FS DBBC3 Operations Manual>> for the
+details), support for spot (noncontinuous) calibration was completed,
+and averaging/filtering of continuous calibration data was added.
 
 * The _plotlog_ utility, for examining data in the log files, has been
 expanded and updated. The changes include support for RDBEs, DBBC3s,
 and additional data types including recorder performance statistics.
+
+As always, we are deeply indebted to Jonathan Quick (HartRAO) for his
+many significant contributions that go far beyond what is explicitly
+mentioned here. For this particular release, his contributions include
+feature suggestions and testing for DBBC3 support, as well as for many
+non-DBBC3 specific features, and for documentation enhancements. Many
+of the improvements that were made are due to his thoughtfulness and
+diligence.
+
+We thank Eskil Varenius and Jun Yang (both at Onsala) for bug reports
+and feedback, particularly on DBBC3 related issues.
+
+We thank Beppe Maccaferri (Medicina) for being a diligent tester
+and reporting bugs.
 
 == Upgrading from 10.1
 
@@ -81,6 +96,24 @@ using the installation document, https://nvi-inc.github.io/fsl11/.
 Testers of previous _10.2_ development versions, on any FSL__x__, can
 follow the instructions here; some steps may have changed from
 previous versions.
+
+=== Backup your operational system
+
+Having a back-up to return to will allow you to continue operations in
+case something goes wrong with the installation. If you don't have
+your own scheme, and for more details, please see the
+<<../../misc/install_reference.adoc#_making_a_back_up_before_installing,Making
+a back-up before installing>> section in the
+<<../../misc/install_reference.adoc#,Installation Reference>>
+document.
+
+You can also use symbolic links with copies of your old operational
+directories to switch back and forth between in your operational
+_10.1_ configuration and a test install of _10.2_. This is covered
+in detail in the
+<<../../misc/install_reference.adoc#_using_symbolic_links,Using
+symbolic links>> subsection of the section and document referenced
+above.
 
 === Fetch 10.2
 
@@ -99,12 +132,12 @@ _git_:
 
 +
 
-Please follow the steps, through the one that includes the option to
-set the _/usr2/fs_ link, in the
+Refer to the
 <<../../misc/release_model.adoc#_installing_from_an_archive,Installing
 from an archive>> subsection in the
-<<../../misc/release_model.adoc#,Release Model>> document. Please note
-that:
+<<../../misc/release_model.adoc#,Release Model>> document. Follow the
+steps there, through the one that includes the option to set the
+_/usr2/fs_ link. Please note that:
 
 +
 [disc]
@@ -125,10 +158,20 @@ There are two alternatives:
 . For FSL11, no new environment variables need to be set, skip to the
 next step <<Make the FS>>.
 
-. For FSL__x__ Linux distributions FSL10 and earlier, set the
+. For other FSL__x__ Linux distributions, FSL10 and earlier, set the
 environment variables `FS_F95_NO_ALLOW_ARGUMENT_MISMATCH` (even if not
-using _f95_) and `FS_PYTHON_VERSION`. Some other non-FSL__x__
-distributions may need one or both set as well.
+using _f95_) and `FS_PYTHON_VERSION`.
+
++
+
+NOTE: Some other non-FSL__x__ distributions may need one or both set
+as well.
+
++
+
+NOTE: We don't know if FS versions _10.<x>_ will work for FSL7 and
+older distributions as is, but please contact Ed if you run into
+problems. We expect that they will be easy to fix.
 
 .. Update login _rc_ files:
 
@@ -180,15 +223,17 @@ your file with:
 
 The script will insert the needed line. It will report an error if the
 file has more, or less, than the number of expected non-comment lines.
-You should correct that.
+If that happens, you should correct the file.
 
 +
 
 The script will also attempt to update the comments that have changed
 since FS _10.1_. If your file has the original comments from that
 version they will be updated. If not, or they occurred more than once,
-a warning will be printed. You can decide what action would be
-appropriate.
+a warning will be printed. You may want to look into fixing any
+discrepancies. You can use the example file,
+_/usr2/fs/st.default/control/dbbc3.ctl_, as a guide for making
+changes.
 
 +
 
@@ -232,7 +277,8 @@ the browser, and finally click on the original link) of the
 <<FS changes>> section to see if any are applicable to your code.
 Strictly speaking, they are not needed unless you are using FSL11, and
 of course they can't be fully tested until you are. As a result, you
-may want to defer this until you are transitioning to FSL11.
+may want to defer this until you are transitioning to FSL11 (or a later
+FSL__x__).
 
 . Use of shared memory variables.
 
@@ -252,9 +298,10 @@ and routines.
 
 +
 
-The old variables all have a length of `8`. The new variables have a
-length defined by the `MAX_SKD` parameter (currently with a value of
-`18`) in _include/params.h_ ++(C)++ and _include/params.i_ (FORTRAN).
+The old variables all have a length of `8` characters. The new
+variables have a length defined by the `MAX_SKD` parameter (currently
+with a value of `18`) in _include/params.h_ ++(C)++ and
+_include/params.i_ (FORTRAN).
 
 +
 
@@ -397,7 +444,7 @@ To update the usual _~/.Xresources_ file, enter the commands:
  cd
  /usr2/fs/misc/xresourcesfix .Xresources
 
-You will need to log-out on the console and log back into to see the
+You will need to log-out on the console and log back in to see the
 full change.
 
 The script will report an error if it found the geometry value for one
@@ -500,11 +547,37 @@ very few users of this script, is why this change is listed as
 optional (even though in some sense it is necessary). See the
 <<refresh_spare_usr2,refresh_spare_usr2>> FS change below (if that
 link doesn't work in your browser, click on this link instead:
-<<fs_bugs,FS miscellaneous bug fixes>>, open the "`Details`" toggle
+<<fs_bugs,Make miscellaneous bug fixes>>, open the "`Details`" toggle
 below that location by clicking on it, go `Back` in the browser, and
 finally click on the original link).
 
 ====
+
+=== Test the FS
+
+Generally speaking, a fairly thorough test is to run a test
+experiment. Start with using _drudg_ to rotate a schedule,
+__drudg__ing it to make _.snp_ and _.prc_ files and listings. Peform
+any other pre-experiment preparation and tests you normally do, then
+execute part of the schedule, and perform any normal post-experiment
+plotting and clean-up that you do. The idea here is to verify that
+everything works as you expect for normal operations.
+
+=== Consider when to update your backups
+
+It would be prudent to wait until you have successfully run an
+experiment or two and preferably received word that the experiment(s)
+produced good data.
+
+The chances of needing to use your backup from before updating should
+be small. If you are using the RAID system of FSL10 or FSL11, you can
+copy the backup to the (now assumed bad) updated disk. You can then
+either use the restored disk for operations and/or try the FS update
+again. The RAID based recoverable testing procedures for FSL10
+(https://nvi-inc.github.io/fsl10/raid.html#_recoverable_testing) and
+FSL11 (https://nvi-inc.github.io/fsl11/raid.html#_recoverable_testing)
+have more options for recovery. Managing this is a lot easier and
+safer if you have a third disk.
 
 === Review changes
 
@@ -858,20 +931,27 @@ programs (such as _antcn_ and _telegraf_) that are pinned to the FS
 _10.0_ memory layout until they can be updated for the new variables.
 Of course, longer names will appear truncated in the downstream
 programs until they have been updated. The new and old variables are
-described in the <<Update your station code>> step above.
+described in the <<Update station code>> step above.
 
 ====
 
-. Expand DBBC3 support
+. Update DBBC3 support
 
 +
 
-Support was added for the DBBC3 personality DDC_E. Environment
-variables were added to change the handling of DBBC3 TPI data.
-Support was completed for DBBC3 non-continuous (_spot_) calibration.
-The `tpicd=tsys` command was enabled. Add option to not command
-parameters of `cont_cal` command. Add DBBC3 `ddc` as a condition for
-the `if` command. The order of commands for DBBC3 syncing was changed.
+DBBC3 personality DDC_E support was added. The handling of TPI data
+was adjusted to agree with what was empirically determined to be
+correct and environment variables were added to allow further
+adjustments to be made in the field and to control other features.
+Information on setting the IF target values was added. DBBC3
+non-continuous (_spot_) calibration support was completed. Averaging
+(and optionally _filtering_) of continuous calibration data was added.
+The `tpicd=tsys` command was enabled. Not sending some device
+parameters of the `cont_cal` command was made an option. The
+polarization of the IF was added to the T~sys~ display (_monit7_). The
+condition `ddc` was added to the `if` command for the DBBC3. The order
+of commands for DBBC3 syncing was changed. The order of TPI values for
+DBBC3 `iftp__X__` commands was changed to `_on_` then `_off_`.  +
 
 +
 
@@ -895,24 +975,64 @@ version. Using the string `nominal` for the BBCs/IF in this file
 selects a value of eight for this case. The <<../1/dbbc3_ops.adoc#,FS
 DBBC3 Operations Manual>> was updated to include the new personality.
 
-.. Add environment variables to change the handling of DBBC3 TPI data.
+.. Adjust handing of TPI data to agree with what was empirically
+determined to be correct (closing
+https://github.com/nvi-inc/fs/issues/97[#97] and
+https://github.com/nvi-inc/fs/issues/192[#192]).
 
 +
 
-Variables were added to change the order of TPI values (USB versus
-LSB, and for continuous calibration, cal-on versus cal-off).
-Variables were also added to control some general features including
-whether time is expected in the multicast and how often to report
-incorrect firmware version returned by the multicast data. The default
-values for these variables are appropriate for the typical cases, but
-may need to be adjusted for some older firmware versions.
+The ordering of TPI data returned by the DBBC3 does not agree with the
+documentation. Particularly LSB/USB are swapped and in some cases
+cal-on/cal-off are swapped. The FS handling of the data was adjusted
+to agree with what was empirically determined to be correct. In
+addition, environment variables were added to allow the handling to be
+adjusted in the field since there are some variations among firmware
+release, particularly for early ones, and changes may occur in future
+firmware releases.
 
 +
 
-The use of these variables are covered in detail in the
+Environment variables were also added for multicast data to control
+whether time is expected, to adjust the returned time, and to set how
+often to report an incorrect firmware version.
+
++
+
+The default values for all these variables are appropriate for the
+understood cases, but may need to be adjusted for some older firmware
+versions. The use of these variables are covered in detail in the
 <<../1/dbbc3_ops.adoc#_dbbc3_specific_environment_variables,DBBC3
 specific environment variables>> appendix of the
 <<../1/dbbc3_ops.adoc#,FS DBBC3 Operations Manual>>.
+
++
+
+Thanks to Eskil Varenius (Onsala) and Beppe Maccaferri (Medicina) for
+discovering the TPI ordering issue. Thanks to Jon Quick (HartRAO) for
+providing a test-bed system for detailed exploration of the issue.
+
+.. Add information to the DBBC3 `if__X__` command `help` page for the
+correct `_target_` levels.
+
++
+
+The nominal level is `32000`, but needs to be reduced if the BW of the
+input signal is narrower than the nominal 4 GHz. Approximate target
+levels for three different input BWs was added. This information was
+also added to the <<../1/dbbc3_ops.adoc#,FS DBBC3 Operations Manual>>,
+as the <<../1/dbbc3_ops.adoc#_if_target_levels, IF target levels>>
+section, along with some information on detecting the problem and
+correcting it.
+
++
+
+Thanks to Jun Yang (Onsala) for finding this issue and pointing out
+using the compress factor of _onoff_ as an indication of a problem.
+Thanks to Sven Bornbusch (MPIfR) for explaining the cause and
+providing guidance on reasonable levels. Thanks to Jon Quick (HartRAO)
+for suggesting using T~sys~ values as a method for finding the correct
+level.
 
 .. Complete support of DBBC3 non-continuous (_spot_) calibration
 (closing https://github.com/nvi-inc/fs/issues/194[#194])
@@ -922,8 +1042,8 @@ specific environment variables>> appendix of the
 As part of this change, the terminology __spot calibration__ was added
 as a synonym for noncontinuous calibration for DBBC3s. Support for
 device mnemonics `formmbbc` and `formif` were added to the T~sys~
-related commands.  The DBBC3 T~sys~ display window (_monit7_) can now
-display spot calibration data.  Example procedures were added.
+related commands. The DBBC3 T~sys~ display window (_monit7_) can now
+display spot calibration data. Example procedures were added.
 
 ... __Spot calibration__ terminology
 
@@ -976,7 +1096,8 @@ pointing out support was needed and discovering that the existing spot
 calibration support still worked for the DBBC3.
 
 
-.. Add averaging of continuous DBBC3 T~sys~ data.
+.. Add averaging (and optionally _filtering_) of continuous DBBC3
+T~sys~ data.
 
 +
 
@@ -1000,7 +1121,7 @@ data.
 
 +
 
-For the DBBC3, the average is formed using exponential smoothing of
+For the DBBC3, the averages are formed using exponential smoothing of
 the T~sys~ values themselves. The decay time-constant for the
 smoothing is set, in seconds, by the `_samples_` parameter of the FS
 `cont_cal` command. If multicast packets are lost, that is not taken
@@ -1009,7 +1130,7 @@ spacing.
 
 +
 
-The average is restarted for any of these events:
+The averages are restarted for either of these events:
 
 +
 [disc]
@@ -1017,7 +1138,14 @@ The average is restarted for any of these events:
 * The `tpicd` command is used to reinitialize the sampling
 configuration. This may indicate a setup change. A consequence of this
 is that the `*tpicd*` command (with no parameters) can be used to
-restart the average manually at any time.
+restart the averages manually at any time.
+
++
+
+NOTE: If _tpicd_ is configured for continuous logging
+(`tpicd=yes,...`, which is not used normally for observing), using
+`tpicd` to reset the averages will cause logging to be started if it
+is not already).
 
 * A change in any FS `cont_cal` command parameters.
 
@@ -1083,23 +1211,34 @@ in the FS `cont_cal` command. Thereafter they are sent with the
 previously specified value. (A value to `-1` can be used to disable
 sending of the parameter again.)
 
++
+
+NOTE: As described in the <<cont_cal_defaults,Setting cont_cal
+defaults>> change item in this document, it is now possible to use
+`undef` as the first (`_state_`) parameter to set the defaults for
+these parameters without sending them to the device.
+
 .. Add polarization to `IF`/`RF` header in the DBBC3 T~sys~ monitor
 display (_monit7_).
 
 +
 
-If the LO and its polarizaion are defined for the displayed IF, the
+If the LO and its polarization are defined for the displayed IF, the
 polarization will be shown as `(L)` or `+++(R)+++`.
 
 +
 
-NOTE: Following the usual alphabetical order convention, `L`=`H`=`X`
-and `R`=`V`=`Y`. You have to know which system you are on Left/Right,
-Horizontal/Vertical, or X/Y.
+NOTE: `(L)` or `+++(R)+++` are displayed regardless of what
+polarization pair is in use: Left/Right, Horizontal/Vertical, or X/Y.
+Following the usual alphabetical order convention within a pair: `LR`,
+`HV`, and `XY`, you can assume: `L`=`H`=`X` and `R`=`V`=`Y`. Until the
+FS is updated to recognize pairs other than Left/Right, you need to
+know which pair is in use to interpret what is shown.
 
 +
 
-Thanks to Jon Quick (HartRAO) for suggesting showing the polarization.
+Thanks to Jon Quick (HartRAO) for suggesting showing the polarization
+and the format.
 
 .. Add DBBC3 `ddc` as a condition for the `if` command.
 
@@ -1130,6 +1269,16 @@ recommended.
 
 Thanks to Sven Dornbusch (MPIfR) for providing the best sequence of
 commands.
+
+.. Change the order of TPI values for DBBC3 `iftp__X__` commands to
+`_on_` then `_off_`
+
++
+
+This disagrees with the DBBC3 documentation, but agrees with what the
+DBBC3 returns for polarity `0`. It also agrees with the order of all
+other `_on_` and `_off_` values in the DBBC3 documentation (for
+`bbc__NNN__`, multicast IF, and multicast BBC data).
 
 ====
 
@@ -1169,7 +1318,7 @@ if the differences cluster around ±180°. Support for the _giza_ plot
 library was added. Bad horizontal tick marks in some `-p` plots were
 fixed. Some command line options were changed and some added. Use of
 a nonexistent command line option is now trapped. The `-h` (help)
-output was improved. The version was bumped to _2.3_. Some
+output was improved. The version was bumped to _2.4_. Some
 improvements were made in the code.
 
 .. Change the plot device for X11 displays to `/xw` (closing
@@ -1203,16 +1352,7 @@ Time plots were added for:
 
 * Delay in recorder starting (seconds)
 
-+
-
-NOTE: This does not include any delay for the schedule running late.
-
 * Shortness of recording length (seconds)
-
-+
-
-NOTE: For non-Mark 6 recording, this may include some delay for the
-schedule running late.
 
 * Missing bytes (count)
 
@@ -1566,7 +1706,7 @@ script should do something that is likely to be useful. Options can be
 added to tune the behavior for different situations. Scripts or
 aliases can be used if any options are needed routinely.
 
-.. Bump version number to _2.3_.
+.. Bump version number to _2.4_.
 
 .. Improve the code
 
@@ -1587,6 +1727,67 @@ maintenance.
 ... Removing DOS end-of-lines (to help with files that were
 transferred via machines with such end-of-lines) was improved so that
 it did not need to be handled in each search string.
+
+====
+
+. <<cont_cal_defaults,Setting cont_cal
+defaults>>[[cont_cal_defaults]]: Cleanup setting parameter defaults
+for the DBBC and DBBC3 `cont_cal` commands.
+
++
+
+Add `undef` as a value for the `_state_` parameter to not command the
+device. Change the default value for the `_samples_` parameter to be
+the previous value.
+
++
+[%collapsible]
+====
+
+The `cont_cal` commands are unique among FS commands in that the
+defaults for most of their parameters are the previous values
+commanded. This occurs in an attempt to simplify __drudg__'s
+generation of the `cont_cal=...` commands in the setup procedures
+without it having to know additional details of the station. The
+concept is that the user can set the value of the parameters _drudg_
+doesn't know about (`_frequency_`, `_option_`, and `_samples_`) in the
+`initi` procedure and then they will be the default for those
+parameters in the commands that _drudg_ generates.
+
+With this approach, _drudg_ only needs to set the continuous
+calibration `_state_` (`on` or `off`) and optionally, if the `_state_`
+is `on`, the `_polarity_` (`0`, `1`, `2`, or `3`). If the other
+parameters change for different receivers, something additional will
+be required, such as commanding new defaults when there is a receiver
+change.
+
+[NOTE]
+=====
+
+_drudg_ can be configured to not set the `_polarity_` and then that can
+come from the previous value used by the command.
+
+The _skedf.ctl_ options for controlling how _drudg_ handles the
+`cont_cal` command are `cont_cal` and `cont_cal_polarity`.
+
+=====
+
+Two things were missing to make the scheme work in a general way.
+First, there was no way to set the defaults without commanding the
+device. This can be an issue if there is no correct choice for the
+`_state_` and/or some values may cause a device problem. Using `undef`
+for the `_state_` (instead of `on` or `off`) will now suppress sending
+the parameters to the device.
+
+
+Secondly, due to an oversight, it was not possible to set the default
+for the `_samples_` parameter. As result, if a value other than `10`
+was used, it had to be edited into each `cont_cal=...` command.  This
+has been fixed so that the default for the `_samples_` will be the
+previous value (initially `10`).
+
+Thanks to Jon Quick (HartRAO) for pointing out that the implementation
+was incomplete and fruitful discussions about how to complete it.
 
 ====
 
@@ -1663,64 +1864,6 @@ Environment Variables>> document was updated to reflect this change.
 
 The <<../0/fsserver_changes.adoc#,FS 10.0.0 Server changes>> document
 was updated to reflect this change.
-
-====
-
-. Cleanup setting parameter defaults for the DBBC and DBBC3 `cont_cal`
-commands.
-
-+
-
-Add `undef` as a value for the `_state_` parameter to not command the
-device. Change the default value for the `_samples_` parameter to be
-the previous value.
-
-+
-[%collapsible]
-====
-
-The `cont_cal` commands are unique among FS commands in that the
-defaults for most of their parameters are the previous values
-commanded. This occurs in an attempt to simplify __drudg__'s
-generation of the `cont_cal=...` commands in the setup procedures
-without it having to know additional details of the station. The
-concept is that the user can set the value of the parameters _drudg_
-doesn't know about (`_frequency_`, `_option_`, and `_samples_`) in the
-`initi` procedure and then they will be the default for those
-parameters in the commands that _drudg_ generates.
-
-With this approach, _drudg_ only needs to set the continuous
-calibration `_state_` (`on` or `off`) and, if the `_state_` is `on`,
-the `_polarity_` (`0`, `1`, `2`, or `3`). If the other parameters
-change for different receivers, something additional will be required,
-such as commanding new defaults when there is a receiver change .
-
-[NOTE]
-=====
-
-_drudg_ can be configured to not set the `_polarity_` and then that can
-come from the previous value used by the command.
-
-The _skedf.ctl_ options for controlling how _drudg_ handles the
-`cont_cal` command are `cont_cal` and `cont_cal_polarity`.
-
-=====
-
-Two things were missing to make the scheme work in a general way.
-First, there was no way to set the defaults without commanding the
-device. This can be an issue if there is no correct choice for the
-`_state_` and/or some values may cause a device problem. Using `undef`
-as the `_state_` now allows setting the defaults without commanding
-the device.
-
-Secondly, due to an oversight, it was not possible to set the default
-for the `_samples_` parameter. As result, if a value other than `10`
-was used, it had to be edited into each `cont_cal=...` command. This
-has been fixed so that default will be the previously commanded value
-(initially `10`).
-
-Thanks to Jon Quick (HartRAO) for pointing out that the implementation
-was incomplete and fruitful discussions about how to complete it.
 
 ====
 
@@ -1816,7 +1959,9 @@ instead. If it is used without the display server enabled, it will
 crash the FS immediately after start-up.
 
 * The `-h` option is not useful in _stpgm.ctl_. Its use will cause the
-FS to crash immediately after start-up.
+FS to crash immediately after start-up if the display server is not
+enabled. It will also crash the FS if the display server is in enabled
+and it it is used in an `n` line in _stpgm.ctl_.
 
 * The `-s` option can be used in _stpgm.ctl_ but is of marginal value.
 It may reduce the number of lines that might be lost at FS start-up.
@@ -1824,8 +1969,7 @@ With the display server not enabled, it may reduce the number of lines
 lost at the transition to a new log.
 
 * The `-w` option is not useful in _stpgm.ctl_ and will cause problems
-in some cases if the display server is not enabled. It is best to
-avoid it entirely in _stpgm.ctl_.
+in some cases if the display server is not enabled.
 
 =====
 
@@ -1935,13 +2079,10 @@ Thanks to Jon Quick (HartRAO) for reportig these issues.
 +
 
 This change prevents history entries from being changed if they are
-edited and then not used.
-
-+
-
-The "`feature`" of changing the history entries can be quite
-frustrating, particularly in _bash_. It can be disabled in FSL9,
-FSL10, and FSL11 by creating the file:
+edited and then not used. This "`feature`" of changing the history
+entries can be quite frustrating, particularly in _bash_. It can be
+disabled in FSL9, FSL10, and FSL11, on a per user basis, by creating
+the file:
 
 +
 .~/.inputrc
@@ -1969,7 +2110,7 @@ communications antennas.
 +
 
 The script _misc/govert_ was added to calculate
-stem:[\mathit{\frac{G}{T}}] from SEFD, using a very simple
+stem:[\mathit{\frac{G}{T}}] from _onoff_ output, using a very simple
 calculation. It may not meet your accuracy requirements. For extended
 sources, it can be also be impacted by the crude resolution
 corrections used by the FS. The formula used is
@@ -2233,8 +2374,10 @@ use `.py2` instead of `.py`) to your _~oper/bin_ directory.
 
  cp /usr2/fs/misc/rdbe30_mon.py ~oper/bin
 
-.... Place a line for each RDBE in your _clpgm.ctl_ control file. For
-example, for RDBE-A (for _python2_, use `.py2` instead of `.py`):
+.... Place a line for each RDBE in your _clpgm.ctl_ control file. You
+can refer to the default _st.default/control/clpgm.ctl_ file. For
+example, for RDBE-A (for _python2_, use `.py2` instead of `.py`) add a
+line like:
 
  mona   d popen 'cd /tmp;rdbe30_mon.py -h 224.0.2.10 -p 20021 -H rdbea 2>&1' -n rdbemona
 
@@ -2537,9 +2680,9 @@ https://github.com/nvi-inc/fs/issues/189[#189]).
 If entered interactively, they would execute immediately even if there
 was a time block on the operator command stream. This was not an issue
 for the schedule stream, where they were normally used, since that
-stream doesn't have the functionality of immediate execution commands
-and in a schedule they are normally used in procedures. As a result,
-the old behavior was benign for schedules.
+stream doesn't have the functionality of immediate execution commands.
+As a result, the old behavior was benign for schedules. It was also of
+no consequence interactively unless there was a time block.
 
 .. Correct T~sys~ error messages (overflow, infinity, less than zero)
 for four character device names
@@ -2596,57 +2739,22 @@ NOTE: In the uninstalled script, the line is commented out.
 
 +
 
-Add information to the DBBC3 `if__X__` command `help` page for the
-correct target levels. Change the order of TPI values for DBBC3
-`iftp__X__` commands to `_on_` then `_off_`. Improve the `help` pages
-for `cont_cal` for the DBBC and DBBC3. Improve the `help` page for
-`cont_cal` for the DBBC3. Improve `help` page for `bbc_gain` for DBBC2
-and DBBC3. Fix `-help` command line option for _gnplt_. Improve
-`logpl` help contents for the Main screen. Improve `help` page for the
-`setup_proc` command.
+Improve the `help` pages for `cont_cal` for the DBBC and DBBC3.
+Improve the `help` page for `cont_cal` for the DBBC3.  Improve `help`
+page for `bbc_gain` for DBBC2 and DBBC3. Fix `-help` command line
+option for _gnplt_. Improve `logpl` help contents for the Main screen.
+Improve `help` page for the `setup_proc` command.
 
 +
 
 [%collapsible]
 ====
 
-.. Add information to the DBBC3 `if__X__` command `help` page for
-the correct `_target_` levels.
-
-+
-
-The nominal level is `32000`, but needs to be reduced if the BW of the
-input signal is narrower than the nominal 4 GHz. Approximate target
-levels for three different input BWs was added. This information was
-also added to the <<../1/dbbc3_ops.adoc#,FS DBBC3 Operations Manual>>,
-as the <<../1/dbbc3_ops.adoc#_if_target_levels, IF target levels>>
-section, along with some information on detecting the problem and
-correcting with it.
-
-+
-
-Thanks to Jun Yang (Onsala) for finding this issue and pointing out
-using the compress factor of _onoff_ as an indication of a problem.
-Thanks to Sven Bornbusch (MPIfR) for explaining the cause and
-providing guidance on reasonable levels. Thanks to Jon Quick (HartRAO)
-for suggesting using T~sys~ values as a method for finding the correct
-level.
-
-.. Change the order of TPI values for DBBC3 `iftp__X__` commands to
-`_on_` then `_off_`
-
-+
-
-This disagrees with the DBBC3 documentation, but agrees with what the
-DBBC3 returns for polarity `0`. It also agrees with the order of all
-other `_on_` and `_off_` values in the DBBC3 documentation (for
-`bbc__NNN__`, multicast IF, and multicast BBC data).
-
 .. Improve the `help` pages for `cont_cal` for the DBBC and DBBC3.
 
 +
 
-... Clarify that the DBBC3 sends the continuous calibration control
+... Clarify that the DBBCs send the continuous calibration control
 signal to the receiver.
 
 +
@@ -2720,7 +2828,7 @@ Improve the description of the `thread__suffix__` procedure. Fix the
 `record = ...` command description for recorder tuning. Remove
 "`10.1`" from the title of the "`FS DBBC3 Operations Manual`". Add
 update notes for FS _10.0.1_ and _10.1.1_ patch releases. Modify the
-FS _10.1.0_ updates to recognize that the default branch may already
+FS _10.1.0_ update notes to recognize that the default branch may already
 be _main_. Add a *TIP* for managing directory names of FS
 installations from archives. Add a *TIP* for how to avoid losing your
 place in a "`Details`" toggle when following a link. Add explanation
