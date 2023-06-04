@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020-2022 NVI, Inc.
+// Copyright (c) 2020-2023 NVI, Inc.
 //
 // This file is part of the FSL10 Linux distribution.
 // (see http://github.com/nvi-inc/fsl10).
@@ -19,7 +19,7 @@
 //
 
 = Installation Reference
-Version 1.5 - March 2022
+Version 1.6 - June 2023
 
 :sectnums:
 :experimental:
@@ -253,10 +253,10 @@ If you have SCSI disks, Section 5.7 of the FS9 _Computer Reference_
 manual has a discussion of drive ID numbers if you are unsure about
 these.
 
-If you are using a RAID, except for FSL10 (which uses a different
-scheme), you would normally choose to install the update on your
-primary disk after having made and verified your back-up.  Once the
-installation is complete, has been tested, and used for a little
+If you are using a RAID, except for FSL11 and FSL10 (which use a
+different scheme), you would normally choose to install the update on
+your primary disk after having made and verified your back-up.  Once
+the installation is complete, has been tested, and used for a little
 while, you can copy over your back-up with the upgraded primary.  If
 the upgrade fails, you should restore the back-up to the primary for
 operations.  You can then try to upgrade again when it is convenient.
@@ -265,6 +265,12 @@ may choose to install the FS on your back-up disk for testing and then
 later copy the back-up onto the primary once you are satisfied with
 the new version.  In any event, please be sure to make a fresh back-up
 (and put it safely away) before attempting an update installation.
+
+====  FSL11 (bullseye)
+
+If the system is configured as a RAID, please see the procedure at:
+
+https://nvi-inc.github.io/fsl11/raid.html#_recoverable_testing
 
 ====  FSL10 (stretch)
 
