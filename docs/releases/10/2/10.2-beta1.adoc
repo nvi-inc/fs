@@ -21,7 +21,7 @@
 :doctype: book
 
 = FS 10.2-beta1 Update Notes
-Version 0.64.1 - June 2023
+Version 0.65 - June 2023
 
 :sectnums:
 :stem: latexmath
@@ -204,6 +204,29 @@ As _prog_:
  make -s
 
 No output from the last command indicates a successful _make_.
+
+[TIP]
+====
+
+If you used `git fetch` during the short interval when the release's
+tag was `10.2-beta1`, you will get an error:
+
+ Makefile:35: *** no PATCHLEVEL value.  Stop.
+
+You can correct this with:
+
+ cd /usr2/fs
+ git checkout main
+ git pull
+ git tag -d 10.2-beta1
+ git checkout -q 10.2.0-beta1
+
+Then re-execute the `make` commands.
+
+Thanks to Rubén González (Ny-Ålesund) for reporting this.
+
+====
++
 
 === Update control files
 
