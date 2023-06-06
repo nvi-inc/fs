@@ -20,8 +20,8 @@
 
 :doctype: book
 
-= FS 10.2-beta1 Update Notes
-Version 0.65 - June 2023
+= FS 10.2.0-beta1 Update Notes
+Version 0.66 - June 2023
 
 :sectnums:
 :stem: latexmath
