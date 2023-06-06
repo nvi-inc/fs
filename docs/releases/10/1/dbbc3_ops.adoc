@@ -28,7 +28,7 @@
 :experimental:
 :downarrow: &downarrow;
 E. Himwich, J. Quick
-Version 5.2 - May 2023
+Version 5.2.1 - June 2023
 
 == Introduction
 
@@ -531,9 +531,9 @@ signal is 32000. For a 1 GHz BW input signal around 22000 might be
 good. For 0.5 GHZ input BW signal, 10000 may be realistic.
 
 If you have continuous calibration, you can check for compression by
-adjusting the target level for each IF while watching the <<Tsys
-monitor display>> for that IF. Once setup for a mode, reduce the
-target level for that IF from 32000 until it reaches a reasonable
+adjusting the target level for each IF while watching the
+<<Tsys monitor display>> for that IF. Once setup for a mode, reduce
+the target level for that IF from 32000 until it reaches a reasonable
 minimum. If you have _spot_ calbration, you can do the same, but you
 will need to use the `caltsys` procedure to check T~sys~. The `onoff`
 command can also be useful for this; check that the `Comp`
@@ -580,9 +580,10 @@ The version information is checked for each multicast reception. If
 there is no multicast being received, these errors will not be
 reported this way. The minimum reporting interval is one minute, but
 can be increased up to 10 minutes with the environment variable
-`FS_DBBC3_MULTICAST_VERSION_ERROR_MINUTES`. Please see the <<Other
-options>> section of the <<DBBC3 specific environment variables>>
-appendix below for the details.
+`FS_DBBC3_MULTICAST_VERSION_ERROR_MINUTES`. Please see the
+<<Other options>> section of the
+<<DBBC3 specific environment variables>> appendix below for the
+details.
 
 +
 
