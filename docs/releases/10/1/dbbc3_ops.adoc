@@ -28,7 +28,7 @@
 :experimental:
 :downarrow: &downarrow;
 E. Himwich, J. Quick
-Version 5.2.1 - June 2023
+Version 5.2.2 - June 2023
 
 == Introduction
 
@@ -642,7 +642,7 @@ For DBBC3 use, the rack type in _equip.ctl_ should be `dbbc3_ddc_e`
 `dbbc3_ddc_u`, or `dbbc3_ddc_v` depending on the firmware that is
 loaded.
 
-NOTE: For FS _10.1_, `dbbc3_ddc_e` was not available.
+NOTE: For FS _10.1_, `dbbc3_ddc_e` was not supported.
 
 === dbbc3.ctl
 
@@ -858,7 +858,7 @@ If colors are not available for the terminal, inverse video is used
 instead.
 
 NOTE: In FS _10.1_, all invalid values (negative, infinity, overflow)
-were display as dollar signs and the "`off`" TPIs being zero was not
+were displayed as dollar signs and the "`off`" TPIs being zero was not
 recognized as an error condition.
 
 ===== Diagnosing problems
@@ -879,7 +879,7 @@ diode is not firing
 but the DBBC3 has it "`off`".
 
 Turning off averaging (setting the `_samples_` parameter of `cont_cal`
-to zero), can be useful to troubleshooting. You will see the T~sys~
+to `0`), can be useful for troubleshooting. You will see the T~sys~
 values calculated sample-by-sample with no averaging or filtering.
 
 ==== Spot (noncontinuous) calibration
@@ -1056,10 +1056,13 @@ interval is the product of `_samples_` times `_cycle_`.
 
 +
 
-Negative T~sys~ values will not be logged unless averaging is
-turned off since averaging rejects negative values. Other invalid
-values (overflow, infinity, and `off=0`) are logged as dollar signs,
-`$` when averaging is turned off, but not otherwise.
+When averaging is turned off, invalid values (overflow, infinity, and
+`off=0`) are logged as dollar signs, `$`. When averaging is turned on,
+the same invalid values are logged as dollar signs only if no valid
+positive values have occurred. Likewise when averaging is turned on, a
+negative value will be logged only if no valid positive values have
+occurred. Values less than -999.5 or larger than 999.9 are logged as
+dollar signs.
 
 +
 
