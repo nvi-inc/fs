@@ -21,7 +21,7 @@
 :doctype: book
 
 = FS 10.2-beta1 Update Notes
-Version 0.64 - June 2023
+Version 0.64.1 - June 2023
 
 :sectnums:
 :stem: latexmath
@@ -125,7 +125,7 @@ then as _prog_ execute:
 
  cd /usr2/fs-git
  git fetch
- git checkout 10.2.0-beta1
+ git checkout -q 10.2.0-beta1
 
 . If you are using FSL8 or are otherwise unable, or prefer not, to use
 _git_:
