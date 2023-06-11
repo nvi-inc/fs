@@ -25,3 +25,6 @@
 #define RED          4
 #define MAGENTA      5
 #define CYAN         6
+#define GREENN       7
+#define YELLOWN      8
+#define REDN         9
