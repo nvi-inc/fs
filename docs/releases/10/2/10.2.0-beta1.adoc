@@ -21,7 +21,7 @@
 :doctype: book
 
 = FS 10.2.0-beta1 Update Notes
-Version 0.66 - June 2023
+Version 0.67 - June 2023
 
 :sectnums:
 :stem: latexmath
@@ -57,15 +57,8 @@ https://nvi-inc.github.io/fsl11/.
 * Support for experiment names (session codes) of 16 characters or
 less. This enables use of the new IVS 12-character session codes.
 
-* Several changes were made to DBBC3 support, including: DDC_E
-firmware is now recognized, the interpretation of TPI data was
-adjusted to agree with what was empirically determined to be correct
-and environment variables were added to allow further adjustments and
-control other features, information on IF target levels was added (see
-the <<../1/dbbc3_ops.adoc#_if_target_levels,IF target levels>> section
-of the <<../1/dbbc3_ops.adoc#,FS DBBC3 Operations Manual>> for the
-details), support for spot (noncontinuous) calibration was completed,
-and averaging/filtering of continuous calibration data was added.
+* Support for the DBBC3 was extensively improved. It is now roughly
+complete for the DDC firmware releases available as of June 2023.
 
 * The _plotlog_ utility, for examining data in the log files, has been
 expanded and updated. The changes include support for RDBEs, DBBC3s,
@@ -128,7 +121,7 @@ then as _prog_ execute:
  git checkout -q 10.2.0-beta1
 
 . If you are using FSL8 or are otherwise unable, or prefer not, to use
-_git_:
+_git_ (you will probably need to be _root_):
 
 +
 
@@ -137,7 +130,7 @@ Refer to the
 from an archive>> subsection in the
 <<../../misc/release_model.adoc#,Release Model>> document. Follow the
 steps there, through the one that includes the option to set the
-_/usr2/fs_ link. Please note that:
+__/usr2/fs__ link. Please note that:
 
 +
 [disc]
@@ -150,6 +143,11 @@ will need the *TIP* in the `*wget*` step.
 * You will end using the "`installing from an archive`" procedure with
 the step setting the link for __/usr2/fs__ by running *`make
 install`*.
+
+=== Login in as prog
+
+If you are not already logged-in as _prog_, do that. This is necessary
+for the remaining steps until <<Reboot>>.
 
 === Set new make-time environment variables
 
@@ -226,42 +224,6 @@ Then re-execute the `make` commands.
 Thanks to Rubén González (Ny-Ålesund) for reporting this.
 
 ====
-+
-
-=== Update control files
-
-The steps in this section are to be performed by _oper_.
-
-. Update the _dbbc3.ctl_ control file.
-
-+
-
-A line was inserted for the DDC_E firmware version. You can update
-your file with:
-
- cd /usr2/control
- /usr2/fs/misc/dbbc3ctlfix dbbc3.ctl
-
-+
-
-The script will insert the needed line. It will report an error if the
-file has more, or less, than the number of expected non-comment lines.
-If that happens, you should correct the file.
-
-+
-
-The script will also attempt to update the comments that have changed
-since FS _10.1_. If your file has the original comments from that
-version they will be updated. If not, or they occurred more than once,
-a warning will be printed. You may want to look into fixing any
-discrepancies. You can use the example file,
-_/usr2/fs/st.default/control/dbbc3.ctl_, as a guide for making
-changes.
-
-+
-
-NOTE: The original _dbbc3.ctl_ file will be saved as _dbbc3.ctl.bak_
-in case you need to recover.
 
 === Update station code
 
@@ -368,6 +330,43 @@ standard way, you can do this with (as _prog_):
 
 IMPORTANT: This will make sure the FS server is stopped and shared
 memory is reallocated.
+
+=== Login in as oper
+
+The remaining steps are to be performed by _oper_.
+
+=== Update control files
+
+. Update the _dbbc3.ctl_ control file.
+
++
+
+A line was inserted for the DDC_E firmware version. You can update
+your file with:
+
+ cd /usr2/control
+ /usr2/fs/misc/dbbc3ctlfix dbbc3.ctl
+
++
+
+The script will insert the needed line. It will report an error if the
+file has more, or less, than the number of expected non-comment lines.
+If that happens, you should correct the file.
+
++
+
+The script will also attempt to update the comments that have changed
+since FS _10.1_. If your file has the original comments from that
+version they will be updated. If not, or they occurred more than once,
+a warning will be printed. You may want to look into fixing any
+discrepancies. You can use the example file,
+_/usr2/fs/st.default/control/dbbc3.ctl_, as a guide for making
+changes.
+
++
+
+NOTE: The original _dbbc3.ctl_ file will be saved as _dbbc3.ctl.bak_
+in case you need to recover.
 
 === Set DBBC3 specific environment variables
 
@@ -580,10 +579,10 @@ finally click on the original link).
 
 Generally speaking, a fairly thorough test is to run a test
 experiment. Start with using _drudg_ to rotate a schedule,
-__drudg__ing it to make _.snp_ and _.prc_ files and listings. Peform
-any other pre-experiment preparation and tests you normally do, then
-execute part of the schedule, and perform any normal post-experiment
-plotting and clean-up that you do. The idea here is to verify that
+__drudg__ing it to make _.snp_ and _.prc_ files and listings. Perform
+any other pre-experiment preparation and tests that you normally
+would, then execute part of the schedule, and perform any normal
+post-experiment plotting and clean-up. The idea here is to verify that
 everything works as you expect for normal operations.
 
 === Consider when to update your backups
@@ -601,11 +600,6 @@ again. The RAID based recoverable testing procedures for FSL10
 FSL11 (https://nvi-inc.github.io/fsl11/raid.html#_recoverable_testing)
 have more options for recovery. Managing this is a lot easier and
 safer if you have a third disk.
-
-=== Review changes
-
-Please see the <<Changes since 10.1>> section below for the details
-of the changes since that release.
 
 == Changes since 10.1
 
@@ -962,25 +956,26 @@ described in the <<Update station code>> step above.
 
 +
 
-DBBC3 personality DDC_E support was added. The handling of TPI data
-was adjusted to agree with what was empirically determined to be
-correct and environment variables were added to allow further
-adjustments to be made in the field and to control other features.
-Information on setting the IF target values was added. DBBC3
-non-continuous (_spot_) calibration support was completed. Averaging
-(and optionally _filtering_) of continuous calibration data was added.
-The `tpicd=tsys` command was enabled. Not sending some device
-parameters of the `cont_cal` command was made an option. The
-polarization of the IF was added to the T~sys~ display (_monit7_). The
-condition `ddc` was added to the `if` command for the DBBC3. The order
-of commands for DBBC3 syncing was changed. The order of TPI values for
-DBBC3 `iftp__X__` commands was changed to `_on_` then `_off_`.  +
+Several changes were made to DBBC3 support.
 
 +
 
 [%collapsible]
 ====
 
+DBBC3 personality DDC_E support was added. The handling of TPI data
+was adjusted to agree with what was observed in the field and
+environment variables were added to allow further adjustments to be
+made in the field and to control other features.  Information on
+setting the IF target values was added. DBBC3 non-continuous (_spot_)
+calibration support was completed. Averaging (and optionally
+_filtering_) of continuous calibration data was added.  The
+`tpicd=tsys` command was enabled. Not sending some device parameters
+of the `cont_cal` command was made an option. The polarization of the
+IF was added to the T~sys~ display (_monit7_). The condition `ddc` was
+added to the `if` command for the DBBC3. The order of commands for
+DBBC3 syncing was changed. The order of TPI values for DBBC3
+`iftp__X__` commands was changed to `_on_` then `_off_`.  +
 
 .. Add support for the DBBC3 personality DDC_E
 
@@ -994,12 +989,13 @@ Core3H board.
 
 It can be selected by setting the rack in _equip.ctl_ to
 `dbbc3_ddc_e`. The _dbbc3.ctl_ file has an additional line for the
-version. Using the string `nominal` for the BBCs/IF in this file
-selects a value of eight for this case. The <<../1/dbbc3_ops.adoc#,FS
-DBBC3 Operations Manual>> was updated to include the new personality.
+version (see the <<Update control files>> step above for details on
+installing this change). Using the string `nominal` for the BBCs/IF in
+this file selects a value of eight for this case. The
+<<../1/dbbc3_ops.adoc#,FS DBBC3 Operations Manual>> was updated to
+include the new personality.
 
-.. Adjust handing of TPI data to agree with what was empirically
-determined to be correct (closing
+.. Adjust handing of TPI data to agree with what was observed (closing
 https://github.com/nvi-inc/fs/issues/97[#97] and
 https://github.com/nvi-inc/fs/issues/192[#192]).
 
@@ -1008,11 +1004,10 @@ https://github.com/nvi-inc/fs/issues/192[#192]).
 The ordering of TPI data returned by the DBBC3 does not agree with the
 documentation. Particularly LSB/USB are swapped and in some cases
 cal-on/cal-off are swapped. The FS handling of the data was adjusted
-to agree with what was empirically determined to be correct. In
-addition, environment variables were added to allow the handling to be
-adjusted in the field since there are some variations among firmware
-release, particularly for early ones, and changes may occur in future
-firmware releases.
+to agree with what was observed in the field. In addition, environment
+variables were added to allow the handling to be adjusted in the field
+since there are some variations among firmware releases, particularly
+for early ones, and changes may occur in future firmware releases.
 
 +
 
@@ -1109,7 +1104,7 @@ defined), are shown as dollar signs, `$`.
 
 +
 
-Example `caltsys` can `caltsys_man` procedures were added to the
+Example `caltsys` and `caltsys_man` procedures were added to the
 _st.default/proc/d3fbstation.prc_ example library.
 
 +
@@ -1915,7 +1910,7 @@ small number of entries may be lost when the active log is changed.
 The script has four command line options. Generally speaking they
 should _not_ be used with _streamlog_ in _stpgm.ctl_. The options are:
 
-.. `-d` -- display stream
+... `-d` -- display stream
 
 +
 
@@ -1942,9 +1937,9 @@ because the operator has suppressed them with the `tnx` command.
 specifically the FS startup and termination messages and some program
 error messages.
 
-.. `-h` -- help output
+... `-h` -- help output
 
-.. `-s` -- scroll-back
+... `-s` -- scroll-back
 
 +
 
@@ -1961,8 +1956,8 @@ output when the script is started, the active file log is changed, or
 the FS is started. This may result in some lines being output more
 than once. It may reduce the number of lines that will be missed
 during these transitions.
-`
-.. `-w` -- wait for FS start
+
+... `-w` -- wait for FS start
 
 +
 
@@ -1976,6 +1971,7 @@ The limitations and considerations for why these options should _not_
 be used in _stpgm.ctl_ are:
 
 [disc]
+
 * The '-d' option can be used in _stpgm.ctl_ if the display server is
 in use. However, it would be safer to use the log output (no `-d`)
 instead. If it is used without the display server enabled, it will
@@ -2005,6 +2001,15 @@ script, the initial version, and many of the incremental improvements.
 
 +
 
+About 10 additional small features were changed or added. These
+enhancements included two new utility scripts and cleanup of several
+small issues.
+
++
+
+[%collapsible]
+====
+
 No longer ring the bell for large structure correction warnings.
 Increase the default X11 window width. Prevent problems with _erchk_
 when the display server is not in use. Use `set revert-all-at-newline
@@ -2013,11 +2018,6 @@ more digits in the DBBC3 T~sys~ display window for negative values.
 Add script for calculating stem:[\mathit{\frac{G}{T}}]. Improve
 recommended NTP configuration. Improve _pfmed_. Add _rdbe30_mon.py_
 script.
-
-+
-
-[%collapsible]
-====
 
 .. Change the warning for a large structure size correction in _onoff_
 to not ring the bell.
@@ -2473,8 +2473,16 @@ Exit the program by closing the `Monitor` window
 
 +
 
-Fix _plog_ to support sending multiple files to BKG. Fix crashes for
-DBBC2 communication errors. Correct logging of multicast time for
+About 15 small bugs were fixed. All were fairly minor but one could
+cause a crash of a DBBC2 was in a bad state.
+
++
+
+[%collapsible]
+====
+
+Fix crashes for DBBC2 communication errors. Fix _plog_ to support
+sending multiple files to BKG. Correct logging of multicast time for
 DBBC3 Core3H board `5`. Prevent multicast time-out errors from being
 suppressed after the DBBC3 returns an error. Fix using a DBBC IF
 channel as a detector in _fivpt_ and _onoff_ with continuous
@@ -2488,23 +2496,6 @@ first parameter error messages. Correct the DBBC error message for an
 incorrect detector device in T~sys~ related commands. Fix the home
 directory permissions for AUID accounts. Fix the _refresh_spare_usr2_
 scripts for FSL6-8 and FSL9.
-
-+
-
-[%collapsible]
-====
-
-.. Fix _plog_ to support sending multiple files to BKG (closes
-https://github.com/nvi-inc/fs/issues/186[#186]).
-
-+
-
-Due to a bug, _plog_ was unable to send multiple files to BKG in one
-invocation. The result was that none were sent.
-
-+
-
-Thanks to Kiah Imai (KPGO) for reporting this and testing the fix.
 
 .. Fix crashes for DBBC2 communication errors (closing
 https://github.com/nvi-inc/fs/issues/191[#191]).
@@ -2529,6 +2520,18 @@ This fix is also included in patch releases _10.0.1_ and _10.1.1_.
 
 Thanks to Eskil Varenius (Onsala) for reporting this problem and
 testing the fix.
+
+.. Fix _plog_ to support sending multiple files to BKG (closes
+https://github.com/nvi-inc/fs/issues/186[#186]).
+
++
+
+Due to a bug, _plog_ was unable to send multiple files to BKG in one
+invocation. The result was that none were sent.
+
++
+
+Thanks to Kiah Imai (KPGO) for reporting this and testing the fix.
 
 .. Correct logging of multicast time for DBBC3 Core3H board `5`
 (closing https://github.com/nvi-inc/fs/issues/198[#198]).
@@ -2762,16 +2765,14 @@ NOTE: In the uninstalled script, the line is commented out.
 
 +
 
+[%collapsible]
+====
+
 Improve the `help` pages for `cont_cal` for the DBBC and DBBC3.
 Improve the `help` page for `cont_cal` for the DBBC3.  Improve `help`
 page for `bbc_gain` for DBBC2 and DBBC3. Fix `-help` command line
 option for _gnplt_. Improve `logpl` help contents for the Main screen.
 Improve `help` page for the `setup_proc` command.
-
-+
-
-[%collapsible]
-====
 
 .. Improve the `help` pages for `cont_cal` for the DBBC and DBBC3.
 
@@ -2846,6 +2847,15 @@ Minor wording improvements.
 
 +
 
+About a dozen small improvements and expansions were made to the web
+pages. These are beyond changes that were made as part of feature
+changes and the update notes for this release.
+
++
+
+[%collapsible]
+====
+
 Improve the description of the `use_setup_proc` _drudg_ option.
 Improve the description of the `thread__suffix__` procedure. Fix the
 `record = ...` command description for recorder tuning. Remove
@@ -2859,11 +2869,6 @@ of how to navigate to a link in "`Details`" toggle in a different
 document. Expand "`Font Conventions`" document. Update "`Converting to
 a 64-bit System`" document. Update instructions for making the
 `gh-pages` documentation.
-
-+
-
-[%collapsible]
-====
 
 .. Improve the description of the `use_setup_proc` _drudg_ option in
 the
@@ -3002,17 +3007,19 @@ current default branch, _main_.
 
 +
 
+About 10 small cosmetic issues were fixed
+
++
+
+[%collapsible]
+====
+
 Change title for `cable` data in _logpl_. Fix _gnplt_ error message
 for the GUI crashing. Remove more extraneous `(..)` strings from some
 error messages. Fix column alignment of header for `APR` lines in
 _onoff_. Prevent _monit7_ from crashing if the rack type is non-DBBC3.
 Remove an extraneous leading blank in _erchk_. Improve coding of
 _tpicd_ for DBBC3. Fix comments in an _include_ file.
-
-+
-
-[%collapsible]
-====
 
 .. Change description (title) for `cable` in the default _logpl.ctl_
 file to not include `length`.
