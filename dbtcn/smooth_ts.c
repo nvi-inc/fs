@@ -48,18 +48,18 @@ static void apply_filter(int filter,int samples,float alpha, float param,
     float *tsys,float *saved,unsigned *count,unsigned *clipped,
     float *shadow_saved, unsigned *shadow_count)
 {
-    if(*tsys<0.0) {
-        if(1 == filter && 0.0<=*saved && *count >= samples)
+    if(*tsys<-1e4) {
+        if(1 == filter && -1e4<=*saved && *count >= samples)
             ++*clipped;
         return;
-    } else if(0.0<=*saved) {
+    } else if(-1e4<=*saved && fabs(*saved) >= 0.05) {
         if(1==filter && param >=0.0) {
 //          printf(" before: count %u shadow_count %u shadow_saved %f tsys %f saved %f\n",
 //                  *count,*shadow_count,*shadow_saved,*tsys,*saved);
           *shadow_saved=alpha* *tsys + (1.0-alpha)* *shadow_saved;
           ++*shadow_count;
           if(*shadow_count >=samples ) {
-            if(100.0*fabs(*shadow_saved-*saved)/(*saved) >= param) {
+            if(100.0*fabs((*shadow_saved-*saved)/(*saved)) >= param) {
               *saved=*shadow_saved;
               *count=*shadow_count;
               *clipped=0;
@@ -70,7 +70,7 @@ static void apply_filter(int filter,int samples,float alpha, float param,
 //          printf(" after: count %u shadow_count %u shadow_saved %f tsys %f saved %f\n",
 //                  *count,*shadow_count,*shadow_saved,*tsys,*saved);
         }
-        if(*count < samples || 0==filter || 1==filter && param >= 0.0 && 100.0*fabs(*tsys-*saved)/(*saved) < param) {
+        if(*count < samples || 0==filter || 1==filter && param >= 0.0 && 100.0*fabs((*tsys-*saved)/(*saved)) < param) {
             *tsys=alpha* *tsys + (1.0-alpha)* *saved;
             *clipped=0;
 
@@ -98,7 +98,7 @@ void smooth_ts( struct dbbc3_tsys_cycle *cycle, int reset, int samples,
         for (j=0;j<MAX_DBBC3_IF;j++) {
             saved.ifc[j].tsys=cycle->ifc[j].tsys;
             saved.ifc[j].count=0;
-            if(0.0<saved.ifc[j].tsys)
+            if(-1e4<saved.ifc[j].tsys)
                 saved.ifc[j].count=1;
             cycle->ifc[j].clipped=0;
 
@@ -108,13 +108,13 @@ void smooth_ts( struct dbbc3_tsys_cycle *cycle, int reset, int samples,
         for (k=0;k<MAX_DBBC3_BBC;k++) {
             saved.bbc[k].tsys_lsb=cycle->bbc[k].tsys_lsb;
             saved.bbc[k].count_lsb=0;
-            if(0.0<saved.bbc[k].tsys_lsb)
+            if(-1e4<saved.bbc[k].tsys_lsb)
                 saved.bbc[k].count_lsb=1;
             cycle->bbc[k].clipped_lsb=0;
 
             saved.bbc[k].tsys_usb=cycle->bbc[k].tsys_usb;
             saved.bbc[k].count_usb=0;
-            if(0.0<saved.bbc[k].tsys_usb)
+            if(-1e4<saved.bbc[k].tsys_usb)
                 saved.bbc[k].count_usb=1;
             cycle->bbc[k].clipped_usb=0;
 
