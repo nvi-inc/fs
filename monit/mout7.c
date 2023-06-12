@@ -74,6 +74,11 @@ static void print_tsys(float tsys, unsigned clipped)
             printw("%5s","off=0");
         else if (tsys < -1e6)
             printw("%5s"," inf ");
+    } else if (tsys <= -999.5) {
+        HIGHLIGHT(MAGENTA)
+        printw("%5s","$$$$$");
+    } else if (999.95 <= tsys) {
+        printw("%5s","$$$$$");
     } else {
         buf[0]=0;
         if(0==clipped && tsys <0.0) /* negative */

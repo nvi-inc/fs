@@ -115,7 +115,7 @@ void calc_ts( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
             tsys=-9e8;
         else if(diff == 0) /* divide by zero */
             tsys=-9e6;
-        else if((tcal/diff)*0.5*(on+off)<-999.5) /* too negative */
+        else if((tcal/diff)*0.5*(on+off)<=-999.5) /* too negative */
             tsys=-9e4;
         else
             tsys= (tcal/diff)*0.5*(on+off);
@@ -149,7 +149,7 @@ void calc_ts( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
             tsys=-9e8;
         else if(diff == 0) /* divide by zero */
             tsys=-9e6;
-        else if((tcal/diff)*0.5*(on+off)<-999.5) /* too negative */
+        else if((tcal/diff)*0.5*(on+off)<=-999.5) /* too negative */
             tsys=-9e4;
         else
             tsys= (tcal/diff)*0.5*(on+off);
@@ -195,7 +195,7 @@ void calc_ts( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
             tsys=-9e8;
         else if(diff == 0) /* divide by zero */
             tsys=-9e6;
-        else if((tcal/diff)*0.5*(on+off)<-999.5) /* too negative */
+        else if((tcal/diff)*0.5*(on+off)<=-999.5) /* too negative */
             tsys=-9e4;
         else
             tsys= (tcal/diff)*0.5*(on+off);
