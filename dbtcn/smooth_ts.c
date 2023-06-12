@@ -53,23 +53,7 @@ static void apply_filter(int filter,int samples,float alpha, float param,
             ++*clipped;
         return;
     } else if(-1e4<=*saved && fabs(*saved) >= 0.05) {
-        if(1==filter && param >=0.0) {
-//          printf(" before: count %u shadow_count %u shadow_saved %f tsys %f saved %f\n",
-//                  *count,*shadow_count,*shadow_saved,*tsys,*saved);
-          *shadow_saved=alpha* *tsys + (1.0-alpha)* *shadow_saved;
-          ++*shadow_count;
-          if(*shadow_count >=samples ) {
-            if(100.0*fabs((*shadow_saved-*saved)/(*saved)) >= param) {
-              *saved=*shadow_saved;
-              *count=*shadow_count;
-              *clipped=0;
-            }
-            *shadow_saved=*tsys;
-            *shadow_count=1;
-          }
-//          printf(" after: count %u shadow_count %u shadow_saved %f tsys %f saved %f\n",
-//                  *count,*shadow_count,*shadow_saved,*tsys,*saved);
-        }
+        float orig_tsys=*tsys;
         if(*count < samples || 0==filter || 1==filter && param >= 0.0 && 100.0*fabs((*tsys-*saved)/(*saved)) < param) {
             *tsys=alpha* *tsys + (1.0-alpha)* *saved;
             *clipped=0;
@@ -79,6 +63,26 @@ static void apply_filter(int filter,int samples,float alpha, float param,
         } else if (1==filter && param >= 0.0) {
             *tsys=*saved;
             ++*clipped;
+        }
+        if(1==filter && param >=0.0) {
+//          printf(" before: count %u shadow_count %u shadow_saved %f orig_tsys %f saved %f\n",
+//                  *count,*shadow_count,*shadow_saved,orig_tsys,*saved);
+          if(*shadow_count > 0)
+              *shadow_saved=alpha* orig_tsys + (1.0-alpha)* *shadow_saved;
+          else
+              *shadow_saved=orig_tsys;
+          ++*shadow_count;
+          if(*shadow_count >=samples ) {
+            if(100.0*fabs((*shadow_saved-*saved)/(*saved)) >= param) {
+              *tsys=*shadow_saved;
+              *clipped=0;
+              *saved=*shadow_saved;
+              *count=*shadow_count;
+            }
+            *shadow_count=0;
+          }
+//          printf(" after: count %u shadow_count %u shadow_saved %f orig_tsys %f saved %f\n",
+//                  *count,*shadow_count,*shadow_saved,orig_tsys,*saved);
         }
     } else {
         *saved=*tsys;
