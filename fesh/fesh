@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright (c) 2020-2022 NVI, Inc.
+# Copyright (c) 2020-2023 NVI, Inc.
 #
 # This file is part of VLBI Field System
 # (see http://github.com/nvi-inc/fs).
@@ -19,7 +19,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-VERSION=2022-04-30
+VERSION=2023-06-12
 
 version(){
     echo "[fesh $VERSION]"
@@ -105,7 +105,7 @@ Options:
  -D dc    Use alternate data center; dc=bkg, cddis, opar, or vlbeer. Upper
           and lower case are accepted. (see more below about setting the
           default data center)
- -v       Verbose mode, drudg output printed to stdout
+ -v       Verbose mode: curl/wget verbose and drudg output printed to stdout
  -V       Print version and exit.
  -P       With -d, use drudg to send the schedule summary to the printer
  -S       Skip download (including for -x and -f)
@@ -545,14 +545,21 @@ else
 fi
 version
 if [[ -n "$download" ]]; then
+    if [[ -n "$verbose" ]]; then
+        CURL_VERBOSE=-v
+        WGET_VERBOSE=
+    else
+        WGET_VERBOSE=-nv
+        CURL_VERBOSE=
+    fi
     pushd "$SCHED_DIR" >/dev/null
     echo Fetching schedule from server... >&2
     #TODO: if not found, maybe check next or previous years?
     if [[ "$FESH_DATA_CENTER" =~ cddis ]]; then
         if [[ "$FESH_CDDIS_METHOD" =~ ^ftp$ ]]; then
-            wget -nv "ftp://ftp@cddis.gsfc.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
+            wget $WGET_VERBOSE "ftp://ftp@cddis.gsfc.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
             if [[ -n "$txt" ]]; then
-                wget -nv "ftp://ftp@cddis.gsfc.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.txt"
+                wget $WGET_VERBOSE "ftp://ftp@cddis.gsfc.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.txt"
             fi
         elif [[ "$FESH_CDDIS_METHOD" =~ ^https$ ]]; then
             if [[ ! -e "$NETRC_DIR/.netrc" ]]; then
@@ -562,40 +569,40 @@ if [[ -n "$download" ]]; then
             if ! grep -q urs.earthdata.nasa.gov "$NETRC_DIR/.netrc"; then
                 fatal "$NETRC_DIR/.netrc does not contain CDDIS login information, see usage"
             fi
-            curl  -k  -f -c /dev/null -n \
+            curl  -k  -f -c /dev/null $CURL_VERBOSE -n \
                 $CURL_NETRC_FILE_OPTION \
                 -L -O "https://cddis.nasa.gov/archive/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
             if [[ -n "$txt" ]]; then
-                curl  -k  -f -c /dev/null -n \
+                curl  -k  -f -c /dev/null $CURL_VERBOSE -n \
                     $CURL_NETRC_FILE_OPTION \
                     -L -O "https://cddis.nasa.gov/archive/vlbi/ivsdata/aux/$year/$sched/$sched.txt"
             fi
         else
-            curl -u "$user" -k -O --ftp-ssl "ftp://gdc.cddis.eosdis.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
+            curl -u "$user" -k -O $CURL_VERBOSE --ftp-ssl "ftp://gdc.cddis.eosdis.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
 
             if [[ -n "$txt" ]]; then
-                curl -u "$user" -k -O --ftp-ssl "ftp://gdc.cddis.eosdis.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.txt"
+                curl -u "$user" -k -O $CURL_VERBOSE --ftp-ssl "ftp://gdc.cddis.eosdis.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.txt"
             fi
         fi
     elif [[ "$FESH_DATA_CENTER" =~ opar ]]; then
-        wget -nv "ftp://ftp@ivsopar.obspm.fr/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
+        wget $WGET_VERBOSE "ftp://ftp@ivsopar.obspm.fr/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
         if [[ -n "$txt" ]]; then
-            wget -nv "ftp://ftp@ivsopar.obspm.fr/vlbi/ivsdata/aux/$year/$sched/$sched.txt"
+            wget $WGET_VERBOSE "ftp://ftp@ivsopar.obspm.fr/vlbi/ivsdata/aux/$year/$sched/$sched.txt"
         fi
     elif [[ "$FESH_DATA_CENTER" =~ bkg ]]; then
         if [[ "$FESH_BKG_METHOD" =~ ^ftp$ ]]; then
-            wget -nv "ftp://ftp@ivs.bkg.bund.de/pub/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
+            wget $WGET_VERBOSE "ftp://ftp@ivs.bkg.bund.de/pub/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
             if [[ -n "$txt" ]]; then
-                wget -nv "ftp://ftp@ivs.bkg.bund.de/pub/vlbi/ivsdata/aux/$year/$sched/$sched.txt"
+                wget $WGET_VERBOSE "ftp://ftp@ivs.bkg.bund.de/pub/vlbi/ivsdata/aux/$year/$sched/$sched.txt"
             fi
         else
-            curl --ssl-reqd -u anonymous:anonymous -O "ftp://ivs.bkg.bund.de/pub/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
+            curl --ssl-reqd $CURL_VERBOSE -u anonymous:anonymous -O "ftp://ivs.bkg.bund.de/pub/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
             if [[ -n "$txt" ]]; then
-                curl --ssl-reqd -u anonymous:anonymous -O "ftp://ivs.bkg.bund.de/pub/vlbi/ivsdata/aux/$year/$sched/$sched.txt"
+                curl --ssl-reqd $CURL_VERBOSE -u anonymous:anonymous -O "ftp://ivs.bkg.bund.de/pub/vlbi/ivsdata/aux/$year/$sched/$sched.txt"
             fi
         fi
     elif [[ "$FESH_DATA_CENTER" =~ vlbeer ]]; then
-        wget -nv "ftp://ftp@vlbeer.ira.inaf.it/vlb_arc/ftp/vlbi_arch/$month/$sched.vex"
+        wget $WGET_VERBOSE "ftp://ftp@vlbeer.ira.inaf.it/vlb_arc/ftp/vlbi_arch/$month/$sched.vex"
     fi
     echo Done >&2
     popd >/dev/null
