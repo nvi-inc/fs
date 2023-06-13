@@ -465,6 +465,9 @@ get_latest_exp() {
         | egrep -v '(station|point)'\
         | head -1)
 
+    if [[ -z "$log" ]]; then
+      fatal "No latest log found"
+    fi
     local ext=${log#*.}
     local expname
     expname=$(basename "$log" .$ext)
