@@ -97,6 +97,9 @@ main()
     int ifc=0;
     int krf=1;
     int all=0;
+    int is_escape=0;
+    int is_lb=0;
+    int is_inter=0;
     for(;;) {
         rte_time(it,&iyear);
         isleep=100-it[0];
@@ -110,6 +113,40 @@ main()
             exit(0);
         }
         while(ERR!=(ch=getch())) {  /* handle inputs */
+
+            if(is_escape) { /* filter escape sequences */
+              if (!is_lb) {
+                 if('[' != ch) { /* not CSI */
+                   is_inter=is_lb=is_escape=0;
+                   goto next;
+                 } else {  /* CSI */
+                   is_lb=1;
+                   continue;
+                 }
+              } else if(0x30 <= ch && ch <= 0x3F) { /* CSI parameter */
+                if(is_inter) { /* not after intermediate */
+                   is_inter=is_lb=is_escape=0;
+                   goto next;
+                } else {
+                   continue;
+                }
+              } else if(0x20 <= ch && ch <= 0x2F) { /* CSI intermediate */
+                is_inter=1;
+                continue;
+              } else if(0x40 <= ch && ch <= 0x7E) { /* CSI final */
+                is_inter=is_lb=is_escape=0;
+                continue;
+              } else {
+                continue;
+              }
+            }
+
+        next:
+            if ('\e' ==ch) {
+              is_escape=1;
+              continue;
+            }
+
             char *num=strchr(numbers,ch);
             if(NULL != num) {
                 dwell=num-numbers+1;
@@ -163,20 +200,17 @@ main()
                 move(7,0);
                 printw("? or / - help");
                 move(8,0);
-                printw("Esc or Control-C to exit");
+                printw("Control-C to exit");
                 move(9,0);
-                printw("Any other resume cycle");
-                move(10,0);
-                printw("  Use any key now to");
+                printw("Any other: resume cycle");
                 move(11,0);
-                printw("     leave help");
+                printw("   Use any key now to");
+                move(12,0);
+                printw("       leave help");
                 while(ERR==getch())
                     ;
                 clear();
                 ifc=ifc_before;
-            } else if ( '\e' == ch) {
-                die();
-                exit(0);
             }
             if(-1==ifc || ifc>fs->dbbc3_ddc_ifs)
                 ifc=0;
