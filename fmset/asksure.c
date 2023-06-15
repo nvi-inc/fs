@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020, 2023 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -77,7 +77,7 @@ echo ();
  mvwscanw(  maindisp, ROWA+4, COL0+55, "%1s", answer );
  }
 
- if ( source == DBBC && sync && (answer[0] == 'Y' || answer[0] == 'y') ) {
+ if ( rack == DBBC && sync && (answer[0] == 'Y' || answer[0] == 'y') ) {
  sprintf(buffer,
 	 "Do you also want to sync the DBBC first (recommended) (y/n) ?      ");
        /* 012345678901234567890123456789012345678901234567890123456789012 */
