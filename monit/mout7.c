@@ -74,11 +74,6 @@ static void print_tsys(float tsys, unsigned clipped)
             printw("%5s","off=0");
         else if (tsys < -1e6)
             printw("%5s"," inf ");
-    } else if (tsys <= -999.5) {
-        standout();
-        printw("%5s","$$$$$");
-    } else if (999.95 <= tsys) {
-        printw("%5s","$$$$$");
     } else if(tsys <0.0) { /* negative */
         buf[0]=0;
         if(0==clipped)
@@ -89,8 +84,12 @@ static void print_tsys(float tsys, unsigned clipped)
             HIGHLIGHT(YELLOWN)
         else
             HIGHLIGHT(REDN)
-        dble2str_j(buf,tsys,-5,1);
-        printw("%5s",buf);
+        if (tsys <= -999.5)
+            printw("%5s","$$$$$");
+        else {
+            dble2str_j(buf,tsys,-5,1);
+            printw("%5s",buf);
+        }
     } else {
         buf[0]=0;
         if(0==clipped)
@@ -101,8 +100,12 @@ static void print_tsys(float tsys, unsigned clipped)
             HIGHLIGHT(YELLOW)
         else
             HIGHLIGHT(RED)
-        dble2str(buf,tsys,-5,1);
-        printw("%5s",buf);
+        if (999.95 <= tsys)
+            printw("%5s","$$$$$");
+        else {
+            dble2str(buf,tsys,-5,1);
+            printw("%5s",buf);
+        }
     }
     standend();
 }
