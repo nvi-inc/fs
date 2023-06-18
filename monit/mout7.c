@@ -78,12 +78,14 @@ static void print_tsys(float tsys, unsigned clipped)
         buf[0]=0;
         if(0==clipped)
             standout();
+        else if(clipped == UINT_MAX)
+            HIGHLIGHT(BLUEI)
         else if(clipped <= WARN1)
-            HIGHLIGHT(GREENN)
+            HIGHLIGHT(GREENI)
         else if(clipped <= WARN2)
-            HIGHLIGHT(YELLOWN)
+            HIGHLIGHT(YELLOWI)
         else
-            HIGHLIGHT(REDN)
+            HIGHLIGHT(REDI)
         if (tsys <= -999.5)
             printw("%5s","$$$$$");
         else {
@@ -94,6 +96,8 @@ static void print_tsys(float tsys, unsigned clipped)
         buf[0]=0;
         if(0==clipped)
             ;
+        else if(clipped == UINT_MAX)
+            HIGHLIGHT(MAGENTA)
         else if(clipped <= WARN1)
             HIGHLIGHT(GREEN)
         else if(clipped <= WARN2)

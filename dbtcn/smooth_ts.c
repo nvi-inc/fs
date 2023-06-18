@@ -50,6 +50,9 @@ static void apply_filter(int filter,int samples,float alpha, float param,
     float *tsys,float *saved,unsigned *count,unsigned *clipped,
     float *shadow_saved, unsigned *shadow_count)
 {
+    if(*clipped == UINT_MAX)
+      *clipped=0;
+
     if(*tsys<=-999.5 || *tsys >=999.95) {
         if(1 != filter && -1e4<=*saved && *count >= samples && -1e6 < *tsys)
             ++*clipped;
@@ -77,7 +80,7 @@ static void apply_filter(int filter,int samples,float alpha, float param,
           if(*shadow_count >=samples ) {
             if(100.0*fabs((*shadow_saved-*saved)/(*saved)) >= param && *clipped > WARN2+1) {
               *tsys=*shadow_saved;
-              *clipped=0;
+              *clipped=UINT_MAX;
               *saved=*shadow_saved;
               *count=*shadow_count;
             }
