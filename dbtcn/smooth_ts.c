@@ -31,6 +31,8 @@
 #include "packet.h"
 #include "dbtcn.h"
 
+#define WARN2  5
+
 static struct {
     struct {
         float tsys;
@@ -73,7 +75,7 @@ static void apply_filter(int filter,int samples,float alpha, float param,
               *shadow_saved=orig_tsys;
           ++*shadow_count;
           if(*shadow_count >=samples ) {
-            if(100.0*fabs((*shadow_saved-*saved)/(*saved)) >= param) {
+            if(100.0*fabs((*shadow_saved-*saved)/(*saved)) >= param && *clipped > WARN2+1) {
               *tsys=*shadow_saved;
               *clipped=0;
               *saved=*shadow_saved;
