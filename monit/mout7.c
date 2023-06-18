@@ -75,6 +75,8 @@ static void print_tsys(float tsys, unsigned clipped, int reverse)
             printw("%5s","ovrfl");
         else if (tsys < -1e8)
             printw("%5s","off=0");
+        else if (tsys < -1e7)
+            printw("%5s"," on=0");
         else if (tsys < -1e6)
             printw("%5s"," inf ");
     } else if (tsys <= -999.5) {
