@@ -73,6 +73,8 @@ static void print_tsys(float tsys, unsigned clipped, int reverse)
             HIGHLIGHT(CYANI)
         if (tsys < -1e10)
             printw("%5s","ovrfl");
+        else if (tsys < -1e9)
+            printw("%5s","tpi=0");
         else if (tsys < -1e8)
             printw("%5s","off=0");
         else if (tsys < -1e7)
