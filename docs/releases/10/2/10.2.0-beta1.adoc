@@ -21,7 +21,7 @@
 :doctype: book
 
 = FS 10.2.0-beta1 Update Notes
-Version 0.67 - June 2023
+Version 0.68 - June 2023
 
 :sectnums:
 :stem: latexmath
@@ -238,7 +238,7 @@ not put off updating your software too long. There is a reasonable
 chance that your software may not need any changes.
 
 CAUTION: You may be asked by a coordinating center or scheduler if
-your station can handle the longer names. You should answer "`no``"
+your station can handle the longer names. You should answer "`no`"
 until you have made the necessary changes or verified that no changes
 are needed.
 
@@ -415,7 +415,7 @@ system and use the _drudg_ generated `cont_cal` commands to control
 whether continuous calibration, and optionally what polarity, is used.
 
 You can of course change the defaults after `initi` has run if you
-want. This could be helpful if you need to change the defaults. You
+want. This could be useful, for example, if you change receivers. You
 might want to have a SNAP procedure in the `station` library for this
 to minimize the required typing.
 
@@ -498,7 +498,7 @@ for _prog_ (and any AUID accounts) as well.
 ====
 
 . Use `set revert-all-at-newline on` for _readline_ to prevent the
-_bash_, _oprin_, and _pfmed_ histores from being changed.
+_bash_, _oprin_, and _pfmed_ histories from being changed.
 
 +
 
@@ -751,9 +751,9 @@ intrinsic `and()`.
 
 +
 
-FSL11 has limited support for _python2_, in particular there is no
-`numpy` The two largest _python_ programs in the FS, _gnplt_ and
-_logpl_ require `numpy`. Since most of the work converting was for
+FSL11 has limited support for _python2_. In particular, there is no
+`numpy`. The two largest _python_ programs in the FS, _gnplt_ and
+_logpl_, require `numpy`. Since most of the work converting was for
 these two programs, it seemed best if they all were converted. There
 is not expected to by any _python2_ in the next Debian release,
 _bookworm_.
@@ -1046,7 +1046,7 @@ correcting it.
 +
 
 Thanks to Jun Yang (Onsala) for finding this issue and pointing out
-using the compress factor of _onoff_ as an indication of a problem.
+that the compression factor of _onoff_ can be used to identify it.
 Thanks to Sven Bornbusch (MPIfR) for explaining the cause and
 providing guidance on reasonable levels. Thanks to Jon Quick (HartRAO)
 for suggesting using T~sys~ values as a method for finding the correct
@@ -1579,7 +1579,7 @@ version `1.2.0` (which is used by FSL11):
 NOTE: FSL11 offers an optional non-standard version of _pgperl_ that
 uses _pgplot_. Every effort has been made to make this "`safe,`"
 however using it is at your own risk. Installing FSL11 will not
-install it by default. You can find the directions for installing this
+include it by default. You can find the directions for installing this
 non-standard package at:
 https://nvi-inc.github.io/fsl11/installation.html#_install_pgplot_version_of_pgperl.
 
@@ -2029,7 +2029,7 @@ handle four character device mnemonics, which was missing before.
 
 +
 
-This also means that the warning will not show-up in _erchk_ and
+This also means that the warning will no longer show-up in _erchk_ and
 _sterp_.
 
 .. Increase default X11 window size to 146.
@@ -2041,6 +2041,7 @@ and `scnch` windows is 146 columns. The advantages of the new width is
 that it is the smallest that will allow:
 
 +
+--
 [disc]
 
 * Standard error messages displayed from the log to fit in the
@@ -2054,16 +2055,17 @@ fit without wrapping (a minimum of 146 columns is required for this)
 * All four of these windows to have an aligned right edge if their
 left edges are aligned with the left edge of the screen,
 
+--
 +
 
 Of course, it is entirely up to you what widths you want to use for
 your system and that will depend on your display. A script,
 _misc/xresourcesfix_ is included that will allow you to adjust the
-widths for these windows. If your _erchk.ctl_ uses more than four
-characters of indentation, you will need to increase the width
-correspondingly to avoid wrapping. See the <<set_x11_widths,Setting
-X11 window widths>> sub-step in the <<Optional steps>> above for the
-details.
+widths for these windows, either all the same, or different for each
+window. If your _erchk.ctl_ uses more than four characters of
+indentation, you will need to increase the width correspondingly to
+avoid wrapping. See the <<set_x11_widths,Setting X11 window widths>>
+sub-step in the <<Optional steps>> above for the details.
 
 +
 
@@ -2076,17 +2078,17 @@ should be used.
 +
 
 This is to guard against accidentally starting _erchk_ if the display
-server is not running.  This might happen, for example, if the
-operator is in the habit of starting additional copies of _erchk_ when
-the display server is running. Two fixes were made that only affect
-_erchk_ when the display server is not in use:
+server is not running. This might happen, for example, if the multiple
+copies copies of _erchk_ are normally used when the display server is
+running. Two fixes were made that only affect _erchk_ when the display
+server is not in use:
 
 +
 
 [disc]
 * _erchk_ can no longer be started if the FS is not running
 
-* Mutiple copies of _erchk_ cannot be started.
+* Multiple copies of _erchk_ cannot be started.
 
 +
 
@@ -2095,13 +2097,13 @@ messages.
 
 +
 
-Thanks to Jon Quick (HartRAO) for reportig these issues.
+Thanks to Jon Quick (HartRAO) for reporting these issues.
 
 .. Use `set revert-all-at-newline on` for _readline_.
 
 +
 
-This change prevents history entries from being changed if they are
+This update prevents history entries from being changed if they are
 edited and then not used. This "`feature`" of changing the history
 entries can be quite frustrating, particularly in _bash_. It can be
 disabled in FSL9, FSL10, and FSL11, on a per user basis, by creating
@@ -2454,6 +2456,10 @@ Exit the program by closing the `Monitor` window
 
 ... The following changes were needed for the _python3_ version:
 
+* The first three changes for _python3_ in the "`Details`" for the
+<<FSL11,FSL11>> changes above: running the script through _2to3_ and
+_reindent_ and changing the _shebang_ line.
+
 * Change `import` of `NavigationToolBar2TkAgg` to
 `NavigationToolBar2Tk`
 
@@ -2474,7 +2480,7 @@ Exit the program by closing the `Monitor` window
 +
 
 About 15 small bugs were fixed. All were fairly minor but one could
-cause a crash of a DBBC2 was in a bad state.
+cause a crash if a DBBC2 was in a bad state.
 
 +
 
@@ -2502,15 +2508,23 @@ https://github.com/nvi-inc/fs/issues/191[#191]).
 
 +
 
-There was an error in class number handing of communicating with a
-DBBC2 (the FS refers to the device as a "`DBBC`"). It occurred in the
-periodic checking of the DBBC2 personality and version number. Crashes
-only seemed to happen when the DBBC2 is in a bad state, and then after
-about ++~35++ `ch -810 Communication error for DBBC.` errors. There
-should no longer be any crashes even if the DBBC2 is in the bad state.
-Rebooting the DBBC2 may fix the bad state. That is a good thing to do
-since calibration data may be lost and other problems may occur while
-it is in the bad state.
+There were two errors in class number handing of communicating with a
+DBBC2 (the FS refers to the device as a "`DBBC`"). They occurred in
+the periodic checking of the DBBC2 personality/version and the the VSI
+clock rate. Crashes only seemed to happen when the DBBC2 is in a bad
+state, and then after about ++~35++ `ch -810 Communication error for
+DBBC.` errors. There should no longer be any crashes even if the DBBC2
+is in the bad state. Rebooting the DBBC2 may fix the bad state. That
+is a good thing to do since calibration data may be lost and other
+problems may occur while it is in the bad state.
+
++
+
+These errors were present since the addition of these checks in
+commits `8e59c7c3502243ea7762c2bfa062a06bad427de2`, January 2016,
+released as FS _9.11.9_, and
+`0fd3f965075ae91ec12768a4a4a2f5911e973824`, April 2019, released as FS
+_9.13.1_.
 
 +
 
@@ -2527,7 +2541,8 @@ https://github.com/nvi-inc/fs/issues/186[#186]).
 +
 
 Due to a bug, _plog_ was unable to send multiple files to BKG in one
-invocation. The result was that none were sent.
+invocation. The result was that none were sent. This situation comes
+up routinely when sending both reduced and _full.log_ files for VGOS.
 
 +
 
@@ -2576,8 +2591,8 @@ https://github.com/nvi-inc/fs/issues/190[#190]).
 The DBBC (i.e., the DBBC2) does not provide separate cal-on and
 cal-off TPIs for an IF detector when continuous calibration is in use.
 Implementing something useful in the FS for this case had been
-overlooked. Unfortunately, the FS produced unusable T~ant~
-measurements in _fivpt_ and nonsensical T~sys~ values for those
+overlooked. Unfortunately until it was fixed, the FS produced unusable
+T~ant~ measurements in _fivpt_ and nonsensical T~sys~ values for those
 detectors in _fivpt_ and _onoff_.
 
 +
@@ -2641,8 +2656,8 @@ cleared before being used to decode the next detector. As a result, if
 a detector was incompletely specified, but was completed by leftover
 characters in the buffer, no error was detected and an incorrect
 detector may have been selected. This was corrected for all rack
-types. This bug could interact with the preceding bug (Buffer
-shortness) to prevent a truncated detector at the end of the buffer
+types. This bug could interact with the preceding bug ("`Buffer
+shortness`") to prevent a truncated detector at the end of the buffer
 from being reported as an error.
 
 +
@@ -2681,21 +2696,36 @@ prevents a match on the second command of a pair if the first command
 of that pair with a different string has occurred since the original
 first command with the right string.
 
-.. Prevent DBBC communication errors with the PFB personalty from
+.. Prevent DBBC communication errors with the PFB personality from
 causing a crash for the `tpi`, `tpical`, and `tpzero` commands,
 
 +
 
-The error check had been omitted.
+The PFB personality is not heavily used and what use it gets does not
+usually include T~sys~ measurements.
+
++
+
+The error check was lost in commit
+`224cc218b7519c300c11c59aea6391a6da3b122b`, August 2019, for the merge
+of the `master` branch into the `VGOS` branch.
 
 .. Remove redundant class number clearing, which only occurred after
-an error, when setting the AGC in _onoff_ for DBBC2s and DBBC3s.
+an error when setting the AGC in _onoff_ for DBBC2s and DBBC3s.
 
 +
 
 The could potentially have caused clearing of a class number that was
-already in use for something else. The chances of a problem occuring
+already in use for something else. The chances of a problem occurring
 were pretty low.
+
++
+
+This error was introduced with the initial support for the DBBC2 and
+DBBC3. For the DBBC2, this was commit
+`f3ee6ea64be008b2bb0ebcbf3f54223b43de8b23`, January 2013, released as
+FS _9.11.2_; DBBC3, `19a69540f9f03d4b1035cde4bd097a5babb3ddfe`,
+October 2018, FS _9.12.12_.
 
 .. Demote `if` and `setup_proc` commands from being _immediate_
 execution commands (closing
@@ -2861,11 +2891,11 @@ Improve the description of the `thread__suffix__` procedure. Fix the
 `record = ...` command description for recorder tuning. Remove
 "`10.1`" from the title of the "`FS DBBC3 Operations Manual`". Add
 update notes for FS _10.0.1_ and _10.1.1_ patch releases. Modify the
-FS _10.1.0_ update notes to recognize that the default branch may already
-be _main_. Add a *TIP* for managing directory names of FS
+FS _10.1.0_ update notes to recognize that the default branch may
+already be _main_. Add a *TIP* for managing directory names of FS
 installations from archives. Add a *TIP* for how to avoid losing your
 place in a "`Details`" toggle when following a link. Add explanation
-of how to navigate to a link in "`Details`" toggle in a different
+of how to navigate to a link in a "`Details`" toggle in a different
 document. Expand "`Font Conventions`" document. Update "`Converting to
 a 64-bit System`" document. Update instructions for making the
 `gh-pages` documentation.
@@ -2949,9 +2979,9 @@ document's tab, whatever you prefer.
 
 ****
 
-.. Add explanation of how to navigate to a link in "`Details`" toggle
-in a different document, if the browser doesn't support going to it
-directly. This was added to the
+.. Add explanation of how to navigate to a link in a "`Details`"
+toggle in a different document, if the browser doesn't support going
+to it directly. This was added to the
 <<../1/10.1.0.adoc#improve_presentation,Improve presentation>> FS
 change sub-item (if that link doesn't work in your browser, the text
 is copied below) of the <<../1/10.1.0.adoc#,FS 10.1.0 Update Notes>>
@@ -3016,10 +3046,10 @@ About 10 small cosmetic issues were fixed
 
 Change title for `cable` data in _logpl_. Fix _gnplt_ error message
 for the GUI crashing. Remove more extraneous `(..)` strings from some
-error messages. Fix column alignment of header for `APR` lines in
-_onoff_. Prevent _monit7_ from crashing if the rack type is non-DBBC3.
-Remove an extraneous leading blank in _erchk_. Improve coding of
-_tpicd_ for DBBC3. Fix comments in an _include_ file.
+error messages. Fix column alignment of the header for the `APR` lines
+in _onoff_. Prevent _monit7_ from crashing if the rack type is
+non-DBBC3.  Remove an extraneous leading blank in _erchk_. Improve
+coding of _tpicd_ for DBBC3. Fix comments in an _include_ file.
 
 .. Change description (title) for `cable` in the default _logpl.ctl_
 file to not include `length`.
@@ -3035,18 +3065,24 @@ rather than `LogPlotter`.
 
 +
 
-The most common of these were fixed in FS _10.1_, but a few remained.
-These were due to unnecessarily setting variables by _dbbcn_, _mk5cn_,
-and _rdbcn_. Additionally, a change was made to _boss_ that may
-eliminate any remaining instances.
+The most common of these were fixed in FS _10.1_, but a few more were
+uncovered. These were due to unnecessary setting of variables in
+_dbbcn_, _mk5cn_, and _rdbcn_. Additionally, a change was made to
+_boss_ that may eliminate this issue if there are any remaining
+instances.
 
-.. Fix column alignment of header for `APR` lines in _onoff_.
+.. Fix column alignment of the header for the `APR` lines in _onoff_.
 
 +
 
 Beginning with the `T` column header, the rightmost ones were moved
-one character farther right. This was apparently not done quite
-correctly when the detector field was expanded to four characters.
+one character farther right.
+
++
+
+The misalignment had apparently been there since _onoff_ was rewritten
+in commit `1b68b90f216412b90c31afca2ab1eb7168602280`, October 2002,
+for release FS _9.5.15_,
 
 .. Prevent _monit7_ from crashing if the rack type is non-DBBC3.
 
