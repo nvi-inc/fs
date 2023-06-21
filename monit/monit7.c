@@ -85,15 +85,16 @@ main()
       start_color();
       use_default_colors();
       init_pair(DEFAULT,-1,-1);
-      init_pair(GREEN,-1,COLOR_GREEN);
-      init_pair(YELLOW,-1,COLOR_YELLOW);
+      init_pair(GREEN,COLOR_BLACK,COLOR_GREEN);
+      init_pair(YELLOW,COLOR_BLACK,COLOR_YELLOW);
       init_pair(RED,COLOR_WHITE,COLOR_RED);
-      init_pair(GREENI,COLOR_GREEN,COLOR_BLACK);
-      init_pair(YELLOWI,COLOR_YELLOW,COLOR_BLACK);
-      init_pair(REDI,COLOR_RED,COLOR_BLACK);
-      init_pair(MAGENTA,-1,COLOR_MAGENTA);
-      init_pair(BLUEI,COLOR_BLUE,COLOR_BLACK);
-      init_pair(CYAN,-1,COLOR_CYAN);
+      init_pair(BLUE,COLOR_WHITE,COLOR_BLUE);
+      init_pair(CYAN,COLOR_BLACK,COLOR_CYAN);
+      init_pair(GREENI,COLOR_WHITE,COLOR_GREEN);
+      init_pair(YELLOWI,COLOR_WHITE,COLOR_YELLOW);
+      init_pair(REDI,COLOR_BLACK,COLOR_RED);
+      init_pair(BLUEI,COLOR_BLACK,COLOR_BLUE);
+      init_pair(CYANI,COLOR_WHITE,COLOR_CYAN);
     }
     int next=-1;
     int count=-1;
