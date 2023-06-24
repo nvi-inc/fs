@@ -43,7 +43,7 @@ void resize()
   clear();
   refresh();
 }
-main()
+main(int argc, char *argv[])
 {
     int it[6], iyear, isleep;
     void m7init();
@@ -55,6 +55,21 @@ main()
     char numbers[]  = "123456789";
     char letters[]  = "abcdefgh";
     char lettersu[] = "ABCDEFGH";
+    int reverse;
+
+    if(argc == 2) {
+        if(strcmp(argv[1],"-rv")) {
+            printf("Bad argument '%s', only '-rv' allowed\nPausing 10 seconds then monit7 will terminate.\n",argv[1]);
+            sleep(10);
+            exit(-1);
+        } else
+            reverse = 1;
+    } else if (argc >2) {
+        printf("Too many arguments '%d', only '1' allowed\nPusing 10 seconds then monit7 will terminate.\n",argc-1);
+        sleep(10);
+        exit(-1);
+    } else
+        reverse = 0;
 
     setup_ids();
     fs = shm_addr;
@@ -286,7 +301,7 @@ main()
 //            die();
 //            exit(0);
 //        }
-        mout7(next,&shm_addr->dbbc3_tsys_data.data[iping],krf,all,!undef,record);
+        mout7(next,&shm_addr->dbbc3_tsys_data.data[iping],krf,all,!undef,record,reverse);
         move(ROW_HOLD,COL_HOLD);  /* place cursor at consistent location */
         standend();
         printw(" ");

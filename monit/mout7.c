@@ -48,7 +48,7 @@ static char unit_letters[ ] = {"ABCDEFGH"};
 static time_t save_disp_time;
 static int kfirst = 1;
 
-static void print_tsys(float tsys, unsigned clipped)
+static void print_tsys(float tsys, unsigned clipped, int reverse)
 {
     char buf[128];
 
@@ -67,7 +67,10 @@ static void print_tsys(float tsys, unsigned clipped)
         standout();
         printw("%5s","N cal");
     } else if (tsys < -1e6) {
-        HIGHLIGHT(CYAN)
+        if(!reverse)
+            HIGHLIGHT(CYAN)
+        else
+            HIGHLIGHT(CYANI)
         if (tsys < -1e10)
             printw("%5s","ovrfl");
         else if (tsys < -1e8)
@@ -80,13 +83,25 @@ static void print_tsys(float tsys, unsigned clipped)
             if(tsys < 0.0)
                standout();
         } else if(clipped == UINT_MAX)
-            HIGHLIGHT(BLUE)
+            if(!reverse)
+                HIGHLIGHT(BLUE)
+            else
+                HIGHLIGHT(BLUEI)
         else if(clipped <= WARN1)
-            HIGHLIGHT(GREEN)
+            if(!reverse)
+               HIGHLIGHT(GREEN)
+            else
+               HIGHLIGHT(GREENI)
         else if(clipped <= WARN2)
-            HIGHLIGHT(YELLOW)
+            if(!reverse)
+               HIGHLIGHT(YELLOW)
+            else
+               HIGHLIGHT(YELLOWI)
         else
-            HIGHLIGHT(RED)
+            if(!reverse)
+               HIGHLIGHT(RED)
+            else
+               HIGHLIGHT(REDI)
         if (tsys <= -999.5 || 999.95 <= tsys)
             printw("%5s","$$$$$");
         else {
@@ -97,7 +112,7 @@ static void print_tsys(float tsys, unsigned clipped)
     standend();
 }
 void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
-        int def, int rec)
+        int def, int rec, int reverse)
 {
     struct dbbc3_tsys_ifc ifc;
     struct dbbc3_tsys_bbc bbc[MAX_DBBC3_BBC];
@@ -148,7 +163,7 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
     if (ifc.lo < 0.0)
         printw("%5s"," ");
     else
-        print_tsys(ifc.tsys,ifc.clipped);
+        print_tsys(ifc.tsys,ifc.clipped,reverse);
 
     move(2,0);
     printw("Time   ");
@@ -251,12 +266,12 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
 
         if (all && (def || rec) || !rec && ifc.lo>=0.0 || itpis[ibbc+MAX_DBBC3_BBC]) {
             printw(" ");
-            print_tsys(bbc[ibbc].tsys_usb,bbc[ibbc].clipped_usb);
+            print_tsys(bbc[ibbc].tsys_usb,bbc[ibbc].clipped_usb,reverse);
         }
 
         if(all && (def || rec) || !rec && ifc.lo>=0.0 || itpis[ibbc              ]) {
             printw(" ");
-            print_tsys(bbc[ibbc].tsys_lsb,bbc[ibbc].clipped_lsb);
+            print_tsys(bbc[ibbc].tsys_lsb,bbc[ibbc].clipped_lsb,reverse);
         }
     }
 }
