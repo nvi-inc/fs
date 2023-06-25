@@ -21,7 +21,7 @@
 :doctype: book
 
 = FS 10.2.0-beta1 Update Notes
-Version 0.68 - June 2023
+Version 0.69 - June 2023
 
 :sectnums:
 :stem: latexmath
@@ -373,7 +373,7 @@ in case you need to recover.
 There are two alternatives:
 
 . If you are not using a DBBC3, no new environment variables need to
-be set, skip to <<Optional steps>>.
+be set, skip to <<Remove temporary versions of fesh/plog>>.
 
 . If you are using a DBBC3, you _may_ need to set some environment
 variables. A reasonable first approach would be to not set any at this
@@ -387,6 +387,34 @@ the section
 <<../1/dbbc3_ops.adoc#_determining_what_values_to_use,Determining what
 values to use>> may be helpful.
 
+=== Remove temporary versions of fesh/plog
+
+If you have installed temporary fixes of _fesh_ and/or _plog_ (or
+other scripts) outside the normal FS source directory, you should
+probably remove them. All previously supplied updates to work-around
+various issues have been incorporated into this release.
+
+Typically these temporary versions would have been installed in
+_~oper/bin_ and/or have aliases defined for them. We think very few
+stations have installed temporary versions. If you can't remember, you
+can check for an alias, for example for _plog_, with the command:
+
+  alias | grep plog
+
+To check if you are are using local copy in your `PATH` you can use
+the command:
+
+   which plog
+
+Instead of just deleting temporary versions or aliases, we suggest you
+rename them, for example, maybe _plog.old_ for _plog_. That way they
+will still be accessible until you have verified that the new standard
+versions work for you. If you find any fixes are missing, please
+contact Ed so they can be added.
+
+
+NOTE: If you use a local version of _feshp_, it should not need to be
+changed.
 
 === Optional steps
 

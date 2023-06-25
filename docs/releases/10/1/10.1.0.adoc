@@ -22,7 +22,7 @@
 
 = FS 10.1.0 Update Notes
 E. Himwich, J. Quick, J. Gipson, D. Horsley
-Version 6.1 - April 2023
+Version 6.2 - June 2023
 
 //:hide-uri-scheme:
 :sectnums:
@@ -356,8 +356,55 @@ sure you are using the latest version of the display server.
 
 === Login as oper
 
-IMPORTANT: Except as indicated, the actions in the next step should be
+IMPORTANT: Except as indicated, the remaining steps should be
 performed as _oper_.
+
+=== Remove temporary fixes
+
+There are two general categories of temporary fixes that we are aware
+of: <<Local versions of fesh/plog>> and
+<<FS display server error logging>>. We think very few stations have
+installed these fixes. If can't remember if you have installed either
+of these, reading the respective subsections may help you figure that
+out. If you have other fixes you are aware of, you should check those
+as well.
+
+==== Local versions of fesh/plog
+
+If you have installed temporary fixes of _fesh_ and/or _plog_ (or
+other scripts), hence outside the normal FS source directory, you
+should probably remove them. All previously supplied updates to
+work-around various issues have been incorporated into this release.
+
+Typically these temporary versions would have been installed in
+_~oper/bin_ and/or have aliases defined for them. If you can't
+remember if you are using a local version, you can check for an alias,
+for example for _plog_, with the command:
+
+  alias | grep plog
+
+To check if you are are using local copy in your `PATH` you can use
+the command:
+
+   which plog
+
+Instead of just deleting temporary versions or aliases, we suggest you
+rename them, for example, maybe _plog.old_ for _plog_. That way they
+will still be accessible until you have verified that the new standard
+versions work for you. If you find any fixes are missing, please
+contact Ed so they can be added.
+
+NOTE: If you use a local version of _feshp_, it should not need to be
+changed.
+
+==== FS display server error logging
+
+If you were using a _screen_ session to capture any debug error output
+from the display server (_fsserver_), that must be disabled. The FS
+now does this automatically.
+
+Typically, this would be setup in a alias or script (possibly in
+_~/oper/bin_) that you use start the FS.
 
 === Local customizations
 
