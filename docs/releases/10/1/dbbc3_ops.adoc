@@ -28,7 +28,7 @@
 :experimental:
 :downarrow: &downarrow;
 E. Himwich, J. Quick
-Version 5.2.2 - June 2023
+Version 5.2.3 - June 2023
 
 == Introduction
 
@@ -730,6 +730,8 @@ Following the usual alphabetical order convention within a pair: `LR`,
 FS is updated to recognize pairs other than Left/Right, you need to
 know which pair is active to interpret what is shown.
 
+NOTE: In FS _10.1_, the polarization was not shown.
+
 Except for `Time`, the values are from the previous second's
 multicast. Hence for continuous calibration, the T~sys~ values are
 from two seconds in the past. If the system is operating normally,
@@ -740,24 +742,36 @@ the somewhat odd situation that for a Core3H board that is not synced,
 with non-DDC_V firmware, its `Time` value will be shown as `00:00:01`
 on the first day of the current VDIF epoch.
 
-[NOTE]
-====
-
 The `Time` value is shown with inverse video if it is not changing,
-i.e., it is not advancing. The time is not available in the multicast
-for DDC_V firmware, so the multicast arrival time is shown. If there
-is intermittent loss of multicast messages, whether due to execution
-of DBBC3 commands or network issues, the `Time` value will
-intermittently flash inverse video. For non-DDC_V firmware, the `Time`
-value will also be inverse video in some cases if one or more of the
-Core3H boards is not synced.
+i.e., it is not advancing. For non-DDC_V firmware, the `Time` value
+will also be inverse video in some cases if one or more of the Core3H
+boards is not synced.
+
+If there is intermittent loss of multicast messages, whether due to
+execution of DBBC3 commands or network issues, the `Time` value will
+intermittently flash inverse video. When the time is inverse video,
+the data displayed will be from the last received message, i.e., it
+will be stale.
 
 The `Epoch` value is shown as `--` for now since the VDIF epoch is not
 available yet in the multicast.
 
 The `DBBC3-FS` time difference, in seconds, is shown in inverse video
 if it is not zero (positive if the DBBC3 time is later than the FS).
-It is shown as `------` for DDC_V firmware.
+
+[NOTE]
+====
+
+For DDC_V firmware:
+
+* Time is not available in the multicast so the message arrival time
+is shown and `DBBC3-FS` is shown as `------`.
+
+* In FS version _10.1_ for DDC_V firmware versions after _v124_, the
+time is incorrectly shown as `00:00:01` on the first day of the
+current VDIF epoch. Normally for DDC_V firmware no time would be
+available. There was a misunderstanding about whether it would be for
+these later versions.
 
 ====
 
@@ -1039,6 +1053,16 @@ received (nominal 1 Hz rate), the following information, shown with
 their log entry labels, is logged:
 
 * `time` -- for each Core3H board in the system
+
++
+
+NOTE: In FS version _10.1_ for DDC_V firmware versions after v124, the
+time is incorrectly logged as `00:00:01` on the first day of the
+current VDIF epoch, except for board `5` for which the arrival time of
+the message will be logged. Normally for DDC_V firmware no time would
+be available. There was a misunderstanding about whether it would be
+for these later versions.
+
 * `pps2dot` -- (`pps_delay`) in nanoseconds for each Core3H board
 * `tpcont`  -- Only if continuous calibration _is_ in use -- TPI counts for each BBC and IF configured for recording.
 +
