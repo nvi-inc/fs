@@ -77,6 +77,11 @@ static void print_tsys(float tsys, unsigned clipped, int reverse)
             printw("%5s","off=0");
         else if (tsys < -1e6)
             printw("%5s"," inf ");
+    } else if (tsys <= -999.5) {
+        standout();
+        printw("%5s","$$$$$");
+    } else if (999.95 <= tsys) {
+        printw("%5s","$$$$$");
     } else {
         buf[0]=0;
         if(0==clipped) {
@@ -102,12 +107,8 @@ static void print_tsys(float tsys, unsigned clipped, int reverse)
                HIGHLIGHT(RED)
             else
                HIGHLIGHT(REDI)
-        if (tsys <= -999.5 || 999.95 <= tsys)
-            printw("%5s","$$$$$");
-        else {
-            dble2str_j(buf,tsys,-5,1);
-            printw("%5s",buf);
-        }
+         dble2str_j(buf,tsys,-5,1);
+         printw("%5s",buf);
     }
     standend();
 }

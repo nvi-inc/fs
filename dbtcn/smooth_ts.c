@@ -54,8 +54,6 @@ static void apply_filter(int filter,int samples,float alpha, float param,
       *clipped=0;
 
     if(*tsys<=-999.5 || *tsys >=999.95) {
-        if(1 != filter && -1e4<=*saved && *count >= samples && -1e6 < *tsys)
-            ++*clipped;
         return;
     } else if(-1e4<=*saved && fabs(*saved) >= 0.05) {
         float orig_tsys=*tsys;
