@@ -28,7 +28,7 @@
 :experimental:
 :downarrow: &downarrow;
 E. Himwich, J. Quick
-Version 5.2.3 - June 2023
+Version 5.2.4 - June 2023
 
 == Introduction
 
@@ -1003,11 +1003,13 @@ for setting the FS time.)
 
 The value in _dbbc3.ctl_ can be adjusted as appropriate. It should be
 easy to measure it for a given system when NTP _is_ available, using
-the output of the `mcast_time` command and _setcl_. The system will
-need to be synced to NTP and the `computer` model selected in
-_time.ctl_. In this case, the last value on the `mcast_time/0` line
-_minus_ the last value on the `#setcl#model/old` line is the delay in
-centiseconds; it may vary at the single digit centisecond level.
+the output of the `mcast_time` command, and optionally  _setcl_. The
+system will need to be synced to NTP and the `computer` model selected
+in _time.ctl_. In this case, the last parameter, `hsecs`, on the
+`mcast_time/0` line _minus_ the last value on the `#setcl#model/old`
+line is the value to put in the file; it may vary at the single digit
+centisecond level. If _setcl_ it not being used, the value from it can
+be treated as being zero.
 
 * The board number to use for measuring the time.
 
@@ -1051,6 +1053,15 @@ command. It will automatically be enabled by _drudg_ generated setup
 procedures. When logging is enabled, for each multicast message
 received (nominal 1 Hz rate), the following information, shown with
 their log entry labels, is logged:
+
+* The arrival time of the message -- is represented by the time-tag of
+the log entry with centisecond precision.
+
++
+
+The fractional seconds should agree with the last value, `hsecs`, on
+the `mcast_time/0` line with small variations at the one centisecond
+level.
 
 * `time` -- for each Core3H board in the system
 
