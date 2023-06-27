@@ -22,7 +22,7 @@
 
 = FS 10.1.0 Update Notes
 E. Himwich, J. Quick, J. Gipson, D. Horsley
-Version 6.2 - June 2023
+Version 6.3 - June 2023
 
 //:hide-uri-scheme:
 :sectnums:
@@ -227,8 +227,11 @@ You can of course use any name you like for the copy. You should use a
 different name for the copy than _fs-git.old-10.0.0_ if that already
 exists.
 
-* If you are using an FSL9, FSL10, or another system that can support
-`https` connections with _github.com_:
+NOTE: The use of `10.1.1` in this step is not a typo. That is the
+latest patch release for _10.1_.
+
+. If you are using an FSL9, FSL10, or another system that can support
+`https` connections with _github.com_, enter the commands:
 
   cd /usr2
   mv fs-git fs-git.old-10.0.0
@@ -239,16 +242,10 @@ exists.
 
 +
 
-NOTE: The use of `10.1.1` is not a typo. That is the latest patch
-release for _10.1_.
-
-. Login as _root_
-+
-
 Answer `*y*` to confirm installation.
 
-* If you are able to use _ssh_ instead (this no longer includes
-FSL8):
+. If you are able to use _ssh_ instead (this no longer includes
+FSL8), enter the commands:
 
   cd /usr2
   mv fs-git fs-git.old-10.0.0
@@ -259,21 +256,16 @@ FSL8):
 
 +
 
-NOTE: The use of `10.1.1` is not a typo. That is the latest patch
-release for _10.1_.
-
-+
-
 Answer `*y*` to confirm installation.
 
-* If you are using FSL8, or otherwise unable to use _git_:
+. If you are using FSL8, or otherwise unable to use _git_:
 
 +
 
 NOTE: This option does not include making a copy of your old directory
 since it is preserved anyway.
 
-. Please follow the steps, through the step that includes the option
+.. Please follow the steps, through the step that includes the option
 to set the _/usr2/fs_ link, in the
 <<../../misc/release_model.adoc#_installing_from_an_archive,Installing
 from an archive>> subsection in the
@@ -281,14 +273,7 @@ from an archive>> subsection in the
 `10.1.1` as the value for __tag__. Be sure to set the link for
 __/usr2/fs__ by running *`make install`*.
 
-+
-
-+
-
-NOTE: The use of `10.1.1` is not a typo. That is the latest patch
-release for _10.1_.
-
-. Return to this document, continuing with the next step,
+.. Return to this document, continuing with the next step,
 <<Fix file permissions>> below.
 
 === Fix file permissions
@@ -362,33 +347,37 @@ performed as _oper_.
 === Remove temporary fixes
 
 There are two general categories of temporary fixes that we are aware
-of: <<Local versions of fesh/plog>> and
+of: <<Local versions of fesh/plog/rdbemsg>> and
 <<FS display server error logging>>. We think very few stations have
 installed these fixes. If can't remember if you have installed either
 of these, reading the respective subsections may help you figure that
 out. If you have other fixes you are aware of, you should check those
 as well.
 
-==== Local versions of fesh/plog
+==== Local versions of fesh/plog/rdbemsg
 
-If you have installed temporary fixes of _fesh_ and/or _plog_ (or
-other scripts), hence outside the normal FS source directory, you
-should probably remove them. All previously supplied updates to
-work-around various issues have been incorporated into this release.
+If you have installed temporary versions of _fesh_ and/or _plog_
+and/or _rdbemsg_, which should be outside the normal FS source
+directory, you should probably remove them. All previously supplied
+updates to work-around various issues have been incorporated into this
+release.
 
-Typically these temporary versions would have been installed in
-_~oper/bin_ and/or have aliases defined for them. If you can't
-remember if you are using a local version, you can check for an alias,
-for example for _plog_, with the command:
+Typically these temporary versions would have aliases defined for them
+and/or have been installed in _~oper/bin_. If you can't remember if
+you are using a local version, you can check for an alias, for example
+for _plog_, with the command:
 
   alias | grep plog
+
+TIP: Aliases are usually defined in  _~oper/.bash_aliases_ or
+_~oper/.cshrc_.
 
 To check if you are are using local copy in your `PATH` you can use
 the command:
 
    which plog
 
-Instead of just deleting temporary versions or aliases, we suggest you
+Instead of just deleting aliases or temporary versions, we suggest you
 rename them, for example, maybe _plog.old_ for _plog_. That way they
 will still be accessible until you have verified that the new standard
 versions work for you. If you find any fixes are missing, please
@@ -585,19 +574,6 @@ the FS for use with a DBBC3>> section of the <<dbbc3_ops.adoc#,FS
 DBBC3 Operations Manual>>. If you expect to get a DBBC3, these changes
 can be deferred until then.
 
-. If you have been using local copies of _fesh_ and/or _plog_ and/or
-_rdbemsg_, you should remove them from use.
-
-+
-
-A simple way to do this, while preserving the local copy, is to rename
-it to something else, e.g., for _fesh_, you might name it _fesh.old_,
-if that doesn't conflict with an existing name. If you have aliases
-setup (probably in _~oper/.bash_aliases_ or _~oper/.cshrc_, but
-possibly elsewhere) to make the local copy the default, you should
-deactivate them so you will get the new standard _fesh_ and _plog_ by
-default.
-
 . Cleanup _.rxg_ file comments:
 
 +
@@ -744,11 +720,6 @@ using FSL10, its recoverable testing procedure
 (https://nvi-inc.github.io/fsl10/raid.html#_recoverable_testing) has
 more options for recovery. Managing this is a lot easier and safer if
 you have a third disk.
-
-=== Review changes
-
-Please see the <<Changes since 10.0.0>> section below for the details
-of the changes since that release.
 
 == Changes since 10.0.0
 
