@@ -28,7 +28,7 @@
 :experimental:
 :downarrow: &downarrow;
 E. Himwich, J. Quick
-Version 5.2.4 - June 2023
+Version 5.2.5 - June 2023
 
 == Introduction
 
@@ -933,7 +933,8 @@ RF frequencies for the corresponding BBCs.
 +
 
 NOTE: If one IF was manually selected before the IF and BBC
-configuration was defined, it will not be possible to toggle between
+configuration was defined (or at startup of the display window before
+any IF had been displayed), it will not be possible to toggle between
 display modes until cycling has been restarted.
 
 * `*0*` -- reset to all defaults
