@@ -272,11 +272,13 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
         if (all && (def || rec) || !rec && ifc.lo>=0.0 || itpis[ibbc+MAX_DBBC3_BBC]) {
             printw(" ");
             print_tsys(bbc[ibbc].tsys_usb,bbc[ibbc].clipped_usb,reverse);
-        }
+        } else
+            printw(" %5s"," ");
 
         if(all && (def || rec) || !rec && ifc.lo>=0.0 || itpis[ibbc              ]) {
             printw(" ");
             print_tsys(bbc[ibbc].tsys_lsb,bbc[ibbc].clipped_lsb,reverse);
-        }
+        } else
+            printw(" %5s"," ");
     }
 }
