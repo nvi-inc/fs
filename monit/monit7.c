@@ -240,10 +240,7 @@ main(int argc, char *argv[])
         int undef;
         int record;
         int i;
-        /* find next IF to display */
-        if (0==ifc) {
-            count=++count%dwell;
-            if (0==count) {
+
 // logic states
 //
 // not recording a/r  action           show        states
@@ -260,18 +257,23 @@ main(int argc, char *argv[])
 // some defs          cycle recording  Rec  !undef  record !all
 // some defs     all  cycle all        All  !undef  record  all
 //
-                record=FALSE;
-                for(i=0;i<fs->dbbc3_ddc_ifs;i++)
-                    record=record ||
-                                (shm_addr->dbbc3_core3h_modex[i].mask1.state.known &&
-                                 shm_addr->dbbc3_core3h_modex[i].mask1.mask1) ||
-                                (shm_addr->dbbc3_core3h_modex[i].mask2.state.known &&
-                                 shm_addr->dbbc3_core3h_modex[i].mask2.mask2);
-                undef=TRUE;
-                for(i=0;i<fs->dbbc3_ddc_ifs;i++)
-                    undef=undef &&
-                        fs->dbbc3_tsys_data.data[iping].ifc[i].lo<0;
+        record=FALSE;
+        for(i=0;i<fs->dbbc3_ddc_ifs;i++)
+            record=record ||
+                        (shm_addr->dbbc3_core3h_modex[i].mask1.state.known &&
+                         shm_addr->dbbc3_core3h_modex[i].mask1.mask1) ||
+                        (shm_addr->dbbc3_core3h_modex[i].mask2.state.known &&
+                         shm_addr->dbbc3_core3h_modex[i].mask2.mask2);
+        undef=TRUE;
+        for(i=0;i<fs->dbbc3_ddc_ifs;i++)
+            undef=undef &&
+                fs->dbbc3_tsys_data.data[iping].ifc[i].lo<0;
 
+/* find next IF to display */
+
+        if (0==ifc) {
+            count=++count%dwell;
+            if (0==count) {
                 if(!record) {
                     if(undef) {
                         next=++next%fs->dbbc3_ddc_ifs;
