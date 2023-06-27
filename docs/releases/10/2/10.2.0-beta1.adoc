@@ -21,7 +21,7 @@
 :doctype: book
 
 = FS 10.2.0-beta1 Update Notes
-Version 0.69 - June 2023
+Version 0.70 - June 2023
 
 :sectnums:
 :stem: latexmath
@@ -270,9 +270,9 @@ FSL__x__).
 +
 
 If your station software uses the C shared memory variables: `LLOG`,
-`LLPRC`, `LSKD`, `LSTP`, `LNEWPR`, `LNEWSK`, or `LEXPER`, you should
-update to use `LLOG2`, `LLPRC2`, `LSKD2`, `LSTP2`, `LNEWPR2`,
-`LNEWSK2` or `LEXPER2` instead, respectively.
+`LPRC`, `LSKD`, `LSTP`, `LNEWPR`, `LNEWSK`, or `LEXPER`, you should
+update to use `LLOG2`, `LPRC2`, `LSKD2`, `LSTP2`, `LNEWPR2`, `LNEWSK2`
+or `LEXPER2` instead, respectively.
 
 +
 
@@ -492,7 +492,7 @@ for using different sizes).
 To update the usual _~/.Xresources_ file, enter the commands:
 
  cd
- /usr2/fs/misc/xresourcesfix .Xresources
+ /usr2/fs/misc/xresouresfix .Xresources
 
 You will need to log-out on the console and log back in to see the
 full change.
@@ -539,14 +539,12 @@ Their changing in this way can be quite frustrating, but it is up to
 you if you want to prevent it. In FSL11, the default is to prevent it
 (this is installed by the `make install` step for the FS). If you are
 using FSL10 or FSL9 (but not FSL8), you can prevent it by creating the
-file:
+file, _~/.inputrc_ with the commands:
 
-.~/.inputrc
-[source]
-----
-$include /etc/inputrc
-set revert-all-at-newline on
-----
+ cat >~/.inputrc <<EOT
+ \$include /etc/inputrc
+ set revert-all-at-newline on
+ EOT
 
 You may want to make the same change for _prog_ (and any AUID
 accounts) as well.
