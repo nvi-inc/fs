@@ -22,7 +22,7 @@
 
 = FS 10.1.0 Update Notes
 E. Himwich, J. Quick, J. Gipson, D. Horsley
-Version 6.3 - June 2023
+Version 6.4 - June 2023
 
 //:hide-uri-scheme:
 :sectnums:
@@ -1548,11 +1548,23 @@ cases. As a result, to bring the operator's attention to the conflict
 (so that it can be fixed), _monit6_ was modified to show DOT values
 that are not the current time in inverse video. This change could have
 been limited to using inverse video to just show times that don't
-agree with the majority since only a disagreement causes a problem.
-However, there did not seem to be a use case for recording with the
-time intentionally set wrong.
+agree with the majority since only a disagreement causes a severe
+problem. However, there did not seem to be a use case for recording
+with the time wrong.
 
-Thanks to  Javi Gonzalez (Yebes) for requesting this.
+A side effect of this change is that DOT time in _monit6_ will
+sometimes flash inverse video when the RDBE attenuator setting is
+automatically adjusted with the `rdbe_atten__X__=...` command  (the
+`auto` SNAP procedure uses it). It doesn't always happen and it may be
+more likely to happen when the attenuator adjustment is larger or
+unstable. Apparently, what is happening is that the adjustment keeps
+the RDBE busy enough that multicast packet may not be fully updated.
+This is not a change in the RDBE's behavior, but it is now more
+obvious that it is occurring.
+
+Thanks to  Javi Gonzalez (Yebes) for requesting this. Thanks to Kiah
+Imai (KPGO) for reporting the interaction with the
+`rdbe_atten__X__=...` command.
 
 ====
 
