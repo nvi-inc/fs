@@ -22,7 +22,7 @@
 
 = FS 10.1.0 Update Notes
 E. Himwich, J. Quick, J. Gipson, D. Horsley
-Version 6.4 - June 2023
+Version 6.5 - June 2023
 
 //:hide-uri-scheme:
 :sectnums:
@@ -1556,7 +1556,7 @@ A side effect of this change is that DOT time in _monit6_ will
 sometimes flash inverse video when the RDBE attenuator setting is
 automatically adjusted with the `rdbe_atten__X__=...` command  (the
 `auto` SNAP procedure uses it). It doesn't always happen and it may be
-more likely to happen when the attenuator adjustment is larger or
+more likely to happen when the attenuator adjustment is large or
 unstable. Apparently, what is happening is that the adjustment keeps
 the RDBE busy enough that multicast packet may not be fully updated.
 This is not a change in the RDBE's behavior, but it is now more
