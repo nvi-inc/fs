@@ -21,7 +21,7 @@
 :doctype: book
 
 = FS 10.2-beta1 Update Notes
-Version 0.71 - June 2023
+Version 0.72 - June 2023
 
 :sectnums:
 :stem: latexmath
@@ -144,7 +144,7 @@ will need the *TIP* in the `*wget*` step.
 the step setting the link for __/usr2/fs__ by running *`make
 install`*.
 
-=== Login in as prog
+=== Login as prog
 
 If you are not already logged-in as _prog_, do that. This is necessary
 for the remaining steps until <<Reboot>>.
@@ -318,7 +318,7 @@ longer names.
 
 === Make the station software
 
-The layout of some variables in shared memory have changed. Even if
+The layout of some variables in shared memory has changed. Even if
 you have not updated your station code, you should re-_make_ your
 station code to be safe. If _/usr2/st/Makefile_ is set-up in the
 standard way, you can do this with (as _prog_):
@@ -331,7 +331,7 @@ standard way, you can do this with (as _prog_):
 IMPORTANT: This will make sure the FS server is stopped and shared
 memory is reallocated.
 
-=== Login in as oper
+=== Login as oper
 
 The remaining steps are to be performed by _oper_.
 
@@ -492,7 +492,7 @@ for using different sizes).
 To update the usual _~/.Xresources_ file, enter the commands:
 
  cd
- /usr2/fs/misc/xresouresfix .Xresources
+ /usr2/fs/misc/xresourcesfix .Xresources
 
 You will need to log-out on the console and log back in to see the
 full change.
