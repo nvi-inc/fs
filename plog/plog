@@ -20,7 +20,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-VERSION=2023-06-13
+VERSION=2023-06-30
 
 version(){
     echo "[plog $VERSION]"
@@ -56,8 +56,9 @@ USAGE:
 ARG can be an experiment ID or the path of a file.
 
 ${underline}Options:${normal}
-    ${black}-l${normal}            Use latest with log in $FS_LOG_PATH for STATION code $STATION
-                  (and without 'station' or 'point' in the name)
+    ${black}-l${normal}            Use latest log in $FS_LOG_PATH for STATION code.
+                  without 'station' or 'point' in the name,
+                  and the name must be more than just the STATION code
     ${black}-t${normal}            Test run: print commands, do not actually push files to server
     ${black}-h${normal}            Print this message
     ${black}-c CENTER${normal}     Push files to data CENTER. Overrides the DATA_CENTERS
@@ -461,12 +462,13 @@ reduce() {
 # Find latest modified log in $FS_LOG_PATH which isn't station or point
 get_latest_exp() {
     local log=$(ls -t $FS_LOG_PATH\
-        | grep "$STATION\($PLOG_FULL_SUFFIX\)\?\\.log\(.$PLOG_COMPRESSED_EXT\)\?\$"\
+        | grep ".$STATION\($PLOG_FULL_SUFFIX\)\?\\.log\(.$PLOG_COMPRESSED_EXT\)\?\$"\
         | egrep -v '(station|point)'\
+        | grep -v "[^${STATION:0:1}][^${STATION:1:1}]$PLOG_FULL_SUFFIX\.log"\
         | head -1)
 
     if [[ -z "$log" ]]; then
-      fatal "No latest log found"
+      fatal "No latest log found for $STATION"
     fi
     local ext=${log#*.}
     local expname
