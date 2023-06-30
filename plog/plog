@@ -468,7 +468,7 @@ get_latest_exp() {
         | head -1)
 
     if [[ -z "$log" ]]; then
-      fatal "No latest log found"
+      fatal "No latest log found for $STATION"
     fi
     local ext=${log#*.}
     local expname
