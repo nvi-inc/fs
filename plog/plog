@@ -464,6 +464,7 @@ get_latest_exp() {
     local log=$(ls -t $FS_LOG_PATH\
         | grep ".$STATION\($PLOG_FULL_SUFFIX\)\?\\.log\(.$PLOG_COMPRESSED_EXT\)\?\$"\
         | egrep -v '(station|point)'\
+        | grep -v "[^${STATION:0:1}][^${STATION:1:1}]$PLOG_FULL_SUFFIX\.log"\
         | head -1)
 
     if [[ -z "$log" ]]; then
