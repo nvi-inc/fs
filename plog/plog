@@ -56,7 +56,7 @@ USAGE:
 ARG can be an experiment ID or the path of a file.
 
 ${underline}Options:${normal}
-    ${black}-l${normal}            Use latest with log in $FS_LOG_PATH for STATION code $STATION
+    ${black}-l${normal}            Use latest log in $FS_LOG_PATH for STATION code
                   (and without 'station' or 'point' in the name)
     ${black}-t${normal}            Test run: print commands, do not actually push files to server
     ${black}-h${normal}            Print this message
