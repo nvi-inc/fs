@@ -21,12 +21,13 @@
 :doctype: book
 
 = FS 10.2-beta1 to FS 10.2-beta2 Update Notes
-Version 0.72 - June 2023
+Version 0.73 - July 2023
 
 :sectnums:
 :stem: latexmath
 :sectnumlevels: 4
 :experimental:
+:downarrow: &downarrow;
 
 :toc:
 
@@ -150,7 +151,533 @@ title item, summary, and/or the details are very brief.
 
 === FS changes
 
-No changes so far.
+. Improve display server usage.
+
+.. Make the display server the default.
+
++
+
+Unless the environment variable `FS_DISPLAY_SERVER` is explicitly set
+to `off`, the display server will be used. This should be backward
+compatible with existing usage of the variable which was to only use
+the display server if the variable was set to `on`. Now if you don't
+want the display server, the variable will have to be explicitly set
+to `off`.
+
++
+
+CAUTION: It is important that this variable be set the same for all
+accounts/sessions that use _fs_, _fsclient_, or _streamlog_, usually
+just _oper_ and _prog_. There may be problems if there is a mismatch.
+
+.. New environment variable `FS_DISPLAY_SERVER_CONFIRM_TERMINATE`.
+
++
+
+The terminate confirmation prompt is included in _oprin_ as a safety
+mechanism to reduce the chances that the FS will be terminated while
+another user (client) is using the FS. Although it not recommended, if
+you don't want this prompt, you can set the variable to `off`. For all
+other values, including it not being set, the prompt will be used.
+The setting of this variable in the session that started the client,
+with either the _fs_ or _fsclient_, determines the behavior of _oprin_
+for that client.
+
++
+
+TIP: For simplicity, it is recommended that this variable be set the
+same for all accounts/sessions that use _fs_ or _fsclient_, usually
+just _oper_ and _prog_.
+
+.. Add wait to FS start-up if it is a rapid restart when the display
+server is in use.
+
++
+
+The change in _10.2-beta1_ to stop the FS server when the FS is
+terminated resulted in a problem when the FS was restarted quickly
+after being stopped. The restart could fail with the error message:
+
+ fsclient.c:436 (fetch_state) error unable to connect to server: Connection refused
+
++
+
++
+
+Apparently, it takes the server a couple seconds to shutdown
+completely so it can be restarted. To avoid this error, a wait of up
+to two seconds since the previous FS exit is used. If a wait is
+needed, a message about its length is printed before the wait. After
+the wait, the FS starts up normally. An interval of two seconds was
+tested under a variety of conditions and found to be reliable, while
+not excessive. In case it is not sufficient some cases, the error
+message above was augmented with an explanation and a suggestion to
+try again.
+
+. DBBC3 improvements
+
+.. The terminology _spot_ calibration was replaced by _legacy_ calibration.
+
++
+
+Legacy calibration refers to explicitly turning the noise diode on and
+off to make calibration measurements. This contrasts to _continuous_
+calibration, which alternates the diode on and off automatically,
+usually at 80 Hz.
+
++
+
+The use of _spot_, while appealing, seemed more cumbersome than
+_legacy_, which has an historical precedent.
+
+.. Add using `tpicd=reset` to reset the averages for T~sys~ data,
+
++
+
+While just using `tpicd` to reset the averages will always work, it
+can also have the side-effect of prematurely starting continuous
+logging (`tpicd=yes,...`) when that is configured. Using `tpicd=reset`
+avoids this and is recommended for manually restarting the averages.
+It can be placed in a SNAP procedure, maybe `reset`, to minimize
+typing.
+
+.. Force the polarity to `0` for legacy T~sys~.
+
++
+
+When legacy calibration is used (`cont_cal=off,...`), a polarity of
+`0` is always sent to the DBBC3, regardless of what was requested
+(even not sending anything). A warning is issued if this overrides the
+request. This is necessary to place the TPI data in the correct
+position in DBBC3 command responses and the multicast data.
+
+.. Switch to adaptive multicast time-out detection
+
++
+
+Previously the time-out was a fixed 125 centiseconds (cs). Now it is
+140 centiseconds if the previous read did not time-out. If it did, the
+time-out is adjusted to 100 cs. This allows generous margin for
+variations in the multicast transmission and should detect all missing
+packets. The exception is that it may miss the first time-out after a
+new firmware is loaded, but that should correct itself once a
+multicast is received from the new firmware.
+
++
+
+The previous time-out of 125 cs was probably too small given the
+variation in the packet arrival times. It should have been increased
+to something a little less than 150 cs. However, even that would
+detect the third of three missing packets in a row, etc. The new
+scheme should detect all missing messages, as well as collect all the
+available messages.
+
+.. Change multicast time-out error reports to use a summary format
+
++
+
+The first occurrence of a time-out is reported. Then a count of the
+time-outs in the next 60 read attempts is kept. The number is reported
+(the initial time-out is _not_ included in this count). This continues
+until there are 60 attempts with no time-outs. That is reported and
+then keeping a count ends until the next time-out.
+
++
+
+This approach was adopted because in some cases, time-outs come in
+bursts. It does not increase the number of messages if there is an
+isolated time-out. It does reduce, but not eliminate, the messages
+when the firmware is being reloaded and other cases of persistent or
+repetitive time-outs. If multicast data is being logged, it is
+possible to reconstruct which messages were lost.
+
+.. Add auto-reset feature to DBBC3 continuous T~sys~ filtering
+
++
+
++
+
+When filtering is in use, if the clipping reaches the _red_ zone
+(clipped six times or more) for a detector, and the long-term average
+for the detector is more than the filtering percentage from the
+average of the last `_samples_` samples (set by the `cont_cal=on,...`
+command), the long-term average is reset to the more current average
+and shown with a blue background.
+
++
+
++
+
+A separate _shadow_ average is maintained for this. It is
+reinitialized every `_samples_` samples so that it is only dependent
+on the most recent data. Thus if the long-term average in use is
+significantly skewed by older data with either RFI or from a different
+elevation, a more up-to-date value will be substituted. The device
+must be in the red clipping zone on the sample that completes the
+shadow average for a reset to occur.
+
++
+
++
+
+For the next cycle after the reset, the displayed value may clipped,
+or unclipped, depending on how far the new value is from the new
+long-term average.
+
+.. Log negative continuous T~sys~ values
+
++
+
+Negative T~sys~ values occur with continuous calibration data if the
+polarity is incorrect. The polarity should be fixed, but the values
+are logged in case they are useful until the situation is rectified.
+They only difference from the correct values is the sign.
+
+.. Improve _monit7_:
+
+... Replace the unused VDIF `Epoch` field with multicast centiseconds
+`Arrival` time.
+
++
+
+The former was expected to become available in the multicast data, but
+had not yet been added. Instead the centiseconds, the 0.01 seconds
+within the second, of the multicast arrival time is shown. This can be
+useful for diagnosing late transmission, and hence arrival, of
+multicast packets.
+
++
+
+Generally speaking if the centiseconds is less than 20, the packet
+from the previous second was _late_. Usually in that case the packet
+arrives after the display updates. Data from the previous packet is
+displayed again, with the `Time` value in inverse video because it has
+not changed. In the update for the _next_ second, the data from the
+late packet is displayed with the low value for the arrival time. The
+displayed `Time` from the packet and `DBBC3-FS` values are increased
+by one to account for when the packet did arrive. The packet that
+should have arrived in that second is lost and a multicast time-out
+occurs. Apparently the previous packet transmission overran the DBBC3
+1 PPS, preventing the transmission of the next packet. The `Time`
+value will not be inverse again for the missing packet since the late
+packet was displayed instead.
+
++
+
+The arrival time before which a packet is considered being late (from
+the previous second) in _monit7_ can be adjusted with the new command
+line switch `-l`.
+
++
+
+The VDIF epoch field will be re-added when it becomes available in the
+multicast.
+
+
+... The background color for negative T~sys~ values was changed to
+inverse video.
+
++
+
+Except for clipped (and auto-reset) values, all negative values,
+including out-of-range (dollar signs, `++$$$$$++`), are shown in
+inverse video to highlight that the polarity is wrong without the
+somewhat extreme magenta color used before. Clipped (and auto-reset)
+values include a sign anyway.
+
+... For filtering, invalid values and T~sys~ values outside the range
+±1000° are ignored completely instead of being included in the
+clipped count.
+
+... New invalid values, also shown with a cyan background, were added:
+
++
+
++
+[disc]
+
+* "`on`" TPI value is zero -- This is shown as `` on=0``. It occurs
+when the DBBC3 is configured for legacy calibration with polarity `2`
+and the FS is expecting continuous cal.
+
+* "`on``" and "`off`" TPI values are both zero -- This is shown as
+`tpi=0`.  It may happen when the firmware is being loaded/reloaded
+
+... Change the foreground colors for cyan, green, yellow, red, and blue
+backgrounds.
+
++
+
+The foreground color for cyan, green, and yellow background is black;
+red and blue, white. It was felt that these combinations were the
+easiest to read.
+
++
+
++
+
+For certain reverse video terminals, the white and black foreground
+colors are swapped for cyan, green, yellow. red, and blue. For
+example, this happens if _xterm_ is run with the `-rv` command line
+option and the normal FS `black`/`linen` settings for
+foreground/background are in use. To get the unswapped foreground
+colors, you can use the new `-r` command line option with _monit7_.
+Unfortunately, it is not possible for _monit7_ to detect the need for
+this automatically.
+
+... Always clear BBC T~sys~ fields that aren't being displayed in
+_monit7_.
+
++
+
+In certain cases when changing modes, such as when a particular IF was
+selected before `Def` or `Rec` came into effect, some old non-blank
+fields were not cleared when they should have been.
+
+... Correct mode selecting not working if an IF was selected before
+`Def` or `Rec` mode started.
+
++
+
++
+
++
+
+Now normal mode switching is always available.
+
+. Restore  DBBC sync prompt for DBBC/Mark5b in _fmset_ (closing
+https://github.com/nvi-inc/fs/issues/207[#207]).
+
++
+
+When syncing the Mark 5B, prompting to sync the DBBC first was
+restored. This had been lost in merge of the VGOS branch, commit
+`224cc218b7519c300c11c59aea6391a6da3b122b`.
+
++
+
+Thanks to Jon Quick (HartRAO) for testing this fix.
+
+. Prevent inadvertent escape sequences from causing the DBBC3 T~sys~
+display window (_monit7_) from terminating (closing
+https://github.com/nvi-inc/fs/issues/204[#204]).
+
++
+
+Pressing a desktop key combination that generates an escape sequence,
+such as kbd:[Ctrl+Alt+{downarrow}], when _monit7_ had the focus would
+cause it to terminate. To prevent this, use of kbd:[Escape] to
+terminate was removed. To prevent other characters in the escape
+sequence from being treated as _monit7_ commands, they are filtered
+according to "`CSI sequences`" at
+(https://en.wikipedia.org/wiki/ANSI_escape_code). If an out-of-order
+byte is received, processing of the escape sequence is terminated and
+the byte is treated as a new input, either another escape sequence or
+a command. This effectively filters out the user pressing
+kbd:[Escape], possibly more than once in a row or automatic repeats.
+
++
+
+Thanks to Jon Quick (HartRAO) for reporting this issue and testing the
+fix.
+
+. Refactor display of RDBE multicast data
+
++
+
+Adding the feature, in FS _10.1_, of using inverse video for an
+incorrect RDBE DOT time had the inadvertent side effect of causing the
+DOT time to flash inverse sometimes when the RDBE attenuators were
+adjusted. This was apparently caused by the attenuator adjustment
+delaying the multicast enough to arrive after the RDBE monitor display
+(_monit6_) had updated. Thus the previous second time was displayed
+and in inverse video because it was wrong.
+
++
+
+This was fixed by recording the time of the multicast message arrival
+and using that to decide of the RDBE time is correct. The display
+update time was moved to the next integer second for consistency. The
+displayed time is incremented by one second so it will agree with
+other displayed times, for _monit2_ in particular. As a result, the
+oddness/evenness of the time no longer agrees with that of the IF
+being displayed. The _monit7_ updates are now better synchronized with
+the _monit2_ updates, instead of being about 200 milliseconds later.
+
++
+
+Thanks to Kiah Imai (KPGO) for reporting the interaction with setting
+the attenuators.
+
+. Accept `waiting` response from RDBE `dbe_data_send?` query in
+_fmset_.
+
++
+
+When _fmset_ queries the RDBE to see if data sending needs to be
+turned off, a previously unexpected response, `waiting`, can occur.
+This can apparently happen when the state is `off`. The code was
+adjusted to take this into account. Also any other unexpected response
+will now be displayed in the error when reporting the error.
+
++
+
+Thanks to Russ McWhirter (Haystack) for explaining the `waiting`
+response.
+
+
+. Add verbose option for _curl_/_wget_ in _fesh_ (closing
+https://github.com/nvi-inc/fs/issues/201[#201]).
+
++
+
+When the `-v` option is used in _fesh_ verbose output is enabled to
+for _curl_ and _wget_. This can useful debugging connection issues.
+The `-v` option still includes verbose output for _drudg_.
+
++
+
+Thanks to Eskil Varenius (Onsala) for suggesting this.
+
+. Improve _plog_
+
+.. Correct description of the `-l` option in the `plog -h` output
+(closing https://github.com/nvi-inc/fs/issues/203[#203]).
+
++
+
+The `-l` (for "`latest`") option, will use the latest log that ends
+with the station's two letter code and does not contain either _point_
+or _station_.
+
++
+
+Thanks to Eskil Varenius (Onsala) for helping clarify this.
+
+.. Add error message for no matching log found for the `-l` option in _plog_.
+
++
+
+The previous message was not informative.
+
+.. Ignore certain log files for the `-l` option.
+
++
+
++
+
+Log file names that only consist of the station code are excluded.
+___full.log__ files are not accepted if the station code is `ll`
+unless __ll__ immediately precedes ___full.log__ in the file name.
+
+.. Fix `-h` to work if the `STATION` enviroment variable is not set.
+
++
+
++
+
+This was overlooked in FS _10.1_.
+
+. Rename _xresouresfix_ script to the correct _xresourcesfix_.
+
+. Add missing `10.2.0-beta1` tag.
+
++
+
+Thanks to Rubén González (Ny-Ålesund) for reporting this.
+
+. Improve documentation
+
+.. Change the naming scheme for feature releases documents and
+references.
+
++
+
+The patch level (_.0_) is now omitted in the file names and references
+for feature releases.
+
++
+
+This makes the document consistent for use with later patches without
+having to rename, or generate almost completely redundant, documents
+for the patches. The document will be updated for the patches, i.e.,
+the new tag and any documentation fixes. Not having to rename allows
+the old link to still work. Users who update to a feature release
+after patches have been released can use the original link. Brief
+explanatory update documents, e.g, "`10.2.1 Update Notes`", will still
+be provided for users applying patches. Previous feature releases are
+referred to without the patch level. For feature releases that have
+not had their documents renamed for this approach, the patch level is
+included in the anchor text for the link to be consistent. The feature
+release _tag_ still includes the `.0` patch level.
+
++
+
++
+
+This change is implemented as of FS _10.2-beta2_. A symbolic link was
+added so that existing URLs for _10.2.0-beta1.html_ will be redirected
+to _10.2-beta1.html_. The documents for previous feature releases
+(_10.0_ and _10.1_) may be updated to follow this pattern if there is
+a need.
+
+.. Add steps to remove temporary fixes for _10.1_ and _10.2_ updates.
+
++
+
+There were some temporary fixes provided to stations, without
+releasing patches, to deal with various issues. The programs affected
+were _fesh_ and _plog_ for data center changes, as well as _rdbemsg_.
+Instructions to remove the versions were added as a reminder to switch
+back to using the new standard versions, which include all the fixes.
+
+.. Improve _10.2-beta1_ update notes.
+
++
+
+Cleanup the document, fixing many typos and reorganizing a little.
+
++
+
++
+
+Thanks to Jon Quick (HartRAO) for helpful feedback.
+
+.. Improve "`FS DBBC3 Operations Manual.`"
+
+... Describe how multicast message arrival time is logged.
+
+... Describe _monit7_ data being stale if there is a multicast
+time-out.
+
+... Improve description of `Time` field in _monit7_
+
+... Add more detail on T~sys~ logging
+
+... Improve description of setup for using _setcl_ to set FS time.
+
+... Add more **NOTE**s for changes from _10.1_.
+
+.. Improve instructions in _making_gh-pages.txt_.
+
+.. Remove redundant "`Review changes`" section in _10.1_ and _10.2_
+update notes.
+
+.. Fix organization of the "`Fetch`" step in the _10.1_ update notes.
+
++
+
+[disc]
+* Don't `add` _.adoc_ files, that should have already been done
+
+* Don't delete _.html_ files, we don't want to delete symbolic links
+
+* Don't commit and push, that should already be done or the workflow
+is different anyway
+
++
+
+.. Fix various typos and broken links.
 
 === drudg changes
 
