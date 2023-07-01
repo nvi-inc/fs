@@ -542,4 +542,6 @@ typedef struct fscom {
   int  dbbc3_ddce_v;
   char dbbc3_ddce_vs[16];
   int  dbbc3_ddce_vc;
+
+  int terminate_ticks;
 } Fscom;

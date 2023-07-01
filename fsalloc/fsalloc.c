@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020, 2023 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -64,6 +64,7 @@ main()
 				       &shm_addr->time.ticks_off,
 				       &shm_addr->time.init_error,
 				       &shm_addr->time.init_errno);
+    shm_addr->terminate_ticks=0;
     key = SEM_KEY;
     nsems = SEM_NUM;
     if( (sem_id = sem_get( key, nsems)) == -1) {
