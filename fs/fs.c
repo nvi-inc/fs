@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 NVI, Inc.
+ * Copyright (c) 2020-2021, 2023 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -76,6 +76,18 @@ static int ip[]={0,0,0,0,0};
 
 
 void start_server() {
+    if(shm_addr->terminate_ticks !=0) {
+      int ticks;
+      rte_ticks(&ticks);
+#define WAIT   200
+      if(ticks<shm_addr->terminate_ticks+WAIT) {
+         int sleep=shm_addr->terminate_ticks+WAIT-ticks;
+         sleep = sleep > WAIT ? WAIT : sleep;
+         fprintf(stderr,"Waiting %.2f seconds to give the previous fsserver more time to cleanup ...", sleep/100.);
+         rte_sleep(sleep);
+         fprintf(stderr," continuing.\n");
+      }
+    }
     if (system("fsserver status    > /dev/null 2>/dev/null ") > 0)
         system("fsserver start     > /dev/null 2>/dev/null");
     if (system("fsserver fs status > /dev/null 2>/dev/null") > 0)
@@ -514,6 +526,7 @@ waitfor:
      
      /*     fsync(STDERR_FILENO);*/
      rte_sleep(1);
+     rte_ticks(&shm_addr->terminate_ticks);
      exit( 0);
     
 }

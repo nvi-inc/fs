@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020, 2023 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -433,6 +433,7 @@ void fetch_state(void) {
 	}
 
 	if ((rv = nng_dial(server_cmd_sock, server_cmd_url, NULL, 0)) != 0) {
+                fprintf(stderr,"If you restarted the FS, fsserver may have needed more time to cleanup. Try again.\n");
 		fatal("unable to connect to server", nng_strerror(rv));
 	}
 
