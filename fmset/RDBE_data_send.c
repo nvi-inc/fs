@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 NVI, Inc.
+ * Copyright (c) 2022, 2023 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -116,18 +116,21 @@ static int check_send()
 
     ptr=strtok(NULL,":");
 
-    if(NULL==ptr || strcmp(ptr,"on") && strcmp(ptr,"off")) {
+    if(NULL==ptr
+      || strcmp(ptr,"on") && strcmp(ptr,"off") && strcmp(ptr,"waiting")) {
         endwin();
         fprintf(stderr,
                 "Unable to decode on/off field of dbe_data_send response from rdbc%c\n",
                 unit_letters[iRDBE-1]);
+        if(NULL!=ptr)
+            fprintf(stderr, "The string '%s' was not recognized",ptr);
         rte_sleep(SLEEP_TIME);
         exit(0);
     }
-    if(!strcmp(ptr,"off"))
-        return 0;
-    else
+    if(!strcmp(ptr,"on"))
         return 1;
+    else
+        return 0;
 }
 static void set_send(int on)
 {
