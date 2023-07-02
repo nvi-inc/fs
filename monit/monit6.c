@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020, 2023 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -95,7 +95,7 @@ main()
     refresh();
 
     rte_time(it,&iyear);
-    isleep=120-it[0];
+    isleep=100-it[0];
     isleep=isleep>100?100:isleep;
     isleep=isleep<1?100:isleep;
     rte_sleep((unsigned) isleep);
