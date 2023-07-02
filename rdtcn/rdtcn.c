@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, 2022 NVI, Inc.
+ * Copyright (c) 2020, 2022, 2023 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -155,6 +155,7 @@ int main(int argc, char *argv[])
 {
 
   struct rdbe_tsys_cycle local;
+  struct rdbe_tsys_cycle1 local1;
   unsigned int tpi[MAX_RDBE_CH*MAX_RDBE_IF][2];
   int iping;
   char multicast_addr[129];
@@ -176,6 +177,8 @@ int main(int argc, char *argv[])
 
   setup_ids();    /* attach to the shared memory */
   rte_prior(FS_PRIOR);
+  int it[6];
+  int seconds;
 
   if(argc >= 2) {
     memcpy(me+3,argv[1],2);
@@ -590,11 +593,17 @@ while (1) {
   memcpy(&dot2gps,&llvalue,8);
   local.dot2gps=dot2gps;
 
+  rte_time(it,it+5);
+  rte2secs(it,&seconds);
+  local1.arrival=seconds;
+
   iping=1-shm_addr->rdbe_tsys_data[irdbe].iping;
   if(iping!=0 && iping !=1)
     iping=0;
   memcpy(&shm_addr->rdbe_tsys_data[irdbe].data[iping],&local,
 	 sizeof(struct rdbe_tsys_cycle));
+  memcpy(&shm_addr->rdbe_tsys_data1[irdbe].data[iping],&local1,
+	 sizeof(struct rdbe_tsys_cycle1));
   shm_addr->rdbe_tsys_data[irdbe].iping=iping;
 
   /* check control again to get the last state */
