@@ -157,7 +157,10 @@ struct dbbc3_cont_cal_cmd *lcl;
   if(lcl->mode >= 0 && lcl->mode < NMODE_KEY) 
     strcat(buff,mode_key[lcl->mode]);
 
- if(lcl->polarity >= 0)
+ if(lcl->polarity != 0 && lcl->mode == 0) {
+   strcat(buff,",0");
+   logit(NULL,202,"de");
+ } else if(lcl->polarity >= 0)
     sprintf(buff+strlen(buff),",%d",lcl->polarity);
  else
    strcat(buff,",");

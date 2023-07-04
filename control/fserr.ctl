@@ -2312,6 +2312,9 @@ Class buffer error from command response.
 DD -501
 Only DBBC DDC rack types supported in cont_cal command.
 ""
+DE  202
+WARNING: Overriding polarity to '0' for 'cont_cal=off,...'.
+""
 DE -201
 Mode must be one of: off, on, or undef.
 ""

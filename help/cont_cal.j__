@@ -30,6 +30,10 @@ Settable parameters:
 Monitor-only parameters: None.
 
 Comments:
+If 'state' is 'off', a 'polarity' of '0' is always sent to the device'. A warning
+is issued if a different 'polarity' had been requested. A value of '0' is
+necessary to get the TPI values in the expected positions for decoding.
+
 If 'state' is 'on', this command causes the DBBC3 to generate a TTL square-wave
 to control noise injection. The receiver must use the square-wave to inject a
 switched calibration signal for this to be useful.
