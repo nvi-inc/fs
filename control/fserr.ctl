@@ -7673,6 +7673,9 @@ TPICD not set-up: no detectors selected.
 TC -303
 Continuous cal Tsys only available for DBBC DDC.
 ""
+TC -304
+'tpicd=reset' is only available for DBBC3.
+""
 TE   -9
 Video converter frequency has not been set
 ""

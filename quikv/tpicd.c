@@ -73,6 +73,20 @@ int ip[5];                           /* ipc parameters */
 	  skd_run("tpicd",'w',ip);
 	  ip[0]=ip[1]=ip[2]=0;
           return;
+	} else if(0==strcmp(command->argv[0],"reset")){
+	  if(DBBC3!=shm_addr->equip.rack) {
+	    ierr=-304;
+	    goto error;
+	  }
+	  if((DBBC==shm_addr->equip.rack && 0==shm_addr->dbbc_cont_cal.mode)||
+	     (DBBC3==shm_addr->equip.rack && 0==shm_addr->dbbc3_cont_cal.mode)) {
+	    ierr=-301;
+	    goto error;
+	  }
+	  ip[0]=1;
+	  skd_run("tpicd",'w',ip);
+	  ip[0]=ip[1]=ip[2]=0;
+          return;
 	} else if(0==strcmp(command->argv[0],"tsys")){
 	  if((DBBC==shm_addr->equip.rack && 0==shm_addr->dbbc_cont_cal.mode)||
 	     (DBBC3==shm_addr->equip.rack && 0==shm_addr->dbbc3_cont_cal.mode)) {

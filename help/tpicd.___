@@ -4,6 +4,7 @@
                         tpicd
                         tpicd=stop
                         tpicd=tsys
+                        tpicd=reset
                         tpicd=display_on
                         tpicd=display_off
                         tpicd=?
@@ -44,6 +45,11 @@ It will cause the tsys to be calculated from the next set of samples
 (not yet supported for RDBEs or DBBC3s).  The number of samples is
 specified by the cont_cal command.  This does not disturb the behavior
 otherwise.
+
+The form "tpicd=reset" can only be used with a DBBC3 and only if
+continuous cal is selected. If averaging has been selected, this form
+will force a reset of the detector averages. This is useful, e.g., if
+RFI had caused the averages to be skewed.
 
 This command controls the tpicd TPI measurement daemon.  The remaining
 comments describe the daemon.
