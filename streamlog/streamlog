@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright (c) 2022 NVI, Inc.
+# Copyright (c) 2022, 2023 NVI, Inc.
 #
 # This file is part of VLBI Field System
 # (see http://github.com/nvi-inc/fs).
@@ -34,6 +34,7 @@ usage() {
 SCROLL=
 WAIT=
 STREAM=log
+FS_DISPLAY_SERVER="${FS_DISPLAY_SERVER:-on}"
 while getopts "dhws" arg; do
     case $arg in
         s)
@@ -47,7 +48,7 @@ while getopts "dhws" arg; do
             exit 0
             ;;
         d)
-            if [[ ! -n ${FS_DISPLAY_SERVER:-} ]]; then
+            if [ "$FS_DISPLAY_SERVER" = "off" ]; then
                 echo "'-d' only supported with display sever enabled" >&2
                 exit 1
             fi
@@ -66,7 +67,7 @@ if [[ $# -ne 0 ]] ; then
     exit 1
 fi
 
-if [[ -n ${FS_DISPLAY_SERVER:-} ]]; then
+if [ "$FS_DISPLAY_SERVER" != "off" ]; then
     if [[ -z "$WAIT" ]]; then
         if ! fsserver fs status &> /dev/null; then echo fs not running >&2; exit 1; fi
     fi

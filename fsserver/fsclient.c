@@ -772,7 +772,7 @@ int main(int argc, char **argv) {
 	}
 
 	char *serve_env_var = getenv("FS_DISPLAY_SERVER");
-	if (!serve_env_var || !*serve_env_var) {
+	if (serve_env_var && 0==strcmp(serve_env_var,"off")) { /* off */
 		fprintf(stderr, "FS server is not enabled\n");
 		exit(EXIT_FAILURE);
 	}

@@ -142,7 +142,8 @@ main(int argc_in,char *argv_in[])
 	bool arg_no_server = true;
 	bool arg_internal = false;
 
-    if(getenv("FS_DISPLAY_SERVER") != NULL) {
+    char *serve_env_var = getenv("FS_DISPLAY_SERVER");
+    if (!serve_env_var || 0!=strcmp(serve_env_var,"off")) { /* not off */
         arg_no_server = false;
 #ifdef FS_DISPLAY_SERVER_NO_MAKE
 		fprintf(stderr, "Server was not built into the FS, can't run with FS_DISPLAY_SERVER set.\n");

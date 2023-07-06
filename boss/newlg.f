@@ -630,7 +630,7 @@ c
       nch = 1
       nch = ichmv_ch(ib,nch,'fsserver,')
       call getenv('FS_DISPLAY_SERVER', display_server_envar)
-      if (display_server_envar == "") then
+      if (display_server_envar .eq. "off") then
           nch = ichmv_ch(ib,nch,'disabled')
       else
           nch = ichmv_ch(ib,nch,'enabled')

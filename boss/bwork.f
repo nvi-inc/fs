@@ -894,7 +894,7 @@ C
               call logit7ci(0,0,0,0,-173,'bo',0)
            endif
            call getenv('FS_DISPLAY_SERVER', display_server_envar)
-           if (display_server_envar == "on") then
+           if (display_server_envar .ne. "off") then
               ipida=fc_find_process('autoftp'//char(0),ierr)
               if(ipida.ge.0) then
                  call logit7ci(0,0,0,0,-174,'bo',0)

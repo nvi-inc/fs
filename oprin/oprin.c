@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 NVI, Inc.
+ * Copyright (c) 2020-2021, 2023  NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -263,7 +263,9 @@ main(int argc, char **argv)
   setup_ids();
 
   fs_internal = argc == 2 && 0 == strcmp("-fs_internal", argv[1]);
-  if (getenv("FS_DISPLAY_SERVER") != NULL) {
+
+  char *serve_env_var = getenv("FS_DISPLAY_SERVER");
+  if (!serve_env_var || 0!=strcmp(serve_env_var,"off")) { /* not off */
       fs_internal = 0;
   }
 

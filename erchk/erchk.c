@@ -122,7 +122,8 @@ int read_skd() {
    */
 
   setup_ids();
-  if(getenv("FS_DISPLAY_SERVER") == NULL) {
+  char *serve_env_var = getenv("FS_DISPLAY_SERVER");
+  if (serve_env_var && 0==strcmp(serve_env_var,"off")) { /* off */
     if (nsem_test(NSEM_NAME) != 1) {
       fprintf(stderr,"Field System not running - erchk aborting\n");
       rte_sleep(SLEEP_TIME);
@@ -216,7 +217,8 @@ int main()
     exit(-1);
   }
 
-  if(getenv("FS_DISPLAY_SERVER") != NULL)
+  char *serve_env_var = getenv("FS_DISPLAY_SERVER");
+  if (!serve_env_var || 0!=strcmp(serve_env_var,"off")) /* not off */
     fd = read_ssub();
   else
     fd = read_skd();
