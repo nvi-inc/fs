@@ -32,3 +32,4 @@ void version_check( dbbc3_ddc_multicast_t *t);
 void perform_swaps( dbbc3_ddc_multicast_t *t);
 void smooth_ts( struct dbbc3_tsys_cycle *cycle, int reset, int samples,
         int filter, float if_param[MAX_DBBC3_IF]);
+void time_check( struct dbbc3_tsys_cycle *cycle);

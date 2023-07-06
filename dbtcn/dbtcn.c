@@ -143,6 +143,8 @@ int main(int argc, char *argv[])
 
         update_shm(&packet,&cycle, itmc, centisec);
 
+        time_check(&cycle);
+
         /* check control to get the last state before logging */
 
         iping=shm_addr->dbtcn.iping;

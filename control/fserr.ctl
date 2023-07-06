@@ -2627,6 +2627,9 @@ Error decoding dbbcNN/ response, could be a DBBC version mis-match, see error DC
 DK -451
 Class buffer error from command response.
 ""
+DN   24
+DBBC3 multicast: Core3H board times now agree
+""
 DN   21
 DBBC3 multicast: error from select() cleared
 ""
@@ -2668,6 +2671,9 @@ DBBC3 multicast: error from recvfrom(), UNIX?FFF
 ""
 DN  -23
 DBBC3 multicast: time-out while data_valid is on, some multicast not recorded, probably due to a DBBC3 command
+""
+DN  -24
+DBBC3 multicast: Core3H boards have different times.
 ""
 DN  -30 Place holder for version string
 
