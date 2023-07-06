@@ -186,18 +186,20 @@ void terminate(const char *arg0, const char *arg) {
         return;
     }
 
-    while (1) {
-        char *input = readline("This will terminate the whole Field System. To exit just this client use 'client=exit'.\nDo you really want to terminate the FS? [yN]:");
-        if (*input == 'y' || *input == 'Y') {
-            free(input);
-            break;
-        }
+    char *serve_ter_var = getenv("FS_DISPLAY_SERVER_CONFIRM_TERMINATE");
+    if (!serve_ter_var || 0!=strcmp(serve_ter_var,"off")) /* not off */
+      while (1) {
+          char *input = readline("This will terminate the whole Field System. To exit just this client use 'client=exit'.\nDo you really want to terminate the FS? [yN]:");
+          if (*input == 'y' || *input == 'Y') {
+              free(input);
+              break;
+          }
 
-        if (!*input || *input == 'n' || *input == 'N') {
-            free(input);
-            return;
-        }
-    }
+          if (!*input || *input == 'n' || *input == 'N') {
+              free(input);
+              return;
+          }
+      }
 
     run_snap(arg0, arg);
 }
