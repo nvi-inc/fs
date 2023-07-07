@@ -19,7 +19,7 @@
 //
 
 = Strawman Release Model
-Version 1.3 - March 2023
+Version 1.4 - June 2023
 
 :sectnums:
 
@@ -106,38 +106,65 @@ otherwise being a risk to operations.
 
 == Update notices
 
-For each release, there should be an _update notice_ in a file of the form
+For each release, there should be an _update notice_ in a file with
+the its name in the form:
 
 [subs="+quotes"]
 ....
-__/usr2/fs/docs/releases/<MAJOR>/<MINOR>/<tag>.adoc__
+__/usr2/fs/docs/releases/<MAJOR>/<MINOR>/<name>.adoc__
 ....
 
-documenting the changes in the version and installation instructions.
-There may also be documents using the `_STRING_` and other files
-associated with the release, including patches, in the same
-sub-directory, e.g., _beta1.adoc_, _beta2.adoc_,
-_beta1_to_beta2.adoc_, _<STRING>_to_latest.adoc_, and _10.0.1.adoc_.
+The update notices should have a complete description of the changes
+and installation instructions relative to the previous feature
+release, for example _10.2-beta1_ relative to _10.1_ and _10.2.1_ (and
+possibly _10.2.1-beta1_) relative to _10.2_. The values of _<name>_
+are fully discussed in the following two subsections.
+
 All these files should be visible on the _gh-pages_ in HTML format.
 
-For feature releases, the notice should have a complete description of
-the changes and installation instructions from the previous feature
-release.
+=== Feature releases
 
-For patch releases, the description and instructions should be
-complete for an update from the corresponding feature release and
-include those instructions (by reference).
+For feature release notices (including associated releases with a
+non-empty `_STRING_`), _<name>.adoc_ omits the `.0` patch level part
+of the release `_tag_`, e.g., _10.2.adoc_ (and _10.2-beta1.adoc_).
+This makes it possible for the feature release (with an empty
+`_STRING_`) notice file names, and links to them, to be re-used for an
+update to a feature release including the latest patches. It is not
+necessary to rename them or generate almost completely redundant
+versions for the patches. The contents of the feature release notice
+should be updated for the patches, i.e., the latest patch `_tag_`
+would be used and any installation and documentation changes would be
+included. Thus users who update to a feature release after patches
+have been released would use the original link to install to the
+latest patch. The notice for applying a patch to a feature release is
+covered in the next subsection.
 
-A _<tag>_to_latest.adoc_ file covers changes on that branch since the
-most recent feature or maintenance release. It starts as basically
-empty for a new release. It accumulates the changes that occur until
-the next release. It helps provide content for the next release update
-notes. At a new release it is converted to a new _<tag>.adoc_ file for
-the new _<tag>_.
+In the documents, references to feature releases, omit the
+patch level, e.g., _10.2_ (and _10.2-beta1_).
 
-NOTE: Those using the latest commit are understood to be experts and
-are expected to manage differences in the update steps when updating to
-the next release themselves. Advice may be helpful of course, but
+NOTE: The feature release `_tag_` must still include the `.0` patch
+level, e.g., `10.2.0` (and `10.2.0-beta1`).
+
+=== Patch releases
+
+All patch release notices use the full `_tag_` for _<name>.adoc_,
+e.g., _10.2.1.adoc_ (and possibly _10.2.1-beta1.adoc_).
+
+In the documents, references to patch releases use the full `_tag_`,
+e.g., _10.2.1_ (and _10.2.1-beta1_).
+
+=== Latest commit
+
+A _<name>_to_latest.adoc_ file covers changes on _that_ release's
+branch since the most recent feature (and possibly patch) release,
+e.g., _10.2_to_latest.adoc_ (and _10.2.1_to_latest.adoc_). It begins
+basically empty after a release. It accumulates the installation steps
+and changes until the next release. At a new release, it is converted
+to a new _<name>.adoc_ file for the new _<name>_.
+
+NOTE: Those using the _latest_ commit are understood to be experts and
+are expected to manage differences in the update steps when updating
+to the next release themselves. Advice may be available of course, but
 documentation is not provided.
 
 == Branches
