@@ -42,6 +42,8 @@
                            attron(COLOR_PAIR(COLOR)); \
                          else \
                            standout();
+#define CS_LIMIT 20
+
 extern struct fscom *fs;
 
 static char unit_letters[ ] = {"ABCDEFGH"};
@@ -177,7 +179,7 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
 
     if(ifc.time > 0) {
       disp_time=ifc.time+1;
-      if(ifc.time_included && cycle->hsecs <= 20) {
+      if(ifc.time_included && tsys_cycle->hsecs < CS_LIMIT) {
         disp_time++;
         ifc.time_error++;
       }
@@ -206,14 +208,26 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
        printw("%17s"," ");
 
     move(3,0);
-    printw("Epoch ");
+//    printw("Epoch ");
+//    if(ifc.time > 0) {
+//      if(ifc.vdif_epoch >= 0) {
+//        buf[0]=0;
+//        int2str(buf,ifc.vdif_epoch,-2,0);
+//        printw("%2s",buf);
+//      } else
+//        printw("%2s","--");
+//    } else
+//      printw("%2s"," ");
+
+    printw("Arrival ");
     if(ifc.time > 0) {
-      if(ifc.vdif_epoch >= 0) {
-        buf[0]=0;
-        int2str(buf,ifc.vdif_epoch,-2,0);
-        printw("%2s",buf);
-      } else
-        printw("%2s","--");
+      if(tsys_cycle->hsecs < CS_LIMIT)
+        standout();
+      buf[0]=0;
+      int2str(buf,tsys_cycle->hsecs,-2,0);
+      printw("%2s",buf);
+      if(tsys_cycle->hsecs < CS_LIMIT)
+        standend();
     } else
       printw("%2s"," ");
 
@@ -223,15 +237,15 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
             printw("------");
         else {
             buf[0]=0;
-            int2str(buf,ifc.time_error,-6,0);
+            int2str(buf,ifc.time_error,-4,0);
             if(ifc.time_error)
                 standout();
-            printw("%6s",buf);
+            printw("%4s",buf);
             if(ifc.time_error)
                 standend();
         }
     } else
-        printw("%6s"," ");
+        printw("%4s"," ");
 
     move(4,0);
     if(ifc.lo>=0.0 && krf)
