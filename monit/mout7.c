@@ -177,6 +177,10 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
 
     if(ifc.time > 0) {
       disp_time=ifc.time+1;
+      if(ifc.time_included && cycle->hsecs <= 20) {
+        disp_time++;
+        ifc.time_error++;
+      }
       ptr=gmtime(&disp_time);
     }
 
