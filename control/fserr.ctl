@@ -2634,7 +2634,7 @@ DN   21
 DBBC3 multicast: error from select() cleared
 ""
 DN   20
-DBBC3 multicast: receiving messages again
+DBBC3 multicast: No time-outs in the last 60 attempts; counting stopped.
 ""
 DN   -1
 DBBC3 multicast: error unpacking, packet too small.
@@ -2661,7 +2661,7 @@ DN  -18
 DBBC3 multicast: retrieving interface address from socket (wrong interface?), UNIX?FFF
 ""
 DN  -20
-DBBC3 multicast: time-out, DBBC3 may not be running
+DBBC3 multicast: Time-out; will now count time-outs in background.
 ""
 DN  -21
 DBBC3 multicast: error from select(), UNIX?FFF
@@ -2670,10 +2670,13 @@ DN  -22
 DBBC3 multicast: error from recvfrom(), UNIX?FFF
 ""
 DN  -23
-DBBC3 multicast: time-out while data_valid is on, some multicast not recorded, probably due to a DBBC3 command
+DBBC3 multicast: Time-out while data_valid is on; will now count time-outs in background.
 ""
 DN  -24
 DBBC3 multicast: Core3H boards have different times.
+""
+DN  -25
+DBBC3 multicast: In the last 60 attempts, there were?WW time-out(s); continuing to count.
 ""
 DN  -30 Place holder for version string
 

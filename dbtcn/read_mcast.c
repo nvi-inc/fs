@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2022 NVI, Inc.
+ * Copyright (c) 2020-2023 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -50,8 +50,9 @@ ssize_t read_mcast(int sock, char buf[], size_t buf_size, int it[6],
     fd_set readfds;
     int return_select;
     static int mcast_error = 0;
-    static int mcast_to    = 0;
     static int old_error = 0;
+    static int to_count = -1;
+    static int to_try = 0;
 
     static unsigned was_count_next = 0;
     unsigned was_count;
@@ -62,6 +63,9 @@ ssize_t read_mcast(int sock, char buf[], size_t buf_size, int it[6],
 
     was_count=was_count_next;
     was_count_next=shm_addr->dbbc3_command_count;
+
+    if(to_try > 0)
+      to_try=to_try%60+1;
 
     /* Read when data available */
     FD_ZERO(&readfds);
@@ -74,15 +78,25 @@ ssize_t read_mcast(int sock, char buf[], size_t buf_size, int it[6],
         int dbbc3_cmd=shm_addr->dbbc3_command_active ||
             shm_addr->dbbc3_command_count != was_count;
         if(!dbbc3_cmd) {
-            mcast_to=mcast_to%(ERROR_PERIOD/TIME_OUT) + 1;
-            if(1==mcast_to) {
+            to_count++;
+            if(to_count == 0) {
               logit(NULL,-20,"dn");
             }
         } else if(data_valid) {
-            mcast_to=mcast_to%(ERROR_PERIOD/TIME_OUT) + 1;
-            if(1==mcast_to) {
+            to_count++;
+            if(to_count == 0) {
               logit(NULL,-23,"dn");
             }
+        }
+        if(to_count > -1) { /* only if there was a reportable time-out */
+          if(to_try < 1)
+            to_try=1;
+          else {
+            if(1 == to_try) {
+              logitn(NULL,-25,"dn",to_count);
+              to_count=0;
+            }
+          }
         }
       return -1;
     } else if (return_select < 0) { /* error */
@@ -96,10 +110,20 @@ ssize_t read_mcast(int sock, char buf[], size_t buf_size, int it[6],
       rte_sleep(100);
       return -1;
     }
-    if(mcast_to) {
-      mcast_to=0;
-      logit(NULL,20,"dn");
+
+    if(to_try > 0) {
+      if(1 == to_try) {
+        if(0 == to_count) {
+          logit(NULL,20,"dn");
+          to_count=-1;
+          to_try=0;
+        } else {
+          logitn(NULL,-25,"dn",to_count);
+          to_count=0;
+        }
+      }
     }
+
     if(mcast_error) {
       mcast_error=0;
       old_error = 0;
