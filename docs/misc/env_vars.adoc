@@ -19,7 +19,7 @@
 //
 
 = FS Environment Variables
-Version 1.8 - April 2023
+Version 1.9 - July 2023
 
 :sectnums:
 
@@ -381,13 +381,38 @@ They were introduced in _10.2-alpha3_.
 
 Nominal value is `on`.
 
-If set, the display server is enabled. It must also be set in sessions
-that use the client.
+If set to `off`, the display server is not enabled. For all other
+values, and if not set at all, the display server is used.
 
-It must not be set if `FS_DISPLAY_SERVER_NO_MAKE` was set when the FS
-was _made_.
+CAUTION: This variable should be set the same, or not set, for all
+accounts/sessions that use _fs_, _fsclient_, or _streamlog_, usually
+just _oper_ and _prog_. There may be problems if there is a mismatch.
 
-This was introduced in _9.13.0_, September 2018.
+It must be set to `off` if `FS_DISPLAY_SERVER_NO_MAKE` was set when
+the FS was _made_.
+
+This was introduced in _9.13.0_, September 2018. Until _10.2-beta2_,
+July 2023, it was `off` by default and only enabled display server use
+if it was set to `on`.
+
+=== FS_DISPLAY_SERVER_CONFIRM_TERMINATE
+
+Nominal value is `on`.
+
+If set to `off`, _oprin_ will not prompt for confirmation before
+accepting the `terminate` command. For all other values, and if not
+set at all, there will be a prompt to confirm termination.
+
+The setting of this variable in the session that started the client,
+with either _fs_ or _fsclient_, determines the behavior of _oprin_ for
+that client.
+
+TIP: For simplicity, it is recommended that this variable be set the
+same, or not set, for all accounts/sessions that use _fs_ or
+_fsclient_, usually just _oper_ and _prog_.
+
+This was introduced in  _10.2-beta2_, July 2023. Before that there was
+no way to avoid a confirmation prompt.
 
 === FS_ERROR_WAV
 
