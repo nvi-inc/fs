@@ -36,7 +36,7 @@ extern struct fscom *shm_addr;
 #include "dbtcn.h"
 
 // These are in centiseconds
-#define TIME_OUT        125
+#define TIME_OUT        145
 #define ERROR_PERIOD   2000
 
 ssize_t read_mcast(int sock, char buf[], size_t buf_size, int it[6],
@@ -53,6 +53,8 @@ ssize_t read_mcast(int sock, char buf[], size_t buf_size, int it[6],
     static int old_error = 0;
     static int to_count = -1;
     static int to_try = 0;
+    static int was_to = 0;
+    int time_out;
 
     static unsigned was_count_next = 0;
     unsigned was_count;
@@ -68,15 +70,24 @@ ssize_t read_mcast(int sock, char buf[], size_t buf_size, int it[6],
       to_try=to_try%60+1;
 
     /* Read when data available */
+    if(was_to)
+      time_out=100;
+    else
+      time_out=TIME_OUT;
+    was_to=0;
+
     FD_ZERO(&readfds);
     FD_SET(sock, &readfds);
-    to.tv_sec=TIME_OUT/100;
-    to.tv_usec=(TIME_OUT%100)*10000;
+    to.tv_sec=time_out/100;
+    to.tv_usec=(time_out%100)*10000;
 
     return_select = select(sock + 1, &readfds, NULL, NULL, &to);
     if(return_select == 0) {
         int dbbc3_cmd=shm_addr->dbbc3_command_active ||
             shm_addr->dbbc3_command_count != was_count;
+
+        was_to=1;
+
         if(!dbbc3_cmd) {
             to_count++;
             if(to_count == 0) {
