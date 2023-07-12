@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, 2022 NVI, Inc.
+ * Copyright (c) 2020, 2022, 2023 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -43,16 +43,19 @@ mout6()
 {
   int i;
   struct rdbe_tsys_cycle local[MAX_RDBE];
+  struct rdbe_tsys_cycle1 local1[MAX_RDBE];
   char outflt[12];
   int tone, chan;
   int iping[4];
   int it[6];
+  int int_seconds;
   time_t seconds;
   int dot2pps;
   struct tm *tm;
   int inv_vdif[4],vdif_should,inv_pps;
   int inv_dot[4];
-  char dot_should[14];
+  char dot_should[MAX_RDBE][14];
+  char dot_display[18];
 
   for (i=0;i<MAX_RDBE;i++) {
     inv_vdif[i]=0;
@@ -71,32 +74,22 @@ mout6()
     memcpy(&local[i],
 	   &fs->rdbe_tsys_data[i].data[iping[i]],
 	   sizeof(struct rdbe_tsys_cycle));      
+
+    memcpy(&local1[i],
+	   &fs->rdbe_tsys_data1[i].data[iping[i]],
+	   sizeof(struct rdbe_tsys_cycle1));
   }
 
   rte_time(it,it+5);
-  rte2secs(it,&seconds);
+  rte2secs(it,&int_seconds);
+  seconds=int_seconds;
   tm = gmtime(&seconds);
 
   vdif_should=-1;
-  memset(dot_should,0,sizeof(dot_should));
   if(tm->tm_year>99) {
     vdif_should=(tm->tm_year-100)%32;
     vdif_should=vdif_should*2+tm->tm_mon/6;
-    snprintf(dot_should,sizeof(dot_should),"%04d%03d%02d%02d%02d",
-            tm->tm_year+1900,
-            tm->tm_yday+1,
-            tm->tm_hour,
-            tm->tm_min,
-            tm->tm_sec);
   }
-
-  for(i=0;i<MAX_RDBE;i++) {
-    inv_dot[i]=0;
-    if(0!=fs->rdbe_active[i] && (iping[i]==0 || iping[i]==1) &&
-      memcmp(local[i].epoch,dot_should,13))
-        inv_dot[i]=1;
-  }
-
   if(vdif_should>=0) {
     int valid[MAX_RDBE],same[MAX_RDBE];
     int active=0;
@@ -117,7 +110,7 @@ mout6()
     }
 
     max=0;
-    imax==-1;
+    imax=-1;
     for(i=0;i<MAX_RDBE;i++)  /* find the one with the most the same */
       if(same[i]>max) {
 	max=same[i];
@@ -135,6 +128,16 @@ mout6()
 	    inv_vdif[j]=1;
   }
 
+  for(i=0;i<MAX_RDBE;i++) {
+    tm = gmtime(&local1[i].arrival);
+    strftime(dot_should[i],sizeof(dot_should[i]),"%Y%j%H%M%S",tm);
+
+    inv_dot[i]=0;
+    if(0!=fs->rdbe_active[i] && (iping[i]==0 || iping[i]==1) &&
+      memcmp(local[i].epoch,dot_should[i],13))
+        inv_dot[i]=1;
+  }
+
   for (i=0;i<MAX_RDBE;i++) {
     if(0==fs->rdbe_active[i])
       continue;
@@ -146,12 +149,14 @@ mout6()
       standout();
 
     move(ROW_A+i,COL_DOT);
-    printw("%.4s.%.3s.%.2s:%.2s:%.2s",
-	   local[i].epoch,
-	   local[i].epoch+4,
-	   local[i].epoch+7,
-	   local[i].epoch+9,
-	   local[i].epoch+11);
+    local[i].epoch[13]=0;
+    it[0]=it[1]=it[2]=it[3]=it[4]=it[5]=0;
+    sscanf(local[i].epoch,"%4d%3d%2d%2d%2d",it+5,it+4,it+3,it+2,it+1);
+    rte2secs(it,&int_seconds);
+    seconds=int_seconds+1;
+    tm = gmtime(&seconds);
+    strftime(dot_display,sizeof(dot_display),"%Y.%j.%H:%M:%S", tm);
+    printw("%17s",dot_display);
     if(inv_dot[i])
       standend();
 

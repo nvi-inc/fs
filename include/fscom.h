@@ -544,4 +544,11 @@ typedef struct fscom {
   int  dbbc3_ddce_vc;
 
   int terminate_ticks;
+
+  struct rdbe_tsys_data1 {
+    struct rdbe_tsys_cycle1 {;
+      time_t arrival;
+    } data[2];
+  } rdbe_tsys_data1[MAX_RDBE];
+
 } Fscom;
