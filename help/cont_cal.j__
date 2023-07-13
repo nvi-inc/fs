@@ -68,10 +68,13 @@ in the FS's model (shared memory) is not affected.
 
 The 'samples' sets the exponential decay time-constant in seconds for a
 trailing average of Tsys calculated from the multicast.  The average for a
-channel or IF detector is restarted after: (i) 'tpicd' is started or restarted
-or (ii) the 'cont_cal' parameters are changed.  If multicast packets are lost
-or a negative or infinite Tsys occurs, it is ignored, The remaining (finite
-positive) data is treated as though it had uniform one second spacing.
+channel or IF detector is restarted after: (i) 'tpicd' is started or restarted,
+typically for a mode setup, (ii) the 'cont_cal' parameters are changed, or
+(iii) the average is reset manually with a 'tpicd=reset' command.  If multicast
+packets are lost or Tsys values are invalid (detector overflow, infinite Tsys,
+or on/off zero) or out-of-range (less than -999. or greater than +999.9) they
+are ignored.  The remaining data are treated as though they have uniform one
+second spacing.
 
 The 'samples' also sets the number of cycles of 'tpicd' for logging the
 averaged Tsys data.  It is expected that the cycle period for 'tpicd' will
@@ -90,20 +93,33 @@ values that differ by more than a threshold amount from the average from
 contributing to it.  Filtering occurs on a per detector basis with a threshold
 set per IF.  If 'filter' is '0', there is no filtering.  If it is '1',
 filtering is enabled after an initial average has been formed.  This requires
-'samples' positive finite values for a detector each time the average is reset.
-The filter parameters 'ifX' set the threshold in percent for rejecting values
-for detectors on that IF.  For example, if 'ifa' is '50', then values that
-differ from the detector's average by more than +/- 50% on IF A are rejected.
-If an 'ifX' is '0' the average will never change for detectors on that IF after
-the initial average has been formed. If 'ifX' is negative, filtering is
-disabled on that IF and just averaging is used. Non-negative values only need
-to be supplied for IFs that are to be filtered.  Other filters, selected by
-'filter' values larger than '1', may be added in the future.
+'samples' valid in-range values for a detector each time the average is reset.
+
+The filter parameters 'ifX' set the threshold in percent for rejecting, or
+"clipping", values for detectors on that IF.  For example, if 'ifa' is '50',
+then values that differ from the detector's average by more than +/- 50% on IF
+A are clipped.  If an 'ifX' is '0' the average will never change for detectors
+on that IF after the initial average has been formed. If 'ifX' is negative,
+filtering is disabled on that IF and just averaging is used. Non-negative
+values only need to be supplied for IFs that are to be filtered.  Other
+filters, selected by 'filter' values larger than '1', may be added in the
+future.
 
 When the values are filtered, the background color of the value in the Tsys
-monitor display window (monit7) is changed when a value is rejected. For the
-first and second rejected value in a row, the color is green; third through
+monitor display window (monit7) is changed when a value is "clipped". For the
+first and second clipped value in a row, the color is green; third through
 fifth, yellow; six or more, red. On monochrome terminals inverse video is used
-instead. Tsys values that were negative or infinity are included in the count
-of rejected points in a row, but those values themselves are not displayed with
-green/yellow/red.
+instead.
+
+When filtering is in use, if the clipping reaches the red zone (clipped six
+times or more) for a detector, and the long-term average for the detector is
+more than the filtering percentage from the average of the last 'samples'
+samples, the long-term average is "auto-reset" to the more current average and
+shown with a blue background (inverse video on monochrome terminals).
+
+A separate shadow average is maintained for auto-resetting. It is reinitialized
+every 'samples' samples so that it is only dependent on the most recent data.
+Thus if the long-term average in use is significantly skewed by older data with
+either RFI or from a different elevation, a more up-to-date value will be
+substituted.  The device must be in the red clipping zone on the sample that
+completes the shadow average for a reset to occur.
