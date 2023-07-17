@@ -42,7 +42,6 @@
                            attron(COLOR_PAIR(COLOR)); \
                          else \
                            standout();
-#define CS_LIMIT 20
 
 extern struct fscom *fs;
 
@@ -119,7 +118,7 @@ static void print_tsys(float tsys, unsigned clipped, int reverse)
     standend();
 }
 void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
-        int def, int rec, int reverse)
+        int def, int rec, int reverse, int late)
 {
     struct dbbc3_tsys_ifc ifc;
     struct dbbc3_tsys_bbc bbc[MAX_DBBC3_BBC];
@@ -179,7 +178,7 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
 
     if(ifc.time > 0) {
       disp_time=ifc.time+1;
-      if(ifc.time_included && tsys_cycle->hsecs < CS_LIMIT) {
+      if(ifc.time_included && tsys_cycle->hsecs < late) {
         disp_time++;
         ifc.time_error++;
       }
@@ -221,12 +220,12 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
 
     printw("Arrival ");
     if(ifc.time > 0) {
-      if(tsys_cycle->hsecs < CS_LIMIT)
+      if(tsys_cycle->hsecs < late)
         standout();
       buf[0]=0;
       int2str(buf,tsys_cycle->hsecs,-2,0);
       printw("%2s",buf);
-      if(tsys_cycle->hsecs < CS_LIMIT)
+      if(tsys_cycle->hsecs < late)
         standend();
     } else
       printw("%2s"," ");

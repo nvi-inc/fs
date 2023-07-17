@@ -55,22 +55,42 @@ main(int argc, char *argv[])
     char numbers[]  = "123456789";
     char letters[]  = "abcdefgh";
     char lettersu[] = "ABCDEFGH";
-    int reverse;
+    int reverse=0;
+    int late=20;
 
-    if(argc == 2) {
-        if(strcmp(argv[1],"-rv")) {
-            printf("Bad argument '%s', only '-rv' allowed\nPausing 10 seconds then monit7 will terminate.\n",argv[1]);
-            sleep(10);
-            exit(-1);
-        } else
+    int i=0;
+    int okay=1;
+    while (++i<argc) {
+        if(0==strcmp(argv[i],"-r")) {
             reverse = 1;
-    } else if (argc >2) {
-        printf("Too many arguments '%d', only '1' allowed\nPusing 10 seconds then monit7 will terminate.\n",argc-1);
+        } else if(0==strcmp(argv[i],"-l")) {
+            char dumc;
+            if(++i >= argc || 1!=sscanf(argv[i],"%d%c",&late,&dumc) || late <0 || late > 100) {
+                if (i >= argc)
+                    fprintf(stderr,"Parameter required for '-l'\n");
+                else
+                    fprintf(stderr,"Could not decode '-l' parameter as 0-100: '%s'\n",argv[i]);
+                okay=0;
+            }
+        } else if(0==strcmp(argv[i],"-h")) {
+            fprintf(stderr,"Usage: %s [-v] [-l n] [-h]\n", argv[0]);
+            fprintf(stderr,"Options:\n");
+            fprintf(stderr," -r    reverse some foreground colors\n");
+            fprintf(stderr," -l n  change late arrival limit from 20\n");
+            fprintf(stderr,"    n  0-100 centiseconds; 0=none, 100=all\n");
+            fprintf(stderr,"       late packets arrive before 'n'\n");
+            fprintf(stderr," -h    this help output\n");
+            exit(0);
+        } else {
+            fprintf(stderr,"Unknown option: '%s', try '%s -h'\n",argv[i],argv[0]);
+            okay = 0;
+        }
+    }
+    if(!okay) {
+        fprintf(stderr,"Pausing 10 seconds\n");
         sleep(10);
         exit(-1);
-    } else
-        reverse = 0;
-
+    }
     setup_ids();
     fs = shm_addr;
 
@@ -303,7 +323,7 @@ main(int argc, char *argv[])
 //            die();
 //            exit(0);
 //        }
-        mout7(next,&shm_addr->dbbc3_tsys_data.data[iping],krf,all,!undef,record,reverse);
+        mout7(next,&shm_addr->dbbc3_tsys_data.data[iping],krf,all,!undef,record,reverse,late);
         move(ROW_HOLD,COL_HOLD);  /* place cursor at consistent location */
         standend();
         printw(" ");
