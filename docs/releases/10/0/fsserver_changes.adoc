@@ -19,7 +19,7 @@
 //
 
 = FS 10.0.0 fsserver Changes
-Version 0.5 - March 2023
+Version 0.6 - July 2023
 
 //:hide-uri-scheme:
 :sectnums:
@@ -117,6 +117,15 @@ reboot or run `*fsserver stop*` after using the FS from an account
 other than _oper_.
 
 ****
+
+=== Server shuts down on FS termination
+
+As of FS _10.2_, the server shuts down when the FS is terminated. An
+interlock was introduced to prevent termination if it would also stop
+active _autoftp_ and/or _fs.prompt_ instances. A variable wait was
+introduced for FS startup to make sure the server has fully shutdown
+before starting it again. The maximum wait is two seconds. There is no
+wait unless the FS was restarted faster than that.
 
 === Server accepts SNAP commands
 
