@@ -69,7 +69,7 @@ ssize_t read_mcast(int sock, char buf[], size_t buf_size, int it[6],
     if(to_try > 0)
       to_try=to_try%60+1;
 
-    /* Read when data available */
+    /* set time-out */
     if(was_to)
       time_out=100;
     else
@@ -81,8 +81,9 @@ ssize_t read_mcast(int sock, char buf[], size_t buf_size, int it[6],
     to.tv_sec=time_out/100;
     to.tv_usec=(time_out%100)*10000;
 
+    /* Check if data available */
     return_select = select(sock + 1, &readfds, NULL, NULL, &to);
-    if(return_select == 0) {
+    if(return_select == 0) {  /* time-out */
         int dbbc3_cmd=shm_addr->dbbc3_command_active ||
             shm_addr->dbbc3_command_count != was_count;
 
@@ -91,54 +92,54 @@ ssize_t read_mcast(int sock, char buf[], size_t buf_size, int it[6],
         if(!dbbc3_cmd) {
             to_count++;
             if(to_count == 0) {
-              logit(NULL,-20,"dn");
+                logit(NULL,-20,"dn");
             }
         } else if(data_valid) {
             to_count++;
             if(to_count == 0) {
-              logit(NULL,-23,"dn");
+                logit(NULL,-23,"dn");
             }
         }
         if(to_count > -1) { /* only if there was a reportable time-out */
-          if(to_try < 1)
-            to_try=1;
-          else {
-            if(1 == to_try) {
-              logitn(NULL,-25,"dn",to_count);
-              to_count=0;
+            if(to_try < 1)
+                to_try=1;
+            else {
+                if(1 == to_try) { /* summary if a time-out */
+                    logitn(NULL,-25,"dn",to_count);
+                    to_count=0;
+                }
             }
-          }
         }
-      return -1;
+        return -1;
     } else if (return_select < 0) { /* error */
         if(old_error != errno)
             mcast_error = 0;
-      mcast_error=mcast_error%(ERROR_PERIOD/100) + 1;
-      if(1==mcast_error) {
-        logitn(NULL,-21,"dn",errno);
-      }
-      old_error=errno;
-      rte_sleep(100);
-      return -1;
+        mcast_error=mcast_error%(ERROR_PERIOD/100) + 1;
+        if(1==mcast_error) {
+            logitn(NULL,-21,"dn",errno);
+        }
+        old_error=errno;
+        rte_sleep(100);
+        return -1;
     }
 
-    if(to_try > 0) {
-      if(1 == to_try) {
-        if(0 == to_count) {
-          logit(NULL,20,"dn");
-          to_count=-1;
-          to_try=0;
-        } else {
-          logitn(NULL,-25,"dn",to_count);
-          to_count=0;
+    if(to_try > 0) { /* summary if NOT a time-out */
+        if(1 == to_try) {
+            if(0 == to_count) {
+                logit(NULL,20,"dn");
+                to_count=-1;
+                to_try=0;
+            } else {
+                logitn(NULL,-25,"dn",to_count);
+                to_count=0;
+            }
         }
-      }
     }
 
     if(mcast_error) {
-      mcast_error=0;
-      old_error = 0;
-      logit(NULL,21,"dn");
+        mcast_error=0;
+        old_error = 0;
+        logit(NULL,21,"dn");
     }
 
     if ((n = recvfrom(sock, buf, buf_size, 0,
