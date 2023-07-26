@@ -48,7 +48,7 @@ static char unit_letters[ ] = {"ABCDEFGH"};
 static time_t save_disp_time;
 static int kfirst = 1;
 
-static void print_tsys(float tsys, unsigned clipped)
+static void print_tsys(float tsys, unsigned clipped, int reverse)
 {
     char buf[128];
 
@@ -67,36 +67,57 @@ static void print_tsys(float tsys, unsigned clipped)
         standout();
         printw("%5s","N cal");
     } else if (tsys < -1e6) {
-        HIGHLIGHT(CYAN)
+        if(!reverse)
+            HIGHLIGHT(CYAN)
+        else
+            HIGHLIGHT(CYANI)
         if (tsys < -1e10)
             printw("%5s","ovrfl");
+        else if (tsys < -1e9)
+            printw("%5s","tpi=0");
         else if (tsys < -1e8)
             printw("%5s","off=0");
+        else if (tsys < -1e7)
+            printw("%5s"," on=0");
         else if (tsys < -1e6)
             printw("%5s"," inf ");
+    } else if (tsys <= -999.5) {
+        standout();
+        printw("%5s","$$$$$");
+    } else if (999.95 <= tsys) {
+        printw("%5s","$$$$$");
     } else {
         buf[0]=0;
-        if (tsys <=0.0) { /* negative */
-            HIGHLIGHT(MAGENTA)
-            dble2str_j(buf,tsys,-5,1);
-        } else {
-            if(0==clipped)
-                ;
-            else if(clipped <= WARN1)
-                HIGHLIGHT(GREEN)
-            else if(clipped <= WARN2)
-                HIGHLIGHT(YELLOW)
+        if(0==clipped) {
+            if(tsys < 0.0)
+               standout();
+        } else if(clipped == UINT_MAX)
+            if(!reverse)
+                HIGHLIGHT(BLUE)
             else
-                HIGHLIGHT(RED)
-
-            dble2str(buf,tsys,-5,1);
-        }
-        printw("%5s",buf);
+                HIGHLIGHT(BLUEI)
+        else if(clipped <= WARN1)
+            if(!reverse)
+               HIGHLIGHT(GREEN)
+            else
+               HIGHLIGHT(GREENI)
+        else if(clipped <= WARN2)
+            if(!reverse)
+               HIGHLIGHT(YELLOW)
+            else
+               HIGHLIGHT(YELLOWI)
+        else
+            if(!reverse)
+               HIGHLIGHT(RED)
+            else
+               HIGHLIGHT(REDI)
+         dble2str_j(buf,tsys,-5,1);
+         printw("%5s",buf);
     }
     standend();
 }
 void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
-        int def, int rec)
+        int def, int rec, int reverse)
 {
     struct dbbc3_tsys_ifc ifc;
     struct dbbc3_tsys_bbc bbc[MAX_DBBC3_BBC];
@@ -147,7 +168,7 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
     if (ifc.lo < 0.0)
         printw("%5s"," ");
     else
-        print_tsys(ifc.tsys,ifc.clipped);
+        print_tsys(ifc.tsys,ifc.clipped,reverse);
 
     move(2,0);
     printw("Time   ");
@@ -250,12 +271,12 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
 
         if (all && (def || rec) || !rec && ifc.lo>=0.0 || itpis[ibbc+MAX_DBBC3_BBC]) {
             printw(" ");
-            print_tsys(bbc[ibbc].tsys_usb,bbc[ibbc].clipped_usb);
+            print_tsys(bbc[ibbc].tsys_usb,bbc[ibbc].clipped_usb,reverse);
         }
 
         if(all && (def || rec) || !rec && ifc.lo>=0.0 || itpis[ibbc              ]) {
             printw(" ");
-            print_tsys(bbc[ibbc].tsys_lsb,bbc[ibbc].clipped_lsb);
+            print_tsys(bbc[ibbc].tsys_lsb,bbc[ibbc].clipped_lsb,reverse);
         }
     }
 }

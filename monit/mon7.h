@@ -23,5 +23,10 @@
 #define GREEN        2
 #define YELLOW       3
 #define RED          4
-#define MAGENTA      5
-#define CYAN         6
+#define CYAN         5
+#define BLUE         6
+#define GREENI       7
+#define YELLOWI      8
+#define REDI         9
+#define BLUEI       10
+#define CYANI       11

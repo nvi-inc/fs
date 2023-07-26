@@ -51,7 +51,9 @@ void calc_ts( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
        -9e14 tcal < 0
        -9e12 no continuous cal
        -9e10 overflow (except for IFs)
+       -9e9  on and off are zero
        -9e8  off is zero
+       -9e7  on  is zero
        -9e6  infinite
        -9e4  too negative
      */
@@ -111,11 +113,15 @@ void calc_ts( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
               tsys=9e10; /* so we get $$$$$ on display */
         } else if(on >= 65535 || off >= 65535) /* no overflows */
             tsys=-9e10;
+        else if(on==0 && off == 0) /* on and off are zero */
+            tsys=-9e9;
         else if(off == 0) /* off is zero */
             tsys=-9e8;
+        else if(on == 0) /* on is zero */
+            tsys=-9e7;
         else if(diff == 0) /* divide by zero */
             tsys=-9e6;
-        else if((tcal/diff)*0.5*(on+off)<-999.5) /* too negative */
+        else if((tcal/diff)*0.5*(on+off)<=-999.5) /* too negative */
             tsys=-9e4;
         else
             tsys= (tcal/diff)*0.5*(on+off);
@@ -145,11 +151,15 @@ void calc_ts( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
               tsys=9e10; /* so we get $$$$$ on display */
         } else if(on >= 65535 || off >= 65535) /* no overflows */
             tsys=-9e10;
+        else if(on==0 && off == 0) /* on and off are zero */
+            tsys=-9e9;
         else if(off == 0) /* off is zero */
             tsys=-9e8;
+        else if(on == 0) /* on is zero */
+            tsys=-9e7;
         else if(diff == 0) /* divide by zero */
             tsys=-9e6;
-        else if((tcal/diff)*0.5*(on+off)<-999.5) /* too negative */
+        else if((tcal/diff)*0.5*(on+off)<=-999.5) /* too negative */
             tsys=-9e4;
         else
             tsys= (tcal/diff)*0.5*(on+off);
@@ -191,11 +201,15 @@ void calc_ts( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
             else if(tsys <0.0)
               tsys=9e10; /* so we get $$$$$ on display */
       /* no information on what an overflow is */
+        else if(on==0 && off == 0) /* on and off are zero */
+            tsys=-9e9;
         } else if(off == 0) /* off is zero */
             tsys=-9e8;
+        else if(on == 0) /* on is zero */
+            tsys=-9e7;
         else if(diff == 0) /* divide by zero */
             tsys=-9e6;
-        else if((tcal/diff)*0.5*(on+off)<-999.5) /* too negative */
+        else if((tcal/diff)*0.5*(on+off)<=-999.5) /* too negative */
             tsys=-9e4;
         else
             tsys= (tcal/diff)*0.5*(on+off);
