@@ -4847,6 +4847,9 @@ Error decoding dbe_tsys response from rdb?W
 NF -117
 Incorrect IF channel in dbe_tsys response from rdb?W
 ""
+NF -118
+Error processing RDBE data, see message above.
+""
 PC   -1
 program error: portopen8: devdb incorrect size.
 ""

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020, 2023 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -150,18 +150,19 @@ double dtpi[MAX_RDBE_DET],dtpi2[MAX_RDBE_DET];
       }
     }
 
-  /* local error processing no longer require */
   if(iplast[2]!=0)
     for(j=2;j<5;j++)
       ip[j]=iplast[j];
   
+  if(ip[2]!=0)
+    logita(NULL,ip[2],ip+3,ip+4);
+
   ip[0]=0;
   ip[1]=0;
-  *ierr=ip[2];
-
-  if(ip[2]<0)
+  if(ip[2]<0) {
+    *ierr=-118;
     return -1;
-  else
+  } else
     return 0;
 
 }
