@@ -718,10 +718,8 @@ main()
     ip[0]=0;
     ip[1]=0;
     ip[2]=ierr;
-    if(ierr==-1||ierr==-6||ierr==-16 || ierr==-20 || ierr==-30)
-      ip[4]=0;
     memcpy(ip+3,"nf",2);
-    logita(NULL,ip[2],ip+3,ip+4);
+    logit(NULL,ip[2],ip+3);
   }
   nsem_put("onoff");
 
