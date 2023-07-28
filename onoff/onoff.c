@@ -37,6 +37,7 @@ extern struct fscom *shm_addr;
 
 #include "sample_ds.h"
 
+char unit_letters[ ] = {" abcdefghijklm"}; /* mk6/rdbe unit letters */
 
 main()
 {
@@ -93,6 +94,36 @@ main()
   koff=FALSE;
   memcpy(&onoff,&shm_addr->onoff,sizeof(onoff));
   ierr=0;
+
+  if(shm_addr->equip.rack==RDBE) { /* remove inactive RDBEs */
+    int some=0;
+    int removed[MAX_RDBE];
+    for (i=0;i<MAX_RDBE;i++)
+      removed[i]=0;
+    for (i=0;i<MAX_RDBE_DET;i++)
+      if(1==onoff.itpis[i]) {
+        int irdbe=i/(MAX_RDBE_IF*MAX_RDBE_CH);
+        if(shm_addr->rdbe_active[irdbe]==0) {
+          onoff.itpis[i]=0;
+          removed[irdbe]=1;
+        }
+      }
+    for (i=0;i<MAX_RDBE;i++)
+      if(removed[i]) {
+        char lwhat[ ]="-a";
+        memcpy(ip+3,"nf",2);
+        lwhat[1]=unit_letters[i+1];
+        logita(NULL,8,ip+3,lwhat);
+      }
+    for (i=0;i<MAX_RDBE_DET;i++)
+      some=some || 1==onoff.itpis[i];
+    if(!some) {  /* none left */
+      memcpy(ip+3,"nf",2);
+      logit(NULL,-8,ip+3);
+      goto loop;
+    }
+  }
+
 
   count=0;
   for(j=0;j<MAX_ONOFF_DET;j++)

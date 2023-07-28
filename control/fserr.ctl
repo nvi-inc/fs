@@ -4703,6 +4703,9 @@ mk6?W: Mark6 return code 9: indeterminate state
 MN   -1 Place Holder
 
 ""
+NF    8
+WARNING: rdbe?W is not active but has detectors selected, they will be skipped.
+""
 NF    7 Placeholder for large structure correction warning
 
 ""
@@ -4723,6 +4726,9 @@ Error occurred while trying to return to AGC: check gain settings
 ""
 NF   -6
 Error occurred while trying to restore IF att. Check IF att settings.
+""
+NF   -8
+No detectors remain after accounting for inactive RDBEs.
 ""
 NF  -10
 MCBCN failed setting AGC
