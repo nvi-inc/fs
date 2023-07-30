@@ -146,7 +146,7 @@ main(int argc_in,char *argv_in[])
     if (!serve_env_var || 0!=strcmp(serve_env_var,"off")) { /* not off */
         arg_no_server = false;
 #ifdef FS_DISPLAY_SERVER_NO_MAKE
-		fprintf(stderr, "Server was not built into the FS, can't run with FS_DISPLAY_SERVER set.\n");
+		fprintf(stderr, "Server was not built, can't run unless 'FS_DISPLAY_SERVER is set to 'off'.\n");
 		exit(EXIT_FAILURE);
 #endif
     }
