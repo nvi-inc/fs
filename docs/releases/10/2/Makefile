@@ -18,7 +18,8 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-all: index.html 10.2.0-beta1.html 10.2_to_latest.html
+all: index.html 10.2-beta1.html 10.2_to_latest.html 10.2-beta2.html\
+	beta1_to_beta2.html
 
 %.html: %.adoc
 	asciidoctor -a toc $^

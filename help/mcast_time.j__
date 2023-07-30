@@ -22,7 +22,7 @@ time        Core3H multicast time
 epoch       Reported VDIF epoch in use, currently null.
 pps2dot     Core3H pps_delay value, seconds
 offset      Difference between 'time' for this board and 'last',
-            positive board if the board time is later
+            positive if the board time is later
 
 Comments:
 
@@ -41,9 +41,8 @@ The format of 'time' and 'last' is:
 
 The lines output for the boards are columnized for readability.
 
-The hsecs fields can be useful as a measure of the delay of the
-multicast if the FS is running on NTP. It should agree roughly with
-the multicast delay in the dbbc3.ctl control file.
+'hsecs' can be useful as a measure of the delay of the multicast if
+the FS is running on NTP.
 
 The VDIF epoch is currently not provided by the multicast, but it is
 expected that it will be added.

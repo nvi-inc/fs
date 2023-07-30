@@ -22,7 +22,7 @@
 
 = FS 10.1.0 Update Notes
 E. Himwich, J. Quick, J. Gipson, D. Horsley
-Version 6.5 - June 2023
+Version 6.7 - July 2023
 
 //:hide-uri-scheme:
 :sectnums:
@@ -1558,9 +1558,9 @@ automatically adjusted with the `rdbe_atten__X__=...` command  (the
 `auto` SNAP procedure uses it). It doesn't always happen and it may be
 more likely to happen when the attenuator adjustment is large or
 unstable. Apparently, what is happening is that the adjustment keeps
-the RDBE busy enough that multicast packet may not be fully updated.
-This is not a change in the RDBE's behavior, but it is now more
-obvious that it is occurring.
+the RDBE busy enough to delay transmission of the multicast packet.
+The flash has been fixed in FS _10.2_ by refactord the display of the
+data in _monit6_.
 
 Thanks to  Javi Gonzalez (Yebes) for requesting this. Thanks to Kiah
 Imai (KPGO) for reporting the interaction with the
@@ -2669,7 +2669,7 @@ strings after the error number. This came about because a change was
 made (in commit `9e9906d9` for version _9.12.2_ released in March of
 2016), to report the so-called `LWHAT` two character Hollerith values
 (or up to four character representation of numbers) for an error even
-if there was no `?W` (or `?WWW) string in the message to be replaced
+if there was no `?W` (or `?WWW`) string in the message to be replaced
 with the value. The principle being that it was more important to
 report the information to help solve a problem than to adhere to the
 possibly incorrect formatting of the error message.

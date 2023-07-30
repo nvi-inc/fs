@@ -28,20 +28,32 @@
 :experimental:
 :downarrow: &downarrow;
 E. Himwich, J. Quick
-Version 5.2.5 - June 2023
+Version 5.2.7 - July 2023
 
 == Introduction
 
 This document describes FS DBBC3 support in the latest FS version,
 _10.2_. It outlines the features and model for FS operations with the
 DBBC3. Some **NOTE**s are included to describe how support in FS
-_10.1_ is different. Versions before _10.1_ are not covered here.
+_10.1_ is different. Versions before _10.1_ had minimal support for
+DBBC3s and are not covered here.
 
 The FS supports the DDC_E, DDC_U, and DDC_V personalities.
 
-NOTE: Support for the DDC_E personality was not available in FS
-_10.1_, nor was there support for any DDC_V versions other than
-_v124_, even then it was only for very early releases.
+[NOTE]
+====
+
+In FS _10.1_:
+
+* Support for the DDC_E personality is not available.
+
+* Support for DDC_V versions other than _v124_ is not available and
+even for _v24_ is only correct for very early releases.
+
+* T~sys~ _fivpt_, and _onoff_ support for polarities other than `2`
+may not be correct.
+
+====
 
 The appendix <<Configuring the FS for use with a DBBC3>> gives the
 steps for customizing the FS. The appendix
@@ -51,8 +63,8 @@ provides methods for checking those two specific issues.
 
 Additional appendices, <<Minimizing the use of setup procedures>>,
 <<Thread procedure>>, and <<Recorder tuning>> describe features that
-are not limited to use with the DBBC3, but are expected to mostly be
-used with them.
+intended primarily for use with the DBBC3, but can be used with other
+systems.
 
 Support for several items that utilize the multicast data, including
 the T~sys~ monitor display and multicast data logging, is built on
@@ -80,8 +92,8 @@ to the end in the DBBC3 version. The meanings of the `_frequency_` and
 
 +
 
-NOTE: In FS _10.1_, operation had only been tested with polarity `2`
-and for early releases of DDC_U and DDC_V firmware. The support was
+NOTE: For FS _10.1_, operation was only tested with polarity `2` and
+for early releases of DDC_U and DDC_V firmware. That support was
 discovered to be incompatible with some later DDC_V _v124_ releases.
 
 * `core3h` -- Low-level communication with Core3H boards
@@ -197,7 +209,7 @@ non-continuous calibrations T~sys~ measurements.
 
 +
 
-NOTE: If FS  _10.1_, `formbbc` and `formif` were not supported as
+NOTE: If FS  _10.1_, `formbbc` and `formif` are not supported as
 mnemonics to specify DBBC3 detectors for channels/IFs that are
 configured for recording.
 
@@ -517,32 +529,34 @@ corresponding Core3H configuration procedure instead. For example:
     core3h01
 
 This is not recommended for checking the mode, since it does not
-configure the non-Core3H board aspects of the observing mode.
+configure the non-Core3H board aspects of the observing mode to verify
+that there is no error when commanding them.
 
 ====
 
 == IF target levels
 
-Due to the very wide input bandpass (4 GHz) of the DBBC3,  it very
+Due to the very wide input bandpass (4 GHz) of the DBBC3, it is very
 important have the correct IF target levels. If they are too high, the
 samplers will saturate, which which will result in gain compression
 and loss of VLBI sensitivity. The nominal target for 4 GHz BW input
-signal is 32000. For a 1 GHz BW input signal around 22000 might be
-good. For 0.5 GHZ input BW signal, 10000 may be realistic.
+signal is 32000 counts. For a 1 GHz BW input signal around 22000 might
+be good. For 0.5 GHZ input BW signal, 10000 may be realistic.
 
-If you have continuous calibration, you can check for compression by
+If you use continuous calibration, you can check for compression by
 adjusting the target level for each IF while watching the
 <<Tsys monitor display>> for that IF. Once setup for a mode, reduce
-the target level for that IF from 32000 until it reaches a reasonable
-minimum. If you have _spot_ calbration, you can do the same, but you
-will need to use the `caltsys` procedure to check T~sys~. The `onoff`
-command can also be useful for this; check that the `Comp`
-(compression) value is close to unity. You can also use a noise source
-to measure the change in TPI levels, with the gains locked, at
-different operating levels and find the highest value before it
-becomes non-linear. All of these methods rely on avoiding gain
-compression for the TPI counts. It is expected that eliminating
-compression for them with do the same for the VLBI data.
+the target level for that IF from 32000 until the BBC T~sys~ values
+reach a reasonable minimum. If you use _legacy_ (noncontinuous)
+calibration, you can do the same, but you will need to use the
+`caltsys` procedure to check T~sys~. The `onoff` command can also be
+useful for this, adjusting to get the `Comp` (compression) value close
+to unity. You can also use a noise source to measure the change in TPI
+levels, with the gains locked, at different operating levels and find
+the highest value before it becomes non-linear. All of these methods
+rely on avoiding gain compression for the TPI counts. It is expected
+that eliminating compression for them will do the same for the VLBI
+data.
 
 If you find you need to set target levels other than `32000` and there
 are values that will work for all your bands and modes per IF, you can
@@ -554,6 +568,117 @@ mode, you will need to modify the IF setup procedures provided by
 _drudg_ for some cases. We are hoping to have a feature in a future
 release that will better automate this. If you need such a feature,
 please contact Ed to explain what is needed for your case.
+
+== Multicast time-outs
+
+The DBBC3 provides multicast packets, nominally, every second. They
+provides a wealth of data including for amplitude calibration. A
+subset of the data is logged, as described in the
+<<Multicast logging>> section below. Sometimes no data may be received
+for one or more seconds. The FS reports each missing packet as
+a multicast _time-out_.
+
+Generally speaking, the `Time` value in the T~sys~ monitor display
+will be shown in inverse video for each time-out (but it can be
+inverse for other reasons as well). Except when `data_valid` is `off`
+(see below), the FS will report an error for the first time-out that
+occurs after there have been none in the last 60 read attempts. After
+the initial report, it will give a summary error report of the
+time-outs in batches of 60 attempts, ending with a report of no
+time-outs for 60 attempts, when that occurs.
+
+When `data_valid` is `off`, the FS will only report a time-out if it
+does not appear to be associated with DBBC3 command usage.
+
+NOTE: We believe that there will be no "`extra`" reports caused by
+DBBC3 commands when `data_valid` is `off`. However, we cannot be sure
+every case has been caught. There is some chance that there will be
+extra reports one to three seconds after the most recent DBBC3
+communication. Please contact Ed about this if you encounter it. It is
+easier to fix if you have a, even if only intermittently, repeatable
+example.
+
+When `data_valid` is `on`, i.e., during recording or eVLBI, the FS
+will report any loss of multicast messages, even if DBBC3 commands
+were used.
+
+IMPORTANT: You should avoid use of DBBC3 commands when `data_valid` is
+`on`, i.e., during a scan, since they may cause loss of calibration
+data.
+
+There seems to be three primary causes of time-outs:
+
+. The DBBC3 is busy -- Some DBBC3 commands, particularly those
+associated with the Core3H boards, appear to inhibit the generation of
+multicast when they are being processed. These are not reported as an
+error when `data_valid` is `off` because they are expected and of
+limited consequence. They are reported when `data_valid` is `on` since
+they cause loss of calibration data.
+
+. Network traffic conflicts -- How this affects the multicast is not
+clear. If there is significant other traffic on the network, there may
+be _collisions_ that cause packets to be dropped.
+
+. Overrun of the 1 PPS -- It appears that the generation of the
+multicast is triggered by the 1 PPS. If the generation takes so long
+that it overruns the next 1 PPS, making the packet _late_. That
+appears to inhibit the generation of the packet for the next second.
+Whether or not this happens seems to depend on the number of Core3H
+boards, the firmware version, the DBBC3 CPU speed. There seem to be
+three regimes for this:
+
++
+--
+
+[disc]
+
+* No overruns -- This is the typical case.
+
+* Intermittent overruns -- This may happen if the packet generation
+usually finishes close to but before the next 1 PPS. There seems to be
+a variable delay of up to about an additional 0.25 seconds that can
+cause packets to be late.
+
+* Consistent overruns -- This occurs when the packet generation
+always overruns at least the next 1 PPS. This will cause a time-out
+every other read attempt if just the next 1 PPS is overrun
+consistently.
+
+--
++
+
+Usually, log entries for late packets will have a timestamp
+centiseconds (0.01 seconds) of `19` or less.
+
++
+
+The late arrival time will also be visible in the `Arrival` time of
+_monit7_ and in the last field,`_hsecs_`, of the `mcast_time/0`
+output, if you happen to catch them for the late packet. For _monit7_,
+late arrival times are shown in inverse video. For consistent
+overruns, the arrival times may, or may not, be before the late
+arrival limit used by _monit7_.
+
++
+
+When a late packet occurs, an inverse video `Time` value will occur
+before the time-out. This happens because when the packet arrives
+late, data from the previous packet has already been displayed again
+with the time unchanged (inverse because it did not advance). In the
+update for the _next_ second, the data from the late packet is
+displayed (along with the late arrival time, which is inverse video).
+The `Time` value will not be inverse video because the late packet,
+usually, has a different time.
+
++
+
+NOTE: The limit _monit7_ uses for late arrival times can be adjusted
+with the `-l` command line option.
+
++
+
+NOTE: In FS _10.1_, arrival times are not shown in the _monit7_ window
+and there was no `-l` option.
 
 == Firmware version checking
 
@@ -576,9 +701,9 @@ The checks are made in two different situations:
 
 +
 
-The version information is checked for each multicast reception. If
+The version information is checked for each multicast reception. (If
 there is no multicast being received, these errors will not be
-reported this way. The minimum reporting interval is one minute, but
+reported this way.) The minimum reporting interval is one minute, but
 can be increased up to 10 minutes with the environment variable
 `FS_DBBC3_MULTICAST_VERSION_ERROR_MINUTES`. Please see the
 <<Other options>> section of the
@@ -588,7 +713,7 @@ details.
 +
 
 NOTE: In FS _10.1_, the interval for reporting version errors detected
-with the multicast data was 20 seconds and could not be adjusted.
+with the multicast data is 20 seconds and can not be adjusted.
 
 +
 
@@ -642,15 +767,16 @@ For DBBC3 use, the rack type in _equip.ctl_ should be `dbbc3_ddc_e`
 `dbbc3_ddc_u`, or `dbbc3_ddc_v` depending on the firmware that is
 loaded.
 
-NOTE: For FS _10.1_, `dbbc3_ddc_e` was not supported.
+NOTE: For FS _10.1_, `dbbc3_ddc_e` is not supported.
 
 === dbbc3.ctl
 
 The DBBC3 specific control file parameters are in the _dbbc3.ctl_
 control file. An example of the contents is:
 
-NOTE: In FS _10.1_, the second non-comment line below, for the DDC_E
-firmware version, was not present.
+NOTE: In FS _10.1_, the second non-comment (and its associated
+preceding comment) line below, for the DDC_E firmware version, is not
+present.
 
 ....
 * Two fields: BBCs/IF (8, 12, 16 or nominal (U:16,EV:8)), IFs (1-8)
@@ -712,72 +838,122 @@ _/usr2/fs/st.defaul/control/skedf.ctl_ example file.
 
 == Tsys monitor display
 
-The T~sys~ monitor display is organized per IF and updates at a 1 Hz
-rate. The displayed information includes: LO, time, VDIF epoch, time
-difference between DBBC3 and the FS, PPS delay, T~sys~ and
-polarization for each IF/Core3H board as well as BBC frequencies and
-T~sys~ values. By default the display will cycle through the
-appropriate IFs, dwelling for two seconds on each. Selecting other
-configurations is described in the <<Commands>> subsection below.
+The T~sys~ monitor display (_monit7_) is organized per IF and updates
+at a 1 Hz rate. The displayed information includes: LO, time,
+multicast arrival time, time difference between DBBC3 and the FS, PPS
+delay, T~sys~ and polarization for each IF/Core3H board as well as BBC
+frequencies and T~sys~ values. By default the display will cycle
+through the appropriate IFs, dwelling for two seconds on each. It is
+designed to provide useful information without operator intervention.
+The operator can adjust the display as desired using the features
+described in the <<Commands>> subsection below.
 
-If the LO and its polarization are defined for the displayed IF, the
-polarization will be shown as `(L)` or `+++(R)+++`.
+_monit7_ has three command line options:
 
-NOTE: `(L)` or `+++(R)+++` are displayed regardless of what
-polarization pair is in use: Left/Right, Horizontal/Vertical, or X/Y.
-Following the usual alphabetical order convention within a pair: `LR`,
-`HV`, and `XY`, you can assume: `L`=`H`=`X` and `R`=`V`=`Y`. Until the
-FS is updated to recognize pairs other than Left/Right, you need to
-know which pair is active to interpret what is shown.
+* `-h` -- print command line option help output
 
-NOTE: In FS _10.1_, the polarization was not shown.
+* `-l _n_` -- change the _late_ arrival time limit from `20` to `_n_`
+centiseconds. The range is `0`-`100`, `0` disables late arrival
+processing, `100` marks all packets as late. Arrival times _less_ than
+the limit are considered late. The interpretation of arrival times is
+discussed in the section <<Multicast time-outs>> above under
+"`Intermittent overruns.`"
 
-Except for `Time`, the values are from the previous second's
-multicast. Hence for continuous calibration, the T~sys~ values are
-from two seconds in the past. If the system is operating normally,
-`Time` shows a value one second more than in the previous second's
-multicast to avoid confusion with times displayed in other windows.
-(Logged values of the time are the raw received values.) This leads to
-the somewhat odd situation that for a Core3H board that is not synced,
-with non-DDC_V firmware, its `Time` value will be shown as `00:00:01`
-on the first day of the current VDIF epoch.
+* `-r` -- reverse the foreground colors (swapping white and black)
+for cyan, green, yellow, red, and blue backgrounds.
 
-The `Time` value is shown with inverse video if it is not changing,
-i.e., it is not advancing. For non-DDC_V firmware, the `Time` value
-will also be inverse video in some cases if one or more of the Core3H
-boards is not synced.
-
-If there is intermittent loss of multicast messages, whether due to
-execution of DBBC3 commands or network issues, the `Time` value will
-intermittently flash inverse video. When the time is inverse video,
-the data displayed will be from the last received message, i.e., it
-will be stale.
-
-The `Epoch` value is shown as `--` for now since the VDIF epoch is not
-available yet in the multicast.
-
-The `DBBC3-FS` time difference, in seconds, is shown in inverse video
-if it is not zero (positive if the DBBC3 time is later than the FS).
+If there is an error when the options are parsed, an explanatory
+message is printed, then the program pauses for 10 seconds before
+terminating. This gives the user a chance to see the message if the
+window it is in closes automatically when the program ends.
 
 [NOTE]
 ====
 
-For DDC_V firmware:
+In FS _10.1_:
 
-* Time is not available in the multicast so the message arrival time
-is shown and `DBBC3-FS` is shown as `------`.
+* The polarization and the multicast arrival time are not shown. In
+place of the arrival time, the VDIF epoch is shown as `--`. The epoch
+was expected to be available but has not been included in the
+multicast yet.
 
-* In FS version _10.1_ for DDC_V firmware versions after _v124_, the
-time is incorrectly shown as `00:00:01` on the first day of the
-current VDIF epoch. Normally for DDC_V firmware no time would be
-available. There was a misunderstanding about whether it would be for
-these later versions.
+* For DDC_V firmware versions after _v124_, `Time` is incorrectly
+shown as `00:00:01` on the first day of the current VDIF epoch and
+`DBBC3-FS` is shown as dollar signs (too big to fit). Normally for
+DDC_V firmware no time would be available. There was a
+misunderstanding about whether it would be included for these later
+versions.
+
+* There were no command line options for _monit7_.
 
 ====
 
-The display is designed to provide useful information without operator
-intervention. The operator can adjust the display as desired using the
-features described in <<Commands>> subsection below.
+Except for `Time`, the DBBC3 based data are from the previous second's
+multicast. Hence for continuous calibration, the T~sys~ values are
+from two seconds in the past. For DDC_V firmware, time is not
+available in the multicast so the message arrival second is used
+instead.
+
+If the system is operating normally, `Time` shows a value one second
+more than for the previous second's multicast to avoid confusion with
+times displayed in other windows. (Logged values of the time are the
+raw received values.) This leads to the somewhat odd situation that
+for a Core3H board that is not synced, with non-DDC_V firmware, its
+`Time` value will be shown as `00:00:01` on the first day of the
+current VDIF epoch.
+
+The `Time` value is shown with inverse video if it is not changing,
+i.e., it is not advancing. Typically, this happens for multicast
+time-outs, but may also occur for non-DDC_V firmware for other
+reasons. An example of the latter is if one or more of the Core3H
+boards is not synced. When the time is inverse video due to a lost (or
+_late_, see below) message, the data displayed will be from the last
+received message, i.e., it will be stale.
+
+The `DBBC3-FS` time difference, in seconds (positive if the DBBC3 time
+is later than the FS), is shown in inverse video if it is not zero.
+For DDC_V firmware, `DBBC3-FS` is shown as `------`.
+
+The `Arrival` value is the centiseconds (the 0.01 seconds) of the
+arrival time of the multicast message. Generally values of `20`-`99`
+indicate that the message arrived on-time in the second it is for.
+Values of `0`-`19` generally indicate that the message arrived _late_,
+i.e., are from the previous second, and are shown in inverse video. If
+the multicast was late, the `Time` and the `DBBC3-FS` values are
+increased by one to compensate. The limit in _monit7_ for when an
+arrival time is considered late can be adjusted with the `-l` command
+line option.
+
+If a message is late in arriving, the time will be shown in inverse
+because there is no new data available when the display is updated.
+The late message inhibits the DBBC3's next multicast causing it to be
+lost. The late message will be displayed in its place. That will
+display a new `Time` value, removing the inverse video. In this case,
+as well as for a message that is simply missing, `Time` will be
+inverse for one cycle. Unlike for a simply missing message, it will be
+inverse before the loss of the message is detected.
+
+If the LO and its polarization are defined for the displayed IF, the
+polarization will be shown as `(L)` or `+(R)+`.
+
+NOTE: `(L)` or `+(R)+` are displayed regardless of what polarization
+pair is in use: Left/Right, Horizontal/Vertical, or X/Y.  Following
+the usual alphabetical order convention within a pair: `LR`, `HV`, and
+`XY`, you can assume: `L`=`H`=`X` and `R`=`V`=`Y`. Until the FS is
+updated to recognize pairs other than Left/Right, you need to know
+which pair is active to interpret what is shown.
+
+[NOTE]
+====
+
+In FS _10.1_:
+
+* The polarization is not shown.
+
+* The late packet arrival processing and _monit7_ command line switch
+`-l` are not included.
+
+====
 
 === Modes
 
@@ -823,7 +999,7 @@ Finite values outside of the range, `-999.` to `999.9`, which won't
 fit in the available field width, are displayed as dollar signs, `$`.
 
 There are two regimes, described below: <<Continuous calibration>> and
-<<Spot (noncontinuous) calibration>>.
+<<Legacy (noncontinuous) calibration>>.
 
 ==== Continuous calibration
 
@@ -839,74 +1015,121 @@ only the first encountered is reported. The order is:
 
 . `Ntcal` -- no Tcal value was found
 
-. `N cal` -- continuous calibration not enabled (and no spot
-measurement have been made yet)
+. `N cal` -- continuous calibration not enabled (and a legacy
+measurement has not been made yet)
 
-+
+The T~sys~ values are calculated using the averaging and filtering
+methods described in `*help=cont_cal*`. Negative (including
+out-of-range) values as shown in inverse video, unless colorization
+for filtering overrides that (see below). Invalid and out-of-range
+data are always shown whenever they occur.
 
-NOTE: In FS _10.1_, `Nccal` was used instead and only applied to
-continuous calibration.
+Invalid data is shown with a cyan background. The cases are:
 
-The T~sys~ values are calculated using the averaging method described
-in `*help=cont_cal*`. A special background color is used for the
-following errors, regardless of whether averaging is in use:
+* If the BBC "`on`" and/or "`off`" TPI values overflow (`65536`),
+`ovrfl` is shown.
 
-* Negative values, including too large values with dollar signs, are
-shown with magenta.
+* If the "`on`" and "`off`" TPI values are zero, `tpi=0` is shown.
 
-* If the "`on`" and "`off`" TPI values are equal, `` inf `` is shown
-with cyan.
+* If the "`off`" TPI value is zero, `off=0` is shown.
 
-* If the "`on`" and/or "`off`" TPI values overflow (`65536` for BBCs),
-`ovrfl` is shown with cyan.
+* If the "`on`" TPI value is zero, `` on=0`` is shown.
 
-* If the "`off`" TPI value is zero, `off=0` is shown with cyan.
+* If the "`on`" and "`off`" TPI values are equal (and not zero), ``
+inf `` is shown.
 
-If filtering is use, there is a green background  when 1-2 values have
-been rejected in a row; yellow, 3-5; red; 6 or more. Invalid results
-(negative, infinity, overflow, and the "`off`" value being zero) are
-still displayed as such and included in the accumulated count of
-rejected values for the next time there is a valid result.
+If filtering is in use, there is a green background when 1-2 values
+have been rejected, or _clipped_, in a row; yellow, 3-5; red; 6 or
+more. Once in the red clipping zone, you may also see the background
+transition to blue for one cycle to show there has been auto-reset
+(see `*help=cont_cal*` for information on auto-reset). Invalid results
+(infinity, overflow, and the "`off`" and/or "`on`" values being zero)
+and out-of-range positive and negative values are still displayed as
+such and are not included in the clipped count.
 
+For certain reverse video terminals, for example with the normal FS
+`black`/`linen` settings for foreground/background, the white and back
+foreground colors are swapped when the background is cyan, green,
+yellow. red, and blue. To get the intended foreground colors, you can
+use the `-r` command line switch with _monit7_. Unfortunately, it is
+not possible for _monit7_ to detect the need for this automatically.
 If colors are not available for the terminal, inverse video is used
 instead.
 
-NOTE: In FS _10.1_, all invalid values (negative, infinity, overflow)
-were displayed as dollar signs and the "`off`" TPIs being zero was not
-recognized as an error condition.
+[NOTE]
+====
+
+In FS _10.1_:
+
+* `Nccal` is used in place of ``N cal`` and only applied to
+continuous calibration.
+
+* Averaging and filtering are not available.
+
+* All invalid values (negative, infinity, overflow) are displayed as
+dollar signs.
+
+* "`off`" and/or "`on`" TPI values being zero are not identified as
+invalid.
+
+* The _monit7_ command line switch `-r` is not available.
+
+====
 
 ===== Diagnosing problems
 
 With the way T~sys~ data is displayed, certain problems can be readily
 identified as the values update:
 
-* Most, or all, values are negative -- the calibration polarity is
+* All, or most, values are negative -- the calibration polarity is
 incorrect
 
-* Most, or all, values are very large positive or negative values,
+* All, or most, values are very large positive or negative values,
 including dollar signs, perhaps with some `` inf `` mixed in -- the
-diode is not firing
+diode is not firing. You may also see some clipping and auto-resets if
+you are using filtering and have significant RFI.
 
 * Some fields have `overfl` -- the gain is set too high for those BBCs
 
 * `off=0` is seen -- the FS has continuous calibration set to "`on`",
-but the DBBC3 has it "`off`".
+but the DBBC3 has it "`off`" (legacy).
+
+* `` on=0`` is seen -- the FS has continuous calibration set to
+"`on`", but the DBBC3 has it "`off`" and the DBBC3 has polarity `2`.
+
+* ``tpi=0`` is seen -- This may appear in some situations when the
+DBBC3 firmware is being reloaded.
 
 Turning off averaging (setting the `_samples_` parameter of `cont_cal`
 to `0`), can be useful for troubleshooting. You will see the T~sys~
 values calculated sample-by-sample with no averaging or filtering.
 
-==== Spot (noncontinuous) calibration
+NOTE: In FS _10.1_, the error conditions that are identified are all
+shown as dollar signs and thus can not be distinguished. The most
+likely problems in that case are the polarity being wrong or the noise
+diode not firing. The T~sys~ values being unrealistically low could be
+a symptom of the FS having continuous calibration "`on`", but the
+DBBC3 having it "`off`". Examining the raw count data, either with the
+`BBC__nnn__` commands, or from logged multicast data, can help
+identify the problem.
 
-Spot calibration refers to explicitly turning the noise diode on and
-off to make calibration measurements. Incorrect values (negative,
-infinity, and overflow) and BBCs or LOs not configured are displayed
-as dollar signs, `$`. If the T~cal~ it not defined `Ntcal` is shown in
-inverse video. If no measurement has been made yet, `N cal` is shown
-in inverse video.
+==== Legacy (noncontinuous) calibration
 
-NOTE: In FS _10.1_, information for spot calibration T~sys~ was not
-displayed.
+_Legacy_ calibration refers to explicitly turning the noise diode on
+and off to make calibration measurements. Incorrect values (negative,
+infinity, and overflow) and for BBCs or LOs not configured are
+displayed as dollar signs, `$`. If the T~cal~ it not defined `Ntcal`
+is shown in inverse video. If no measurement has been made yet,
+`N{nbsp}cal` is shown in inverse video.
+
+NOTE: When legacy calibration is set (`cont_cal=off,...`), the
+polarity is forced to `0` to make sure the TPI data will populate the
+expected fields in DBBC3 command responses and multicast data. A
+warning is issued if this is different than the user requested
+polarity.
+
+NOTE: In FS _10.1_, information for legacy calibration T~sys~ is not
+displayed in _monit7_ and the polarity is not forced to `0`.
 
 === Commands
 
@@ -930,27 +1153,32 @@ RF frequencies for the corresponding BBCs.
 
 * `*l*` -- toggle between `All` and `Rec`*/*`Def` modes (see the <<Modes>> subsection above for defaults)
 
-+
-
-NOTE: If one IF was manually selected before the IF and BBC
-configuration was defined (or at startup of the display window before
-any IF had been displayed), it will not be possible to toggle between
-display modes until cycling has been restarted.
-
 * `*0*` -- reset to all defaults
 * `*?*` or `*/*` -- show help summary
-*  kbd:[esc] or kbd:[control+c] -- exit
+*  kbd:[Ctrl+c] -- exit
+
 * Any other key (e.g., kbd:[space]) -- resume cycling
 
-TIP: Some key combinations, e.g., kbd:[Ctrl+Alt+{downarrow}], generate
-escape sequences. If they are used while _monit7_ has the focus, they
-will probably cause it to exit. We are looking into a programmatic way
-to prevent this. If this is annoying or you are not using the display
-server (in which case the FS will crash), you can mask out troublesome
-key combinations for _monit7_ in _~/.Xresources_ or possibly with the
-window manager. If _monit7_ exits while using the display server and
-you have it defined in _clpgm.ctl_, you can use `client=monit7` to
-reopen it.
+[NOTE]
+====
+
+In FS _10.1_:
+
+[disc]
+
+* kbd:[Esc] can also be used to exit. Some key combinations, e.g.,
+kbd:[Ctrl+Alt+{downarrow}] generate escape sequences. Thus, if they
+are used while _monit7_ has the focus, they will probably cause it to
+exit.
+
+* If one IF is manually selected before the IF and BBC configuration
+was defined (or at startup of the display window before any IF had
+been displayed), it is not be possible to toggle between display
+modes until cycling has been restarted.
+
+* In some cases, no longer active BBC T~sys~ fields are not cleared.
+
+====
 
 == Checking DBBC3 time
 
@@ -961,27 +1189,30 @@ For DDC_V firmware, `mcast_time`, cannot report the time, but will
 still report the `pps_delay`. For non-DDC_V firmware, an error will be
 reported if any Core3H board's time differs from the FS time.
 
-For DDC_V firmware and versions before _v124_, the `dbbc3=time`
-command can be used. However, the output can be difficult to
-interpret because the boards may be sampled in different seconds.
+For DDC_V firmware, the `dbbc3=time` command can be used. However, the
+output can be difficult to interpret because the boards may be sampled
+in different seconds.
 
 NOTE: We expect that future firmware versions, possibly beginning with
 _v130_, will report the VDIF epoch in the multicast. In that case,
 `mcast_time` will report if there is a VDIF epoch mismatch between the
-boards.  Other checks may also be added in the future.
+boards. Other checks may also be added in the future.
 
 == Setting FS time
 
 It is expected that normally the FS computer will be using NTP and the
 FS time model is set to `computer` (see _misc/ntp.txt_ for more
 information). If good NTP servers are available, that should give the
-best time in the FS.
+best time in the FS. The _setcl_ program should not be used with DBBC3
+and NTP. The best way to monitor DBBC3 time is with the `mcast_time`
+command, which should at least be placed in `midob` and can of course
+be used manually as well.
 
 No suitable NTP servers may be available either because network
 connectivity is poor and/or there are no local functioning NTP
 servers. In that case the FS program _setcl_ can be used with
 non-DDC_V versions to set and adjust FS time (see _misc/fstime.txt_
-for the details).
+for the general information).
 
 The implementation of _setcl_ for the DBBC3 depends on two values from the
 _dbbc3.ctl_ control file:
@@ -991,26 +1222,40 @@ _dbbc3.ctl_ control file:
 +
 
 This is the delay for when the multicast arrives after the 1 PPS. It
-seems to be stable for a given system. It does seem to vary with the
-number of Core3H boards and other factors we don't fully understand
-yet. In tests with DDC_U _v125_, we have seen delays of 57 and 75
-centiseconds in systems with eight Core3H boards; 33 centiseconds, for
-a system with two boards. (For DDC_V _v124_ with eight boards, we have
-seen about 30 centiseconds in one system and 19 in another. Since
-there is no time available in the DDC_V multicast, DDC_V is not useful
-for setting the FS time.)
+seems to be fairly stable for a given configuration. It does vary with
+the number of Core3H boards installed, the firmware loaded, and the
+DBBC3 CPU speed.
 
 +
 
 The value in _dbbc3.ctl_ can be adjusted as appropriate. It should be
 easy to measure it for a given system when NTP _is_ available, using
-the output of the `mcast_time` command, and optionally  _setcl_. The
-system will need to be synced to NTP and the `computer` model selected
-in _time.ctl_. In this case, the last parameter, `hsecs`, on the
-`mcast_time/0` line _minus_ the last value on the `#setcl#model/old`
-line is the value to put in the file; it may vary at the single digit
-centisecond level. If _setcl_ it not being used, the value from it can
-be treated as being zero.
+the output of the `mcast_time` command. The system will need to be
+synced to NTP and the `computer` model selected in _time.ctl_. In this
+case, the last parameter, `_hsecs_`, on the `mcast_time/0` output is
+the value to put in the file; it may vary at the few centisecond
+level. (If _setcl_ it being used, it will probably work to subtract
+the last value on the `#setcl#model/old` from `_hsecs_` before putting
+it in the file.)
+
++
+
+You can also get the value from the timestamps of logged multicast
+data or the `Arrival` value of the T~sys~ monitor display (_monit7_).
+
++
+
+TIP: You will not be able to get a suitable value for the delay if the
+multicast packet generation is overrunning the next 1 PPS as described
+in the <<Multicast time-outs>> section above. If setting the FS time
+is needed in such a case, please contact Ed, a patch can be provided.
+If you only get multicast time-outs rarely, you probably don't have
+this problem.
+
++
+
+NOTE: In FS _10.1_, the `Arrival` value is not available in _monit7_.
+
 
 * The board number to use for measuring the time.
 
@@ -1020,15 +1265,18 @@ There can be up to eight to choose from. Board `1` will be in all systems and
 should be adequate for the purpose, but which board is used can be changed in
 the control file if need be.
 
++
+
 NOTE: _setcl_ will only be able to get a useful time from the selected
 board if it is synced. _setcl_ detects a lack of sync when the Core3H
 board's time in the multicast is `00:00:00` or `00:00:01` on the first
 day of the current VDIF epoch. As a result, twice a year for about two
 seconds each, _setcl_ can incorrectly think the board is not synced.
-Each run of _setcl_ tries to get the time for up to four attempts, so
-even if the first two tries incorrectly show the board as unsynced, a
-subsequent attempt should be okay. A lack of sync will also be shown
-as `unsynced` in the `core3h_mode` command monitor output.
+Each run of _setcl_ tries to get the time for up to four attempts,
+each for a different second, so even if the first two tries
+incorrectly show the board as unsynced, a subsequent attempt should be
+okay. A lack of sync will also be shown as `unsynced` in the
+`core3h_mode` command monitor output.
 
 Using _setcl_ to set the FS time this way will only be useful to level
 of stability of the delay of the multicast. Network congestion may
@@ -1055,13 +1303,13 @@ procedures. When logging is enabled, for each multicast message
 received (nominal 1 Hz rate), the following information, shown with
 their log entry labels, is logged:
 
-* The arrival time of the message -- is represented by the time-tag of
-the log entry with centisecond precision.
+* The arrival time of the message -- represented by the time-tag of
+the log entry with centisecond precision
 
 +
 
-The fractional seconds should agree with the last value, `hsecs`, on
-the `mcast_time/0` line with small variations at the one centisecond
+The fractional seconds should agree with the last value, `_hsecs_`, on
+the `mcast_time/0` line with small variations at the centisecond
 level.
 
 * `time` -- for each Core3H board in the system
@@ -1073,14 +1321,14 @@ time is incorrectly logged as `00:00:01` on the first day of the
 current VDIF epoch, except for board `5` for which the arrival time of
 the message will be logged. Normally for DDC_V firmware no time would
 be available. There was a misunderstanding about whether it would be
-for these later versions.
+included for these later versions.
 
 * `pps2dot` -- (`pps_delay`) in nanoseconds for each Core3H board
-* `tpcont`  -- Only if continuous calibration _is_ in use -- TPI counts for each BBC and IF configured for recording.
+* `tpcont`  -- only if continuous calibration _is_ in use -- TPI counts for each BBC and IF configured for recording
 +
 The counts are given in the order of diode _on_ then _off_
-* `tpi`  -- Only if continuous calibration is _not_ in use -- TPI counts for each BBC and IF configured for recording.
-* `tsys` -- Only if continuous calibration _is_ in use -- T~sys~ for each BBC and IF configured for recording
+* `tpi`  -- only if continuous calibration is _not_ in use -- TPI counts for each BBC and IF configured for recording
+* `tsys` -- only if continuous calibration _is_ in use -- T~sys~ for each BBC and IF configured for recording
 
 +
 
@@ -1092,51 +1340,24 @@ interval is the product of `_samples_` times `_cycle_`.
 
 +
 
-When averaging is turned off, invalid values (overflow, infinity, and
-`off=0`) are logged as dollar signs, `$`. When averaging is turned on,
-the same invalid values are logged as dollar signs only if no valid
-positive values have occurred. Likewise when averaging is turned on, a
-negative value will be logged only if no valid positive values have
-occurred. Values less than -999.5 or larger than 999.9 are logged as
-dollar signs.
+When averaging is turned off, invalid (overflow, infinity, and "`on`"
+and/or "`off`" zero TPIs) and out-of-range values are logged as dollar
+signs, `$`. When averaging is turned on, the same invalid values are
+logged as dollar signs only if no valid in-range values have occurred.
 
 +
 
-NOTE: For FS _10.1_, negative T~sys~ values were recorded as dollar
-signs, `$`. Averaging was not implemented.
+NOTE: For FS _10.1_, negative T~sys~ values are recorded as dollar
+signs, `$`, and averaging is not implemented.
 
 Even when not being logged, multicast data is normally being received.
-A subset can be seen in the T~sys~ monitor display. The current value
-can displayed in the log display window (and logged) at anytime by
-using the command `*tpicd=tsys*`.
+A subset can be seen in the T~sys~ monitor display. For continuous
+calibration, the current values can be displayed in the log display
+window (and logged) at anytime by using the command `*tpicd=tsys*`.
 
-Multicast messages may be lost if there are network issues or if a
-DBBC3 command is used. The FS will report an error (a _time-out_) once
-every 20 seconds if it is not receiving multicast when `data_valid` is
-`on`, i.e., during recording or e-VLBI.
-
-IMPORTANT: You should avoid use of DBBC3 commands when `data_valid` is
-`on`, i.e., during a scan, since they may cause loss of calibration
-data.
-
-When `data_valid` is `off`, the FS will only report loss of multicast
-messages if it does not appear to be associated with DBBC3 command
-usage. We believe that there will be no "`extra`" errors caused by
-DBBC3 commands. However, we cannot be sure every case has been caught.
-There is some chance that there will be extra errors reported one to
-three seconds after the most recent DBBC3 communication. Please report
-this situation if you encounter it, so it can be fixed. It is more
-convincing that a DBBC3 command is the cause if you do not normally
-get multicast time-outs for other reasons.
-
-Each time a multicast message is lost the `Time` value in the T~sys~
-monitor display will not advance and will be displayed in inverse
-video.
-
-NOTE: The _plog_ utility was modified to push reduced logs with DBBC3
-multicast data squeezed out by default, as it already did for RDBEs. A
-subsequent revision in _plog_ causes the compressed full log to also
-be pushed by default. Please see ``**plog -h**`` for more information.
+NOTE: By default, the _plog_ utility will push both reduced logs, with
+the multicast data squeezed out, and compressed full logs. Please see
+``**plog -h**`` for more information.
 
 == drudg support
 
@@ -1194,7 +1415,10 @@ _/usr2/fs/st.default/control/skedf.ctl_ file.
 == Configuring the FS for use with a DBBC3
 
 This appendix provides the steps needed to configure the FS to support
-a DBBC3. All steps, except as noted, are to be executed as _oper_.
+a DBBC3. You must have version FS _10.1_, or later, installed before
+using these directions. All steps, except as noted, are to be executed
+as _oper_.
+
 
 . Update _equip.ctl_.
 
@@ -1205,7 +1429,7 @@ Change your rack type to `dbbc3_ddc_e`, `dbbc3_ddc_u,` or
 
 +
 
-NOTE: For FS _10.1_, `dbbc3_ddc_e` was not available.
+NOTE: For FS _10.1_, `dbbc3_ddc_e` is not available.
 
 . Update _dbbc3.ctl_.
 
@@ -1312,8 +1536,9 @@ You will probably want to update many other procedures or replace them
 with DBBC3 versions. The example/default DBBC3 `station` procedure
 library is _/usr2/fs/st.default/proc/d3fbstation.prc_. You can place a
 copy in your _/usr2/proc/_ directory with (adjusting the target file
-name appropriately to avoid overwriting an existing file; use eight
-characters or less for the part before `.prc`):
+name appropriately to avoid overwriting an existing file; use
+eighteen, in FS _10.1_ eight, characters or less for the part before
+`.prc`):
 
   cd /usr2/proc
   cp /usr2/fs/st.default/proc/d3fbstation.prc d3fbstat.prc
@@ -1342,8 +1567,8 @@ This method is particularly well suited for installing a new system
 but can be useful for updating an existing system as well. If the FS
 is running, `terminate` it first. Then use the commands (adjusting the
 target filename in the `mv` command appropriately to avoid overwriting
-an existing file; use eight characters or less for the part before
-`.prc`):
+an existing file; use eighteen, in FS _10.1_ eight, characters or
+less for the part before `.prc`):
 
   cd /usr2/proc
   mv station.prc statold.prc
@@ -1554,7 +1779,7 @@ in DBBC3 behaviour between different firmware releases. Several
 variables are provided to give flexibility for handling different
 variations.
 
-NOTE: None of these environment variables are supported in FS _10.1_.
+NOTE: In FS _10.1_, none of these environment variables are available.
 
 While some firmware releases may require setting a subset of these
 variables, we have set the default values so that the end user should
@@ -1623,15 +1848,15 @@ results without any of the environment variables set. Assuming you are
 using the correct polarity (see <<Continuous calibration polarity>> in
 the <<Verifying polarity and USB/LSB TPI swaps>> appendix), then if:
 
-* T~sys~ for the BBCs in the monitor display window is `++$$$$$++`, you
+* T~sys~ for the BBCs in the monitor display window is negative, you
 may need to define `FS_DBBC3_MULTICAST_BBC_ON_OFF_SWAP` as `1`.
 
-* T~sys~ for the IFs in the monitor display window is `++$$$$$++` and your
-polarity is `0`, you may need to define
+* T~sys~ for the IFs in the monitor display window is negative and
+your polarity is `0`, you may need to define
 `FS_DBBC3_MULTICAST_CORE3H_POLARITY0_ON_OFF_SWAP` as `1`.
 
-* T~sys~ for the IFs in the monitor display window is `++$$$$$++` and your
-polarity is `2`, you may need to define
+* T~sys~ for the IFs in the monitor display window is negative and
+your polarity is `2`, you may need to define
 `FS_DBBC3_MULTICAST_CORE3H_POLARITY2_ON_OFF_SWAP` as `0`.
 
 * T~sys~ for the BBCs from _onoff_ is negative (or an overflow,
@@ -1644,6 +1869,10 @@ and your polarity is `0`, you may need to define
 * T~sys~ for the IFs from _onoff_ is negative (or an overflow, ``$``s)
 and your polarity is `2`, you may need to define
 `FS_DBBC3_IFTPX_POLARITY2_ON_OFF_SWAP` as `0`.
+
+NOTE: For FS _10.1_, the monitor display window shows `++$$$$$++` for
+negative T~sys~ values, but DBBC3 specific environment variables,
+including these, are not available.
 
 === Swaps of TPI and gain values
 
@@ -1699,19 +1928,19 @@ options:
 
 +
 
-This variable can be used to adjust the time-stamp in the multicast
+This variable can be used to adjust the timestamp in the multicast
 packets. Normally it does not need to be set and defaults to `0`. If
 the multicast packets being received have a fixed offset from the
 correct time, this variable can be set to correct the values. Any
 32-integer value can be used. Any non-integer value is interpreted as
-`0`. The value is added to the time-stamps.  This does not correct the
+`0`. The value is added to the timestamps. This does not correct the
 time that the DBBC3 is using internally and in the VDIF packets sent
 to the recorder. This can only be used to eliminate FS indications of
 incorrect time in the DBBC3. Please see the warning immediately below.
 
 +
 
-WARNING: Having the wrong time-stamps may be an indication that the
+WARNING: Having the wrong timestamps may be an indication that the
 DBBC3 was not properly synchronized. It may be that the DBBC3 needs to
 be rebooted to resynchronize it properly.
 
@@ -1720,7 +1949,7 @@ be rebooted to resynchronize it properly.
 +
 
 This variable controls whether time is expected in the multicast
-packets.  Normally it does not need to be set. It defaults to `0` for
+packets. Normally it does not need to be set. It defaults to `0` for
 DDC_V and `1` for others. Setting it to `1` means that time in the
 multicast packet is expected. Any other value is interpreted as `0`,
 i.e., time is not expected and no attempt will be made to use it.
@@ -1743,13 +1972,15 @@ This appendix provides methods for verifying the
 <<Continuous calibration polarity>> and the
 <<USB/LSB TPI swap status>>
 
-NOTE: These procedures are not supported for FS _10.1_.
+NOTE: In FS _10.1_, these procedures can be used without the
+environment variables, which are not available,  to check the related
+aspects of the system.
 
 === Continuous calibration polarity
 
 A polarity of `0` corresponds to the noise diode in the receiver being
 active for the low TTL output level of the DBBC3 continuous
-calibration signal; `2`, active for the high TTL output level.  The
+calibration signal; `2`, active for the high TTL output level. The
 best case is to know what the polarity should be from the design of
 your system. If that is not practical, or to verify it, you can use
 the methods in this section.
@@ -1811,7 +2042,7 @@ TPI~off~ value, you should use `2` as your polarity.
 
 === USB/LSB TPI swap status
 
-To verify  your  USB/LSB TPI swap status you need a strong test signal
+To verify your USB/LSB TPI swap status you need a strong test signal
 in one side-band of a BBC. This could either be a phase calibration
 test tone, or an astronomical source such as a Maser, that makes a
 strong signal in only one side-band of one BBC.
@@ -1877,9 +2108,9 @@ equipment unstable, the _drudg_ option `use_setup_proc yes` in _skedf.ctl_ can
 be used to minimize the execution of the setup procedure.
 
 CAUTION: Not executing the setup each scan may not be robust if the
-equipment sometimes loses its configuration. It is up to the individual
-stations to determine whether minimizing its use is better than always
-using it.
+equipment sometimes loses its configuration. Each station will need to
+determine for its particular situation whether minimizing its use is
+better than always using it.
 
 With this option enabled, _drudg_ will replace the calls to setup
 procedures (e.g., `setup01`) in the _.snp_ file with, e.g.:
@@ -1895,7 +2126,9 @@ procedure if either of the following is true:
 This will make sure the setup is run at the start and any restart of
 the schedule. There should be sufficient time for the setup procedure
 in these cases as long as the schedule is started as little as even
-just a few minutes before the first scan.
+just a few minutes before the first scan. The schedule may need to be
+started even earlier to allow enough time for the antenna to slew to
+the first source.
 
 * If there was a mode change, i.e., the name of the setup procedure changed.
 
@@ -1970,11 +2203,6 @@ intentional.
 
 +
 
-NOTE: In FS _10.1_, the `add` command was
-`_command_=datastream=add:{thread}:*`.
-
-+
-
 CAUTION: If you are using a _jive5ab_ version before _v3.1.0-rc1_ and
 you select storing a single-thread-per-file, the `scan_check` command
 will not work properly. You should comment it out or remove it from
@@ -1982,6 +2210,11 @@ your `checkfb` and/or `checkmk5` procedure. Alternately, if you only
 select single-thread-per-file sometimes, you may want to edit the
 procedure depending on your choice. Upgrading to _v3.1.0-rc1_ or later
 is recommended to eliminate this complication.
+
++
+
+NOTE: In FS _10.1_, the `add` command is
+`_command_=datastream=add:{thread}:*` and there is no double _ds_.
 
 * `no` -- for normal multi-threaded recording, in which case, the
 ``thread__suffix__`` procedure contents are:
