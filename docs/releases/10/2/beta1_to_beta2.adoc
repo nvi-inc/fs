@@ -21,7 +21,7 @@
 :doctype: book
 
 = FS 10.2-beta1 to FS 10.2-beta2 Update Notes
-Version 0.74 - July 2023
+Version 0.75 - August 2023
 
 :sectnums:
 :stem: latexmath
@@ -489,7 +489,7 @@ Except for clipped (and auto-reset) values, all negative values,
 including out-of-range (dollar signs, `++$$$$$++`), are shown in
 inverse video to highlight that the polarity is wrong without the
 somewhat extreme magenta color used in _10.1-beta1_. Clipped (and
-auto-reset) values include a sign anyway.
+auto-reset) values include a sign.
 
 ... For filtering, invalid values and T~sys~ values outside the range
 ±1000° are ignored completely instead of being included in the
@@ -502,7 +502,7 @@ clipped count.
 +
 [disc]
 
-* "`on`" TPI value is zero -- This is shown as `` on=0``. It occurs
+* "`on`" TPI value is zero -- This is shown as `{nbsp}on=0`. It occurs
 when the DBBC3 is configured for legacy calibration with polarity `2`
 and the FS is expecting continuous cal.
 

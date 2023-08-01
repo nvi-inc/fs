@@ -21,7 +21,7 @@
 :doctype: book
 
 = FS 10.2-beta2 Update Notes
-Version 0.73 - July 2023
+Version 0.74 - August 2023
 
 :sectnums:
 :stem: latexmath
@@ -543,8 +543,10 @@ _.Xresources.bak_ in case you need to recover.
 
 The script also includes command line options for setting a different
 width, either for all the windows or for specific ones. Enter
-`*/usr2/fs/misc/xresourcesfix*` for the details. You can try multiple
-times with different values if between runs of the script you use:
+`*/usr2/fs/misc/xresourcesfix*` for the details.
+
+You can try the script multiple times with different values if between
+runs you use:
 
  mv .Xresources.bak .Xresources
 
@@ -1167,10 +1169,11 @@ display window,
 
 The values of course only update when a new measurement is made. If
 the T~cal~ has not been defined, `Ntcal` is shown in inverse video. If
-no legacy calibration measurements have been made, `N cal` is shown in
-inverse video. Values that exceed `999.9`, erroneous values (negative,
-infinity, and overflow), and other setup errors, (BBC or LO not
-defined), are shown as dollar signs, `$`.
+no legacy calibration measurements have been made (and continuous
+calibration is not enabled), `N cal` is shown in inverse video. Values
+that exceed `999.9`, erroneous values (negative, infinity, and
+overflow), and other setup errors, (BBC or LO not defined), are shown
+as dollar signs, `$`.
 
 ... Add example legacy calibration procedures for the DBBC3.
 
@@ -1265,7 +1268,8 @@ independent only if `0` is used. This was the behavior of FS _10.1_.
 
 +
 
-When averaging is in use, the data cal also be _filtered_. Nine new
+When averaging is in use, the data cal also be _filtered_. This can be
+particularly helpful for bands with significant RFI. Nine new
 parameters in _cont_cal_ command are used to control filtering (see
 `*help=cont_cal*` or
 https://github.com/nvi-inc/fs/blob/main/help/cont_cal.j__). In
@@ -1396,10 +1400,12 @@ and the format.
 
 Except for clipped (and auto-reset) values, negative values, including
 out-of-range (dollar signs, `++$$$$$++`), are shown in inverse video
-to highlight that the polarity is wrong. Clipped (and auto-reset)
-values include a sign anyway.
+to highlight that the polarity is wrong. This is intended to bring
+attention to the polarity being incorrect. Clipped (and auto-reset)
+values include a sign.
 
-... Invalid data is shown with a cyan background.
+... Invalid continuous calibration data is shown with a cyan
+background.
 
 +
 
@@ -1412,10 +1418,10 @@ The cases are:
 
 * If the "`off`" TPI value is zero, `off=0` is shown.
 
-* If the "`on`" TPI value is zero, `` on=0`` is shown.
+* If the "`on`" TPI value is zero, `{nbsp}on=0` is shown.
 
-* If the "`on`" and "`off`" TPI values are equal (and not zero), ``
-inf `` is shown.
+* If the "`on`" and "`off`" TPI values are equal (and not zero),
+`{nbsp}inf{nbsp}` is shown.
 
 ... Invalid data and out-of-range continuous calibration T~sys~ values
 are always shown when they occur.
@@ -1466,6 +1472,21 @@ sequences, possibly more than once in a row or using automatic repeat.
 
 Thanks to Jon Quick (HartRAO) for reporting this issue and testing the
 fix.
+
+... `N cal` is now displayed when continuous calibration is not
+enabled (and no _legacy_ calibration is available).
+
++
+
+Previously it was `Nccal` (and only applied to continuous
+calibration).
+
+... Allow more digits for negative T~sys~ (continuous calibration)
+
++
+
+A larger range of negative values is shown by dropping the fractional
+digit as needed. The number of significant digits shown is not reduced.
 
 ... Always clear BBC T~sys~ fields that aren't being displayed in
 _monit7_.

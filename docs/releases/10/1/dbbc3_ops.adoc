@@ -28,7 +28,7 @@
 :experimental:
 :downarrow: &downarrow;
 E. Himwich, J. Quick
-Version 5.2.7 - July 2023
+Version 5.2.8 - August 2023
 
 == Introduction
 
@@ -1033,10 +1033,10 @@ Invalid data is shown with a cyan background. The cases are:
 
 * If the "`off`" TPI value is zero, `off=0` is shown.
 
-* If the "`on`" TPI value is zero, `` on=0`` is shown.
+* If the "`on`" TPI value is zero, `{nbsp}on=0` is shown.
 
-* If the "`on`" and "`off`" TPI values are equal (and not zero), ``
-inf `` is shown.
+* If the "`on`" and "`off`" TPI values are equal (and not zero),
+`{nbsp}inf{nbsp}` is shown.
 
 If filtering is in use, there is a green background when 1-2 values
 have been rejected, or _clipped_, in a row; yellow, 3-5; red; 6 or
@@ -1085,16 +1085,16 @@ identified as the values update:
 incorrect
 
 * All, or most, values are very large positive or negative values,
-including dollar signs, perhaps with some `` inf `` mixed in -- the
-diode is not firing. You may also see some clipping and auto-resets if
-you are using filtering and have significant RFI.
+including dollar signs, perhaps with some `{nbsp}inf{nbsp}` mixed in
+-- the diode is not firing. You may also see some clipping and
+auto-resets if you are using filtering and have significant RFI.
 
 * Some fields have `overfl` -- the gain is set too high for those BBCs
 
 * `off=0` is seen -- the FS has continuous calibration set to "`on`",
 but the DBBC3 has it "`off`" (legacy).
 
-* `` on=0`` is seen -- the FS has continuous calibration set to
+* `{nbsp}on=0` is seen -- the FS has continuous calibration set to
 "`on`", but the DBBC3 has it "`off`" and the DBBC3 has polarity `2`.
 
 * ``tpi=0`` is seen -- This may appear in some situations when the
