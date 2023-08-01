@@ -2,12 +2,13 @@
 
 require "getopts.pl";
 
-&Getopts("a:e:l:o:s:");
+&Getopts("a:3:7:T");
 
 if ($#ARGV < 0) {
     print "Usage: $0 [options] file
 
-Updates select geometry widths in an Xresources file (nominally '.Xresources').
+Updates monit3 and monit7 geometry upper edges and monit7 title in an
+Xresources file (nominally '.Xresources').
 
 This script should be run in the directory with the file, usually the user's
 home directory.
@@ -17,16 +18,15 @@ The backup file must not already exist.
 
 Option explanations:
 
- -a number  set width of all         windows
- -e number  set width of erchk       window
- -l number  set width of login_shell window
- -o number  set width of oprin       window
- -s number  set width of scnch       window
+ -a number  set upper edge of both   windows
+ -3 number  set upper edge of monit3 window
+ -7 number  set upper edge of monit7 window
+ -T         do not update monit7 title
 
-The default for '-a' is 146.
-If an option for an individual window is specified, it overrides '-a'.
-A value that isn't a positive integer (e.g. '0' or 'o') disables updating
-that window.
+The default for '-a' is 155.
+If '-3' and/or '-4' for an individual window is specified, they override '-a'.
+A value that is not an non-negative integer (e.g. '-1' or 'o') disables
+updating that window.
 ";
     exit -1;
 }
@@ -81,53 +81,48 @@ if(!open(OUT,">" . $out)) {
 
 # set widths
 
-$all=146;
+$all=155;
 $all=$opt_a if defined($opt_a);
 
-$erchk=$all;
-$erchk=$opt_e if defined($opt_e);
+$monit3=$all;
+$monit3=$opt_3 if defined($opt_3);
+$monit3=-1 if $monit3 !~ m/^\d+$/;
 
-$login_sh=$all;
-$login_sh=$opt_l if defined($opt_l);
+$monit7=$all;
+$monit7=$opt_7 if defined($opt_7);
+$monit7=-1 if $monit7 !~ m/^\d+$/;
 
-$oprin=$all;
-$oprin=$opt_o if defined($opt_o);
-
-$scnch=$all;
-$scnch=$opt_s if defined($opt_s);
+$monit7t=0;
+$monit7t=-1 if defined($opt_T);
 
 # keep count
 
-$count{"erchk"} = 0;
-$count{"login_sh"} = 0;
-$count{"oprin"} = 0;
-$count{"scnch"} = 0;
+$count{"monit3*geometry"} = 0;
+$count{"monit7*geometry"} = 0;
+$count{"monit7.title"} = 0;
 
 # okay now process the file
 
 while(<BAK>) {
-    if (/^(erchk\*geometry:\s*)\d+(x.*)/) {
-        $_ = "$1$erchk$2\n" if $erchk >0;
-        ++$count{"erchk"};
-    } elsif (/^(login_sh\*geometry:\s*)\d+(x.*)/) {
-        $_ = "$1$login_sh$2\n" if $login_sh > 0;
-        ++$count{"login_sh"};
-    } elsif (/^(oprin\*geometry:\s*)\d+(x.*)/) {
-        $_ = "$1$oprin$2\n" if $oprin > 0;
-        ++$count{"oprin"};
-    } elsif (/^(scnch\*geometry:\s*)\d+(x.*)/) {
-        $_ = "$1$scnch$2\n" if $scnch > 0;
-        ++$count{"scnch"};
+    if (/^(monit3\*geometry:.*\+)\d+\s*$/) {
+        $_ = "$1$monit3\n" if $monit3 >=0;
+        ++$count{"monit3*geometry"};
+    } elsif (/^(monit7\*geometry:.*\+)\d+\s*$/) {
+        $_ = "$1$monit7\n" if $monit7 >=0;
+        ++$count{"monit7*geometry"};
+    } elsif (/^(monit7\.title:\s*).*$/) {
+        $_ = "$1DBBC3 Tsys\n" if $monit7t >=0;
+        ++$count{"monit7.title"};
     }
     print OUT;
 }
 
 foreach $key (sort keys %count) {
     if($count{$key} == 0) {
-        print STDERR "WARNING: $key geometry not found\n";
+        print STDERR "WARNING: $key not found\n";
         $none=1;
     } elsif($count{$key} > 1) {
-        print STDERR "ERROR: $key geometry found more than once.\n";
+        print STDERR "ERROR: $key found more than once.\n";
         $extra=1
     }
 }
@@ -135,19 +130,16 @@ if ($none || $extra) {
     print "\n";
     }
 if ($none) {
-    print STDERR "Some geometry values were missing. If you are okay with that, that is fine.\n";
+    print STDERR "Some resources were missing. If you are okay with that, that is fine.\n";
 }
 if ($extra) {
-    print STDERR "Some geometry values were defined more than once. There may be other Xresources
+    print STDERR "Some resources were defined more than once. There may be other Xresources
 for those windows that are defined multiple times. All extra definitions should
 probably be removed.
 ";
 }
 if ($none || $extra) {
     print STDERR "\nFor comparison, you can examine the default versions in
-'/usr2/fs/st.default/(oper|prog|auid)/.Xresoures' as appropriate.
+'/usr2/fs/st.default/(oper|prog)/.Xresoures' as appropriate.
 ";
-}
-if ($none) {
-    print STDERR "The 'auid' version typically only has 'login_sh'.\n";
 }
