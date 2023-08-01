@@ -1,5 +1,4 @@
 #!/usr/bin/perl
-# Usage: xresourcesfix file
 
 require "getopts.pl";
 
@@ -8,10 +7,10 @@ require "getopts.pl";
 if ($#ARGV < 0) {
     print "Usage: $0 [options] file
 
-Updates geometry widths in Xresources file (nominally '.Xresources').
+Updates select geometry widths in an Xresources file (nominally '.Xresources').
 
-This script should be run in directory with file, usually the user's home
-directory.
+This script should be run in the directory with the file, usually the user's
+home directory.
 
 The original file is renamed as a backup by adding a '.bak' extension.
 The backup file must not already exist.
@@ -24,11 +23,10 @@ Option explanations:
  -o number  set width of oprin       window
  -s number  set width of scnch       window
 
-The default for '-a' is 146 is no options as specified.
-If an option for an individual is specified it overrides '-a'.
+The default for '-a' is 146.
+If an option for an individual window is specified, it overrides '-a'.
 A value that isn't a positive integer (e.g. '0' or 'o') disables updating
 that window.
-The order the options are specified does not matter.
 ";
     exit -1;
 }
