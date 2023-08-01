@@ -97,5 +97,5 @@ helpsh*geometry:         80x24+75+75
 helpsh*VT100.Translations:       #override\
         ~Ctrl ~Meta <Btn2Up>:   ignore()
 ! monit7 (DBBC3 Tsys display, 21 lines)
-monit7*geometry:	24x21-0+120
-monit7.title:		System Temperatures
+monit7*geometry:	24x21-0+155
+monit7.title:		DBBC3 Tsys
