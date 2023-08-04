@@ -21,7 +21,7 @@
 :doctype: book
 
 = FS 10.2-beta1 Update Notes
-Version 0.72 - June 2023
+Version 0.73 - August 2023
 
 :sectnums:
 :stem: latexmath
@@ -994,14 +994,15 @@ was adjusted to agree with what was observed in the field and
 environment variables were added to allow further adjustments to be
 made in the field and to control other features.  Information on
 setting the IF target values was added. DBBC3 non-continuous (_spot_)
-calibration support was completed. Averaging (and optionally
-_filtering_) of continuous calibration data was added.  The
-`tpicd=tsys` command was enabled. Not sending some device parameters
-of the `cont_cal` command was made an option. The polarization of the
-IF was added to the T~sys~ display (_monit7_). The condition `ddc` was
-added to the `if` command for the DBBC3. The order of commands for
-DBBC3 syncing was changed. The order of TPI values for DBBC3
-`iftp__X__` commands was changed to `_on_` then `_off_`.  +
+calibration support was completed. _monit7_ was improved for
+continuous calibration. Averaging (and optionally _filtering_) of
+continuous calibration data was added. The `tpicd=tsys` command was
+enabled. Not sending some device parameters of the `cont_cal` command
+was made an option. The polarization of the IF was added to the T~sys~
+display (_monit7_). The condition `ddc` was added to the `if` command
+for the DBBC3. The order of commands for DBBC3 syncing was changed.
+The order of TPI values for DBBC3 `iftp__X__` commands was changed to
+`_on_` then `_off_`.
 
 .. Add support for the DBBC3 personality DDC_E
 
@@ -1121,10 +1122,11 @@ display window,
 
 The values of course only update when a new measurement is made. If
 the T~cal~ has not been defined, `Ntcal` is shown in inverse video. If
-no spot calibration measurements have been made, `N cal` is shown in
-inverse video. Values that exceed `999.9`, erroneous values (negative,
-infinity, and overflow), and other setup errors, (BBC or LO not
-defined), are shown as dollar signs, `$`.
+no spot calibration measurements have been made (and continuous
+calibration is not enabled), `N cal` is shown in inverse video. Values
+that exceed `999.9`, erroneous values (negative, infinity, and
+overflow), and other setup errors, (BBC or LO not defined), are shown
+as dollar signs, `$`.
 
 ... Add example spot calibration procedures for the DBBC3.
 
@@ -1139,6 +1141,46 @@ Thanks to Beppe Maccaferri (Medicina) and Jun Yang (Onsala) for
 pointing out support was needed and discovering that the existing spot
 calibration support still worked for the DBBC3.
 
+
+.. Improve _monit7_ for continuous calibration.
+
+... `N cal` is now displayed when continuous calibration is not
+enabled (and no _spot_ calibration is available).
+
++
+
+Previously it was `Nccal` (and only applied to continuous
+calibration).
+
+...  Invalid T~sys~ values (overflow, infinity, and the cal-off TPI
+being zero) are shown with a cyan background.
+
++
+
+The cases are:
+
+* If the BBC "`on`" and/or "`off`" TPI values overflow (`65536`),
+`ovrfl` is shown.
+
+* If the "`on`" and "`off`" TPI values are equal `{nbsp}inf{nbsp}` is
+shown.
+
+* If the "`off`" TPI value is zero, `off=0` is shown.
+
+... Negative T~sys~ values are shown with a magenta background.
+
++
+
+This is intended to bring attention to the polarity being incorrect.
+
+... Allow more digits for negative T~sys~
+
++
+
++
+
+A larger range of negative values is shown by dropping the fractional
+digit as needed. The number of significant digits shown is not reduced.
 
 .. Add averaging (and optionally _filtering_) of continuous DBBC3
 T~sys~ data.
@@ -2027,7 +2069,7 @@ script, the initial version, and many of the incremental improvements.
 
 +
 
-About 10 additional small features were changed or added. These
+About eight additional small features were changed or added. These
 enhancements included two new utility scripts and cleanup of several
 small issues.
 
@@ -2039,9 +2081,8 @@ small issues.
 No longer ring the bell for large structure correction warnings.
 Increase the default X11 window width. Prevent problems with _erchk_
 when the display server is not in use. Use `set revert-all-at-newline
-on` to prevent old commands in the history from being altered. Allow
-more digits in the DBBC3 T~sys~ display window for negative values.
-Add script for calculating stem:[\mathit{\frac{G}{T}}]. Improve
+on` to prevent old commands in the history from being altered. Add
+script for calculating stem:[\mathit{\frac{G}{T}}]. Improve
 recommended NTP configuration. Improve _pfmed_. Add _rdbe30_mon.py_
 script.
 
@@ -2142,13 +2183,6 @@ the file:
 $include /etc/inputrc
 set revert-all-at-newline on
 ----
-
-.. Allow more digits for T~sys~ in the DBBC3 _monit7_ display window
-
-+
-
-A larger range of negative values is shown by dropping the fractional
-part as needed. The number of significant digits shown is not reduced.
 
 .. Add script, _govert_, to calculated stem:[\mathit{\frac{G}{T}}]
 from SEFDs (closing https://github.com/nvi-inc/fs/issues/197[#197]).
