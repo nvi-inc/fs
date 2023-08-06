@@ -715,13 +715,15 @@ pid_t start_ssub(bool arg_scrollback, bool arg_wait) {
 	return ssub_pid;
 }
 
-const char *usage_short_str = "Usage: %s [-swfnh] \n";
-const char *usage_long_str  = "Usage: %s [-swfnh] \n"
+//const char *usage_short_str = "Usage: %s [-swfnh] \n";
+const char *usage_short_str = "Usage: %s [-swnh] \n";
+//const char *usage_long_str  = "Usage: %s [-swfnh] \n"
+const char *usage_long_str  = "Usage: %s [-swnh] \n"
                              "Connect to local Field System server, starting any X11 programs\n"
                              "in fspgm.ctl or stpgm.ctl\n"
                              "  -s, --scrollback      print full scrollback buffer on connect\n"
                              "  -w, --wait            wait for Field System to restart on exit\n"
-                             "  -f, --force           start even if Field System is not running\n"
+//                             "  -f, --force           start even if Field System is not running\n"
                              "  -n, --no-x            do not start programs requring X11\n"
                              "  -h, --help            print this message\n";
 
@@ -729,7 +731,9 @@ const char *usage_long_str  = "Usage: %s [-swfnh] \n"
 static struct option long_options[] = {
     {"scrollback", no_argument, NULL, 's'},
     {"wait",       no_argument, NULL, 'w'},
+// undocumented, only for fs use now that server terminates on shutdown, is it needed?
     {"force",      no_argument, NULL, 'f'},
+//
     {"no-x",       no_argument, NULL, 'n'},
     {"help",       no_argument, NULL, 'h'},
     {NULL, 0, NULL, 0}};
