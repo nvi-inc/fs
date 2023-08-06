@@ -338,7 +338,7 @@ main(int argc_in,char *argv_in[])
 	if(les==2) {
 	  if(arg_no_x11) {
         if (!arg_internal)
-            fprintf(stderr, "skipping %5.5s, the -No_X option selected\n",name);
+            fprintf(stderr, "skipping %5.5s, the -n (--no-x) option was selected\n",name);
 	    continue;
 	  } else
 	    les=0;
@@ -399,7 +399,7 @@ main(int argc_in,char *argv_in[])
 	  if(les==2) {
 	    if(arg_no_x11) {
         if (!arg_internal)
-            fprintf(stderr, "skipping %5.5s, the -No_X option selected\n",name);
+            fprintf(stderr, "skipping %5.5s, the -n (--no-x) option was selected\n",name);
 	      continue;
 	    } else
 	      les=0;
