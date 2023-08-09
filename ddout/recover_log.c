@@ -125,10 +125,10 @@ int fd;
       /* now try to make a copy */
       size=lseek(fd,0L,SEEK_CUR);
       if(size < 0)
-	perror("determining size of old file to copy, ddout");
+	perror("\007!! help! ** determining size of old file to copy: no progress meter");
       offset=lseek(fd, 0L, SEEK_SET);
       if(offset < 0) {
-	perror("rewinding old file to copy, ddout");
+	perror("\007!! help! ** rewinding old file to copy");
 	fprintf(stderr,"\007!! help! ** can't rewind original file, giving up\n");
 	fail=TRUE;
       } else {
@@ -155,29 +155,29 @@ int fd;
 	}
 	if(count < 0) {
 	  fprintf(stderr,"\007!! help! ** failed, error reading original file, giving up\n",lnamef);
-	  perror("!! help! ** ddout");
+	  perror("\007!! help! ** reading original file");
 	  fail=TRUE;
 	} else if (count!=0 && count!=countw) {
 	  fprintf(stderr,"\007!! help! ** failed, error writing to '%s', giving up\n",lnamef);
-	  perror("!! help! ** ddout");
+	  perror("\007!! help! ** writing recovered log");
 	  fail=TRUE;
-	} else 
+	} else
 	  fprintf(stderr,
-		"\007!! help! ** copying to recover log file '%s', done.\n",
+		"!! help! ** copying to recover log file '%s', done.\n",
 		lnamef);
       }
     }
 
     if(fail) {
-      fprintf(stderr,"\007!! help! ** you can attempt to recover by unmounting the file system and\n");
+      fprintf(stderr,"\007!! help! ** You can attempt to recover by unmounting the file system and\n");
       fprintf(stderr,"\007!! help! ** grep-ing the file system for lines starting with the date\n");
-      fprintf(stderr,"\007!! help! ** portion of time tag for the date(s) of the session try to\n");
+      fprintf(stderr,"\007!! help! ** portion of time tag for the date(s) of the session. Try to\n");
       fprintf(stderr,"\007!! help! ** do as little as possible to the file system until you\n");
-      fprintf(stderr,"\007!! help! ** dismount it. Please see /usr2/fs/misc/logrecovery for details.\n");
+      fprintf(stderr,"\007!! help! ** dismount it. Please see /usr2/fs/misc/logrecovery.txt for details.\n");
     } else {
       int ierr;
 
-      fprintf(stderr,"\007!! help! ** good news, log file '%s' seems to be recovered, please check it.\n",lnamef);
+      fprintf(stderr,"!! help! ** good news, log file '%s' seems to be recovered, please check it.\n",lnamef);
       ierr=write_comment(lnamef,fd2,buf_copy);
       if(ierr < -5) {
         fprintf(stderr,"\007!! help! ** problem adding comment at end of recovered file, see above, may be benign\n");
@@ -193,12 +193,12 @@ int fd;
     }
   } else if (fd2 < 0) {
     shm_addr->abend.other_error=1;
-    perror("checking for existence of log file, ddout");
+    perror("\007!! help! ** checking for existence of log file");
   }
 
   if(fd2 >= 0 && close(fd2) < 0) {
     shm_addr->abend.other_error=1;
-    perror("closing fd2, ddout");
+    perror("\007!! help! ** closing fd2");
   }
 
   return fd;
