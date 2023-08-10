@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 NVI, Inc.
+ * Copyright (c) 2020-2021, 2023 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -37,7 +37,7 @@ int recover_log(lnamef,fd)
 char lnamef[];
 int fd;
 {
-  int fail, fd2, fd_temp;
+  int fail, fd2;
   int before, after, seconds;
   ssize_t count, countw, cum;
   off_t size, offset;
@@ -56,7 +56,7 @@ int fd;
 	      "\007!! help! ** can't create file '%s', giving up\n",
 	      lnamef);
       fail=TRUE;
-    } else { 
+    } else {
 
       /* now try to make a copy */
       size=lseek(fd,0L,SEEK_CUR);
@@ -112,9 +112,6 @@ int fd;
       fprintf(stderr,"\007!! help! ** dismount it. Please see /usr2/fs/misc/logrecovery for details.\n");
     } else {
       fprintf(stderr,"\007!! help! ** good news, log file '%s' seems to be recovered, please check it.\n",lnamef);
-      fd_temp=fd;
-      fd=fd2;
-      fd2=fd_temp;
     }
   } else if (fd2 < 0) {
     shm_addr->abend.other_error=1;
