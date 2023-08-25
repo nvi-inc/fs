@@ -68,7 +68,8 @@ m2init()
   mvaddstr(ROW1+1,COL1+71,"m");
   mvaddstr(ROW1+1,COL1+76,"s");
 
-  mvaddstr(ROW1+2,COL1+23,"SCHED=");
+  mvaddstr(ROW1+2,COL1+20,"SCHED=");
+  mvaddstr(ROW1+2,COL1+35,"LOG=");
   mvaddstr(ROW1+2,COL1+48,"PRES");
   mvaddstr(ROW1+2,COL1+59,"mb");
   mvaddstr(ROW1+2,COL1+62,"DEC");
@@ -139,12 +140,8 @@ Later feature: display x/y or ha depending on axis type
   mvaddstr(ROW1+4,COL1+44,"HA");
 */
   standend();
-
-  mvaddstr(ROW1+4,COL1+52,"LOG=");
-/* old tape recorder head pass number
   mvaddstr(ROW1+4,COL1+62,"           ");
   if(kMdrive[selectm]||kVdrive[selectm])
     mvaddstr(ROW1+4,COL1+62,"HEAD PASS #");
-*/
   refresh();
 }  /* end m2init */
