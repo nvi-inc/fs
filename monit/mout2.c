@@ -433,10 +433,6 @@ int iyear;
   } else
       printw("   ");
 
-  move(ROW1+2,COL1+26);
-  printw("%.8s",shm_addr->LSKD);
-  move(ROW1+2,COL1+39);
-  printw("%.8s",shm_addr->LLOG);
   move(ROW1+2,COL1+53);
   preflt(outf,shm_addr->preswx,-6,1);
   printw("%s",outfloat);
@@ -475,6 +471,9 @@ int iyear;
 
 /* ROW 4 */
 
+  move(ROW1+3,COL1+4);
+  printw("%.*s",MAX_SKD,shm_addr->LSKD2);
+
   move(ROW1+3,COL1+52);
   preflt(outf,shm_addr->cablev,-8,6);
   printw("%s",outfloat);
@@ -512,6 +511,7 @@ int iyear;
 
 /* ROW 5 */
 
+/* was for tape
   inuse=shm_addr->actual.s2rec_inuse;
   rstate=shm_addr->actual.s2rec[inuse].rstate;
   rstate_valid=shm_addr->actual.s2rec[inuse].rstate_valid;
@@ -603,6 +603,10 @@ int iyear;
     printw("%.5s",ptfeet);
   } else
       printw("       ");
+*/
+
+  move(ROW1+4,COL1+4);
+  printw("%.*s",MAX_SKD,shm_addr->LLOG2);
 
   if(kMrack) {
     move(ROW1+4,COL1+29);

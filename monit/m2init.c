@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020, 2023 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -68,8 +68,6 @@ m2init()
   mvaddstr(ROW1+1,COL1+71,"m");
   mvaddstr(ROW1+1,COL1+76,"s");
 
-  mvaddstr(ROW1+2,COL1+20,"SCHED=");
-  mvaddstr(ROW1+2,COL1+35,"LOG=");
   mvaddstr(ROW1+2,COL1+48,"PRES");
   mvaddstr(ROW1+2,COL1+59,"mb");
   mvaddstr(ROW1+2,COL1+62,"DEC");
@@ -77,6 +75,7 @@ m2init()
   mvaddstr(ROW1+2,COL1+71,"m");
   mvaddstr(ROW1+2,COL1+75,"(    )");
 
+/* was for tape
   mvaddstr(ROW1+3,COL1+0,"     ");
   mvaddstr(ROW1+3,COL1+11,"   ");
   mvaddstr(ROW1+3,COL1+19,"   ");
@@ -103,6 +102,9 @@ m2init()
   } else if(kK4drive[selectm]) {
     mvaddstr(ROW1+3,COL1+0,"SEQUENCE");
   } 
+*/
+  mvaddstr(ROW1+3,COL1+0,"SCH=");
+
   if (kMrack) {
     mvaddstr(ROW1+3,COL1+23,"TSYS:");
     mvaddstr(ROW1+3,COL1+29,"IF1");
@@ -140,6 +142,9 @@ Later feature: display x/y or ha depending on axis type
   mvaddstr(ROW1+4,COL1+44,"HA");
 */
   standend();
+
+  mvaddstr(ROW1+4,COL1+0,"LOG=");
+
   mvaddstr(ROW1+4,COL1+62,"           ");
   if(kMdrive[selectm]||kVdrive[selectm])
     mvaddstr(ROW1+4,COL1+62,"HEAD PASS #");
