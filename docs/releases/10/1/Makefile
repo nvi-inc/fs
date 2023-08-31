@@ -21,6 +21,9 @@
 all: index.html dbbc3_ops.html\
     10.1.0-beta1.html 10.1.0-beta2.html beta1_to_beta2.html 10.1.0.html beta2_to_10.1.0.html 10.1.1.html
 
+index.html: index.adoc
+	asciidoctor $^
+
 %.html: %.adoc
 	asciidoctor -a toc $^
 

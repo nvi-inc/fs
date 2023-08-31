@@ -19,7 +19,10 @@
 #
 
 all: index.html 10.2-beta1.html 10.2_to_latest.html 10.2-beta2.html\
-	beta1_to_beta2.html
+	beta1_to_beta2.html beta2_to_10.2.html 10.2.html
+
+index.html: index.adoc
+	asciidoctor $^
 
 %.html: %.adoc
 	asciidoctor -a toc $^

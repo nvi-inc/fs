@@ -19,12 +19,20 @@
 //
 
 = Index of fs/releases/10/2/
-Version 2.5 - July 2023
+Version 2.6 - August 2023
 
-<<10.2-beta2.adoc#,FS 10.2-beta2 Update Notes>> (beta2 release)
+== Current documents
+
+<<10.2.adoc#,FS 10.2 Update Notes>> (latest release)
+
+<<10.2_to_latest.adoc#,FS 10.2 to the Latest Commit Update Notes>>
+
+== Old documents
+
+<<beta2_to_10.2.adoc#,FS 10.2-beta2 to FS 10.2 Update Notes>>
+
+<<10.2-beta2.adoc#,FS 10.2-beta2 Update Notes>>
 
 <<beta1_to_beta2.adoc#,FS 10.2-beta1 to FS 10.2-beta2 Update Notes>>
 
-<<10.2-beta1.adoc#,FS 10.2-beta1 Update Notes>> (old)
-
-<<10.2_to_latest.adoc#,FS 10.2 to the Latest Commit Update Notes>>
+<<10.2-beta1.adoc#,FS 10.2-beta1 Update Notes>>
