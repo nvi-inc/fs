@@ -21,7 +21,7 @@
 :doctype: book
 
 = FS 10.2-beta2 Update Notes
-Version 0.74 - August 2023
+Version 0.75 - September 2023
 
 :sectnums:
 :stem: latexmath
@@ -2091,7 +2091,8 @@ output for more details.
 +
 
 One advantage of _giza_ is that a PDF file is available as an output
-device.
+device. Without _giza_, you can convert a PostScript file to PDF with
+_ps2pdf_.
 
 .. Fix bad horizontal ticks for `-p` option.
 
