@@ -21,7 +21,7 @@
 :doctype: book
 
 = FS 10.2-beta2 Update Notes
-Version 0.75 - September 2023
+Version 0.76 - September 2023
 
 :sectnums:
 :stem: latexmath
@@ -36,7 +36,10 @@ Version 0.75 - September 2023
 This document covers the steps needed to update from FS _10.1_ to
 _10.2_ (latest patch is _10.2.0_) and the changes in the new version.
 Installing the new version (see the <<Upgrading from 10.1>> section
-below) should be simpler than the update to _10.1_ for most users.
+below) should be simpler than the update to _10.1_ for most users. An
+appendix, <<Transferring an existing FS installation to FSL11>>,
+provides a suggested path for transferring an existing FS installation
+to a new FSL11 system, upgrading to _10.2_ in the process.
 
 IMPORTANT: Despite the next paragraph, _alpha_ and _beta_ releases are
 not intended for operations.
@@ -91,7 +94,12 @@ installing this update.
 
 NOTE: You can make a _fresh_ install of _10.2_ on an FSL11 system
 using the installation document, https://nvi-inc.github.io/fsl11/.
-Testers of previous _10.2_ development versions, on any FSL__x__, can
+The appendix, <<Transferring an existing FS installation to FSL11>>,
+below in this document, provides a suggested path for transferring an
+existing FS installation to a new FSL11 system, upgrading to _10.2_ in
+the process.
+
+NOTE: Testers of previous _10.2_ development versions, on any FSL__x__, can
 follow the instructions here; some steps may have changed from
 previous versions. An update notice that specifically covers updating
 from _10.2-beta1_ to _10.2-beta2_ and what changed is available at
@@ -689,7 +697,7 @@ title item, summary, and/or the details are very brief.
 
 === FS changes
 
-. <<FSL11,FSL11>>:[[FSL11]] Support FSL11
+. <<FSL11,Support FSL11>>:[[FSL11]]
 
 +
 --
@@ -2908,8 +2916,8 @@ Exit the program by closing the `Monitor` window
 ... The following changes were needed for the _python3_ version:
 
 * The first three changes for _python3_ in the "`Details`" for the
-<<FSL11,FSL11>> changes above: running the script through _2to3_ and
-_reindent_ and changing the _shebang_ line.
+<<FSL11,Support FSL11>> changes above: running the script through
+_2to3_ and _reindent_ and changing the _shebang_ line.
 
 * Change `import` of `NavigationToolBar2TkAgg` to
 `NavigationToolBar2Tk`
@@ -3764,8 +3772,8 @@ _drudg_ opening message date is `2023-02-21`.
 
 These are similar to changes described in the <<f95,f95>> FS change
 item (if that link doesn't work in your browser, click on this link
-instead: <<FSL11,FSL11>>, open the "`Details`" toggle below that
-location by clicking on it, go `Back` in the browser, and finally
+instead: <<FSL11,Support FSL11>>, open the "`Details`" toggle below
+that location by clicking on it, go `Back` in the browser, and finally
 click on the original link). There were only a few octal constants
 outside of `parameter` statements and these were in simple assignment
 statements. All octal constants were wrapped in `int()`. There were no
@@ -3932,3 +3940,223 @@ compare to `ntpq -p` run from a shell, which will not have `REDACTED`.
 
 If you still get IP addresses from `check_ntp`, then you may need to
 fix the use of the filter in item `6e`.
+
+[appendix]
+== Transferring an existing FS installation to FSL11
+
+This appendix provides a suggested path for transferring an existing
+operational FS installation to a new FSL11 system. It starts with
+transferring your files, then you will need to make incremental
+changes to your files for each critical FS update since your existing
+version. In the end, you will have version _10.2_.
+
+Making the changes on the new system is recommended to avoid possibly
+compromising your operational system. The only testing you will be
+able to do on the new system will be after applying the _10.2_ update.
+You can however, apply these updates to your old system before
+transferring the files. That would allow incremental testing of the
+updates. Some testing on your FSL11 system will still be required in
+the end. See the sub-section titled <<Version 10.2>> below for more
+information for the final steps on the new system for this alternate
+approach.
+
+=== Transfer files
+
+A suggestion for transferring your files can be found in the document:
+<<../../../misc/64-bit_conversion.adoc#,Converting to a 64-bit
+System>>. You can of course use other methods but if so, the document
+may still be useful as an outline of what needs to be done. If you use
+the method in the document:
+
+. You should use all steps from
+<<../../../misc/64-bit_conversion.adoc#_login_as_root,Login as root>>
+through
+<<../../../misc/64-bit_conversion.adoc#_transfer_files,Transfer
+files`>>.
+
+. If your new system is 64-bit and you have not already updated your
+code for 64-bit, you should use the steps
+<<../../../misc/64-bit_conversion.adoc#_login_as_prog,Login as prog>>
+and
+<<../../../misc/64-bit_conversion.adoc#_update_station_programs,Update
+station programs>>.
+
+. Skip all remaining steps. However, if your local station programs
+only uses C, you can test whether it will compile with the
+<<../../../misc/64-bit_conversion.adoc#_make_local_software,Make local
+software>> step. FORTRAN code may also compile and load at this point,
+but it may need further changes for FSL11.
+
+From here jump to the version specific sub-section below that
+corresponds to your existing system's FS:
+
+* <<Version 9.11.<x> or earlier (or FS 9.13.0-9.13.1)>>
+* <<Version 9.13.2 (or 9.12.10-9.12.13)>>
+* <<Version 10.0>>
+* <<Version 10.1>>
+* <<Version 10.2>>
+
+=== Incremental changes for specific versions
+
+These changes are applied incrementally to bring your files up to
+date. For a given existing version you will need to apply the specific
+update and all that follow.
+
+==== Version 9.11.<x> or earlier (or FS 9.13.0-9.13.1)
+
+. If you have a one of these versions, you should upgrade your local
+files to _9.13.2_ first, please refer to the
+<<../../misc/install_reference.adoc#_upgrading_from_fs_versions_before_the_previous_stable,Upgrading
+from FS versions before the previous stable>> section in the
+<<../../misc/install_reference.adoc#,Installation Reference>> document
+for more information. Afterwards, your station programs may not
+compile, load, or run successfully until you made more updates.
+Please contact Ed if you have questions or problems.
+
+. Proceed to the next sub-step, for old version _9.13.2_
+
+==== Version 9.13.2 (or 9.12.10-9.12.13)
+
+. For existing system FS version _9.13.2_ (or _9.12.10_-_9.12.13_),
+first update your local files and software to _10.0_ according to
+<<../0/10.0.0.adoc#_upgrading_from_an_fs9_version,Upgrading from an
+FS9 version>> in the <<../0/10.0.0.adoc#,FS 10.0.0 Update Notes>>
+document. The steps need to be modified slightly to take into account
+that you have an initial install on FSL11 already:
+
+.. Begin with the step <<../0/10.0.0.adoc#_login_as_prog,Login as
+prog>>.
+
+.. Unless your new system is 32-bit (not recommended) _and_ you plan to
+use _fort77_ as your FORTRAN compiler (additionally not recommended),
+skip the steps <<../0/10.0.0.adoc#_set_fortran_compiler,Set FORTRAN
+compiler>> and <<../0/10.0.0.adoc#_make_the_fs,Make the FS>>.
+
++
+
+If you are using _fort77_, which must be on a 32-bit system, you
+should use those steps.
+
+.. Be sure to use step
+<<../0/10.0.0.adoc#_update_station_programs,Update station programs>>.
+
+.. If you local station software is C only, you can check if it will
+compile with step <<../0/10.0.0.adoc#_make_local_software,Make local
+software>>, but this is not necessary.
+
++
+
+FORTRAN code may also compile at this point, but it may need further
+changes for FSL11, detailed in sub-step
+<<update_station_code_for_FSL11,Update station code for FSL11>> in
+sub-section <<Version 10.1>> below.
+
++
+
+You will not be able to test your local software until you have
+complete upgrading through at least _10.2_.
+
+.. Skip the <<../0/10.0.0.adoc#_reboot,Reboot>> step, but it should be
+benign if used.
+
+.. Use the steps beginning with <<../0/10.0.0.adoc#_login_as_oper,Login
+as oper>> through
+<<../0/10.0.0.adoc#_miscellaneous_fs_related_changes,Miscellaneous FS
+related changes>>.
+
++
+
++
+
+Part of the last step references FSL10, but the changes are still
+relevant.
+
+. Proceed to the next sub-step, for old version _10.0_.
+
+====  Version 10.0
+
+. For existing system FS version _10.0_, update your local files and
+software to _10.1_ according to
+<<../1/10.1.0.adoc#_upgrading_from_10_0_0,Upgrading from 10,0.0>> in
+the <<../1/10.1.0.adoc#,FS 10.1.0 Update Notes>> document. The steps
+need to be modified slightly to take into account that you have an
+initial install on FSL11 already:
+
+.. Use step <<../1/10.1.0.adoc#_login_as_oper,Login as oper>>.
+
+.. Use steps: <<../1/10.1.0.adoc#_remove_temporary_fixes,Remove
+temporary fixes>> and <<../1/10.1.0.adoc#_local_customizations,Local
+customizations>>.
+
+. Proceed to the next sub-step, for old version _10.1_.
+
+==== Version 10.1
+
+. For existing system FS version _10.1_, update your local files and
+software to _10.2_ according to <<Upgrading from 10.1>> in the current
+document (<<../2/10.2.adoc#,FS 10.2 Update Notes>>). The steps need to
+be modified slightly to take into account that you have an initial
+install on FSL11 already:
+
+.. Begin with the step <<../2/10.2.adoc#_login_as_prog,Login as prog>>.
+
+.. Skip the steps: <<Set new make-time environment variables>> and
+<<../2/10.2.adoc#_make_the_fs,Make the FS>>.
+
+.. Use step <<Update station code>>.
+
+.. <<update_station_code_for_FSL11,Update station code for
+FSL11>>[[update_station_code_for_FSL11]]:
+
++
+
+There are two FSL11 station code issues that are not addressed in the
+previous step for updating station code. Specifically, the issues are:
+
+* Changes in the FORTRAN compiler that may prevent legacy station code
+from compiling
+
+* Limited support for _python2_. In particular, code that depends on
+`numpy` will not work without converting to _python3_.
+
++
+
+If either or both of these issues affect you, please refer to change
+item <<FSL11,Support FSL11>>, in the main document above, for the
+changes that were made in FS _10.2_ to handle these issues. You can
+make similar changes for your station software. Please contact Ed if
+you have questions or problems.
+
+
+.. Use all the remaining steps beginning with
+<<Make the station software>>.
+
++
+
++
+
+You may need to fix your station code so that it will compile and
+load and debug it as part of testing the FS. Converting to 64-bit and
+upgrading to _10.0_, _10.2_, and FSL11 may have introduced some
+changes that will only be possible to check now.
+
+==== Version 10.2
+
+For existing system FS version _10.2_, in principle nothing needs be
+changed in your local files and software. There however may be station
+code updates that you may not have applied yet:
+
+* If you had been using it on a 32-bit system you may not have made
+the changes for 64-bit referred to in the
+<<Version 9.13.2 (or 9.12.10-9.12.13)>> sub-section of this appendix.
+If your FSL11 system is 64-bit, those changes will now be needed.
+
+* Likewise, if were using FSL10 (or an earlier FSL__X__), the changes
+in the <<update_station_code_for_FSL11,Update station code for FSL11>>
+sub-step in the <<Version 10.1>> sub-section in this appendix may not
+have been applied.
+
+In either and both cases, you will need to apply those changes and
+_make_ the software afterwards.
+
+In any event, you should still test the FS.
