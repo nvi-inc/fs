@@ -31,6 +31,16 @@ Version 0.76 - September 2023
 
 :toc:
 
+:sectnums!:
+== Revision history
+
+* 0.77 -- Add revision history
+* 0.76 -- Add FSL11 transfer appendix
+* 0.75 -- Add using _ps2pdf_ for PostScript to PDF
+* 0.74 -- Fix typos
+* 0.73 -- Initial -beta2 version
+
+:sectnums:
 == Introduction
 
 This document covers the steps needed to update from FS _10.1_ to
