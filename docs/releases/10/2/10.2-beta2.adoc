@@ -21,7 +21,7 @@
 :doctype: book
 
 = FS 10.2-beta2 Update Notes
-Version 0.78 - September 2023
+Version 0.79 - September 2023
 
 :sectnums:
 :stem: latexmath
@@ -34,6 +34,7 @@ Version 0.78 - September 2023
 :sectnums!:
 == Revision history
 
+* 0.79 -- Update internal 64-bit conversion link
 * 0.78 -- Update external 64-bit conversion links
 * 0.77 -- Add revision history
 * 0.76 -- Add FSL11 transfer appendix
@@ -4158,9 +4159,9 @@ changed in your local files and software. There however may be station
 code updates that you may not have applied yet:
 
 * If you had been using it on a 32-bit system you may not have made
-the changes for 64-bit referred to in the
-<<Version 9.13.2 (or 9.12.10-9.12.13)>> sub-section of this appendix.
-If your FSL11 system is 64-bit, those changes will now be needed.
+the changes for 64-bit referred to in the <<Transfer files>> section
+of this appendix. If your new system is 64-bit, those changes will be
+needed now.
 
 * Likewise, if were using FSL10 (or an earlier FSL__X__), the changes
 in the <<update_station_code_for_FSL11,Update station code for FSL11>>
