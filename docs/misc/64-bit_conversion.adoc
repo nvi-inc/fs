@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020-2022 NVI, Inc.
+// Copyright (c) 2020-2023 NVI, Inc.
 //
 // This file is part of VLBI Field System
 // (see http://github.com/nvi-inc/fs).
@@ -19,7 +19,7 @@
 //
 
 = Converting to a 64-bit System
-Version 1.2 - August 2021
+Version 1.3 - September 2023
 
 //:hide-uri-scheme:
 :sectnums:
@@ -31,51 +31,76 @@ Version 1.2 - August 2021
 
 == Introduction
 
-This document covers converting to a 64-bit system from an existing
-32-bit FS10 system. It is also used as part of the upgrade path to go
-directly to 64-bit system while upgrading the FS.
+This document covers converting to a 64-bit system architecture from
+an existing FS _10.<x>_ installation on a 32-bit system. It is also
+used as part of the upgrade path to go directly to a 64-bit system
+while upgrading to FS _10.0_.
 
-The approach here assumes you will be installing a 64-bit system on a new
-computer. Doing so will allow you to convert to 64-bit without
-disturbing your operational 32-bit system.
+The approach here can also be used to transfer an existing 64-bit (or
+32-bit) FS installation to a new computer without changing OS
+(including architecture) and FS version. For that case, in place of
+the <<Install a 64-bit system>> step make sure you have the same OS
+(including architecture) and FS version installed on your new system
+as on your existing system and then omit the
+<<Update station programs for 64-bit>> step.
+
+If you are moving to a different OS, you may need to use a different
+FS version and update your station files and software for the new OS
+and FS version. For FSL11, a pointer to the instructions for this are
+included in its installation guide and in the
+<<Install a 64-bit system>> step below.
+
+The process in this document assumes you will be installing to a new
+computer. This will allow you to set up the new system without
+disturbing your operational system.
 
 == Convert to using a 64-bit system
 
-IMPORTANT: All operations,except where noted, are performed on the
-new, 64-bit, system.
+IMPORTANT: All operations, except where noted, are performed on the
+new system.
 
 Please follow the steps below.
 
 === Install a 64-bit system
 
-Install a 64-bit system on a different (hopefully new) computer. We
-recommend FSL10, which is based on Debian _Stretch_ and tuned for FS
-use. The FSL10 installation guide can be found at
-https://nvi-inc.github.io/fsl10/. That process installs a base FS.
+Install a 64-bit (or 32-bit, but 64-bit is recommended) system on a
+different (hopefully new) computer. We recommend FSL11, which is based
+on Debian _Bullseye_ and tuned for FS use. The FSL11 installation
+guide can be found at https://nvi-inc.github.io/fsl11/. That process
+installs FS _10.2_. After that instead of the directions in the
+current document, you should follow the directions in the appendix
+<<../releases/10/2/10.2.adoc#_transferring_an_existing_fs_installation_to_fsl11,Transferring
+an existing FS installation to FSL11>> of the
+<<../releases/10/2/10.2.adoc#,FS 10.2 Update Notes>> document. Those
+instructions include, by reference, a subset of the ones in the
+current document.
 
-NOTE: As indicated in that document, you should checkout the latest release of FS10, which may be a pre-release.
+NOTE: If you are following these directions as part of installing FS
+_10.0_ on FSL10, that will still work, but we recommend using FS
+_10.2_ on FSL11 instead.
 
-You can install a different distribution. However, we can't
-provide as much support in that case. The FSL10 distribution is
-tuned to provide a complete platform for running the FS. For other
-distributions you may have to make adjusts for several things that
-an FSL10 installation provides, including:
+You can install a non-FSL__X__ Linux distribution. However, we can't
+provide as much support in that case. The FSL11 distribution is tuned
+to provide a complete platform for running the FS. For other
+distributions you may have to make adjustments for several things that
+an FSL11 installation provides, including:
 
 - which packages are installed
 - required user accounts and groups
+- backup methods
 
-=== Login as root
+=== Login as root on the new system
 
-Login as _root_.
+Login as _root_ on the new system.
 
 === Rename default directories
 
 NOTE: This step assumes you have installed a base FS, either along
-with FSL10 or using your own methods. If the latter and the normal
+with FSL11 or using your own methods. If the latter and the normal
 default FS directories were not created, you can skip this step.
 
 . Rename the existing default station specific FS related directories
-on the 64-bit computer to get them out of the way:
+on the new computer to get them out of the way:
 
       cd /usr2
       mv control   control.DEFAULT
@@ -83,13 +108,13 @@ on the 64-bit computer to get them out of the way:
       mv proc      proc.DEFAULT
 
 . If you use the _/usr2/tle_files_ directory on your old computer,
-you should rename the one on the 64-bit computer:
+you should rename the one on the new computer:
 
       cd /usr2
       mv tle_files tle_files.DEFAULT
 
 . If your station software is in _/usr2/st-0.0.0_ on your old computer,
-you should rename the one on the 64-bit computer:
+you should rename the one on the new computer:
 
       cd /usr2
       mv st-0.0.0  st-0.0.0.DEFAULT
@@ -104,19 +129,23 @@ renamed if you prefer:
 === Transfer files
 
 Your station specific FS related files can be transferred from the old
-computer using any convenient method.  If both systems are on the
+computer using any convenient method. If both systems are on the
 network this can be particularly easy. The following example sub-steps
-use this approach. You should replace the _old_ host name in the
-examples (and in file names) with your old system's host name. These
-commands must be executed as _root_, and except where noted, from the
-64-bit system.
+use this approach. You should replace the `_old_` host name in the
+examples with your old system's host name. These commands must be
+executed as _root_, and except where noted, from the new system.
+
+TIP: For the reference copies of the old computer directories, the
+instructions use directory names on the new computer with a fixed
+string `-old` appended. You may prefer a different suffix, e.g., one
+that includes the name of your old computer.
 
 [NOTE]
 ====
 
 You may need to provide the appropriate password for each _scp_
 command below. If so, you can simplify the process by copying your
-64-bit computer's _root_ public SSH keys to the old machine _oper_ and
+new computer's _root_ public SSH keys to the old machine _oper_ and
 _prog_ accounts with _ssh-copy-id_ first. If _root_ doesn't have an ID
 yet, you will get an error like:
 
@@ -141,7 +170,8 @@ useful.
 
 . Transfer operations directories:
 
-.. Transfer _control_, _sched_, and _proc_:
+.. Transfer _control_, _sched_, and _proc_ from your `_old_` computer:
+
 +
 
 [subs="+quotes"]
@@ -158,8 +188,10 @@ large and take a significant amount of time to transfer.
 
 .. Transfer _log_:
 +
-It can be useful to have your old log files on the new
-computer, but that transfer could take a long time:
+
+It can be useful to have your old log files on the new computer. The
+transfer from your `_old_` computer could take a long time:
+
 +
 
 [subs="+quotes"]
@@ -170,8 +202,10 @@ scp -pqr oper@_old_:/usr2/log .
 
 .. Transfer _tle_files_:
 +
-If you use the _/usr2/tle_files_ directory on your old
-computer, you can also transfer it:
+
+If you use the _/usr2/tle_files_ directory on your `_old_` computer,
+you can also transfer it:
+
 +
 
 [subs="+quotes"]
@@ -193,29 +227,32 @@ NOTE: If you don't have a _/usr2/tle_files_ directory, you will get a
 message that there is no such directory. That is benign unless you
 expect such a directory to be there.
 
-. Make back-up copies of the operational directories. This
-sub-step is optional but may be useful so that there are
-unmodified copies of the directories from the old machine
-to use for reference:
-+
+. Make back-up copies of the operational directories. This sub-step is
+optional but may be useful so that there are unmodified copies of the
+directories from the old machine to use for reference. You may want to
+set their permissions so they can't be modified accidentally.
 
++
 [subs="+quotes"]
 ....
 cd /usr2
-cp -a proc      proc-_old_
-cp -a control   control-_old_
-cp -a sched     sched-_old_
+cp -a proc      proc-old
+cp -a control   control-old
+cp -a sched     sched-old
+chmod -R a-w proc-old control-old sched-old
 ....
+
 +
 
 and possibly:
-+
 
++
 [subs="+quotes"]
 ....
 cd /usr2
-cp -a log       log-_old_
-cp -a tle_files tle_files-_old_
+cp -a log       log-old
+cp -a tle_files tle_files-old
+chmod -R a-w log-old tle_files-old
 ....
 
 . Transfer your station software directory (and make a
@@ -226,20 +263,21 @@ computer, you can find its name with:
   ls -l /usr2/st
 +
 
-In the rest of this sub-step, the target _st-version_ will be used.
-You should replace __version__ with your version number. For example,
-_1.0.0_, to make a target _st-1.0.0_. If your target is _st-0.0.0_ you
-should rename the default on the new computer first as described in
-the <<Rename default directories>> step above.
+In the rest of this sub-step, the target `_st-version_` will be used.
+You should replace `_version_` with your version number. For example,
+use `_1.0.0_`, to make a target `_st-1.0.0_`. If your target is
+`_st-0.0.0_` you should rename the default on the new computer first
+as described in the <<Rename default directories>> step above.
 
-.. On the new computer, copy the target from the old computer to the
-new computer, e.g.:
+.. On the new computer, copy the target from the `_old_` computer to
+the new computer, e.g.:
+
 +
 
 [subs="+quotes"]
 ....
 cd /usr2
-scp -pqr oper@__old__:/usr2/st-_version_ .
+scp -pqr prog@__old__:/usr2/st-_version_ .
 ....
 
 .. On the new computer, set the _/usr2/st_ symbolic link to point to
@@ -252,36 +290,39 @@ cd /usr2
 ln -fsn st-_version_ st
 ....
 
-.. On the new computer, you can set its permissions and ownership for
-_prog_ with:
-+
+.. On the new computer, you should set its ownership and prevent users
+other than _prog_ from modifying it:
 
++
 [subs="+quotes"]
 ....
 cd /usr2
 chown -R prog.rtx st-_version_
-chmod -R a+r,u+w,go-w st-_version_
+chmod -R go-w st-_version_
 ....
 
-.. On the new computer, you can make a reference copy with (_old_ is
-the name of your old computer):
+.. On the new computer, you can make a reference copy and prevent it
+from being modified with:
+
 +
 
++
 [subs="+quotes"]
 ....
 cd /usr2
-cp -a st-_version_ st-_version-old_
+cp -a st-_version_ st-_version_-old
+chmod -R a-w st-_version_-old
 ....
 
 . Copy your _oper_ and _prog_ directories to the new computer. This
-sub-step is optional. The FSL10 installation made default home
-directories for these users on _/usr2_.  If you did not have
-customized content for the users on the old computer, you could just
-use the versions on the new computer. Still it may be useful to have a
-copy of your old directories on the new system for reference,
-especially if you realize later that there were additional programs
-and files you want to use on the new system. In the commands below
-_old_ is the name of your old computer.
+sub-step is optional. The FSL11 installation made default home
+directories for these users on _/usr2_. If you did not have customized
+content for the users on the old computer, you could just use the
+versions on the new computer. Still it may be useful to have a copy of
+your old directories on the new system for reference, especially if
+you realize later that there were additional programs and files you
+want to use on the new system. In the commands below `_old_` is the
+name of your old computer.
 
 .. You can accomplish the transfers as _root_ using:
 +
@@ -289,21 +330,22 @@ _old_ is the name of your old computer.
 [subs="+quotes"]
 ....
 cd /usr2
-scp -pqr oper@_old_:~ oper-_old_
-scp -pqr prog@_old_:~ prog-_old_
+scp -pqr oper@_old_:~ oper-old
+scp -pqr prog@_old_:~ prog-old
 ....
 
-.. You probably want to set their permission and ownership so the
-appropriate users are allow to access them:
+.. You probably want to set their ownership and prevent them from
+being modified accidentally:
+
 +
 
 [subs="+quotes"]
 ....
-chown -R oper.rtx /usr2/oper-_old_
-chmod -R a+r,u+w,go-w /usr2/oper-_old_
+chown -R oper.rtx /usr2/oper-old
+chmod -R a-w /usr2/oper-old
 
-chown -R prog.rtx /usr2/prog-_old_
-chmod -R a+r,u+w,go-w /usr2/prog-_old_
+chown -R prog.rtx /usr2/prog-old
+chmod -R a-w /usr2/prog-old
 ....
 
 +
@@ -316,7 +358,26 @@ other files or changes such as:
 
 .. Copy other files or programs from the old system
 +
-This might include directories and log files that exist as copies from even older computers.
+
+This might include directories and log files that exist as copies from
+even older computers. You can use a similar process to the one above.
+If you have enough space and can _ssh_ into your old computer as
+_root_ (which should only be allowed temporarily), you can make
+reference copies of the entire _/etc_/ and _/usr2_ directories from
+your `_old_` computer with:
+
++
+
++
+[subs="+quotes"]
+....
+cd /usr2
+mkdir OLD_PC
+cd OLD_PC
+scp -pqr root@_old_:/etc .
+scp -pqr root@_old_:/usr2 .
+chmod -R a-w /usr2/OLD_PC
+....
 
 .. Install additional Debian packages
 .. Copy/merge additional configuration files, such as:
@@ -326,19 +387,18 @@ This might include directories and log files that exist as copies from even olde
     /etc/hosts.deny
     /etc/ntp.conf
 
-+
-You can use a similar process to the one above to transfer
-and/or make reference copies of more files and directories.
+=== Login as prog on the new system
 
-=== Login as prog
+Login as _prog_ on the new system.
 
-Login as _prog_.
+=== Update station programs for 64-bit
 
-=== Update station programs
-
-This step is for modifying your station programs in _/usr2/st_.  There
+This step is for modifying your station programs in _/usr2/st_. There
 are two possible issues, conversion of FORTRAN code and conversion of
 C code.
+
+NOTE: If you are not converting from 32- to 64-bit, you should skip
+this step and go directly to the <<Make local software>> step below.
 
 ==== Conversion of FORTRAN code
 
@@ -371,7 +431,7 @@ The following steps describe how to install and use the _unlongify_ tool.
 ===== Install go language
 
 If you haven't already, you will need to first install the _go_
-language. If you are using FSL10, you can install the _go_ language in
+language. If you are using FSL11, you can install the _go_ language in
 one of two ways listed below:
 
 . <<Option A - Installing golang package>>
@@ -408,7 +468,7 @@ always re-install it if you need it again.
 Both the initial install and updates are handled by the
 _fsadapt_ script, as _root_:
 
-  cd /root/fsl10
+  cd /root/fsl11
   ./fsadapt
 
 In the first window select _only_ the option (i.e., only that line has a `*`):
@@ -466,7 +526,8 @@ names to the error messages.
 === Make local software
 
 IMPORTANT: If you are installing a 64-bit system as part of upgrading
-the FS, you should return to the FS update instructions at this point.
+to FS _10.0_, you should return to the FS update instructions at this
+point.
 
 If _/usr2/st/Makefile_ is set-up in the standard way, you can do this with:
 
