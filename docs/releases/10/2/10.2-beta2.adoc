@@ -21,7 +21,7 @@
 :doctype: book
 
 = FS 10.2-beta2 Update Notes
-Version 0.76 - September 2023
+Version 0.78 - September 2023
 
 :sectnums:
 :stem: latexmath
@@ -34,6 +34,7 @@ Version 0.76 - September 2023
 :sectnums!:
 == Revision history
 
+* 0.78 -- Update external 64-bit conversion links
 * 0.77 -- Add revision history
 * 0.76 -- Add FSL11 transfer appendix
 * 0.75 -- Add using _ps2pdf_ for PostScript to PDF
@@ -3979,17 +3980,17 @@ may still be useful as an outline of what needs to be done. If you use
 the method in the document:
 
 . You should use all steps from
-<<../../../misc/64-bit_conversion.adoc#_login_as_root,Login as root>>
+<<../../../misc/64-bit_conversion.adoc#_login_as_root_on_the_new_system,Login as root on the new system>>
 through
 <<../../../misc/64-bit_conversion.adoc#_transfer_files,Transfer
 files`>>.
 
 . If your new system is 64-bit and you have not already updated your
 code for 64-bit, you should use the steps
-<<../../../misc/64-bit_conversion.adoc#_login_as_prog,Login as prog>>
-and
-<<../../../misc/64-bit_conversion.adoc#_update_station_programs,Update
-station programs>>.
+<<../../../misc/64-bit_conversion.adoc#_login_as_prog_on_the_new_system,Login
+as prog on the new system>> and
+<<../../../misc/64-bit_conversion.adoc#_update_station_programs_for_64_bit,Update
+station programs for 64-bit>>.
 
 . Skip all remaining steps. However, if your local station programs
 only uses C, you can test whether it will compile with the
