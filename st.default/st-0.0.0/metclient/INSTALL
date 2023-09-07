@@ -132,7 +132,8 @@ STARTING CLIENT:
            localhost &
 
 2.) If you would like metclient to startup at boot time and your system uses
-    init.d. See #3 below for systemd instructions.
+    init.d, which is deprecated. See #3 below for systemd, which is preferred,
+    instructions.
 
     2nd WARNING-2nd WARNING-2nd WARNING-2nd WARNING-2nd WARNING-2nd WARNING:
     vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
@@ -181,7 +182,8 @@ STARTING CLIENT:
               of symlinks even if /etc/init.d/metclient.sh still exists
 
 3.) If you would like metclient to startup at boot time and your system uses
-    systemd. See #2 above for init.d instructions.
+    systemd, which is preferred. See #2 above for init.d, which is deprecated,
+    instructions.
 
     2nd WARNING-2nd WARNING-2nd WARNING-2nd WARNING-2nd WARNING-2nd WARNING:
     vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv

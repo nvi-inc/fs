@@ -128,7 +128,8 @@ IMPORTANT NOTE: You must supply values (even if the default) for all
                                          (metsensor) (windsensor)
 
 2.) If you would like metserver to startup at boot time and your system uses
-    init.d. See #3 below for systemd instructions.
+    init.d, which is deprecated. See #3 below for systemd, which is preferred,
+    instructions.
 
     Special NOTICE: Please edit the script to use your port locations
                     and other settings before you proceed.
@@ -171,7 +172,8 @@ IMPORTANT NOTE: You must supply values (even if the default) for all
               of symlinks even if /etc/init.d/metserver.sh still exists.   
 
 3.) If you would like metserver to startup at boot time and your system uses
-    systemd. See #2 above for init.d instructions.
+    systemd, which is preferred. See #2 above for init.d, which is deprecated,
+    instructions.
 
     Special NOTICE: Please edit the script to use your port locations
                     and other settings before you proceed.
