@@ -19,7 +19,7 @@
 //
 
 = Converting to a 64-bit System
-Version 1.5 - September 2023
+Version 1.6 - September 2023
 
 //:hide-uri-scheme:
 :sectnums:
@@ -32,6 +32,7 @@ Version 1.5 - September 2023
 :sectnums!:
 == Document revision history
 
+* 1.6 -- Transfer logs directly to a reference copy
 * 1.5 -- Use _root_ on the old system to copy files if possible
 * 1.4 -- Add revision history
 * 1.3 -- Rewrite to include FSL11 and make useful for more situations
@@ -135,12 +136,8 @@ you should rename the one on the new computer:
       cd /usr2
       mv st-0.0.0  st-0.0.0.DEFAULT
 
-. The _log_ directory were not included above, since it should
-essentially be empty on the new computer, but could also be
-renamed if you prefer:
-
-      cd /usr2
-      mv log       log.DEFAULT
+The _log_ directory was not included above since it should essentially
+be empty on the new computer.
 
 === Transfer files
 
@@ -214,14 +211,18 @@ large and take a significant amount of time to transfer.
 +
 
 It can be useful to have your old log files on the new computer. The
-transfer from your `_old_` computer could take a long time:
+commands below transfer the logs on your old computer to be a
+reference copy on the new computer. The transfer from your `_old_`
+computer could take a long time:
 
 +
 
 [subs="+quotes"]
 ....
 cd /usr2
-scp -pqr root@_old_:/usr2/log .
+scp -pqr root@_old_:/usr2/log log-old
+chown -R oper.rtx log-old
+chmod -R a-w log-old
 ....
 
 .. Transfer _tle_files_:
@@ -274,7 +275,6 @@ and possibly:
 [subs="+quotes"]
 ....
 cd /usr2
-cp -a log       log-old
 cp -a tle_files tle_files-old
 chmod -R a-w log-old tle_files-old
 ....
