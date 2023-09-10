@@ -19,7 +19,7 @@
 //
 
 = Converting to a 64-bit System
-Version 1.4 - September 2023
+Version 1.5 - September 2023
 
 //:hide-uri-scheme:
 :sectnums:
@@ -32,6 +32,7 @@ Version 1.4 - September 2023
 :sectnums!:
 == Document revision history
 
+* 1.5 -- Use _root_ on the old system to copy files if possible
 * 1.4 -- Add revision history
 * 1.3 -- Rewrite to include FSL11 and make useful for more situations
 * 1.2 -- Add using ssh-keygen
@@ -183,6 +184,14 @@ and directories. If your system is different, you will need to adjust
 what you do accordingly, but you may still find the outline of steps
 useful.
 
+IMPORTANT: These instructions assume that you can login to the old
+system as _root_ using _ssh_. Allowing this is a security risk and
+should only allowed temporarily for these command. If you are not able
+to allow it temporarily, you can use the _oper_ and _prog_ (or other)
+accounts as appropriate to transfer the files. In that case, there is
+risk that some files may not be copied due to ownership/permission
+issues. You may need to take other steps to copy those files.
+
 . Transfer operations directories:
 
 .. Transfer _control_, _sched_, and _proc_ from your `_old_` computer:
@@ -192,9 +201,9 @@ useful.
 [subs="+quotes"]
 ....
 cd /usr2
-scp -pqr oper@_old_:/usr2/control .
-scp -pqr oper@_old_:/usr2/sched .
-scp -pqr oper@_old_:/usr2/proc .
+scp -pqr root@_old_:/usr2/control .
+scp -pqr root@_old_:/usr2/sched .
+scp -pqr root@_old_:/usr2/proc .
 ....
 +
 
@@ -212,7 +221,7 @@ transfer from your `_old_` computer could take a long time:
 [subs="+quotes"]
 ....
 cd /usr2
-scp -pqr oper@_old_:/usr2/log .
+scp -pqr root@_old_:/usr2/log .
 ....
 
 .. Transfer _tle_files_:
@@ -226,7 +235,7 @@ you can also transfer it:
 [subs="+quotes"]
 ....
 cd /usr2
-scp -pqr oper@_old_:/usr2/tle_files .
+scp -pqr root@_old_:/usr2/tle_files .
 ....
 
 . Fix the permissions on the operations directories/files you
@@ -292,7 +301,7 @@ the new computer, e.g.:
 [subs="+quotes"]
 ....
 cd /usr2
-scp -pqr prog@__old__:/usr2/st-_version_ .
+scp -pqr root@__old__:/usr2/st-_version_ .
 ....
 
 .. On the new computer, set the _/usr2/st_ symbolic link to point to
@@ -345,8 +354,8 @@ name of your old computer.
 [subs="+quotes"]
 ....
 cd /usr2
-scp -pqr oper@_old_:~ oper-old
-scp -pqr prog@_old_:~ prog-old
+scp -pqr root@_old_:~ oper-old
+scp -pqr root@_old_:~ prog-old
 ....
 
 .. You probably want to set their ownership and prevent them from
