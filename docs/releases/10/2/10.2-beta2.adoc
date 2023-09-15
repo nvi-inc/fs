@@ -21,7 +21,7 @@
 :doctype: book
 
 = FS 10.2-beta2 Update Notes
-Version 0.79 - September 2023
+Version 0.80 - September 2023
 
 :sectnums:
 :stem: latexmath
@@ -32,8 +32,9 @@ Version 0.79 - September 2023
 :toc:
 
 :sectnums!:
-== Revision history
+== Document revision history
 
+* 0.80 -- In FSL11 appendix: improve tentative compile checks; bring more attention to local customizations
 * 0.79 -- Update internal 64-bit conversion link
 * 0.78 -- Update external 64-bit conversion links
 * 0.77 -- Add revision history
@@ -3994,7 +3995,7 @@ as prog on the new system>> and
 station programs for 64-bit>>.
 
 . Skip all remaining steps. However, if your local station programs
-only uses C, you can test whether it will compile with the
+only uses C, you can test whether it will compile (as _prog_) with the
 <<../../../misc/64-bit_conversion.adoc#_make_local_software,Make local
 software>> step. FORTRAN code may also compile and load at this point,
 but it may need further changes for FSL11.
@@ -4054,7 +4055,7 @@ should use those steps.
 
 .. If you local station software is C only, you can check if it will
 compile with step <<../0/10.0.0.adoc#_make_local_software,Make local
-software>>, but this is not necessary.
+software>>, but this is not necessary at this point.
 
 +
 
@@ -4094,11 +4095,24 @@ the <<../1/10.1.0.adoc#,FS 10.1.0 Update Notes>> document. The steps
 need to be modified slightly to take into account that you have an
 initial install on FSL11 already:
 
-.. Use step <<../1/10.1.0.adoc#_login_as_oper,Login as oper>>.
++
+--
 
-.. Use steps: <<../1/10.1.0.adoc#_remove_temporary_fixes,Remove
-temporary fixes>> and <<../1/10.1.0.adoc#_local_customizations,Local
+.. Use step: <<../1/10.1.0.adoc#_login_as_oper,Login as oper>>.
+
+.. Use step: <<../1/10.1.0.adoc#_remove_temporary_fixes,Remove
+temporary fixes>>.
+
+.. Use step: <<../1/10.1.0.adoc#_local_customizations,Local
 customizations>>.
+
+--
++
+
+You will not be able to run the FS at this point to verify the format
+of the _.rxg_ files. You will need to do that after you have completed
+the upgrade to _10.2_.
+
 
 . Proceed to the next sub-step, for old version _10.1_.
 
