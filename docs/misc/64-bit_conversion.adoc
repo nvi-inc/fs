@@ -19,7 +19,7 @@
 //
 
 = Converting to a 64-bit System
-Version 1.7 - September 2023
+Version 1.9 - September 2023
 
 //:hide-uri-scheme:
 :sectnums:
@@ -37,6 +37,7 @@ Click the *Details* toggle below to unhide/hide the history.
 [%collapsible]
 ====
 
+* 1.9 -- Remove extraneous `log-old` from `chmod a-w ...`
 * 1.8 -- Improve customization of home directories; put Document revision history in a collapsible block
 * 1.7 -- Note other formats for `_st-version_`
 * 1.6 -- Transfer logs directly to a reference copy
@@ -285,7 +286,7 @@ and possibly:
 ....
 cd /usr2
 cp -a tle_files tle_files-old
-chmod -R a-w log-old tle_files-old
+chmod -R a-w tle_files-old
 ....
 
 . Transfer your station software directory (and make a
