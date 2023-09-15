@@ -32,6 +32,12 @@ Version 1.7 - September 2023
 :sectnums!:
 == Document revision history
 
+Click the *Details* toggle below to unhide/hide the history.
+
+[%collapsible]
+====
+
+* 1.8 -- Improve customization of home directories; put Document revision history in a collapsible block
 * 1.7 -- Note other formats for `_st-version_`
 * 1.6 -- Transfer logs directly to a reference copy
 * 1.5 -- Use _root_ on the old system to copy files if possible
@@ -45,6 +51,8 @@ Version 1.7 - September 2023
 * 0.6 -- Simplify 64-bit upgrade path
 * 0.4 -- Simplify 64-bit upgrade path
 * 0.3 -- Initial version
+
+====
 
 :sectnums:
 == Introduction
@@ -375,9 +383,19 @@ chown -R prog.rtx /usr2/prog-old
 chmod -R a-w /usr2/prog-old
 ....
 
+.. Customize the home directories on the new computer to include any
+features you want from the old system.
+
 +
-You can customize the home directories on the new computer
-to include any features you want from the old system.
+
++
+
+This would typically include updating the default _~/.profile_,
+_~/.bashrc_, _~/.bash_aliases_, and _~/bin_. If you were previously
+using _tcsh_ (the default for FSL9 and earlier) and are now changing
+to _bash_ (the default for FSL10 and later), you will need to
+translate customized settings from your _~/.login_ and _~/.cshrc_
+files.
 
 . At this point you are principle done transferring files.
 However, it is also possible that you may need or want
