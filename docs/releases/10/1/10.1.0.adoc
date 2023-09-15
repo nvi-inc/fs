@@ -22,7 +22,7 @@
 
 = FS 10.1.0 Update Notes
 E. Himwich, J. Quick, J. Gipson, D. Horsley
-Version 6.7 - July 2023
+Version 6.8 - September 2023
 
 //:hide-uri-scheme:
 :sectnums:
@@ -544,10 +544,13 @@ selected recorder is FlexBuff.
 
 +
 
-You can do make this change in one of two ways, using _pfmed_ commands:
+Three modifications are needed to fully support this change. _pfmed_
+should be used for all these modifications.
 
-* If you don't also have a Mark 5 recorder, you can rename your existing
-procedure:
+.. You can add the procedure in in one of two ways:
+
+* If you don't also have a Mark 5 recorder, you can rename your
+existing procedure:
 
   pf,station
   rn,checkmk5,checkfb
@@ -558,14 +561,20 @@ existing procedure:
   pf,station
   st,checkmk5,checkfb
 
-+
-
-Additionally, for either case, in the new file:
+.. Additionally, in the new procedure:
 
 * You should remove any `mk5=get_stats?` commands, if they are
 present.
 
 * It is recommended to rename the `mk5_status` call to `fb_status`.
+
++
+
+.. Lastly, if you call `checkmk5` from any local procedures, you
+should probably change those calls to `checkfb` if you only have a
+FlexBuff recorder. If you have also have a Mark 5 recorder, you may
+want to create new versions that call `checkfb` for use with the
+FlexBuff.
 
 . <<dbbc3config,FS DBBC3 Configuration>>[[dbbc3config]]: If you have a
 DBBC3, you should make the configuration changes described in the
