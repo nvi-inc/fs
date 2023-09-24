@@ -67,7 +67,7 @@ C
 C
 C CALIBRATION NOISE SOURCE
 C
-      icnext=icnext+jr2as(calfp,lbuf,icnext,-5,1,isbuf)
+      icnext=icnext+jr2as(calfp,lbuf,icnext,-7,3,isbuf)
       icnext=ichmv_ch(lbuf,icnext,' ')
 C
 C BEAMWIDTH
