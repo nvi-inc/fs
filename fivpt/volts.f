@@ -271,10 +271,10 @@ C
            tpita=(tpita*dim1+dtpi)*dri  
            sigt=(sigt*dim1+dtpi*dtpi)*dri 
         else if(imode.eq.0) then
-           dim1=dble(float(2*(i-1)))
-           dri=1.0d0/dble(float(2*i)) 
-           tpita=(tpita*dim1+dtpi+dtpi2)*dri  
-           sigt=(sigt*dim1+dtpi*dtpi+dtpi2*dtpi2)*dri 
+           dim1=dble(float(i-1))
+           dri=1.0d0/dble(float(i))
+           tpita=(tpita*dim1+0.5*(dtpi+dtpi2))*dri
+           sigt=(sigt*dim1+0.5*(dtpi+dtpi2)*0.5*(dtpi+dtpi2))*dri
         else
            dim1=dble(float(i-1))
            dri=1.0d0/dble(float(i)) 
@@ -304,7 +304,7 @@ C
          didim1=dble(float(intp))/dble(float(intp-1))
          sigt=dsqrt(dabs(sigt-tpita*tpita)*didim1) 
       else if(imode.eq.0) then
-         didim1=dble(float(2*intp))/dble(float(2*(intp-1)))
+         didim1=dble(float(intp))/dble(float(intp-1))
          sigt=dsqrt(dabs(sigt-tpita*tpita)*didim1) 
       else
          didim1=dble(float(intp))/dble(float(intp-1))
