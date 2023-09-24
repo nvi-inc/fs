@@ -248,7 +248,8 @@ C
          temps=-calfp
          vslope=temps/(tpia-vbase)
       endif
-      sigts=sigts*vslope
+C ad hoc approximation
+      sigts=sqrt(sigts*sigts+sig*sig)*vslope
       return
 C
 C  ERROR RETURN, RESET ATTENUATORS
