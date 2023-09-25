@@ -97,7 +97,7 @@ int ip[5];
   cls_snd(&out_class, buf, strlen(buf) , 0, 0);
   out_recs++;
 
-  ip[0]=1;
+  ip[0]=8;
   ip[1]=out_class;
   ip[2]=out_recs;
   skd_run("dbbcn",'w',ip);
@@ -142,7 +142,7 @@ int ip[5];
       out_recs++;
     }
     
-    ip[0]=1;
+    ip[0]=8;
     ip[1]=out_class;
     ip[2]=out_recs;
     skd_run("dbbcn",'w',ip);
@@ -277,7 +277,7 @@ int ip[5];
       out_recs++;
     }
     
-    ip[0]=1;
+    ip[0]=8;
     ip[1]=out_class;
     ip[2]=out_recs;
     skd_run("dbbcn",'w',ip);
