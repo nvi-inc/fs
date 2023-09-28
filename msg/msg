@@ -1273,7 +1273,7 @@ global session station send_to cc current_form auto_start put_into_log session F
    }
 
    if {$current_form=="stop"} {
-    form_controler 3
+    .send_button config -text "Go to Ready" -width 12 -command {form_controler 3}
    }
 
   }
