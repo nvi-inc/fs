@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 #
-# Copyright (c) 2020-2022 NVI, Inc.
+# Copyright (c) 2020-2023 NVI, Inc.
 #
 # This file is part of VLBI Field System
 # (see http://github.com/nvi-inc/fs).
@@ -429,9 +429,56 @@ class msg_tk(tkinter.Tk):
         deteclabel = tkinter.Label(self,textvariable=self.detec,anchor="w",fg="white",bg="black",font=self.customFont,width=15)
         deteclabel.grid(column=6,row=row,sticky='EW')
 
-        row = row + 3
-        r21 = tkinter.Label(self,fg="white", bg="blue",text=" ", font=self.customFont,width=15)
-        r21.grid(column=0,row=row,columnspan=7,sticky='EW')
+        row = row + 1
+        wx1 = tkinter.Label(self,fg="white", bg="blue",text=u" ",font=self.customFont,width=15)
+        wx1.grid(column=0,row=row,columnspan=7,sticky='EW')
+
+        row = row + 1
+        wx2 = tkinter.Label(self,fg="white", bg="blue",text=u"- WX -", font=self.customFont,width=15)
+        wx2.grid(column=0,row=row,sticky='EW')
+
+        Templabel = tkinter.Label(self,fg="white", bg="blue",text=u"Temperature", font=self.customFont,width=15)
+        Templabel.grid(column=1,row=row,sticky='EW')
+
+        Preslabel = tkinter.Label(self,fg="white", bg="blue",text=u"Pressure", font=self.customFont,width=15)
+        Preslabel.grid(column=2,row=row,sticky='EW')
+
+        Humilabel = tkinter.Label(self,fg="white", bg="blue",text=u"Humidity", font=self.customFont,width=15)
+        Humilabel.grid(column=3,row=row,sticky='EW')
+
+        Windlabel = tkinter.Label(self,fg="white", bg="blue",text=u"Wind:", font=self.customFont,width=15)
+        Windlabel.grid(column=4,row=row,sticky='EW')
+
+        Speedlabel = tkinter.Label(self,fg="white", bg="blue",text=u"Speed", font=self.customFont,width=15)
+        Speedlabel.grid(column=5,row=row,sticky='EW')
+
+        Dirlabel = tkinter.Label(self,fg="white", bg="blue",text=u"Direction", font=self.customFont,width=15)
+        Dirlabel.grid(column=6,row=row,sticky='EW')
+
+        row = row + 1
+        self.Temp = tkinter.StringVar()
+        Tempvalue = tkinter.Label(self,textvariable=self.Temp,anchor="w",fg="white",bg="black",font=self.customFont,width=15)
+        Tempvalue.grid(column=1,row=row,sticky='EW')
+
+        self.Pres = tkinter.StringVar()
+        Presvalue = tkinter.Label(self,textvariable=self.Pres,anchor="w",fg="white",bg="black",font=self.customFont,width=15)
+        Presvalue.grid(column=2,row=row,sticky='EW')
+
+        self.Humi = tkinter.StringVar()
+        Humivalue = tkinter.Label(self,textvariable=self.Humi,anchor="w",fg="white",bg="black",font=self.customFont,width=15)
+        Humivalue.grid(column=3,row=row,sticky='EW')
+
+        self.WindSpeed = tkinter.StringVar()
+        WindSpeedvalue = tkinter.Label(self,textvariable=self.WindSpeed,anchor="w",fg="white",bg="black",font=self.customFont,width=15)
+        WindSpeedvalue.grid(column=5,row=row,sticky='EW')
+
+        self.WindDir = tkinter.StringVar()
+        WindDirvalue = tkinter.Label(self,textvariable=self.WindDir,anchor="w",fg="white",bg="black",font=self.customFont,width=15)
+        WindDirvalue.grid(column=6,row=row,sticky='EW')
+
+        row = row + 1
+        wx3 = tkinter.Label(self,fg="white", bg="blue",text=u" ",font=self.customFont,width=15)
+        wx3.grid(column=0,row=row,columnspan=7,sticky='EW')
 
         row = row + 1
         r22 = tkinter.Label(self,fg="white", bg="blue",text="To",font=self.customFont,width=15)
@@ -515,6 +562,11 @@ class msg_tk(tkinter.Tk):
             self.GetPntVals()
         except:
             print("Could not get Pointing values!")
+
+        try:
+            self.GetWXVals()
+        except:
+            print("Could not get WX values!")
 
         self.addressTo.set(self._to)
 
@@ -679,6 +731,29 @@ class msg_tk(tkinter.Tk):
         self.latqc.set(v[8])
         self.detec.set(v[9])
 
+    def GetWXVals(self):
+        print("Updating WX Values")
+        s = self.sessionname.get()
+        c = self.stationcode.get()
+        procWX = subprocess.Popen(["/bin/sh", "-c", "grep 'wx/' /usr2/log/" + s + c + ".log  | tail  -n 1"], stdout=subprocess.PIPE,text=True)
+
+        vals = procWX.stdout.read().split('\n')[0]
+
+        vals=vals.split('/')[-1]
+
+        v = vals.split(',')
+
+        self.Temp.set(v[0])
+        self.Pres.set(v[1])
+        self.Humi.set(v[2])
+
+        self.WindSpeed.set("")
+        self.WindDir.set("")
+        if len(v) >  3:
+            self.WindSpeed.set(v[3])
+            if len(v) >  4:
+                self.WindDir.set(v[4])
+
     def sendMessage(self):
         TO = self.addressTo.get()
         SUBJECT = self.sessionname.get() + " " + self._name + " " + self.typeVariable.get() + " message"
@@ -716,8 +791,12 @@ class msg_tk(tkinter.Tk):
                 " SOURCE: " + self.pSRC.get() + " | TIME: " + self.pTIM.get() + " | DETECTOR: " + self.detec.get() + "\n" + \
                 " Lon: " + self.lon.get() + " | Lat: " + self.lat.get() +"\n" + \
                 " OFFSETS: X-Lat: " + self.xlatoff.get() + " | Lat: " + self.latoff.get() +"\n" + \
-                " QCs: X-Lat: " + self.xlatqc.get() + " | Lat: " + self.latqc.get()
+                " QCs: X-Lat: " + self.xlatqc.get() + " | Lat: " + self.latqc.get() + "\n\n"
 
+        TEXT = TEXT +\
+            "========WEATHER-INFORMATION=======\n" + \
+            " Temperature "  + self.Temp.get() + " | Pressure " + self.Pres.get() + " | Humidity " + self.Humi.get() + "\n" + \
+            " Wind: Speed " + self.WindSpeed.get() + " | Direction " + self.WindDir.get()
 
         process = subprocess.Popen(["mail", "-s", SUBJECT, TO], stdin=subprocess.PIPE, stdout=subprocess.PIPE,text=True)
         process.stdin.write(TEXT)
