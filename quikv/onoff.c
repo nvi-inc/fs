@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 NVI, Inc.
+ * Copyright (c) 2020-2021, 2023 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -598,7 +598,7 @@ int ip[5];                           /* ipc parameters */
 	    lcl.ssize=lcl.ssize>ssize?lcl.ssize:ssize;
 	    if(lcl.devices[i].corr>=1.2) {
 	      memcpy(ip+3,"q1",2);
-	      logita(NULL,-307,ip+3,lcl.devices[i].lwhat);
+	      logita(NULL,307,ip+3,lcl.devices[i].lwhat);
 	    }
 	  }
 	}

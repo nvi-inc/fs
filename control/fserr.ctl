@@ -5078,6 +5078,9 @@ Can't read which ports are in use.
 PP -402
 Porgram error: Impossible situation in pcalports_dis.
 ""
+Q1  307
+WARNING: Source structure correction greater than 20% for detector ?W.
+""
 Q1 -107
 No default for detectors.
 ""
@@ -5119,9 +5122,6 @@ ONOFF, FIVPT, or HOLOG already running.
 ""
 Q1 -306
 BBC patching not defined.
-""
-Q1 -307
-WARNING: Source structure correction greater than 20% for detector ?W.
 ""
 Q1 -308
 Unknown IF filter.
