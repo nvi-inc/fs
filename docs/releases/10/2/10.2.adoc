@@ -21,7 +21,7 @@
 :doctype: book
 
 = FS 10.2 Update Notes
-Version 0.81 - October 2023
+Version 0.82 - October 2023
 
 :sectnums:
 :stem: latexmath
@@ -34,6 +34,7 @@ Version 0.81 - October 2023
 :sectnums!:
 == Document revision history
 
+* 0.82 -- Minor wording changes
 * 0.81 -- Transition from _-beta2_
 * 0.80 -- In FSL11 appendix: improve tentative compile checks; bring more attention to local customizations
 * 0.79 -- Update internal 64-bit conversion link
@@ -1190,8 +1191,8 @@ display window,
 The values of course only update when a new measurement is made. If
 the T~cal~ has not been defined, `Ntcal` is shown in inverse video. If
 no legacy calibration measurements have been made (and continuous
-calibration is not enabled), `N cal` is shown in inverse video. Values
-that exceed `999.9`, erroneous values (negative, infinity, and
+calibration is not enabled), `N{nbsp}cal` is shown in inverse video.
+Values that exceed `999.9`, erroneous values (negative, infinity, and
 overflow), and other setup errors, (BBC or LO not defined), are shown
 as dollar signs, `$`.
 
@@ -1420,8 +1421,7 @@ and the format.
 
 Except for clipped (and auto-reset) values, negative values, including
 out-of-range (dollar signs, `++$$$$$++`), are shown in inverse video
-to highlight that the polarity is wrong. This is intended to bring
-attention to the polarity being incorrect. Clipped (and auto-reset)
+to highlight that the polarity is wrong. Clipped (and auto-reset)
 values include a sign.
 
 ... Invalid continuous calibration data is shown with a cyan
@@ -1493,7 +1493,7 @@ sequences, possibly more than once in a row or using automatic repeat.
 Thanks to Jon Quick (HartRAO) for reporting this issue and testing the
 fix.
 
-... `N cal` is now displayed when continuous calibration is not
+... `N{nbsp}cal` is now displayed when continuous calibration is not
 enabled (and no _legacy_ calibration is available).
 
 +
@@ -3981,8 +3981,8 @@ may still be useful as an outline of what needs to be done. If you use
 the method in the document:
 
 . You should use all steps from
-<<../../../misc/64-bit_conversion.adoc#_login_as_root_on_the_new_system,Login as root on the new system>>
-through
+<<../../../misc/64-bit_conversion.adoc#_login_as_root_on_the_new_system,Login
+as root on the new system>> through
 <<../../../misc/64-bit_conversion.adoc#_transfer_files,Transfer
 files`>>.
 
