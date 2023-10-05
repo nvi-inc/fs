@@ -22,7 +22,7 @@
 
 = FS 10.1.0 Update Notes
 E. Himwich, J. Quick, J. Gipson, D. Horsley
-Version 6.8 - September 2023
+Version 6.9 - October 2023
 
 //:hide-uri-scheme:
 :sectnums:
@@ -573,8 +573,8 @@ present.
 .. Lastly, if you call `checkmk5` from any local procedures, you
 should probably change those calls to `checkfb` if you only have a
 FlexBuff recorder. If you have also have a Mark 5 recorder, you may
-want to create new versions that call `checkfb` for use with the
-FlexBuff.
+want to create new versions that call `checkfb` instead for use with
+the FlexBuff.
 
 . <<dbbc3config,FS DBBC3 Configuration>>[[dbbc3config]]: If you have a
 DBBC3, you should make the configuration changes described in the
