@@ -5078,8 +5078,8 @@ Can't read which ports are in use.
 PP -402
 Porgram error: Impossible situation in pcalports_dis.
 ""
-Q1  307
-WARNING: Source structure correction greater than 20% for detector ?W.
+Q1  307 Placeholder for large structure correction warning
+
 ""
 Q1 -107
 No default for detectors.

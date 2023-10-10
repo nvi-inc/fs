@@ -597,8 +597,14 @@ int ip[5];                           /* ipc parameters */
 					 &lcl.devices[i].corr,&ssize);
 	    lcl.ssize=lcl.ssize>ssize?lcl.ssize:ssize;
 	    if(lcl.devices[i].corr>=1.2) {
-	      memcpy(ip+3,"q1",2);
-	      logita(NULL,307,ip+3,lcl.devices[i].lwhat);
+              char buff3[120];
+              if(0==strncmp("  ",lcl.devices[i].lwhat+2,2))
+                snprintf(buff3,sizeof(buff3),"WARNING: Source structure correction greater than 20%% for detector %-2.2s",
+                        lcl.devices[i].lwhat);
+              else
+                snprintf(buff3,sizeof(buff3),"WARNING: Source structure correction greater than 20%% for detector %-4.4s",
+                        lcl.devices[i].lwhat);
+              logite(buff3,307,"q1");
 	    }
 	  }
 	}
