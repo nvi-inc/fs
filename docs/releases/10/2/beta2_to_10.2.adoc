@@ -47,7 +47,10 @@ The changes in the FS and _drudg_ for _10.2_ are covered in the
 <<Changes since 10.2-beta2>> section below. The most significant
 changes are:
 
-* Adjust positions of the _monit3_ and _monit7_ windows.
+* Move position of schedule and log names in the _monit2_ window.
+
+* Improve _fivpt_, particularly the RMSs for continuous calibration
+with averaging.
 
 == Upgrading from 10.2-beta2
 
@@ -87,9 +90,9 @@ will need the *TIP* in the `*wget*` step.
 
 * For the __tag__ use `10.2.0`.
 
-* You will end using the "`installing from an archive`" procedure with
-the step setting the link for __/usr2/fs__ by running *`make
-install`*.
+* You should return to the steps in this document after completing the
+"`Installing from an archive`" procedure with the step setting the
+link for __/usr2/fs__ by running *`make install`*.
 
 === Login as prog
 
@@ -180,9 +183,9 @@ _.Xresources.bak_ in case you need to recover.
 [TIP]
 =====
 
-The script also includes command line options for setting the position
-of each window, and _not_ updating the _monit7_ title. Enter
-`*/usr2/fs/misc/xresourcesfix2*` for the details.
+The script also includes command line options for setting, or not
+setting, the position of each window, and not updating the _monit7_
+title. Enter `*/usr2/fs/misc/xresourcesfix2*` for the details.
 
 You can try the script multiple times with different values if between
 runs you use:
@@ -261,8 +264,9 @@ obsolete tape related fields were removed to make this possible.
 +
 
 Correct T~ant~ RMS for continuous calibration. Improve T~sys~ RMS. Add
-more digits to T~cal~ value in `#fivpt#fivept` record. Fix a bug that
-caused multicast time-out warnings for the DBBC3 when not recording.
+more digits to T~cal~ value in the `#fivpt#fivept` record. Fix a bug
+that caused multicast time-out warnings for the DBBC3 when not
+recording.
 
 +
 [%collapsible]
@@ -287,7 +291,7 @@ technically correct, this should give an indication of how noisy the
 raw data were.
 
 
-.. Add more digits to T~cal~ value in `#fivpt#fivept` record.
+.. Add more digits to T~cal~ value in the `#fivpt#fivept` record.
 
 +
 
@@ -355,8 +359,9 @@ command to not ring the bell.
 +
 
 Previously this change was made for the warning issued by the _onoff_
-program. This change has now been made for the warning issued by the
-`onoff` command itself.
+program. That warning was also expanded to handle four character
+device mnemonics. These changes have now been made for the warning
+issued by the `onoff` command itself.
 
 . Adjust _.Xresources_ for _monit3_ and _monit7_.
 
@@ -422,7 +427,7 @@ text is now consistent with the current form of the options.
 
 ====
 
-. Add a comment to a recovered log and make two other related minor
+. Add a comment to a recovered log and make two minor related
 improvements.
 
 +
@@ -503,7 +508,7 @@ the FS per se, but were provided with the FS, beginning in 2003, to
 simplify distribution. They have now been moved to their own publicly
 accessible repositories, https://github.com/nvi-inc/metserver and
 https://github.com/nvi-inc/metclient. The instructions in the included
-_INSTALL_ files, set them up independently of the local _/usr2/st_
+_INSTALL_ files set them up independently of the local _/usr2/st_
 directory that was used before. This separation makes them more
 modular and easier to maintain independently from the _station_ FS
 programs.
@@ -593,6 +598,9 @@ transferring the files from an existing operational FS installation to
 a new system. Only a subset of the original steps is needed. Several
 other minor changes were made:
 
++
+[disc]
+
 * Update for FSL11
 
 * Use _root_ account for transferring files if allowed. If not, use
@@ -639,7 +647,7 @@ As part of changing to use procedure `checkfb` instead of `checkmk5`
 for FlexBuff recorders for updating to _10.1_, the user will need to
 change existing calls to the former to calls to the latter. This was
 omitted the <<../1/10.1.0.adoc#,FS 10.1.0 Update Notes>> update notes,
-but has been added now. A fix up step for this has been added to the
+but has been added now. A fix-up step for this has been added to the
 <<10.2.adoc#,FS 10.2 Update Notes>> and <<beta2_to_10.2.adoc#,FS
 10.2-beta2 to FS 10.2 Update Notes>>  This update is only needed if
 there are local procedures that use `checkmk5`. If both a Mark 5 and
@@ -658,12 +666,15 @@ update notes.
 
 +
 
-Some of these were made obsolete by later changes. The changes for
+Some of these were superseded by later changes. The changes for
 _-beta1_ include:
+
++
+[disc]
 
 * Invalid T~sys~ with cyan background
 
-* Negative T~sys~ with magenta background (obsolete, now inverse)
+* Negative T~sys~ with magenta background (superseded, now inverse)
 
 * Change to `N{nbsp}cal` from `Nccal`
 
