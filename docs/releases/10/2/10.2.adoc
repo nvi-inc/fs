@@ -21,7 +21,7 @@
 :doctype: book
 
 = FS 10.2 Update Notes
-Version 0.82 - October 2023
+Version 0.83 - October 2023
 
 :sectnums:
 :stem: latexmath
@@ -34,6 +34,7 @@ Version 0.82 - October 2023
 :sectnums!:
 == Document revision history
 
+* 0.83 -- Incorporate changes since -beta2
 * 0.82 -- Minor wording changes
 * 0.81 -- Transition from _-beta2_
 * 0.80 -- In FSL11 appendix: improve tentative compile checks; bring more attention to local customizations
@@ -563,7 +564,8 @@ _.Xresources.bak_ in case you need to recover.
 =====
 
 The script also includes command line options for setting a different
-width, either for all the windows or for specific ones. Enter
+width, either for all the windows or for specific ones and or for not
+setting the width for specific ones. Enter
 `*/usr2/fs/misc/xresourcesfix*` for the details.
 
 You can try the script multiple times with different values if between
@@ -576,6 +578,66 @@ runs you use:
 If you have other, special purpose, X11 resource files, you may want
 to run the script on them also. You may want to make the same changes
 for _prog_ (and any AUID accounts) as well.
+
+====
+
+. <<adjust_monit3_7,Adjust monit3 and monit7
+positions>>[[adjust_monit3_7]]:
+
++
+
+This corrects a previous misplacement of these windows and provides a
+window title for _monit7_ that fits in the available space.
+
++
+
+[%collapsible]
+====
+
+The previous example _.Xresources_ files placed the _monit3_ and
+_monit7_ windows so that they slightly overlap the _monit2_ window.
+Additionally, the title for the _monit7_ window did not fit in the
+available space.
+
+These changes are recommended unless you have already made adjustments
+or prefer to keep the windows overlapped to save display space. If you
+don't use _monit3_ (pre-RDBE/DBBC3 T~sys~) or _monit7_ (DBBC3 T~sys~),
+it is recommended that you make these changes so that you have the
+default values. The positions of the windows and the title of the
+_monit7_ window can be adjusted with the commands:
+
+ cd
+ /usr2/fs/misc/xresourcesfix2 .Xresources
+
+You will need to log-out on the console and log back in to see the
+full change.
+
+The script will report an error if it found any of the relevant
+resources were defined more than once; the extras should probably
+deleted. A warning will be reported if any of the resources were not
+found. That may be okay, but may also indicate that the entry was not
+in the format the script expected. That may need to be looked into.
+
+NOTE: The original _.Xresources_ file will be saved as
+_.Xresources.bak_ in case you need to recover.
+
+[TIP]
+=====
+
+The script also includes command line options for setting, or not
+setting, the position of each window, and not updating the _monit7_
+title. Enter `*/usr2/fs/misc/xresourcesfix2*` for the details.
+
+You can try the script multiple times with different values if between
+runs you use:
+
+ mv .Xresources.bak .Xresources
+
+=====
+
+If you have other, special purpose, X11 resources files, you may want
+to run the script on them also. You may want to make the same changes
+for _prog_ as well.
 
 ====
 
@@ -632,6 +694,21 @@ addresses in the log, if that is an issue for your site.
 If you want to make this change, it can be deferred to a convenient
 time. The instructions can be found in the
 <<Update NTP Configuration>> appendix.
+
+====
+
+. If you use _metserver_ and/or _metclient_ update them to use their
+new repositories
+
++
+[%collapsible]
+====
+
+If you use the _metserver_ and/or _metclient_ programs, you may want
+to update your system to use the new repositories for these programs.
+If so, this step requires _root_ priveleges. The changes are described
+in the <<met_programs,Remove metserver and metclient programs>> FS
+change item below.
 
 ====
 
@@ -997,12 +1074,14 @@ This change is largely transparent to the users. The four visible
 effects are:
 
 [disc]
+
 * The length and/or location of the `SCHED=...` and `LOG=...` fields
-in the `System Status Monitor` display (_monit2_) were changed. The
-`SCHED=..` field now occupies the space previously used by both
-`SCHED=...` and `LOG=...`. The `LOG=...` field is now in the lower
-right where the (no longer used) `HEAD PASS # ...` field was
-previously located.
+in the `System Status Monitor` display (_monit2_) were changed to
+accommodate the maximum name lengths. The `SCHED=...` label is now
+`SCH=...` to allow it to fit in the available space and for alignment
+with `LOG=...`. Both are now located in lower-half along the left-hand
+edge. Some obsolete tape related fields were removed to make this
+possible.
 
 * The display of procedure libraries for the `pfdl` command in _pfmed_
 now shows only three libraries per line. A key was also added to
@@ -2406,11 +2485,72 @@ script, the initial version, and many of the incremental improvements.
 
 ====
 
+. <<met_programs,Remove metserver and metclient
+programs>>[[met_programs]]:
+
++
+
+They were moved to separate repositories.
+
++
+[%collapsible]
+====
+
+The _metserver_ program serves data from MET3/4/4A meteorological
+and/or WMT7xx wind sensors connected to serial ports. The _metclient_
+program logs data from a server like _metserver_. They are not part of
+the FS per se, but were provided with the FS, beginning in 2003, to
+simplify distribution. They have now been moved to their own publicly
+accessible repositories, https://github.com/nvi-inc/metserver and
+https://github.com/nvi-inc/metclient. The instructions in the included
+_INSTALL_ files set them up independently of the local _/usr2/st_
+directory that was used before. This separation makes them more
+modular and easier to maintain independently from the _station_ FS
+programs.
+
+NOTE: If you have Ethernet-to-serial converters, you can avoid needing
+serial ports by using _gromet_, https://github.com/nvi-inc/gromet,
+instead of _metserver_.
+
+When the programs were split out of the FS repository, the commit
+messages, which often were not specific to these programs, were
+updated to provide more relevant information.
+
+There is no need for existing users to update their versions of
+_metserver_ and _metclient_. However, it may be beneficial to update
+since any future improvements will be made using the repositories.
+
+Although a complete reinstall is not very difficult, a more limited
+update is relatively simple. Besides downloading the repositories and
+_make_-ing the programs, the scripts used to run the programs will
+need to be updated. For systems using `init.d` (deprecated), the
+string assigned to the `DAEMON` variable in the
+_/etc/init.d/metserver.sh_ and/or _/etc/init.d/metclient.sh_ file
+needs to be updated by removing the string _st/_.
+
+For systems using `systemd` (preferred), the existing
+_/usr2/st/metserver/metserver_systemd.sh_ and/or
+_/usr2/st/meclient/meclient_systemd.sh_ scripts need to be copied to
+_/usr/local/sbin_ and the string assigned to the `DAEMON` variable in
+the new copies updated by removing the string _st/_. Additionally, the
+new _metserver.service_ and/or _metclient.service_ files from the new
+repositories need to be copied over the ones in
+_/etc/systemd/system/_. Then the daemon needs to be reloaded:
+
+ systemctl daemon-reload
+
+and the services restarted:
+
+  systemctl restart metserver
+  systemctl restart metclient
+
+====
+
 . Make miscellaneous enhancements.
 
 +
 
-About a dozen additional small features were changed or added. These
+About 20 additional small features were changed or added. These
 enhancements included two new utility scripts and cleanup of several
 small issues.
 
@@ -2420,25 +2560,64 @@ small issues.
 ====
 
 
-No longer ring the bell for large structure correction warnings.
-Increase the default X11 window width. Skip detectors from inactive
-RDBEs in _onoff_. Accept `waiting` response from RDBE `dbe_data_send?`
-query in _fmset_. Log DBBC3 negative T~sys~ values. Add verbose option
-for _curl_/_wget_ in _fesh_. Improve plog. Improve recommended NTP
-configuration. Prevent problems with _erchk_ when the display server
-is not in use. Use `set revert-all-at-newline on` to prevent old
-commands in the history from being altered. Add script for calculating
-stem:[\mathit{\frac{G}{T}}]. Improve _pfmed_. Add _rdbe30_mon.py_
-script.
+Add a new navigation button to _msg_. Add `wx` data to _rdbemsg_. No
+longer ring the bell for large structure correction warnings in
+`onoff`/_onoff_. Increase the default X11 window width. Skip detectors
+from inactive RDBEs in _onoff_. Improve _fivpt_ T~sys~ RMS.  Add more
+digits to T~cal~ value in the `#fivpt#fivept` record. Cleanup _fs_ and
+_fsclient_ command-line options. Accept `waiting` response from RDBE
+`dbe_data_send?` query in _fmset_. Log DBBC3 negative T~sys~ values.
+Add verbose option for _curl_/_wget_ in _fesh_. Improve plog. Add a
+comment to a recovered log and make two minor related improvements.
+Improve recommended NTP configuration. Prevent problems with _erchk_
+when the display server is not in use. Use `set revert-all-at-newline
+on` to prevent old commands in the history from being altered. Add
+script for calculating stem:[\mathit{\frac{G}{T}}]. Improve _pfmed_.
+Add _rdbe30_mon.py_ script.
 
-.. Change the warning for a large structure size correction in _onoff_
-to not ring the bell.
+.. Add a new navigation button to _msg_.
++
+
+Instead of going directly to the `Ready` form after sending the
+message, the `Stop` form will now show a `Go to Ready` button. This
+allows the user to change to a new schedule before the `Ready` form is
+opened. That obviates the need to reload the form, which might be
+overlooked, after the new schedule is opened.
 
 +
 
-The error number was change from `-7` to `7`. It was also expanded to
-handle four character device mnemonics, which was missing before. The
-warning will still show-up in _sterp_ and _erchk_.
+Thanks, to Jon Quick (HartRAO) for suggesting this.
+
+.. Add `wx` data to _rdbemsg_.
+
++
+
+The window (and messages) now includes the meteorological data from
+the `wx` command (temperature, pressure, humidity, wind speed and its
+direction). The `Update Values` button populates those fields in the
+window with the latest results from the `wx` command. The operator
+should make sure to use the `wx` command at least once before pressing
+`Update Values` for the `Ready` message. Of course, if it was
+initially overlooked, a `wx` command can still be issued and `Update
+Values` pressed again. Both the _python2_ and _python3_ versions of
+the script were updated.
+
++
+
+Thanks to Arthur Niell (Haystack) for requesting this change.
+
+.. Change the warning for a large structure size correction for the
+`onoff` command and _onoff_ program to not ring the bell.
+
++
+
+The error number for the `onoff` command was changed from `-307` to
+`307`; the _onoff_ program, changed from `-7` to `7`. (There is a
+warning in both places so that the user does not need to wait until
+_onoff_ finishes to get it.) The warnings were also expanded to handle
+four character device mnemonics, which was missing before. The warning
+will still show-up in _sterp_ and _erchk_. It can be disable in the
+latter using the _erchk.ctl_ control file.
 
 .. Increase default X11 window size to 146.
 
@@ -2473,13 +2652,27 @@ widths for these windows, either all the same, or different for each
 window. If your _erchk.ctl_ uses more than four characters of
 indentation, you will need to increase the width correspondingly to
 avoid wrapping. See the <<set_x11_widths,Setting X11 window widths>>
-sub-step in the <<Optional steps>> above for the details.
+sub-step in the <<Optional steps>> above for the details of updating
+your _~/.Xresources_ files.
 
 +
 
 Thanks to Jon Quick (HartRAO) for encouraging this recognition that
 more modern systems usually have more display real estate and that it
 should be used.
+
+.. Adjust _.Xresources_ for _monit3_ and _monit7_.
+
++
+
+The previous example _.Xresources_ files placed the _monit3_ and
+_monit7_ windows so that they slightly overlap the _monit2_ window.
+Additionally, the title for the _monit7_ did not fit in the available
+space. A script _/usr2/fs/misc/xresourcesfix2_ has been provided to
+update _.Xresources_ files that are in use. See the
+<<adjust_monit3_7,Adjust monit3 and monit7 postions>> sub-step in the
+<<Optional steps>> above for the details of updating your
+_~/.Xresources_ files.
 
 .. Skip detectors from inactive RDBE in _onoff_.
 
@@ -2493,6 +2686,55 @@ skipped with a warning message. This allows an existing setup for
 _onoff_ to still be useful if an RDBE is temporarily unavailable.
 Which RDBEs are active can also be set, among those defined, with the
 _active_rdbes_ command.
+
+.. Improve _fivpt_ T~sys~ RMS.
+
++
+
+This was increased by adding, in quadrature, the variation of the raw
+data raw noise diode "`on`" data to the previously used "`off`" data,
+mapped to temperature units. While the calculation is still not
+technically correct, this should give an indication of how noisy the
+raw data were.
+
+.. Add more digits to T~cal~ value in the `#fivpt#fivept` record.
+
++
+
+Two more digits were added to the value to improve the relative
+precision for small T~cal~ values as an aid to forensic analysis.
+
+.. Cleanup _fs_ and _fsclient_ command-line options
+
++
+
+... The _fs_ options `-b` and `-f` have been removed.
+
++
+
+Whether or not the display server is enabled must be the same across
+all sessions that use _fs_, _fsclient_, _erchk_, and _streamlog_. The
+only way to achieve this is by consistent use of the
+`FS_DISPLAY_SERVER` environment variable. Thus it no longer makes
+sense to allow _fs_ to override the session's setting. Doing so would
+cause incorrect behavior, even within the session that started the FS.
+
+... It no longer makes sense for users to invoke the _fsclient_ option
+`-f`.
+
++
+
+The server no longer runs when the FS is not in use. This makes it
+useless to invoke _fsclient_ without the FS running. The option was
+removed from the help output. The option is still used internally by
+the FS, but it may be possible to eliminate it entirely.
+
+... The warning messages for the `-n` (`--no-x`) option were improved.
+
++
+
+The messages identify the programs that are not being run. The output
+text is now consistent with the current form of the options.
 
 .. Accept `waiting` response from RDBE `dbe_data_send?` query in
 _fmset_.
@@ -2550,6 +2792,60 @@ The previous message was not informative.
 Log file names that only consist of the station code are excluded.
 ___full.log__ files are not accepted if the station code is `ll`
 unless __ll__ immediately precedes ___full.log__ in the file name.
+
+.. Add a comment to a recovered log and make two minor related
+improvements.
+
++
+
+When closing a log, either because of changing logs or the FS being
+terminated, the FS checks to make sure the expected file exists in the
+computer's file system. If it does not, it copies the currently open
+log into a file with the correct name. This allows recovery of an open
+log if the file is accidentally deleted or renamed while the FS is
+running.
+
+... Add a comment to the end of a recovered log
+
++
+
+A comment about the recovery is added at the end of the recovered log.
+This can useful for reconstructing what happened. The format of the
+comment is:
+
++
+[subs="+quotes"]
+....
+"ddout recovered log file '/usr2/log/__name__.log'
+....
+
++
+
+where `_name_` is the log recovered.
+
++
+
+NOTE: If the log was closed _and_ reopened using a single `log=...`
+command, the added comment may have an out-of-order timestamp compared
+to the first entries after it.
+
+
+... Improve displayed messages for a log recovery
+
++
+
+The non-log message output were made more consistent for both error
+and non-errors. All messages start with `!!{nbsp}help!{nbsp}**{nbsp}`.
+Messages for errors now all include a bell character (ASCII `007`).
+
+... Correct which file descriptor is closed.
+
++
+
++
+
+Previously the wrong descriptor was closed after the recovery. That
+could lead to a benign, but confusing error message.
 
 .. Improve recommended NTP configuration
 
@@ -2950,7 +3246,7 @@ _2to3_ and _reindent_ and changing the _shebang_ line.
 
 +
 
-About 17 small bugs were fixed. All were fairly minor but one could
+About 18 small bugs were fixed. All were fairly minor but one could
 cause a crash if a DBBC2 was in a bad state.
 
 +
@@ -2963,14 +3259,16 @@ for DBBC/Mark5B in _fmset_. Fix _plog_ to support sending multiple
 files to BKG. Correct logging of multicast time for DBBC3 Core3H board
 `5`. Prevent multicast time-out errors from being suppressed after the
 DBBC3 returns an error. Fix using a DBBC IF channel as a detector in
-_fivpt_ and _onoff_ with continuous calibration. Fix parsing of
-detectors for T~sys~ related commands. Fix plotting of data from
-paired commands in _logpl_. Prevent DBBC communication errors with the
-PFB personalty from causing a crash. Remove redundant class number
-clearing. Demote `if` and `setup_proc` commands from being immediate
-execution commands. Improve RDBE communication error reporting in
-_onoff_. Correct T~sys~ error messages for four character device
-names. Correct DBBC3 `bbc_gain` first parameter error messages.
+_fivpt_ and _onoff_ with continuous calibration. Correct _fivpt_
+T~ant~ RMS for continuous calibration. Fix a _fivpt_ bug that caused
+multicast time-out warnings for the DBBC3 when not recording. Fix
+parsing of detectors for T~sys~ related commands. Fix plotting of data
+from paired commands in _logpl_. Prevent DBBC communication errors
+with the PFB personalty from causing a crash. Remove redundant class
+number clearing. Demote `if` and `setup_proc` commands from being
+immediate execution commands. Improve RDBE communication error
+reporting in _onoff_. Correct T~sys~ error messages for four character
+device names. Correct DBBC3 `bbc_gain` first parameter error messages.
 Correct the DBBC error message for an incorrect detector device in
 T~sys~ related commands. Fix the home directory permissions for AUID
 accounts. Fix the _refresh_spare_usr2_ scripts for FSL6-8 and FSL9.
@@ -3106,6 +3404,24 @@ accurate values.
 Thanks to Jon Quick (HartRAO) for reporting the existing poor
 behavior, pointing out that something useful could be done, and
 testing the improvement.
+
+.. Correct _fivpt_ T~ant~ RMS for continuous calibration.
+
++
+
+The existing calculation was wrong. It was corrected and simplified.
+Note that the RMS (displayed when averaging is being used) is the
+scatter of the underlying raw data mapped to temperature units.
+
+.. Fix a _fivpt_ bug that caused multicast time-out warnings for the
+DBBC3 when not recording.
+
++
+
+While locking (and unlocking) the gains, the DBBC2 mode for _ddbcn_
+program was used instead of the DBBC3 mode. This disabled the
+suppression of multicast time-outs due to DBBC3 commands being sent
+when not recording. This was fixed.
 
 .. Fix parsing of detectors for T~sys~ related commands: `tpi`,
 `tpical`, `tpzero`, `tpdiff`, `tpgain`, `tpdiffgain`, `caltemps`, and
@@ -3389,8 +3705,8 @@ Minor wording improvements.
 
 +
 
-About a dozen small improvements and expansions were made to the web
-pages. These are beyond the changes that were made as part of the
+About 14 small improvements and expansions were made to the web pages.
+These are beyond the changes that were made as part of the
 functionality changes for this release.
 
 +
@@ -3398,18 +3714,78 @@ functionality changes for this release.
 [%collapsible]
 ====
 
-Change the naming scheme for feature releases documents and
-references. Improve the "`DBBC3 Operations Manual.`" Add steps to
-remove temporary fixes while updating to _10.1_ and _10.2-beta1_. Add
-update notes for FS _10.0.1_ and _10.1.1_ patch releases. Improve FS
-_10.1.0_ and _10.2-beta1_ update notes. Remove redundant section for
-reviewing changes in _10.1_ and _10.2-beta1_ update notes. Add a *TIP*
-for managing directory names of FS installations from archives. Add a
-*TIP* for how to avoid losing your place in a "`Details`" toggle when
-following a link. Add explanation of how to navigate to a link in a
-"`Details`" toggle in a different document. Expand "`Font
-Conventions`" document. Update "`Converting to a 64-bit System`"
-document. Update instructions for making the `gh-pages` documentation.
+An appendix was added to the "`FS 10.2 Update Notes`" document on how
+to transition to FSL11 from an older OS. Update "`Converting to a
+64-bit System`" document. Change the naming scheme for feature
+releases documents and references. Improve the "`DBBC3 Operations
+Manual.`" Add steps to remove temporary fixes while updating to _10.1_
+and _10.2-beta1_. Add update notes for FS _10.0.1_ and _10.1.1_ patch
+releases. Improve FS _10.1.0_ and _10.2-beta1_ update notes. Remove
+redundant section for reviewing changes in _10.1_ and _10.2-beta1_
+update notes. Add a *TIP* for managing directory names of FS
+installations from archives. Add a *TIP* for how to avoid losing your
+place in a "`Details`" toggle when following a link. Add explanation
+of how to navigate to a link in a "`Details`" toggle in a different
+document. Expand "`Font Conventions`" document.Update instructions for
+making the `gh-pages` documentation.
+
+.. Add appendix
+<<10.2.adoc#_transferring_an_existing_fs_installation_to_fsl11,Transferring
+an existing FS installation to FSL11>> to <<10.2.adoc#,FS 10.2 Update Notes>>.
+
++
+
+This fills a gap in that there were instructions for how to update to
+FS _10.2_ on an existing system and how to install FSL11, but there
+were no instructions for how to transition an existing system to
+FSL11. In principle, this should be part of installing FSL11, but it
+was much more cumbersome if included in the "`FSL11 Installation`"
+document. Instead, a pointer was added in that document, linking to
+the new appendix in the "`FS 10.2 Update Notes`" document. This may
+eventually be moved to the
+<<../../misc/install_reference.adoc#,Installation Reference>>
+document.
+
+.. Update <<../../../misc/64-bit_conversion.adoc#,Converting to a
+64-bit System>> document.
+
++
+
+This document was revised to make it clearer how to use it for just
+transferring the files from an existing operational FS installation to
+a new system. Only a subset of the original steps is needed. Several
+other minor changes were made:
+
++
+[disc]
+
+* Update for FSL11
+
+* Use _root_ account for transferring files if allowed. If not, use
+other appropriate accounts.
+
+* Transferring logs directly to a reference copy.
+
+* Add "`new system`" for logins to make it clear which system to use
+
+* Use explicit _-old_ for reference copies of directories on the new
+system
+
+* Turn off write bit for reference copies
+
+* Recognize that _<version>_ for _/usr2/st-<version>_ may use other
+formats than semantic versioning.
+
+* Turn off write bit for `group` and `other` for _/usr2/st-<version>_.
+
+* Improve instructions for updating home directories.
+
+* Copy old _/etc_ and _/usr2_ to new machine for reference
+
+* Add explanation for generating an _ssh_ key for _scp_ commands when
+converting to 64-bit.
+
+* Fix some typos
 
 .. Change the naming scheme for feature releases documents and
 references.
@@ -3629,14 +4005,6 @@ Conventions>> document.
 +
 
 ... The example for inline links was improved.
-
-.. Add explanation for generating an _ssh_ key for _scp_ commands when
-converting to 64-bit.
-
-+
-
-The <<../../../misc/64-bit_conversion.adoc#,Converting to a 64-bit
-System>> document was updated.
 
 .. Improve instructions in _making_gh-pages.txt_.
 
