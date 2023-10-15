@@ -1,0 +1,770 @@
+//
+// Copyright (c) 2020-2023 NVI, Inc.
+//
+// This file is part of VLBI Field System
+// (see http://github.com/nvi-inc/fs).
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <http://www.gnu.org/licenses/>.
+//
+
+:doctype: book
+
+= FS 10.2-beta2 to FS 10.2 Update Notes
+Version 1.0 - October 2023
+
+:sectnums:
+:stem: latexmath
+:sectnumlevels: 4
+:experimental:
+:downarrow: &downarrow;
+
+:toc:
+
+== Introduction
+
+This document covers the steps needed to update from FS _10.2-beta2_
+to _10.2_ and the changes in the new version. Installing the new
+version (see the <<Upgrading from 10.2-beta2>> section below) is
+simpler than the update to _10.2-beta2_.
+
+FS _10.2_ has been tested for a few configurations but not all
+possible ones. You should test it carefully before using it for
+operations. Please email Ed if you encounter problems so that we can
+resolve them.
+
+The changes in the FS and _drudg_ for _10.2_ are covered in the
+<<Changes since 10.2-beta2>> section below. The most significant
+changes are:
+
+* Verify _fivpt_ and _onoff_ for all noise diodes configurations with
+all DBBC3 detector types.
+
+* Move position of schedule and log names in the _monit2_ window.
+
+* Improve _fivpt_, particularly the RMSs for continuous calibration
+with averaging.
+
+== Upgrading from 10.2-beta2
+
+You must have already upgraded to _10.2-beta2_ according to the
+<<10.2-beta2.adoc#,FS 10.2-beta2 Update Notes>> document before
+following these instructions.
+
+=== Fetch 10.2
+
+There are two alternatives:
+
+. If you are using FSL9, FSL10, FSL11, or another system that supports
+connections to _github_ and you are using _git_ (as is recommended)
+then as _prog_ execute:
+
+ cd /usr2/fs-git
+ git fetch
+ git checkout -q 10.2.0
+
+. If you are using FSL8 or are otherwise unable, or prefer not, to use
+_git_ (you will probably need to be _root_):
+
++
+
+Refer to the
+<<../../misc/release_model.adoc#_installing_from_an_archive,Installing
+from an archive>> subsection in the
+<<../../misc/release_model.adoc#,Release Model>> document. Follow the
+steps there, through the one that includes the option to set the
+__/usr2/fs__ link. Please note that:
+
++
+[disc]
+
+* For FSL8, or if you are otherwise unable to connect to _github_, you
+will need the *TIP* in the `*wget*` step.
+
+* For the __tag__ use `10.2.0`.
+
+* You should return to the steps in this document after completing the
+"`Installing from an archive`" procedure with the step setting the
+link for __/usr2/fs__ by running *`make install`*.
+
+=== Login as prog
+
+If you are not already logged-in as _prog_, do that. This is necessary
+for the remaining steps until <<Reboot>>.
+
+=== Make the FS
+
+As _prog_:
+
+ cd /usr2/fs
+ make clean rmdoto rmexe all >& /dev/null
+ make -s
+
+No output from the last command indicates a successful _make_.
+
+=== Reboot
+
+IMPORTANT: This will make sure shared memory is reallocated.
+
+=== Login as oper
+
+The remaining steps are to be performed by _oper_.
+
+=== Required changes
+
+The steps in this section are required. All are to be performed by
+_oper_, except as noted.
+
+. If you have a FlexBuff recorders, update local SNAP procedures that
+call `checkmk5`.
+
++
+
+In _10.1_, for FlexBuff recorders, use of `checkmk5` was replaced with
+`checkfb`. Initial versions of the update notes for _10.1_ neglected
+to mention that if you have local procedures that call `checkmk5`, you
+would need to update them to use `checkfb` instead. If you also have a
+Mark 5 recorder, you may want to create new versions that call
+`checkfb` instead for use with the FlexBuff. You should make the
+appropriate changes now if you haven't already.
+
+=== Optional steps
+
+The steps in this section are optional, but you may find them useful.
+All are to be performed by _oper_, except as noted. If it is present,
+click the "`Details`" toggle for the instructions.
+
+. Adjust _.Xresources_ for _monit3_ and _monit7_.
+
++
+
+This corrects a previous misplacement of these windows and provides a
+window title for _monit7_ that fits in the available space.
+
++
+
+[%collapsible]
+====
+
+The previous example _.Xresources_ files placed the _monit3_ and
+_monit7_ windows so that they slightly overlap the _monit2_ window.
+Additionally, the title for the _monit7_ window did not fit in the
+available space.
+
+These changes are recommended unless you have already made adjustments
+or prefer to keep the windows overlapped to save display space. If you
+don't use _monit3_ (pre-RDBE/DBBC3 T~sys~) or _monit7_ (DBBC3 T~sys~),
+it is recommended that you make these changes so that you have the
+default values. The positions of the windows and the title of the
+_monit7_ window can be adjusted with the commands:
+
+ cd
+ /usr2/fs/misc/xresourcesfix2 .Xresources
+
+You will need to log-out on the console and log back in to see the
+full change.
+
+The script will report an error if it found any of the relevant
+resources were defined more than once; the extras should probably
+deleted. A warning will be reported if any of the resources were not
+found. That may be okay, but may also indicate that the entry was not
+in the format the script expected. That may need to be looked into.
+
+NOTE: The original _.Xresources_ file will be saved as
+_.Xresources.bak_ in case you need to recover.
+
+[TIP]
+=====
+
+The script also includes command line options for setting, or not
+setting, the position of each window, and not updating the _monit7_
+title. Enter `*/usr2/fs/misc/xresourcesfix2*` for the details.
+
+You can try the script multiple times with different values if between
+runs you use:
+
+ mv .Xresources.bak .Xresources
+
+=====
+
+If you have other, special purpose, X11 resources files, you may want
+to run the script on them also. You may want to make the same changes
+for _prog_ as well.
+
+====
+
+. Update _metserver_ and/or _metclient_
+
++
+
+If you use the _metserver_ and/or _metclient_ programs, you may want
+to update your system to use the new repositories for these programs.
+If so, this step requires _root_ priveleges. The changes are described
+in the <<met_programs,Remove metserver and metclient programs>> FS
+change item below.
+
+== Changes since 10.2-beta2
+
+There are separate subsections with summaries of the changes in the FS
+and _drudg_.
+
+Clickable links such as https://github.com/nvi-inc/fs/issues/36[#36]
+connect to specific issues reported at
+https://github.com/nvi-inc/fs/issues.
+
+A complete history of changes can be found using the `git log` command
+from within the FS _git_ working directory, usually _/usr2/fs-git_.
+
+Each change is listed as a numbered title, usually with a few summary
+sentences, followed by a "`Details`" _toggle_, like:
+
+[%collapsible]
+====
+Details are shown here.
+====
+
+that can be clicked on to toggle showing (or not showing) the details.
+In this way, you can view the summary as a list and only reveal the
+details of items that interest you. The summary sentences and/or the
+details toggle may be omitted if they would not add any new
+information, usually because it is already covered in the numbered
+title item, summary, and/or the details are very brief.
+
+=== FS changes
+
+. Verify _fivpt_ and _onoff_ for all noise diodes configurations with
+all DBBC3 detector types.
+
++
+
+[%collapsible]
+====
+
+The various DBBC3 swaps of TPI data for USB vs LSB and "`on`" and
+"`off`" are apparently handled correctly for the latest DDC firmware
+versions available as of June 2023. Some older firmware versions (and
+possibly some subsequent ones) may not be properly supported. There
+are some tools to adapt FS operation to take some differences into
+account. They are discussed in the
+<<../1/dbbc3_ops.adoc#_swaps_of_tpi_and_gain_values,Swaps of TPI and
+gain values>> section of the
+<<../1/dbbc3_ops.adoc#_dbbc3_specific_environment_variables,DBBC3
+specific environment variables>> appendix of the
+<<../1/dbbc3_ops.adoc#,FS DBBC3 Operations Manual>>. Additional tools
+can be provided if these are not sufficient.
+
+Thanks to Beppe Maccaferri (Medicina) and Jon Quick (HartRAO), who in
+yeoman efforts, provided the needed test data.
+
+====
+
+. Move position of schedule and log names in the _monit2_ window.
+
++
+
+They are now displayed together at the left-edge in the lower-half of
+the window.
+
++
+
+[%collapsible]
+====
+
+In the pre-releases of _10.2_, the new, longer, schedule and log name
+fields were visually separated. This was awkward. To make the schedule
+name fit in the available space, the label `SCHED=` was reduced to
+`SCH=`. This also improved the vertical alignment of the fields. Some
+obsolete tape related fields were removed to make this possible.
+
+====
+
+. Improve _fivpt_
+
++
+
+Correct T~ant~ RMS for continuous calibration. Improve T~sys~ RMS. Add
+more digits to T~cal~ value in the `#fivpt#fivept` record. Fix a bug
+that caused multicast time-out warnings for the DBBC3 when not
+recording.
+
++
+[%collapsible]
+====
+
+.. Correct T~ant~ RMS for continuous calibration.
+
++
+
+The existing calculation was wrong. It was corrected and simplified.
+Note that the RMS (displayed when averaging is being used) is the
+scatter of the underlying raw data mapped to temperature units.
+
+.. Improve T~sys~ RMS.
+
++
+
+This was increased by adding, in quadrature, the variation of the raw
+data raw noise diode "`on`" data to the previously used "`off`" data,
+mapped to temperature units. While the calculation is still not
+technically correct, this should give an indication of how noisy the
+raw data were.
+
+
+.. Add more digits to T~cal~ value in the `#fivpt#fivept` record.
+
++
+
+Two more digits were added to the value to improve the relative
+precision for small T~cal~ values as an aid to forensic analysis.
+
+.. Fix a bug that caused multicast time-out warnings for the DBBC3
+when not recording.
+
++
+
+While locking (and unlocking) the gains, the DBBC2 mode for _ddbcn_
+program was used instead of the DBBC3 mode. This disabled the
+suppression of multicast time-outs due to DBBC3 commands being sent
+when not recording. This was fixed.
+
+====
+
+. Improve _msg_
+
++
+
+Instead of going directly to the `Ready` form after sending the
+message, the `Stop` form will now show a `Go to Ready` button.
+
++
+[%collapsible]
+====
+
+This allows the user to change to a new schedule before the `Ready`
+form is opened. That obviates the need to reload the form, which might
+be overlooked, after the new schedule is opened.
+
+Thanks, to Jon Quick (HartRAO) for suggesting this.
+
+====
+
+. Improve _rdbemsg_
+
++
+
+The `wx` data are now included in the window and messages.
+
++
+[%collapsible]
+====
+
+The window (and messages) now includes the meteorological data from
+the `wx` command (temperature, pressure, humidity, wind speed and its
+direction). The `Update Values` button populates those fields in the
+window with the latest results from the `wx` command. The operator
+should make sure to use the `wx` command at least once before pressing
+`Update Values` for the `Ready` message. Of course, if it was
+initially overlooked, a `wx` command can still be issued and `Update
+Values` pressed again. Both the _python2_ and _python3_ versions of
+the script were updated.
+
+Thanks to Arthur Niell (Haystack) for requesting this change.
+
+====
+
+. Change the warning for a large structure size correction in `onoff`
+command to not ring the bell.
+
++
+
+Previously this change was made for the warning issued by the _onoff_
+program. That warning was also expanded to handle four character
+device mnemonics. These changes have now been made for the warning
+issued by the `onoff` command itself.
+
+. Adjust _.Xresources_ for _monit3_ and _monit7_.
+
++
+
+Position the _monit3_ and _monit7_ windows so they don't overlap the
+_monit2_ window. Adjust the _monit7_ window title to fit in the
+available space.
+
++
+
+[%collapsible]
+====
+
+The previous example _.Xresources_ files placed the _monit3_ and
+_monit7_ windows so that they slightly overlap the _monit2_ window.
+Additionally, the title for the _monit7_ did not fit in the available
+space. A script _/usr2/fs/misc/xresourcesfix2_ has been provided to
+update _.Xresources_ files that are in use.
+
+====
+
+. Cleanup _fs_ and _fsclient_ command-line options
+
++
+
+The _fs_ options `-b` and `-f` have been removed. It no longer makes
+sense for users to invoke the _fsclient_ option `-f`. The warning
+messages for the `-n` (`--no-x`) option were improved.
+
++
+
+[%collapsible]
+====
+
+.. The _fs_ options `-b` and `-f` have been removed.
+
++
+
+Whether or not the display server is enabled must be the same across
+all sessions that use _fs_, _fsclient_, _erchk_, and _streamlog_. The
+only way to achieve this is by consistent use of the
+`FS_DISPLAY_SERVER` environment variable. Thus it no longer makes
+sense to allow _fs_ to override the session's setting. Doing so would
+cause incorrect behavior, even within the session that started the FS.
+
+.. It no longer makes sense for users to invoke the _fsclient_ option
+`-f`.
+
++
+
+The server no longer runs when the FS is not in use. This makes it
+useless to invoke _fsclient_ without the FS running. The option was
+removed from the help output. The option is still used internally by
+the FS, but it may be possible to eliminate it entirely.
+
+.. The warning messages for the `-n` (`--no-x`) option were improved.
+
++
+
+The messages identify the programs that are not being run. The output
+text is now consistent with the current form of the options.
+
+====
+
+. Add a comment to a recovered log and make two minor related
+improvements.
+
++
+
+A comment is now added at the end of a log that was recovered. The
+messages printed to the display in the recover process were improved.
+The file descriptor closed was corrected.
+
++
+
+[%collapsible]
+====
+
+When closing a log, either because of changing logs or the FS being
+terminated, the FS checks to make sure the expected file exists in the
+computer's file system. If it does not, it copies the currently open
+log into a file with the correct name. This allows recovery of an open
+log if the file is accidentally deleted or renamed while the FS is
+running.
+
+.. Add a comment to the end of a recovered log
+
++
+
+A comment about the recovery is added at the end of the recovered log.
+This can useful for reconstructing what happened. The format of the
+comment is:
+
++
+[subs="+quotes"]
+....
+"ddout recovered log file '/usr2/log/__name__.log'
+....
+
++
+
+where `_name_` is the log recovered.
+
++
+
+NOTE: If the log was closed _and_ reopened using a single `log=...`
+command, the added comment may have an out-of-order timestamp compared
+to the first entries after it.
+
+
+.. Improve displayed messages for a log recovery
+
++
+
+The non-log message output were made more consistent for both error
+and non-errors. All messages start with `!!{nbsp}help!{nbsp}**{nbsp}`.
+Messages for errors now all include a bell character (ASCII `007`).
+
+.. Correct which file descriptor is closed.
+
++
+
+Previously the wrong descriptor was closed after the recovery. That
+could lead to a benign, but confusing error message.
+
+====
+
+. <<met_programs,Remove metserver and metclient
+programs>>[[met_programs]]:
+
++
+
+They were moved to separate repositories.
+
++
+[%collapsible]
+====
+
+The _metserver_ program serves data from MET3/4/4A meteorological
+and/or WMT7xx wind sensors connected to serial ports. The _metclient_
+program logs data from a server like _metserver_. They are not part of
+the FS per se, but were provided with the FS, beginning in 2003, to
+simplify distribution. They have now been moved to their own publicly
+accessible repositories, https://github.com/nvi-inc/metserver and
+https://github.com/nvi-inc/metclient. The instructions in the included
+_INSTALL_ files set them up independently of the local _/usr2/st_
+directory that was used before. This separation makes them more
+modular and easier to maintain independently from the _station_ FS
+programs.
+
+NOTE: If you have Ethernet-to-serial converters, you can avoid needing
+serial ports by using _gromet_, https://github.com/nvi-inc/gromet,
+instead of _metserver_.
+
+When the programs were split out of the FS repository, the commit
+messages, which often were not specific to these programs, were
+updated to provide more relevant information.
+
+There is no need for existing users to update their versions of
+_metserver_ and _metclient_. However, it may be beneficial to update
+since any future improvements will be made using the repositories.
+
+Although a complete reinstall is not very difficult, a more limited
+update is relatively simple. Besides downloading the repositories and
+_make_-ing the programs, the scripts used to run the programs will
+need to be updated. For systems using `init.d` (deprecated), the
+string assigned to the `DAEMON` variable in the
+_/etc/init.d/metserver.sh_ and/or _/etc/init.d/metclient.sh_ file
+needs to be updated by removing the string _st/_. Then the daemons
+need to restarted with, as appropriate:
+
+  /etc/init.d/metserver.sh restart
+  /etc/init.d/metserver.sh restart
+
+For systems using `systemd` (preferred), the existing
+_/usr2/st/metserver/metserver_systemd.sh_ and/or
+_/usr2/st/meclient/meclient_systemd.sh_ scripts need to be copied to
+_/usr/local/sbin_ and the string assigned to the `DAEMON` variable in
+the new copies updated by removing the string _st/_. Additionally, the
+new _metserver.service_ and/or _metclient.service_ files from the new
+repositories need to be copied over the ones in
+_/etc/systemd/system/_. Then the daemon needs to be reloaded:
+
+ systemctl daemon-reload
+
+and the services restarted, as appropriate:
+
+  systemctl restart metserver
+  systemctl restart metclient
+
+Once _metserver_ and/or _metclient_ are working from the new
+repositories, the old versions, usually in _/usr2/st_, can be removed.
+
+====
+
+. Improve documentation
+
+
++
+
+An appendix was added to the "`FS 10.2 Update Notes`" document on how
+to transition to FSL11 from an older OS. In addition to several minor
+changes, the "`Converting to a 64-bit System`" document was revised to
+make it clearer how to just transfer the files from an existing
+operational FS installation to a new system. A "`Document revision
+history`" section was added to some documents. Include updating calls
+to `checkmk5` to `checkfb` in existing procedures, when appropriate.
+Add using _ps2pdf_ to convert _plotlog_ PostScript output to PDF. Add
+missing _monit7_ continuous calibration changes to _-beta1_ update
+notes. Improve the help output for the `xresourcesfix` script. Add
+opening a new window as an alternative to opening a new tab to avoid
+losing one's place in a collapsible block. Add using a link for a
+feature release to a pre-release document as an expedient.
+
++
+[%collapsible]
+====
+
+.. Add appendix
+<<10.2.adoc#_transferring_an_existing_fs_installation_to_fsl11,Transferring
+an existing FS installation to FSL11>> to <<10.2.adoc#,FS 10.2 Update Notes>>.
+
++
+
+This fills a gap in that there were instructions for how to update to
+FS _10.2_ on an existing system and how to install FSL11, but there
+were no instructions for how to transition an existing system to
+FSL11. In principle, this should be part of installing FSL11, but it
+was much more cumbersome if included in the "`FSL11 Installation`"
+document. Instead, a pointer was added in that document, linking to
+the new appendix in the "`FS 10.2 Update Notes`" document. This may
+eventually be moved to the
+<<../../misc/install_reference.adoc#,Installation Reference>>
+document.
+
+.. Update <<../../../misc/64-bit_conversion.adoc#,Converting to a
+64-bit System>> document.
+
++
+
+This document was revised to make it clearer how to use it for just
+transferring the files from an existing operational FS installation to
+a new system. Only a subset of the original steps is needed. Several
+other minor changes were made:
+
++
+[disc]
+
+* Update for FSL11
+
+* Use _root_ account for transferring files if allowed. If not, use
+other appropriate accounts.
+
+* Transferring logs directly to a reference copy.
+
+* Add "`new system`" for logins to make it clear which system to use
+
+* Use explicit _-old_ for reference copies of directories on the new
+system
+
+* Turn off write bit for reference copies
+
+* Recognize that _<version>_ for _/usr2/st-<version>_ may use other
+formats than semantic versioning.
+
+* Turn off write bit for `group` and `other` for _/usr2/st-<version>_.
+
+* Improve instructions for updating home directories.
+
+* Copy old _/etc_ and _/usr2_ to new machine for reference
+
+* Fix some typos
+
+.. Add a "`Document revision history`" section to some documents.
+
++
+
+Although the full revision history is contained in the _git_ log
+listing, that can be complicated to interpret. The new section is
+intended to give an easier to read, very terse, synopsis of what has
+changed. Currently only the
+<<../../../misc/64-bit_conversion.adoc#,Converting to a 64-bit
+System>> and <<10.2.adoc#,FS 10.2 Update Notes>> documents include
+this, but we expect to expand it to more documents.
+
+.. Include updating calls to `checkmk5` to `checkfb` in existing
+procedures, when appropriate.
+
++
+
+As part of changing to use procedure `checkfb` instead of `checkmk5`
+for FlexBuff recorders for updating to _10.1_, the user will need to
+change existing calls to the former to calls to the latter. This was
+omitted the <<../1/10.1.0.adoc#,FS 10.1.0 Update Notes>> update notes,
+but has been added now. A fix-up step for this has been added to the
+<<10.2.adoc#,FS 10.2 Update Notes>> and <<beta2_to_10.2.adoc#,FS
+10.2-beta2 to FS 10.2 Update Notes>>  This update is only needed if
+there are local procedures that use `checkmk5`. If both a Mark 5 and
+FlexBuff recorders are in use, separate versions of the calling
+procedures will be needed.
+
+.. Add using _ps2pdf_ to convert _plotlog_ PostScript output to PDF.
+
++
+
+This may be useful for viewing the output on other systems that don't
+support PostScript when _giza_ is not being used.
+
+.. Add missing _monit7_ continuous calibration changes to _-beta1_
+update notes.
+
++
+
+Some of these were superseded by later changes. The changes for
+_-beta1_ include:
+
++
+[disc]
+
+* Invalid T~sys~ with cyan background
+
+* Negative T~sys~ with magenta background (superseded, now inverse)
+
+* Change to `N{nbsp}cal` from `Nccal`
+
+* _monit7_ changes were consolidated in a new item.
+
+.. Improve the help output for the `xresourcesfix` script.
+
++
+
+Minor wording and format improvements were made. The help output is
+accessed by not providing any command-line arguments to the script.
+
+.. Add opening a new window as an alternative to opening a new tab to
+avoid losing one's place in a collapsible block.
+
++
+
+It may be easier than opening a new tab.
+
++
+
+This was added to the
+<<../../../misc/font_conventions.adoc#_links_to_different_documents_and_to_the_inside_of_collapsible_blocks,Links
+to different documents and to the inside of collapsible blocks>>
+subsection of the <<../../../misc/font_conventions.adoc#,FS Font
+Conventions>> document and the
+<<../1/10.1.0.adoc#improve_presentation,Improve presentation>> FS
+change sub-item of the <<../1/10.1.0.adoc#,FS 10.1.0 Update Notes>>
+document.
+
+.. Add using a link for a feature release to a pre-release document as
+an expedient.
+
++
+
+This will allow links in issues, discussions, emails, etc. that are
+created before the final release to still point to the latest
+information after the release. What is appropriate will need to be
+decided on a case-by-case basis.
+
++
+
+This was added to the
+<<../../misc/release_model.adoc#_feature_releases,Feature releases >>
+subsection of the <<../../misc/release_model.adoc#,Release Model>>
+document.
+
+====
+
+=== drudg changes
+
+_drudg_ opening message date is `2023-02-21`.
+
+None.

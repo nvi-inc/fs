@@ -19,7 +19,7 @@
 //
 
 = Converting to a 64-bit System
-Version 1.9 - September 2023
+Version 1.9.1 - September 2023
 
 //:hide-uri-scheme:
 :sectnums:
@@ -37,6 +37,7 @@ Click the *Details* toggle below to unhide/hide the history.
 [%collapsible]
 ====
 
+* 1.9.1 -- Add *NOTE* about not renaming _/usr2/log_
 * 1.9 -- Remove extraneous `log-old` from `chmod a-w ...`
 * 1.8 -- Improve customization of home directories; put Document revision history in a collapsible block
 * 1.7 -- Note other formats for `_st-version_`
@@ -146,8 +147,10 @@ you should rename the one on the new computer:
       cd /usr2
       mv st-0.0.0  st-0.0.0.DEFAULT
 
-The _log_ directory was not included above since it should essentially
-be empty on the new computer.
+NOTE: The _/usr2/log_ directory is not renamed since the transfer of
+that directory from the old computer will not replace the one of new
+computer. Instead, it will directly create a reference copy, as
+_/usr2/log-old_.
 
 === Transfer files
 
@@ -193,11 +196,12 @@ useful.
 
 IMPORTANT: These instructions assume that you can login to the old
 system as _root_ using _ssh_. Allowing this is a security risk and
-should only allowed temporarily for these command. If you are not able
-to allow it temporarily, you can use the _oper_ and _prog_ (or other)
-accounts as appropriate to transfer the files. In that case, there is
-risk that some files may not be copied due to ownership/permission
-issues. You may need to take other steps to copy those files.
+should only be allowed temporarily for these command. If you are not
+able to allow it temporarily, you can use the _oper_ and _prog_ (or
+other) accounts as appropriate to transfer the files. In that case,
+there is risk that some files may not be copied due to
+ownership/permission issues. You may need to take other steps to copy
+those files.
 
 . Transfer operations directories:
 

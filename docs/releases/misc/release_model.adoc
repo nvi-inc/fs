@@ -19,7 +19,7 @@
 //
 
 = Strawman Release Model
-Version 1.4 - June 2023
+Version 1.5 - October 2023
 
 :sectnums:
 
@@ -138,6 +138,14 @@ included. Thus users who update to a feature release after patches
 have been released would use the original link to install to the
 latest patch. The notice for applying a patch to a feature release is
 covered in the next subsection.
+
+In the _gh-pages_, it may be expedient to provide a symbolic link for
+a feature release that points to the latest pre-release (for example,
+_10.2.html_ -> _10.2-beta1.html_) until the feature release is
+finalized. This will allow links in issues, discussions, emails, etc.
+that are created before the final release to still point to the latest
+information after the release. What is appropriate will need to be
+decided on a case-by-case basis.
 
 In the documents, references to feature releases, omit the
 patch level, e.g., _10.2_ (and _10.2-beta1_).

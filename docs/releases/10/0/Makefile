@@ -23,6 +23,8 @@ all: index.html beta2.html beta1_to_beta2.html beta2_to_beta3.html\
     changes_10.0.0.html fesh_changes.html fsserver_changes.html\
     10.0.0.html 10.0.1.html
 
+index.html: index.adoc
+	asciidoctor $^
+
 %.html: %.adoc
 	asciidoctor -a toc $^
-

@@ -20,7 +20,7 @@
 //
 
 = DRAFT FS Document Font Conventions
-Version 1.2 - March 2023
+Version 1.3 - October 2023
 
 :sectnums:
 
@@ -183,10 +183,11 @@ closed because the web page has been reloaded. This makes it a little
 more difficult to return to where you were reading in the original
 document if it was within opened text.
 
-TIP: An alternative to avoid this is to right click the link, then
-open it in a new tab, and then click on that tab. To return to the
-original document, you can close the new tab or click on the original
-document's tab, whatever you prefer.
+TIP: To avoid this, right click the link, then open it in a new tab
+(alternatively, open it in a new window), and then click on that tab.
+To return to the original document, you can close the new tab or click
+on the original document's tab (or close the new window), whatever you
+prefer.
 
 Links that point into a closed collapsible block in the _same_
 document do not work in all browsers. To help with that, when these
@@ -203,8 +204,8 @@ also do not work in all browsers. To help with that, if the relevant
 text is small it is reproduced within an embedded sidebar block (grey
 background). Otherwise, a second link to the item with the collapsible
 block is provided along with instructions to follow the link (probably
-opening it in a new tab would be best), open the toggle, and then
-search for the anchor text of the original link.
+opening it in a new tab, or new window, would be best), open the
+toggle, and then search for the anchor text of the original link.
 
 == Source examples
 

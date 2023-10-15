@@ -22,7 +22,7 @@
 
 = FS 10.1.0 Update Notes
 E. Himwich, J. Quick, J. Gipson, D. Horsley
-Version 6.8 - September 2023
+Version 7.0 - October 2023
 
 //:hide-uri-scheme:
 :sectnums:
@@ -573,8 +573,8 @@ present.
 .. Lastly, if you call `checkmk5` from any local procedures, you
 should probably change those calls to `checkfb` if you only have a
 FlexBuff recorder. If you have also have a Mark 5 recorder, you may
-want to create new versions that call `checkfb` for use with the
-FlexBuff.
+want to create new versions that call `checkfb` instead for use with
+the FlexBuff.
 
 . <<dbbc3config,FS DBBC3 Configuration>>[[dbbc3config]]: If you have a
 DBBC3, you should make the configuration changes described in the
@@ -2419,10 +2419,11 @@ within opened text.
 
 +
 
-TIP: An alternative to avoid this is to right click the link, then
-open it in a new tab, and then click on that tab. To return to the
-original document, you can close the new tab or click on the original
-document's tab, whatever you prefer.
+TIP: To avoid this, right click the link, then open it in a new tab
+(alternatively, open it in a new window), and then click on that tab.
+To return to the original document, you can close the new tab or click
+on the original document's tab (or close the new window), whatever you
+prefer.
 
 * Links that point into a closed *Details* toggle in the same document
 do not work in all browsers. To help with that, when these links
@@ -2438,8 +2439,8 @@ not work in all browsers. To help with that, if the relevant text is
 small it is reproduced within an embedded sidebar block (grey
 background). Otherwise, a second link to the title of the item with
 the toggle is provided along with instructions to follow the link
-(probably opening it in a new tab would be best), open the toggle, and
-then search for the anchor text of the original link.
+(probably opening it in a new tab, or new window, would be best), open
+the toggle, and then search for the anchor text of the original link.
 
 +
 
