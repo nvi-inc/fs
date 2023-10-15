@@ -21,7 +21,7 @@
 :doctype: book
 
 = FS 10.2-beta2 to FS 10.2 Update Notes
-Version 0.75 - October 2023
+Version 1.0 - October 2023
 
 :sectnums:
 :stem: latexmath
@@ -46,6 +46,9 @@ resolve them.
 The changes in the FS and _drudg_ for _10.2_ are covered in the
 <<Changes since 10.2-beta2>> section below. The most significant
 changes are:
+
+* Verify _fivpt_ and _onoff_ for all noise diodes configurations with
+all DBBC3 detector types.
 
 * Move position of schedule and log names in the _monit2_ window.
 
@@ -119,7 +122,7 @@ The remaining steps are to be performed by _oper_.
 
 === Required changes
 
-The steps in this section are required.  All are to be performed by
+The steps in this section are required. All are to be performed by
 _oper_, except as noted.
 
 . If you have a FlexBuff recorders, update local SNAP procedures that
@@ -220,7 +223,7 @@ connect to specific issues reported at
 https://github.com/nvi-inc/fs/issues.
 
 A complete history of changes can be found using the `git log` command
-from within the FS _git_ archive directory, usually _/usr2/fs-git_.
+from within the FS _git_ working directory, usually _/usr2/fs-git_.
 
 Each change is listed as a numbered title, usually with a few summary
 sentences, followed by a "`Details`" _toggle_, like:
@@ -238,6 +241,32 @@ information, usually because it is already covered in the numbered
 title item, summary, and/or the details are very brief.
 
 === FS changes
+
+. Verify _fivpt_ and _onoff_ for all noise diodes configurations with
+all DBBC3 detector types.
+
++
+
+[%collapsible]
+====
+
+The various DBBC3 swaps of TPI data for USB vs LSB and "`on`" and
+"`off`" are apparently handled correctly for the latest DDC firmware
+versions available as of June 2023. Some older firmware versions (and
+possibly some subsequent ones) may not be properly supported. There
+are some tools to adapt FS operation to take some differences into
+account. They are discussed in the
+<<../1/dbbc3_ops.adoc#_swaps_of_tpi_and_gain_values,Swaps of TPI and
+gain values>> section of the
+<<../1/dbbc3_ops.adoc#_dbbc3_specific_environment_variables,DBBC3
+specific environment variables>> appendix of the
+<<../1/dbbc3_ops.adoc#,FS DBBC3 Operations Manual>>. Additional tools
+can be provided if these are not sufficient.
+
+Thanks to Beppe Maccaferri (Medicina) and Jon Quick (HartRAO), who in
+yeoman efforts, provided the needed test data.
+
+====
 
 . Move position of schedule and log names in the _monit2_ window.
 
@@ -368,7 +397,7 @@ issued by the `onoff` command itself.
 +
 
 Position the _monit3_ and _monit7_ windows so they don't overlap the
-_monit2_ window.  Adjust the _monit7_ window title to fit in the
+_monit2_ window. Adjust the _monit7_ window title to fit in the
 available space.
 
 +
@@ -408,7 +437,7 @@ only way to achieve this is by consistent use of the
 sense to allow _fs_ to override the session's setting. Doing so would
 cause incorrect behavior, even within the session that started the FS.
 
-..  It no longer makes sense for users to invoke the _fsclient_ option
+.. It no longer makes sense for users to invoke the _fsclient_ option
 `-f`.
 
 +
@@ -531,7 +560,11 @@ _make_-ing the programs, the scripts used to run the programs will
 need to be updated. For systems using `init.d` (deprecated), the
 string assigned to the `DAEMON` variable in the
 _/etc/init.d/metserver.sh_ and/or _/etc/init.d/metclient.sh_ file
-needs to be updated by removing the string _st/_.
+needs to be updated by removing the string _st/_. Then the daemons
+need to restarted with, as appropriate:
+
+  /etc/init.d/metserver.sh restart
+  /etc/init.d/metserver.sh restart
 
 For systems using `systemd` (preferred), the existing
 _/usr2/st/metserver/metserver_systemd.sh_ and/or
@@ -544,10 +577,13 @@ _/etc/systemd/system/_. Then the daemon needs to be reloaded:
 
  systemctl daemon-reload
 
-and the services restarted:
+and the services restarted, as appropriate:
 
   systemctl restart metserver
   systemctl restart metclient
+
+Once _metserver_ and/or _metclient_ are working from the new
+repositories, the old versions, usually in _/usr2/st_, can be removed.
 
 ====
 
@@ -563,9 +599,12 @@ make it clearer how to just transfer the files from an existing
 operational FS installation to a new system. A "`Document revision
 history`" section was added to some documents. Include updating calls
 to `checkmk5` to `checkfb` in existing procedures, when appropriate.
-Add using _ps2pdf_ to convert _plotlog_ PostScript output to PDF.  Add
+Add using _ps2pdf_ to convert _plotlog_ PostScript output to PDF. Add
 missing _monit7_ continuous calibration changes to _-beta1_ update
-notes. Improve the help output for the `xresourcesfix` script.
+notes. Improve the help output for the `xresourcesfix` script. Add
+opening a new window as an alternative to opening a new tab to avoid
+losing one's place in a collapsible block. Add using a link for a
+feature release to a pre-release document as an expedient.
 
 +
 [%collapsible]
@@ -686,6 +725,41 @@ _-beta1_ include:
 
 Minor wording and format improvements were made. The help output is
 accessed by not providing any command-line arguments to the script.
+
+.. Add opening a new window as an alternative to opening a new tab to
+avoid losing one's place in a collapsible block.
+
++
+
+It may be easier than opening a new tab.
+
++
+
+This was added to the
+<<../../../misc/font_conventions.adoc#_links_to_different_documents_and_to_the_inside_of_collapsible_blocks,Links
+to different documents and to the inside of collapsible blocks>>
+subsection of the <<../../../misc/font_conventions.adoc#,FS Font
+Conventions>> document and the
+<<../1/10.1.0.adoc#improve_presentation,Improve presentation>> FS
+change sub-item of the <<../1/10.1.0.adoc#,FS 10.1.0 Update Notes>>
+document.
+
+.. Add using a link for a feature release to a pre-release document as
+an expedient.
+
++
+
+This will allow links in issues, discussions, emails, etc. that are
+created before the final release to still point to the latest
+information after the release. What is appropriate will need to be
+decided on a case-by-case basis.
+
++
+
+This was added to the
+<<../../misc/release_model.adoc#_feature_releases,Feature releases >>
+subsection of the <<../../misc/release_model.adoc#,Release Model>>
+document.
 
 ====
 
