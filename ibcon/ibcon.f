@@ -26,6 +26,8 @@ C   GAG  901220         Added a call to logit on error condition when
 C			initializing MODTBL
 C   JFHQ 940124  	Re-fixed Read/Write buffer truncation bugs 
 C   DMV  941213		removed nchr2, changed logic of if statements, 
+C   Lerner  2012-07-26  Included support for network devices
+C   Lerner  2021-04-27  Added new 2020 header and adapted for 64-bit
 C
 C     PROGRAM STRUCTURE
 C 1.1.   IBCON controls the I/O to the GP Interface Bus 
@@ -94,29 +96,33 @@ C
       integer*2 ibuf(ibufln),ibuf2(ibufln),istatk4(2),irdk4,ilvk4,ilck4
 C               - buffers for reading, writing
 C        ILEN   - length of above buffers 
-      logical kini, kfirst, kgpib
+      logical kini, kfirst, kgpib, no_board
 C               - TRUE once we have initialized 
 C               - TRUE on the first time through,
 C               - TRUE until I know the gpib driver isn't installed
+C               - TRUE until we know whether the GPIB-board is needed
 C        NDEV   - # devices in module table 
       parameter (idevln=32)
 C        length of device file names, up to 64 characters
-      parameter (imaxdev=16)
-C        maximum number of devices on IEEE board
+C     parameter (imaxdev=16)
+      parameter (imaxdev=64)
+C        maximum number of devices on IEEE board - increased for network devices
       integer iscn_ch, ichmv, icomma, iend, iflch
       integer idlen,it(6)
       integer rddev, opbrd, iserial,opdev, wrdev, idum,statbrd,rspdev
+      integer check_network, handle_network
       integer fc_rte_prior, no_after, no_online, no_write_ren
       integer no_w_ren_glbl
       integer set_remote_enable,no_interface_clear_board
       integer interface_clear_converter,interface_clear_after_read
+      integer device, status
       double precision timnow,timlst(imaxdev)
       integer*4 oldcmd(imaxdev)
       integer*2 moddev(imaxdev,idevln)
 C               - module device name
       integer idevid(imaxdev)   
 C               - device ids when opened
-      integer*2 modtbl(3,imaxdev)  
+      integer*2 modtbl(4,imaxdev)  
 C               - module table, word 1 = mnemonic, 
 C                 word 2 = 0 for talk/listen devices
 C                          1 for talk-only devices 
@@ -124,6 +130,7 @@ C                          2 for listen-only devices
 C                         +4 if SRQ supported
 C                         +8 if no_write_ren for this device
 C                 word 3 time-out value
+C                 word 4 index in network table or '0' to indicate GPIB-board
       integer tmotbl(16)
 C                        table of time-out values microseconds
 C                        =0 disabled
@@ -140,6 +147,7 @@ C
 C 5.  INITIALIZED VARIABLES 
 C 
       data kini/.false./,kfirst/.true./,kgpib/.true./
+      data no_board /.true./
       data minmod/0/, maxmod/12/
       data ilen/512/
       data tmotbl/0,10,30,100,300,1000,3000,10000,  30000,    100000,
@@ -224,6 +232,18 @@ C
             goto 151
          endif
          modtbl(1,icount) = ibuf(1)
+C     Let's escape to a C function to check if we got a network-controlled
+C     device and process it, if that is the case --- the return value is either
+C     an index in the network-table, a zero to indicate a normal GPIB-board or
+C     '-1' to indicate an error
+         modtbl(4,icount) = check_network(ibuf, ireg)
+         write(*,*) 'Modtbl =',modtbl(4,icount)
+         if ( modtbl(4,icount).gt.0 ) then
+            goto 150
+         else if ( modtbl(4,icount).lt.0 ) then
+            ierr = -3
+            goto 1090
+         end if
 C !! FIND COMMA AND MOVE DEVICE NAME INTO VARIABLE
 C !! IF THERE IS A COMMA, MOVE OPTION INTO VARIABLE 
          icomma = iscn_ch(ibuf,4,ireg,',') 
@@ -254,6 +274,12 @@ C !! IF THERE IS A COMMA, MOVE OPTION INTO VARIABLE
  151  continue
 C
       ndev = min0(icount,imaxdev)
+C     Check if we need to open the GPIB-board or if we only have
+C     network-controlled devices which have already been dealt with
+      do i=1,ndev
+         if ( modtbl(4,i).eq.0 ) no_board = .false.
+      end do
+      if ( no_board ) goto 1089
 C
       call fs_get_idevgpib(idevgpib)
       if(ichcm_ch(idevgpib,1,'/dev/null ').eq.0) then
@@ -273,7 +299,7 @@ C
         timlst(i)=it(1)+it(2)*100.+it(3)*60.d2+it(4)*3600.d2
         oldcmd(i)=-1
       enddo
-      kini = .true.
+ 1089 kini = .true.
       goto 1090
 C
 C
@@ -343,6 +369,24 @@ c
       if((imode.gt.4.and.imode.lt.9).or.imode.eq.11) then
          ilimit=min(ibuf(3),ibufln*2)
       endif
+C
+C     Branch off to the network-handler, if the device is
+C     a network-controlled device and ignore the rest of this program
+C     A return of '1' from handle_network indicates that we have a reply
+C     we should pass back to the calling program, while a '0' indicates that
+C     a command was sent successfully, and '-1' that the communication failed
+      if ( modtbl(4,idev).gt.0 ) then
+         device = modtbl(4,idev)
+         status = handle_network(ibuf, ireg, device, ierr, ipcode)
+         if ( status.lt.0 ) goto 910
+         if ( status.eq.1 ) then
+            nclrer = nclrer + 1
+            idum = ichmv(ibuf2, 3, ibuf, 1, ireg)
+            ibuf2(1) = nadev    !!MNEMONIC DEVICE NAME 
+            call put_buf(iclasr, ibuf2, -ireg-2, '  ', '  ')
+         end if
+         goto 900
+      end if
 C
       if(idev.gt.0) then
          call fc_rte_time(it,it(6))
