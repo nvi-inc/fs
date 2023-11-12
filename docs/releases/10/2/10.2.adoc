@@ -21,7 +21,7 @@
 :doctype: book
 
 = FS 10.2 Update Notes
-Version 1.0 - October 2023
+Version 1.0 - November 2023
 
 :sectnums:
 :stem: latexmath
@@ -4284,7 +4284,7 @@ TIP: Rebooting is an alternative for restarting NTP on any system.
 
 .. Verify NTP operation (any user can do this)
 
-... Check to make sure you get the expected servers listed by `ntp
+... Check to make sure you get the expected servers listed by `ntpq
 -p`.
 
 +
