@@ -14,4 +14,4 @@ xset s 3900 -dpms
 xmodmap -e "clear Mod5"
 xsetroot -solid SlateGrey
 fvwm &
-xterm -C -ls  -name login_sh
+xterm -C -name login_sh

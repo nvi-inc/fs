@@ -332,12 +332,12 @@ AddToFunc "Resize-or-Raise" "M" Resize
 #now define the menus - defer bindings until later
 
 AddToMenu "Shells" "Shells" Title
-+              "Xterm (7x14 font)" Exec exec /usr/bin/X11/xterm -sb -sl 500 -j -ls -fn 7x14
-#+              "Color Rxvt (VT100 emulator)" Exec exec /usr/bin/X11/rxvt -font 7x14 -ls
-#+              "Color Xterm (7x14 font)" Exec exec /usr/bin/X11/color_xterm -sb -sl 500 -j -ls -fn 7x14
-+              "Large Xterm (10x20 font)" Exec exec /usr/bin/X11/xterm -sb -sl 500 -j -ls -fn 10x20
-#+              "Large Rxvt (10x20 font)" Exec exec /usr/bin/X11/rxvt -font 10x20 -ls
-#+              "Large Color Xterm (10x20 font)" Exec exec /usr/bin/X11/color_xterm -sb -sl 500 -j -ls -fn 10x20
++              "Xterm (7x14 font)" Exec exec /usr/bin/X11/xterm -sb -sl 500 -j -fn 7x14
+#+              "Color Rxvt (VT100 emulator)" Exec exec /usr/bin/X11/rxvt -font 7x14
+#+              "Color Xterm (7x14 font)" Exec exec /usr/bin/X11/color_xterm -sb -sl 500 -j -fn 7x14
++              "Large Xterm (10x20 font)" Exec exec /usr/bin/X11/xterm -sb -sl 500 -j -fn 10x20
+#+              "Large Rxvt (10x20 font)" Exec exec /usr/bin/X11/rxvt -font 10x20
+#+              "Large Color Xterm (10x20 font)" Exec exec /usr/bin/X11/color_xterm -sb -sl 500 -j -fn 10x20
 
 #AddToMenu "Screensaver" "Screensaver" Title
 #+              "Bat" Exec exec xlock -nolock -nice 0 -mode bat
@@ -491,7 +491,7 @@ AddToMenu "Utilities" "Utilities" Title
 
 # Root menu
 AddToMenu "Root Menu" "Root Menu" Title
-+              "New Window" Exec exec xterm -title 'AUID xterm' -ls -g 80x24+125+125 -rw
++              "New Window" Exec exec xterm -title 'AUID xterm' -g 80x24+125+125 -rw
 #	CirculateUp	"Shuffle Up"
 #	CirculateDown	"Shuffle Down"
 +              "Refresh" Refresh
@@ -533,8 +533,8 @@ AddToMenu "Operator Menu" "Operator Menu" Title
 +              "Pfmed C-S-P" Exec exec oper_account xterm -name pfmed -e pfmed
 +              "Setcl C-S-S" Exec exec oper_account run -w setcl
 +              "Fmset C-S-T" Exec exec oper_account xterm -name fmset -e fmset
-+              "oper window C-S-W" Exec exec oper_account xterm -title 'oper xterm' -ls -g 80x24+75+75
-+              "prog window C-S-X" Exec exec prog_account xterm -title 'prog xterm' -ls -g 80x24+175+175
++              "oper window C-S-W" Exec exec oper_account xterm -title 'oper xterm' -g 80x24+75+75
++              "prog window C-S-X" Exec exec prog_account xterm -title 'prog xterm' -g 80x24+175+175
 +              "" Nop
 +              "Window Ops" Popup Window Ops
 
@@ -636,8 +636,8 @@ Key m A CS Exec exec oper_account msg
 Key p A CS Exec exec oper_account xterm -name pfmed -e pfmed
 Key s A CS Exec exec oper_account run -w setcl
 Key t A CS Exec exec oper_account xterm -name fmset -e fmset
-Key w A CS Exec exec oper_account xterm -ls -title 'oper xterm' -g 80x24+75+75 -rw
-Key x A CS Exec exec prog_account xterm -ls -title 'prog xterm' -g 80x24+175+175 -rw
+Key w A CS Exec exec oper_account xterm -title 'oper xterm' -g 80x24+75+75 -rw
+Key x A CS Exec exec prog_account xterm -title 'prog xterm' -g 80x24+175+175 -rw
 #Key Escape	A	SC	CirculateDown
 #Key Escape	A	C	CirculateUp
 Key Escape      A       C       Prev (AcceptsFocus) Focus
