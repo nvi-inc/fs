@@ -27,3 +27,11 @@ fi
 
 export EDITOR=vim
 export LESS=-XR
+
+if [ "$AUID_PROMOTE_ACCOUNT" = "oper" ]; then
+    oper_account
+    exit
+elif [ "$AUID_PROMOTE_ACCOUNT" = "prog" ]; then
+    prog_account
+    exit
+fi
