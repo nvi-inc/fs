@@ -518,7 +518,7 @@ AddToMenu "Window Ops" "Window Ops" Title
 
 # AUID menu
 AddToMenu "AUID Menu" "AUID Menu" Title
-+              "emacs C-S-E" Exec exec emacs
++              "emacs      C-S-E" Exec exec emacs
 +              "New window C-S-W" Exec exec xterm -title 'AUID xterm' -g 80x24+75+75
 +              "" Nop
 +              "Window Ops" Popup Window Ops
