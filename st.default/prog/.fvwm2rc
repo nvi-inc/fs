@@ -526,7 +526,7 @@ AddToMenu "Operator Menu" "Operator Menu" Title
 +              "Monit: Mark 5 C-S-5" Exec exec xterm -name monit5 -e monit5
 +              "Monit: PCal   C-S-6" Exec exec monpcal
 #+              "Monit: RDBE   C-S-6" Exec exec xterm -name monit6 -e monit6
-+              "Monit: Tsys   C-S-7" Exec exec xterm -name monit7 -e monit7
++              "Monit: DBBC3  C-S-7" Exec exec xterm -name monit7 -e monit7
 +              "chekr         C-S-C" Exec exec run -w chekr
 +              "emacs         C-S-E" Exec exec emacs
 +              "logex         C-S-L" Exec exec xterm -name logex -e logex
