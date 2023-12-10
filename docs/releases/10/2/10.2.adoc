@@ -605,6 +605,10 @@ _monit7_ window can be adjusted with the commands:
  cd
  /usr2/fs/misc/xresourcesfix2 .Xresources
 
+In _.xsession, you should remove the `-geometry` option (if present)
+for the `login_sh` xterm_. This will assure that the width is
+determined solely by the _.Xresources_ file.
+
 You will need to log-out on the console and log back in to see the
 full change.
 
@@ -672,6 +676,67 @@ display client (or restart the FS if you are not using the display
 server)
 
 * _pfmed_ -- if it is running, exit and restart it
+
+====
+
+. Modernize _~/.Xresources_, _~/.xsession_, and _~/.fvwm2rc_ files
+
++
+
+Except for _~/.Xresources_, these changes have no material effect on
+existing installations. The effect for _~/.Xresources_ is small.
+Still, you may want to update these files for _oper_ and _prog_ to
+stay consistent with the default. More details about the changes are
+given in the <<gui_rc,Cleanup GUI rc files for oper and prog>> FS
+change item below (if that link doesn't work in your browser, click on
+this link instead: <<misc_enhance,Make miscellaneous enhancements>>,
+open the "`Details`" toggle below that location by clicking on it, go
+`Back` in the browser, and finally click on the original link).
+
++
+[%collapsible]
+====
+
+You may wish to compare your working _oper_ and _prog_ versions of the
+files to the defaults in the appropriate sub-directories of
+_/usr2/fs/st.default_.
+
+.. Enable pasting with the middle mouse button into all windows,
+except `Operator Input`
+
++
+
+In _~/.Xresources_ remove the resource and value:
+
++
+
+```
+VT100.Translations:       #override\
+        ~Ctrl ~Meta <Btn2Up>:   ignore()
+```
+
++
+
+for all windows except `oprin`.
+
+.. Modernize _~/.xsession_
+
+* Remove `source .profile`, but change it to `source .login` for FSL9
+and later if the login shell is _tcsh_.
+
+* Remove the `-ls` option from the `login_sh` _xterm_
+
+.. Modernize _~/.fvwm2rc_
+
+* Remove the `-ls` option from all _xterm_ invocations
+
+* Column-align the `Operator Menu` items so they are easier to read.
+
+* Add any _monit6_, _monit7_, _msg_/_rdbemsg_, _scnch_, and _erchk_
+menu, hot-key, and settings that may be missing.
+
+* Change the menu for the _monit7_ menu entry to say `DBBC3` instead
+of `Tsys`
 
 ====
 
@@ -2574,7 +2639,8 @@ repositories, the old versions, usually in _/usr2/st_, can be removed.
 
 ====
 
-. Make 19 miscellaneous enhancements, which include adding two new
+. <<misc_enhance,Make miscellaneous enhancements>>[[misc_enhance]]:
+Make 21 miscellaneous enhancements, which include adding two new
 utility scripts.
 
 +
@@ -2959,6 +3025,131 @@ the file:
 $include /etc/inputrc
 set revert-all-at-newline on
 ----
+
+=====
+
+.. <<gui_rc,Cleanup GUI rc files for oper and prog>>[[gui_rc]]:
+
++
+[%collapsible]
+=====
+
+... Enable pasting with middle mouse button for all windows except
+`Operator Input`
+
++
+
+Previously, pasting into several _xterm_ windows with the middle mouse
+button was disabled. This was intended to reduce unexpected results if
+the middle mouse button was accidentally clicked. It was probably an
+overly restrictive policy. Instead now, it is only disabled for the
+`Operator Input` window. The change was accomplished by removing the
+resource and value:
+
++
+```
+VT100.Translations:       #override\
+        ~Ctrl ~Meta <Btn2Up>:   ignore()
+```
+
++
+
+in the _~/.Xresources_ files for all windows except the `Operator
+Input` window. It should still be possible to paste into all windows,
+including `Operator Input`, with kbd:[Shift+Insert].
+
+... Remove `source .profile` from the _~/.xsession_ files
+
++
+
+It turns out that it is not needed when the login shell is _bash_.
+_gdm_ (FSL8 and maybe earlier) and _gdm3_ (FSL9/10/11 and maybe later)
+both run _~/.profile_) before running _~/.xsession_.
+
++
+
+If the login shell is _tcsh_, other action is required. For _gdm_
+(FSL8 and maybe earlier), it will be necessary to setup the same
+environment in _~/.profile_ as in _~/.login_ and keep the two files in
+sync. This is because _gdm_ appears to interpret _~/.xsession_ with
+either _sh_ or _bash_. For _gdm3_ (FSL9/10/11 and maybe later, the
+_~/.xsession_ file seems to interpreted using the account's login
+shell. Thus for this case, `source{nbsp}.login` can be inserted as the
+first non-comment line to have it be used to set the environment.
+Comments were added to default versions to explain what to do.
+
++
+
+... Remove the `-ls` option for __xterm__s in _~/.fvwm2rc_ and
+_~/.xsession_ files
+
++
+
+This option runs the shell used by the __xterms__ as a login shell,
+i.e., it runs _~/.profile_ or _~/.login_ as appropriate when started.
+Since the environment was already set by _gdm_/_gdm3_, this was
+redundant.
+
+... Other _~/.fvwm2rc_ file cleanup.
+
+.... The entries in the `Operator menu` were column-aligned for easier
+reading.
+
+.... The `Operator menu` entry for _monit7_ was changed to `Monit:
+DBBC3` to make it more specific than `Monit:{nbsp}Tsys`.
+
+... Bring _~/.fvwm2rc-before-FSL9_ up-to-date
+
+.... The changes to the _~/.fvwm2rc_ files were also made to these
+files.
+
+.... Missing menu and hot-key items were added for: _monit6_, _monit7_,
+_msg_, _rdbemsg_, _scnch_, and _erchk_.
+
+=====
+
+.. Update AUID default files for FSL11
+
++
+[%collapsible]
+=====
+
+... Add logic to AUID _~/.profile_ files to promote to _oper_/_prog_
+automatically
+
++
+
+At the end, the environment variable `AUID_PROMOTE_ACCOUNT` is
+checked. If it is set to `oper` or `prog`, then promotion occurs
+automatically (the AUID account password may still need to be
+entered). This variable is set by the FSL11 scripts _oper_x11_ and
+_prog_x11_, which then run `startx` to start X11 on the console.
+`startx` does not run _~/.profile_ (the environment from the AUID
+account is inherited). The _/.xsession_ for the AUID account runs the
+_xterm_ with the `-ls` option which triggers running _~/.profile_. An
+`exit` command is used after the promotion script so that when the
+promoted session exists, the GUI is shutdown. This last step prevents
+the AUID account from being active on the GUI after the window manager
+has changed to the one for the promoted account.
+
+... Add default __~/.profile_<SUDO_USER>__ scripts to _~oper_ and _~prog_
+
++
+
+A script is created for each AUID added. These scripts are run by the
+_~/.profile_ scripts for these accounts to allow per AUID user (the
+_sudo_ user) customization. The default version of these scripts just
+prints a message as a reminder that it is being running. There is no
+need for the user to update the script file for their AUID account
+unless it would be helpful.
+
+... Cleanup _~/.fvwm2rc_
+
++
+
+The `operator` menu was greatly simplified and renamed `AUID menu`.
+Access to FS program through this menu no longer makes sense. The
+`AUID menu` entries were column-aligned for easier reading.
 
 =====
 
