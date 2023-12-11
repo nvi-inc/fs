@@ -332,12 +332,12 @@ AddToFunc "Resize-or-Raise" "M" Resize
 #now define the menus - defer bindings until later
 
 AddToMenu "Shells" "Shells" Title
-+              "Xterm (7x14 font)" Exec exec /usr/bin/X11/xterm -sb -sl 500 -j -ls -fn 7x14
-#+              "Color Rxvt (VT100 emulator)" Exec exec /usr/bin/X11/rxvt -font 7x14 -ls
-#+              "Color Xterm (7x14 font)" Exec exec /usr/bin/X11/color_xterm -sb -sl 500 -j -ls -fn 7x14
-+              "Large Xterm (10x20 font)" Exec exec /usr/bin/X11/xterm -sb -sl 500 -j -ls -fn 10x20
-#+              "Large Rxvt (10x20 font)" Exec exec /usr/bin/X11/rxvt -font 10x20 -ls
-#+              "Large Color Xterm (10x20 font)" Exec exec /usr/bin/X11/color_xterm -sb -sl 500 -j -ls -fn 10x20
++              "Xterm (7x14 font)" Exec exec /usr/bin/X11/xterm -sb -sl 500 -j -fn 7x14
+#+              "Color Rxvt (VT100 emulator)" Exec exec /usr/bin/X11/rxvt -font 7x14
+#+              "Color Xterm (7x14 font)" Exec exec /usr/bin/X11/color_xterm -sb -sl 500 -j -fn 7x14
++              "Large Xterm (10x20 font)" Exec exec /usr/bin/X11/xterm -sb -sl 500 -j -fn 10x20
+#+              "Large Rxvt (10x20 font)" Exec exec /usr/bin/X11/rxvt -font 10x20
+#+              "Large Color Xterm (10x20 font)" Exec exec /usr/bin/X11/color_xterm -sb -sl 500 -j -fn 10x20
 
 #AddToMenu "Screensaver" "Screensaver" Title
 #+              "Bat" Exec exec xlock -nolock -nice 0 -mode bat
@@ -491,7 +491,7 @@ AddToMenu "Utilities" "Utilities" Title
 
 # Root menu
 AddToMenu "Root Menu" "Root Menu" Title
-+              "New Window" Exec exec xterm -title 'AUID xterm' -ls -g 80x24+125+125 -rw
++              "New Window" Exec exec xterm -title 'AUID xterm' -g 80x24+125+125 -rw
 #	CirculateUp	"Shuffle Up"
 #	CirculateDown	"Shuffle Down"
 +              "Refresh" Refresh
@@ -516,25 +516,10 @@ AddToMenu "Window Ops" "Window Ops" Title
 +              "" Nop
 +              "Refresh Screen" Refresh
 
-# Operator menu
-AddToMenu "Operator Menu" "Operator Menu" Title
-+              "Monit: time C-S-1" Exec exec oper_account xterm -name monit1 -e monit1
-+              "Monit: status C-S-2" Exec exec oper_account xterm -name monit2 -e monit2
-+              "Monit: Tsys C-S-3" Exec exec oper_account xterm -name monit3 -e monit3
-+              "Monit: LBA C-S-4" Exec exec oper_account xterm -name monit4 -e monit4
-+              "Monit: Mark 5 C-S-5" Exec exec oper_account xterm -name monit5 -e monit5
-+              "Monit: PCal C-S-6" Exec exec oper_account monpcal
-#+              "Monit: PCal C-S-6" Exec exec oper_account xterm -name monit6 -e monit6
-+              "Chekr C-S-C" Exec exec oper_account run -w chekr
-+              "Emacs C-S-E" Exec exec oper_account emacs
-+              "Logex C-S-L" Exec exec oper_account xterm -name logex -e logex
-+              "msg   C-S-M" Exec exec oper_account msg
-#+              "rdbemsg   C-S-M" Exec exec oper_account rdbemsg
-+              "Pfmed C-S-P" Exec exec oper_account xterm -name pfmed -e pfmed
-+              "Setcl C-S-S" Exec exec oper_account run -w setcl
-+              "Fmset C-S-T" Exec exec oper_account xterm -name fmset -e fmset
-+              "oper window C-S-W" Exec exec oper_account xterm -title 'oper xterm' -ls -g 80x24+75+75
-+              "prog window C-S-X" Exec exec prog_account xterm -title 'prog xterm' -ls -g 80x24+175+175
+# AUID menu
+AddToMenu "AUID Menu" "AUID Menu" Title
++              "emacs      C-S-E" Exec exec emacs
++              "New window C-S-W" Exec exec xterm -title 'AUID xterm' -g 80x24+75+75
 +              "" Nop
 +              "Window Ops" Popup Window Ops
 
@@ -576,7 +561,7 @@ AddToFunc "window_ops_func" "C" PopUp "Window Ops2"
 
 #     Button	Context Modifi 	Function
 Mouse 1		R   	A       PopUp "Root Menu"
-Mouse 2		R    	A      	PopUp "Operator Menu"
+Mouse 2		R    	A      	PopUp "AUID Menu"
 Mouse 3         R       A       WindowList
 #Mouse 3		R    	A      	Module "winlist" FvwmWinList transient
 
@@ -621,23 +606,8 @@ Mouse 3         W       M       RaiseLower
 ############################################################################
 # Now some keyboard shortcuts.
 
-Key 1 A CS Exec exec oper_account xterm -name monit1 -e monit1
-Key 2 A CS Exec exec oper_account xterm -name monit2 -e monit2
-Key 3 A CS Exec exec oper_account xterm -name monit3 -e monit3
-Key 4 A CS Exec exec oper_account xterm -name monit4 -e monit4
-Key 5 A CS Exec exec oper_account xterm -name monit5 -e monit5
-Key 6 A CS Exec exec oper_account monpcal
-#Key 6 A CS Exec exec oper_account xterm -name monit6 -e monit6
-Key c A CS Exec exec oper_account run -w chekr
-Key e A CS Exec exec oper_account emacs
-Key l A CS Exec exec oper_account xterm -name logex -e logex
-Key m A CS Exec exec oper_account msg
-#Key m A CS Exec exec oper_account rdbemsg
-Key p A CS Exec exec oper_account xterm -name pfmed -e pfmed
-Key s A CS Exec exec oper_account run -w setcl
-Key t A CS Exec exec oper_account xterm -name fmset -e fmset
-Key w A CS Exec exec oper_account xterm -ls -title 'oper xterm' -g 80x24+75+75 -rw
-Key x A CS Exec exec prog_account xterm -ls -title 'prog xterm' -g 80x24+175+175 -rw
+Key e A CS Exec exec emacs
+Key w A CS Exec exec xterm -title 'AUID xterm' -g 80x24+75+75 -rw
 #Key Escape	A	SC	CirculateDown
 #Key Escape	A	C	CirculateUp
 Key Escape      A       C       Prev (AcceptsFocus) Focus

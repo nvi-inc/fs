@@ -33,6 +33,7 @@ do
   esac
 done
 #
+echo "Updating /usr2/$ans"
 cd /usr2
 mv $ans $ans.FSCOPY
 #
@@ -40,5 +41,17 @@ cd /usr2/fs/st.default/auid
 find . -print|cpio -pmdu /usr2/$ans
 chown -R $ans.$ans /usr2/$ans
 chmod 0750 /usr2/$ans
+#
+echo "Adding ~oper/.profile_$ans"
+cat >~oper/.profile_$ans <<EOT
+echo "Applying customizations from \${BASH_SOURCE}"
+EOT
+chown oper.rtx ~oper/.profile_$ans
+#
+echo "Adding ~prog/.profile_$ans"
+cat >~prog/.profile_$ans <<EOT
+echo "Applying customizations from \${BASH_SOURCE}"
+EOT
+chown prog.rtx ~prog/.profile_$ans
 #
 echo "Done."
