@@ -14,8 +14,8 @@ Monitor only parameter:
             Time of last multicast received
 last        Time the most recent multicast message was received
 age         Number of seconds since the last message was received
-hsecs       The centiseconds of the FS time when the multicast
-            message was received.
+hsecs       The "hundredths-of-seconds" (centiseconds) of the FS time
+            when the multicast message was received.
 
 board       Core3H board number, 1-8, for this output line
 time        Core3H multicast time

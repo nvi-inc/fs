@@ -28,7 +28,7 @@
 :experimental:
 :downarrow: &downarrow;
 E. Himwich, J. Quick
-Version 5.2.8 - August 2023
+Version 5.2.9 - November 2023
 
 == Introduction
 
@@ -639,10 +639,11 @@ usually finishes close to but before the next 1 PPS. There seems to be
 a variable delay of up to about an additional 0.25 seconds that can
 cause packets to be late.
 
-* Consistent overruns -- This occurs when the packet generation
-always overruns at least the next 1 PPS. This will cause a time-out
-every other read attempt if just the next 1 PPS is overrun
-consistently.
+* Consistent overruns -- This occurs when the packet generation always
+overruns at least the next 1 PPS. This will cause a time-out every
+other read attempt if just the next 1 PPS is overrun consistently.
+For example, this is known to happen for `DDC_U` _v126_ with eight
+Core3H boards, for at least some CPUs/clock-speeds.
 
 --
 +
@@ -653,11 +654,11 @@ centiseconds (0.01 seconds) of `19` or less.
 +
 
 The late arrival time will also be visible in the `Arrival` time of
-_monit7_ and in the last field,`_hsecs_`, of the `mcast_time/0`
-output, if you happen to catch them for the late packet. For _monit7_,
-late arrival times are shown in inverse video. For consistent
-overruns, the arrival times may, or may not, be before the late
-arrival limit used by _monit7_.
+_monit7_ and in the last field,`_hsecs_` (centiseconds), of the
+`mcast_time/0` output, if you happen to catch them for the late
+packet. For _monit7_, late arrival times are shown in inverse video.
+For consistent overruns, the arrival times may, or may not, be before
+the late arrival limit used by _monit7_.
 
 +
 
@@ -713,7 +714,7 @@ details.
 +
 
 NOTE: In FS _10.1_, the interval for reporting version errors detected
-with the multicast data is 20 seconds and can not be adjusted.
+with the multicast data is 20 seconds and cannot be adjusted.
 
 +
 
@@ -1105,7 +1106,7 @@ to `0`), can be useful for troubleshooting. You will see the T~sys~
 values calculated sample-by-sample with no averaging or filtering.
 
 NOTE: In FS _10.1_, the error conditions that are identified are all
-shown as dollar signs and thus can not be distinguished. The most
+shown as dollar signs and thus cannot be distinguished. The most
 likely problems in that case are the polarity being wrong or the noise
 diode not firing. The T~sys~ values being unrealistically low could be
 a symptom of the FS having continuous calibration "`on`", but the
@@ -1232,11 +1233,11 @@ The value in _dbbc3.ctl_ can be adjusted as appropriate. It should be
 easy to measure it for a given system when NTP _is_ available, using
 the output of the `mcast_time` command. The system will need to be
 synced to NTP and the `computer` model selected in _time.ctl_. In this
-case, the last parameter, `_hsecs_`, on the `mcast_time/0` output is
-the value to put in the file; it may vary at the few centisecond
-level. (If _setcl_ it being used, it will probably work to subtract
-the last value on the `#setcl#model/old` from `_hsecs_` before putting
-it in the file.)
+case, the last parameter, `_hsecs_` (centiseconds), on the
+`mcast_time/0` output is the value to put in the file; it may vary at
+the few centisecond level. (If _setcl_ it being used, it will probably
+work to subtract the last value on the `#setcl#model/old` from
+`_hsecs_` before putting it in the file.)
 
 +
 
@@ -1297,7 +1298,7 @@ the FS time should not cause problems unless the scans are very short.
 
 == Multicast logging
 
-Logging of DBBC3 multi-cast recording is controlled by the `tpicd`
+Logging of DBBC3 multicast recording is controlled by the `tpicd`
 command. It will automatically be enabled by _drudg_ generated setup
 procedures. When logging is enabled, for each multicast message
 received (nominal 1 Hz rate), the following information, shown with
@@ -1308,9 +1309,9 @@ the log entry with centisecond precision
 
 +
 
-The fractional seconds should agree with the last value, `_hsecs_`, on
-the `mcast_time/0` line with small variations at the centisecond
-level.
+The fractional seconds should agree with the last value, `_hsecs_`
+(centiseconds), on the `mcast_time/0` line with small variations at
+the centisecond level.
 
 * `time` -- for each Core3H board in the system
 
@@ -2247,8 +2248,10 @@ schedules. Please see ``**fesh -h**`` for more information.
 NOTE: This can be used for any system with a Mark 5C or FlexBuff
 recorder, not just one with a DBBC3.
 
-This appendix describes changes that can be made to optimize the
-configuration of your Mark 5C and/or FlexBuff recorders.
+This appendix describes the default recorder configuration used by the
+FS and how to make changes in your SNAP procedures to tune some
+aspects of the configuration of your Mark 5C and/or FlexBuff
+recorders.
 
 === mk5c_config/fb_config procedure
 
@@ -2261,20 +2264,20 @@ procedure is mode independent, i.e., the same procedure is used for
 all modes.
 
 This procedure is a local `station` library procedure to allow tuning
-of the configuration of _jive5ab_ for the specifics of the recorder,
-including overriding the "`default`" configuration, described next
-below, given by the `mk5c_mode`/`fb_mode` command in the setup
-procedure.
+some aspects of the configuration of _jive5ab_ for the specifics of
+the recorder, including overriding the "`default`" FS configuration,
+described next below, given by the `mk5c_mode`/`fb_mode` command in
+the setup procedure.
 
-=== Default configuration
+=== Default FS configuration
 
 The `mk5c_mode`/`fb_mode` command sends configuration information,
-beyond what is set with _jive5ab_ `mode` command. This depends on
-which recorder is selected in _equip.ctl_, `mk5c` or `flexbuff`, and
-the total data rate. It does _not_ depend on which command is used;
-`fb_mode` is just an alias for `mk5c_mode`. The commands sent also
-depend on the data type, VDIF or 5B/Ethernet. All the cases are listed
-below.
+beyond what is set with _jive5ab_ `mode` command. What is sent depends
+on which recorder is selected in _equip.ctl_, `mk5c` or `flexbuff`,
+and the total data rate. It does _not_ depend on which command is
+used; `fb_mode` is just an alias for `mk5c_mode`. The commands sent
+also depend on the data type, VDIF or 5B/Ethernet. All the cases are
+listed below.
 
 TIP: You can see the full details of the FS setup of the recorder by
 the `mk5c_mode`/`fb_mode` command by using `*echo=on*` before the
@@ -2282,7 +2285,7 @@ command and `*echo=off*` afterwards.
 
 ==== FlexBuff recorder
 
-. Setting `mtu`:
+. Default `mtu` setting:
 
 +
 
@@ -2296,7 +2299,7 @@ The `mtu` command sent to the recorder depends on the data type:
 
    mtu = 6000 ;
 
-. Setting `net_protocol`:
+. Default `net_protocol` setting:
 
 +
 
@@ -2327,7 +2330,7 @@ FlexBuff has been tuned (especially the kernel network buffer sizes) along the
 lines of the FlexBuff tuning documentation at
 https://www.jive.eu/~verkout/flexbuff/flexbuf.recording.txt.
 
-. Setting `record = nthread`:
+. Default `record = nthread` setting:
 
 +
 
@@ -2348,7 +2351,7 @@ where `_nWriters_` is calculated as `max( _data_rate_ / 6 + 1, 2)` and
 
 ==== Mark 5C recorder
 
-. Setting `net_protocol`:
+. Default `net_protocol` setting:
 
 +
 
@@ -2357,7 +2360,7 @@ type:
 
   net_protocol = : 128k : 2M : 4;
 
-. Setting `packet`:
+. Default `packet` setting:
 
 +
 
@@ -2379,8 +2382,12 @@ command or add more by putting them in your local
 `mk5c_config`/`fb_config` is called after `mk5c_mode`/`fb_mode`
 command (_and_ after the call to the optional <<Thread procedure>>, so
 it can overridden by the same mechanism) in the setup procedure. An
-example of local customization is shown in the
+example of a local customization is shown in the
 <<Changing net_protocol>> subsection below.
+
+Some suggestions for recoder turning, both for _jive5ab_ commands in
+`mk5c_config`/`fb_config` and more generally, can be found at:
+https://www.jive.eu/~verkout/flexbuff/flexbuf.recording.txt.
 
 CAUTION: If you put any commands in `mk5c_config`/`fb_config` that depend on
 the data type, VDIF or 5B/Ethernet, you would need to change them if there is a
