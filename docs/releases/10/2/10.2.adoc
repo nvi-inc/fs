@@ -543,6 +543,10 @@ To update the usual _~/.Xresources_ file, enter the commands:
  cd
  /usr2/fs/misc/xresourcesfix .Xresources
 
+In _.xsession_, you should remove the `-geometry` option (if present)
+for the `login_sh` _xterm_. This will assure that the width is
+determined solely by the _.Xresources_ file.
+
 You will need to log-out on the console and log back in to see the
 full change.
 
@@ -604,10 +608,6 @@ _monit7_ window can be adjusted with the commands:
 
  cd
  /usr2/fs/misc/xresourcesfix2 .Xresources
-
-In _.xsession, you should remove the `-geometry` option (if present)
-for the `login_sh` xterm_. This will assure that the width is
-determined solely by the _.Xresources_ file.
 
 You will need to log-out on the console and log back in to see the
 full change.
@@ -1067,8 +1067,8 @@ _reindent_ are installed in _~prog/.local_):
 Two new environment variables, `FS_F95_NO_ALLOW_ARGUMENT_MISMATCH` and
 `FS_PYTHON_VERSION`, were added to assist with compilation on
 pre-FSL11 systems. They only need to be set once in _prog_'s login
-`rc` files on these systems. Their use is explained in the next two
-items.
+`rc` files on these systems. Their use is explained in the previous
+two sub-items.
 
 =====
 
@@ -2308,7 +2308,7 @@ useful, for example, if there are non-data entry of the form `wx/` and
 the data entries are of the form, `/wx/.` The program accepts the form
 without the leading `/` because that is what some stations produce for
 the data entries and that will match for stations that do use as a
-leading `/`. This option is only to help for stations with non-data
+leading `/`. This option is only helpful for stations with non-data
 entries that do not have the leading `/` and data entries with the
 leading `/`.
 
