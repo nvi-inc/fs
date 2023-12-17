@@ -1,0 +1,245 @@
+#!/usr/bin/perl
+#
+# Copyright (c) 2023 NVI, Inc.
+#
+# This file is part of VLBI Field System
+# (see http://github.com/nvi-inc/fs).
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+#
+
+sub time_add {
+#
+# calculate time of the log entry
+# everything is measured relative to $reftime, first time in log
+# it will make a mess of $reftime is not reasonable
+#
+    my ($time, $ref_add) = @_;
+    my @result=@{$time};
+    my @add=@{$ref_add};
+#    print join(' ',@result), " in\n";
+#    print join(' ',@add), " add in\n";
+
+# seconds
+
+   $result[4]+=$add[4];
+   if($result[4] > 59) {
+       $rem=$result[4] % 60;
+       $quo=int($result[4]/60);
+#       print "quo $quo rem $rem \n";
+       $result[4]=$rem;
+       $result[3]+=$quo;
+   } elsif ($result[4]<0) {
+       $rem=$result[4] % 60;
+       $quo=-1+int($result[4]/60);
+#       print "quo $quo rem $rem \n";
+       $result[4]=$rem;
+       $result[3]+=$quo;
+   }
+
+# minutes
+
+   $result[3]+=$add[3];
+   if($result[3] > 59) {
+       $rem=$result[3] % 60;
+       $quo=int($result[3]/60);
+#       print "quo $quo rem $rem \n";
+       $result[3]=$rem;
+       $result[2]+=$quo;
+   } elsif ($result[3]<0) {
+       $rem=$result[3] % 60;
+       $quo=-1+int($result[3]/60);
+#       print "quo $quo rem $rem \n";
+       $result[3]=$rem;
+       $result[2]+=$quo;
+   }
+
+# hours
+
+   $result[2]+=$add[2];
+   if($result[2] > 23) {
+       $rem=$result[2] % 24;
+       $quo=int($result[2]/.0);
+#       print "quo $quo rem $rem \n";
+       $result[2]=$rem;
+       $result[1]+=$quo;
+   } elsif ($result[2]<0) {
+       $rem=$result[2] % 24;
+       $quo=-1+int($result[2]/24);
+#       print "quo $quo rem $rem \n";
+       $result[2]=$rem;
+       $result[1]+=$quo;
+   }
+
+# days
+
+# we don't handle leap years yet
+
+   $result[1]+=$add[1];
+   if($result[1] > 365) {
+       $rem=$result[1] % 365;
+       $quo=int($result[1]/.0);
+#       print "quo $quo rem $rem \n";
+       $result[1]=$rem;
+       $result[0]+=$quo;
+   } elsif ($result[1]<0) {
+       $rem=$result[1] % 365;
+       $quo=-1+int($result[1]/365);
+#       print "quo $quo rem $rem \n";
+       $result[1]=$rem;
+       $result[0]+=$quo;
+   }
+
+#years
+
+   $result[0]+=$add[0];
+
+    return (@result);
+}
+#
+# main program
+#
+
+# 1.0 Initialize
+
+require "getopts.pl";
+
+if (!&Getopts("hV")) {
+  print STDERR "For help, try: '$0 -h'\n";
+  exit -1;
+}
+
+if ($#ARGV < 0 &&!defined($opt_h) &&!defined($opt_V)) {
+        print STDERR "For help, try: '$0 -h'\n";
+        exit 0;
+}
+
+if(defined($opt_V)) {
+    print "[auto_start 0.1]\n";
+    exit 0;
+}
+
+if (defined($opt_h)) {
+    print "Usage: $0 [options] [sessions]
+
+Synopsis: This script puts commands in the FS time-list to
+automatically start a schedule, and the antenna, at a later time. The
+exit code is 0 for no error. The script stops at the first error
+detected and exits with a non-zero code.
+
+If the first time-block command in a 'session' SNAP file is at least
+10 minutes in the future, the script will send the FS a time-list
+commands to start the schedule 10 minutes early and execute the
+'ant_start' SNAP procedure two minutes after that.
+
+It is assumed that there will be an 'ant_start' SNAP procedure
+(usually in the 'station' procedure) that will start the antenna. It
+might be a good idea to try starting it more than once, if that is
+benign, in that procedure. This will make more robust in case there
+are errors.  If the antenna with start automatically on its own, or it
+certain that it will already be operating, the 'ant_start' procedure
+can be left empty.
+
+The FS must be running and the STATION environment variable defined
+with the two-letter station code.
+
+Multiple sessions can be processed if the result makes sense. However,
+the FS time-list can only hold a small number of entries. Currently,
+the limit is 15. With that limit. the maximum number a sessions that
+can be waiting to auto-start is seven.
+
+Option explanations:
+
+ -h        print this help information and stop
+ -V        print program version information and stop
+";
+    exit 0;
+}
+
+$station= lc $ENV{'STATION'};
+if($station eq "") {
+    print STDERR "STATION environment variable not defined.\n";
+    exit -1
+}
+foreach $name (@ARGV) {
+    $file = "/usr2/sched/${name}$station.snp";
+    open(FILE,$file) || do {
+	print STDERR "can't open $file: $!\n";
+	next;
+    };
+#    print "file $file \n";
+
+    while (<FILE>) {
+        if(/^!(\d{4})\.(\d{3})\.(\d{2}):(\d{2}):(\d{2})/) {
+#            print;
+#            print "$1 $2 $3 $4 $5\n";
+
+#  find first time
+
+            @sndval =  ($1,$2,$3,$4,$5);
+#            print join(' ',@sndval), " snd\n";
+#            print join(' ',@addval), " add\n";
+
+# set start time
+
+            @addval =  ( 0, 0, 0,-10, 0);
+            @retval = time_add(\@sndval,\@addval);
+#            print join(' ',@retval), " ret\n";
+
+# is the start time in the past or now?
+
+            ($sec,$min,$hour,$mday,$mon,$year,$wday,$doy) = gmtime();
+            $year+=1900;
+            $doy++;
+#            print "year $year doy $doy $hour $min $sec \n";
+
+            if($year >  $retval[0] ||
+               $year == $retval[0] && $doy >  $retval[1] ||
+               $year == $retval[0] && $doy == $retval[1] && $hour >  $retval[2] ||
+               $year == $retval[0] && $doy == $retval[1] && $hour == $retval[2] && $min >  $retval[3] ||
+               $year == $retval[0] && $doy == $retval[1] && $hour == $retval[2] && $min == $retval[3] && $sec >= $retvl[4]) {
+                print STDERR "Auto-start time is in the past: ", join(' ',@retval),"\n";
+                exit -1;
+             }
+
+# schedule start
+
+            $command = sprintf("%s%04d.%03d.%02d:%02d:%02d","inject_snap schedule=$name$station,#1\@",@retval);
+#            print "command $command\n";
+            $result=system($command);
+#            print "result $result\n";
+            if($result !=0 ) {
+                print STDERR  "setting schedule auto-start failed, result: $result\n";
+                exit -1;
+            }
+
+# antenna start
+
+            @sndval=@retval;
+            @addval =  ( 0, 0, 0, 2, 0);
+            @retval = time_add(\@sndval,\@addval);
+#            print join(' ',@retval), " ret\n";
+            $command = sprintf("%s%04d.%03d.%02d:%02d:%02d","inject_snap ant_start\@",@retval);
+#            print "command $command\n";
+            $result=system($command);
+#            print "result $result\n";
+            if($result !=0 ) {
+                print STDERR  "setting schedule antenna auto-start failed, result: $result\n";
+                exit -1;
+            }
+            last;
+        }
+    }
+}
+exit 0;
