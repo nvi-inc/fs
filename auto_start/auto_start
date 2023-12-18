@@ -115,18 +115,18 @@ sub time_add {
 
 require "getopts.pl";
 
-if (!&Getopts("hV")) {
+if (!&Getopts("hv")) {
   print STDERR "For help, try: '$0 -h'\n";
   exit -1;
 }
 
-if ($#ARGV < 0 &&!defined($opt_h) &&!defined($opt_V)) {
+if ($#ARGV < 0 &&!defined($opt_h) &&!defined($opt_v)) {
         print STDERR "For help, try: '$0 -h'\n";
         exit 0;
 }
 
-if(defined($opt_V)) {
-    print "[auto_start 0.3]\n";
+if(defined($opt_v)) {
+    print "[auto_start 0.4]\n";
     exit 0;
 }
 
@@ -165,7 +165,7 @@ commands.
 Option explanations:
 
  -h        print this help information and stop
- -V        print program version information and stop
+ -v        print program version information and stop
 ";
     exit 0;
 }
