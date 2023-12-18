@@ -11,6 +11,9 @@ case $- in
       *) return;;
 esac
 
+# uncomment for no auto-logout
+#unset TMOUT
+
 # use physical directories
 set -o physical
 
