@@ -126,7 +126,7 @@ if ($#ARGV < 0 &&!defined($opt_h) &&!defined($opt_V)) {
 }
 
 if(defined($opt_V)) {
-    print "[auto_start 0.2]\n";
+    print "[auto_start 0.3]\n";
     exit 0;
 }
 
@@ -191,18 +191,18 @@ foreach $name (@ARGV) {
 
 #  find first time
 
-            @sndval =  ($1,$2,$3,$4,$5);
+            @timval =  ($1,$2,$3,$4,$5);
             if($kfirst == 0) {
                  next;
             }
             $kfirst=0;
-#            print join(' ',@sndval), " snd\n";
+#            print join(' ',@timval), " tim\n";
 #            print join(' ',@addval), " add\n";
 
 # set start time
 
             @addval =  ( 0, 0, 0,-10, 0);
-            @retval = time_add(\@sndval,\@addval);
+            @retval = time_add(\@timval,\@addval);
 #            print join(' ',@retval), " ret\n";
 
 # is the start time in the past or now?
@@ -234,9 +234,9 @@ foreach $name (@ARGV) {
 
 # antenna start
 
-            @sndval=@retval;
+            @timval=@retval;
             @addval =  ( 0, 0, 0, 2, 0);
-            @retval = time_add(\@sndval,\@addval);
+            @retval = time_add(\@timval,\@addval);
 #            print join(' ',@retval), " ret\n";
             $command = sprintf("%s%04d.%03d.%02d:%02d:%02d","inject_snap ant_start\@",@retval);
 #            print "command $command\n";
@@ -249,11 +249,11 @@ foreach $name (@ARGV) {
         }
     }
 
-# antenna stop use last sndval
+# antenna stop use last timval
 
-#    print "end @sndval\n";
+#    print "end @timval\n";
     @addval =  ( 0, 0, 0, 5, 0);
-    @retval = time_add(\@sndval,\@addval);
+    @retval = time_add(\@timval,\@addval);
 #    print join(' ',@retval), " ret\n";
     $command = sprintf("%s%04d.%03d.%02d:%02d:%02d","inject_snap ant_stop\@",@retval);
 #    print "command $command\n";
