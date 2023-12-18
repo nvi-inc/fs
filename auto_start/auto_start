@@ -126,7 +126,7 @@ if ($#ARGV < 0 &&!defined($opt_h) &&!defined($opt_V)) {
 }
 
 if(defined($opt_V)) {
-    print "[auto_start 0.1]\n";
+    print "[auto_start 0.2]\n";
     exit 0;
 }
 
@@ -134,21 +134,23 @@ if (defined($opt_h)) {
     print "Usage: $0 [options] [sessions]
 
 Synopsis: This script puts commands in the FS time-list to
-automatically start a schedule, and the antenna, at a later time. The
-exit code is 0 for no error. The script stops at the first error
-detected and exits with a non-zero code.
+automatically start a schedule, and start/stop antenna, at a later
+time. The exit code is 0 for no error. The script stops at the first
+error detected and exits with a non-zero code.
 
 If the first time-block command in a 'session' SNAP file is at least
 10 minutes in the future, the script will send the FS a time-list
 commands to start the schedule 10 minutes early and execute the
-'ant_start' SNAP procedure two minutes after that.
+'ant_start' SNAP procedure two minutes after that. The 'ant_stop' SNAP
+procedure will be scheduled to execute five minutes after the last
+time-block command in the SNAP file.
 
-It is assumed that there will be an 'ant_start' SNAP procedure
-(usually in the 'station' procedure) that will start the antenna. It
-might be a good idea to try starting it more than once, if that is
-benign, in that procedure. This will make more robust in case there
-are errors.  If the antenna with start automatically on its own, or it
-certain that it will already be operating, the 'ant_start' procedure
+It is assumed that there will be 'ant_start' and 'ant_stop' SNAP
+procedures (usually in the 'station' procedure) that will start and
+stop the antenna. For both procedures, it might be a good idea to try
+the corresponding action more than once, if that is benign. This will
+be more robust in case there are errors. If it is not necessary to
+take action to start or stop the antenna, the corresponding procedures
 can be left empty.
 
 The FS must be running and the STATION environment variable defined
@@ -156,8 +158,9 @@ with the two-letter station code.
 
 Multiple sessions can be processed if the result makes sense. However,
 the FS time-list can only hold a small number of entries. Currently,
-the limit is 15. With that limit. the maximum number a sessions that
-can be waiting to auto-start is seven.
+the limit is 15. With that limit, the maximum number a sessions that
+should be waiting should be four to allow room for other timed
+commands.
 
 Option explanations:
 
@@ -180,6 +183,7 @@ foreach $name (@ARGV) {
     };
 #    print "file $file \n";
 
+    $kfirst=1;
     while (<FILE>) {
         if(/^!(\d{4})\.(\d{3})\.(\d{2}):(\d{2}):(\d{2})/) {
 #            print;
@@ -188,6 +192,10 @@ foreach $name (@ARGV) {
 #  find first time
 
             @sndval =  ($1,$2,$3,$4,$5);
+            if($kfirst == 0) {
+                 next;
+            }
+            $kfirst=0;
 #            print join(' ',@sndval), " snd\n";
 #            print join(' ',@addval), " add\n";
 
@@ -235,11 +243,25 @@ foreach $name (@ARGV) {
             $result=system($command);
 #            print "result $result\n";
             if($result !=0 ) {
-                print STDERR  "setting schedule antenna auto-start failed, result: $result\n";
+                print STDERR  "setting antenna auto-start failed, result: $result\n";
                 exit -1;
             }
-            last;
         }
+    }
+
+# antenna stop use last sndval
+
+#    print "end @sndval\n";
+    @addval =  ( 0, 0, 0, 5, 0);
+    @retval = time_add(\@sndval,\@addval);
+#    print join(' ',@retval), " ret\n";
+    $command = sprintf("%s%04d.%03d.%02d:%02d:%02d","inject_snap ant_stop\@",@retval);
+#    print "command $command\n";
+    $result=system($command);
+#    print "result $result\n";
+    if($result !=0 ) {
+        print STDERR  "setting antenna auto-stop failed, result: $result\n";
+        exit -1;
     }
 }
 exit 0;
