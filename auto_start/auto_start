@@ -126,29 +126,33 @@ if ($#ARGV < 0 &&!defined($opt_h) &&!defined($opt_v)) {
 }
 
 if(defined($opt_v)) {
-    print "[auto_start 0.5]\n";
+    print "[auto_start 0.6]\n";
     exit 0;
 }
 
 if (defined($opt_h)) {
-    print "Usage: $0 [options] [sessions]
+    print "Usage: $0 [options] [schedule]
 
 Synopsis: This script puts commands in the FS time-list to
-automatically start a schedule, and start/stop antenna, at a later
-time. The exit code is 0 for no error. The script stops at the first
-error detected and exits with a non-zero code.
+automatically start a 'schedule' (use just the experiment name or
+session code, the station code is automatically appended), and
+start/stop the antenna, at later times. The exit code is zero for no
+error. The script stops at the first error detected and exits with a
+non-zero code.
 
-If the first time-block command in a 'session' SNAP file is at least
-10 minutes in the future, the script will send the FS a time-list
-commands to start the schedule 10 minutes early and execute the
-'ant_start' SNAP procedure two minutes after that. The 'ant_stop' SNAP
-procedure will be scheduled to execute five minutes after the last
-time-block command in the SNAP file.
+The first time-block command in the 'schedule' SNAP file must be at
+least 10 minutes in the future, If so, the script will send the FS
+time-list commands to:
 
-It is assumed that there will be 'ant_start' and 'ant_stop' SNAP
-procedures (usually in the 'station' procedure) that will start and
+ * start the schedule 10 minutes early
+ * execute the 'ant_start' SNAP procedure two minutes after that
+ * execute the 'ant_stop' SNAP procedure five minutes after the last
+   time-block command in the SNAP file.
+
+'ant_start' and 'ant_stop' SNAP procedures are required to already
+exist in the 'station' procedure library to, respectively, start and
 stop the antenna. For both procedures, it might be a good idea to try
-the corresponding action more than once, if that is benign. This will
+the corresponding action more than once, if that is benign. That will
 be more robust in case there are errors. If it is not necessary to
 take action to start or stop the antenna, the corresponding procedures
 can be left empty.
@@ -156,17 +160,17 @@ can be left empty.
 The FS must be running and the STATION environment variable defined
 with the two-letter station code.
 
-Multiple sessions can be processed if the result makes sense. However,
-the FS time-list can only hold a small number of entries. Currently,
-the limit is 15. With that limit, the maximum number a sessions that
-should be waiting should be four to allow room for other timed
-commands.
-
 The '-e' option can be used to suppress all the commands except the
 'ant_stop' after the schedule. This can be useful if it was necessary
 to restart the FS or the 'ant_stop' procedure was otherwise removed
 from time-list. The FS 'ti' SNAP command can be used to show what is
 in the time-list.
+
+Multiple 'schedule's can be processed if the result makes sense.
+However, the FS time-list can only hold a small number of entries.
+Currently, the limit is 15. With that limit, the maximum number a
+schedules that should be set for 'auto-start' is four, to allow room
+for other timed commands.
 
 Option explanations:
 
