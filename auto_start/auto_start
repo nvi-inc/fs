@@ -126,7 +126,7 @@ if ($#ARGV < 0 &&!defined($opt_h) &&!defined($opt_v)) {
 }
 
 if(defined($opt_v)) {
-    print "[auto_start 0.6]\n";
+    print "[auto_start 0.7]\n";
     exit 0;
 }
 
@@ -189,8 +189,8 @@ if($station eq "") {
 foreach $name (@ARGV) {
     $file = "/usr2/sched/${name}$station.snp";
     open(FILE,$file) || do {
-	print STDERR "can't open $file: $!\n";
-	next;
+        print STDERR "can't open $file: $!\n";
+        next;
     };
 #    print "file $file \n";
 
