@@ -115,7 +115,7 @@ sub time_add {
 
 require "getopts.pl";
 
-if (!&Getopts("hv")) {
+if (!&Getopts("ehv")) {
   print STDERR "For help, try: '$0 -h'\n";
   exit -1;
 }
@@ -126,7 +126,7 @@ if ($#ARGV < 0 &&!defined($opt_h) &&!defined($opt_v)) {
 }
 
 if(defined($opt_v)) {
-    print "[auto_start 0.4]\n";
+    print "[auto_start 0.5]\n";
     exit 0;
 }
 
@@ -162,8 +162,15 @@ the limit is 15. With that limit, the maximum number a sessions that
 should be waiting should be four to allow room for other timed
 commands.
 
+The '-e' option can be used to suppress all the commands except the
+'ant_stop' after the schedule. This can be useful if it was necessary
+to restart the FS or the 'ant_stop' procedure was otherwise removed
+from time-list. The FS 'ti' SNAP command can be used to show what is
+in the time-list.
+
 Option explanations:
 
+ -e        only command 'ant_stop' for the end of the schedule
  -h        print this help information and stop
  -v        print program version information and stop
 ";
@@ -192,7 +199,7 @@ foreach $name (@ARGV) {
 #  find first time
 
             @timval =  ($1,$2,$3,$4,$5);
-            if($kfirst == 0) {
+            if($kfirst == 0 || $opt_e) {
                  next;
             }
             $kfirst=0;
