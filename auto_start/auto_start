@@ -189,8 +189,8 @@ if($station eq "") {
 foreach $name (@ARGV) {
     $file = "/usr2/sched/${name}$station.snp";
     open(FILE,$file) || do {
-	print STDERR "can't open $file: $!\n";
-	next;
+        print STDERR "can't open $file: $!\n";
+        next;
     };
 #    print "file $file \n";
 
