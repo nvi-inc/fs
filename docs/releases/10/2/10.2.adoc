@@ -3984,23 +3984,24 @@ other minor changes were made:
 * Use _root_ account for transferring files if allowed. If not, use
 other appropriate accounts.
 
-* Transfer logs directly to a reference copy.
+* Add "`new system`" for logins to make it clear which system to work
+on.
 
-* Add "`new system`" for logins to make it clear which system to use
+* Reorganize to create reference copies of old system directories in a
+dedicated directory first, then make working copies as appropriate.
 
-* Use explicit _-old_ for reference copies of directories on the new
-system
-
-* Turn off write bit for reference copies
+* Turn off write permission for reference copies.
 
 * Recognize that _<version>_ for _/usr2/st-<version>_ may use other
 formats than semantic versioning.
 
-* Turn off write bit for `group` and `other` for _/usr2/st-<version>_.
+* Turn off write permission for `group` and `other` for
+_/usr2/st-<version>_.
 
 * Improve instructions for updating home directories.
 
-* Copy old _/etc_ and _/usr2_ to new machine for reference
+* Copy old _/etc_, _/usr/local/sbin_, _/usr/local/bin_, and reference
+copies of older systems for reference on the new system.
 
 * Add explanation for generating an _ssh_ key for _scp_ commands when
 converting to 64-bit.
@@ -4607,8 +4608,8 @@ the method in the document:
 . You should use all steps from
 <<../../../misc/64-bit_conversion.adoc#_login_as_root_on_the_new_system,Login
 as root on the new system>> through
-<<../../../misc/64-bit_conversion.adoc#_transfer_files,Transfer
-files`>>.
+<<../../../misc/64-bit_conversion.adoc#_customize_files_on_the_new_system,Customize
+files on the new system>>.
 
 . If your new system is 64-bit and you have not already updated your
 code for 64-bit, you should use the steps
