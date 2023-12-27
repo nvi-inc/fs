@@ -170,10 +170,9 @@ become effective.
 ====
 
 If you are using the display server and you are using an FS version up
-to and including _10.1.0_ (or more precisely, a commit up to and
-including `3abb6b04ee12ccbaef55bc58ef13c356d8398c6f`), to set or
-change the value of an environment variable, it is necessary, after
-terminating the FS, to either reboot, or to stop _fsserver_, with:
+to and including _10.1_, to set or change the value of an environment
+variable, it is necessary, after terminating the FS, to either reboot,
+or to stop _fsserver_, with:
 
   fsserver stop
 
