@@ -3984,6 +3984,8 @@ other minor changes were made:
 * Use _root_ account for transferring files if allowed. If not, use
 other appropriate accounts.
 
+* User _rsync_ to preserve ownerships.
+
 * Add "`new system`" for logins to make it clear which system to work
 on.
 
