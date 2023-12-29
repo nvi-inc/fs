@@ -19,11 +19,13 @@
 //
 
 = Index of fs/
-Version 0.9 - August 2023
+Version 1.0 - December 2023
 
 == Direct Links
 
 <<releases/10/2/10.2.adoc#,FS 10.2>> Update Notes (latest release)
+
+<<releases/10/1/dbbc3_ops.adoc#,FS DBBC3 Operations Manual>>
 
 == Links to sub-directories
 
