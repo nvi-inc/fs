@@ -780,23 +780,6 @@ Access to FS program through this menu no longer makes sense. The
 
 . Improve documentation
 
-
-+
-
-An appendix was added to the "`FS 10.2 Update Notes`" document on how
-to transition to FSL11 from an older OS. In addition to several minor
-changes, the "`Converting to a 64-bit System`" document was revised to
-make it clearer how to just transfer the files from an existing
-operational FS installation to a new system. A "`Document revision
-history`" section was added to some documents. Include updating calls
-to `checkmk5` to `checkfb` in existing procedures, when appropriate.
-Add using _ps2pdf_ to convert _plotlog_ PostScript output to PDF. Add
-missing _monit7_ continuous calibration changes to _-beta1_ update
-notes. Improve the help output for the `xresourcesfix` script. Add
-opening a new window as an alternative to opening a new tab to avoid
-losing one's place in a collapsible block. Add using a link for a
-feature release to a pre-release document as an expedient.
-
 +
 [%collapsible]
 ====
@@ -836,23 +819,26 @@ other minor changes were made:
 * Use _root_ account for transferring files if allowed. If not, use
 other appropriate accounts.
 
-* Transferring logs directly to a reference copy.
+* User _rsync_ to preserve ownerships.
 
-* Add "`new system`" for logins to make it clear which system to use
+* Add "`new system`" for logins to make it clear which system to work
+on.
 
-* Use explicit _-old_ for reference copies of directories on the new
-system
+* Reorganize to create reference copies of old system directories in a
+dedicated directory first, then make working copies as appropriate.
 
-* Turn off write bit for reference copies
+* Turn off write permission for reference copies.
 
 * Recognize that _<version>_ for _/usr2/st-<version>_ may use other
 formats than semantic versioning.
 
-* Turn off write bit for `group` and `other` for _/usr2/st-<version>_.
+* Turn off write permission for `group` and `other` for
+_/usr2/st-<version>_.
 
 * Improve instructions for updating home directories.
 
-* Copy old _/etc_ and _/usr2_ to new machine for reference
+* Copy old _/etc_, _/usr/local/sbin_, _/usr/local/bin_, and reference
+copies of older systems for reference on the new system.
 
 * Fix some typos
 

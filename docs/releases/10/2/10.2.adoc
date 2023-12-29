@@ -543,6 +543,10 @@ To update the usual _~/.Xresources_ file, enter the commands:
  cd
  /usr2/fs/misc/xresourcesfix .Xresources
 
+In _.xsession_, you should remove the `-geometry` option (if present)
+for the `login_sh` _xterm_. This will assure that the width is
+determined solely by the _.Xresources_ file.
+
 You will need to log-out on the console and log back in to see the
 full change.
 
@@ -604,10 +608,6 @@ _monit7_ window can be adjusted with the commands:
 
  cd
  /usr2/fs/misc/xresourcesfix2 .Xresources
-
-In _.xsession, you should remove the `-geometry` option (if present)
-for the `login_sh` xterm_. This will assure that the width is
-determined solely by the _.Xresources_ file.
 
 You will need to log-out on the console and log back in to see the
 full change.
@@ -685,13 +685,14 @@ server)
 
 Except for _~/.Xresources_, these changes have no material effect on
 existing installations. The effect for _~/.Xresources_ is small.
-Still, you may want to update these files for _oper_ and _prog_ to
-stay consistent with the default. More details about the changes are
-given in the <<gui_rc,Cleanup GUI rc files for oper and prog>> FS
-change item below (if that link doesn't work in your browser, click on
-this link instead: <<misc_enhance,Make miscellaneous enhancements>>,
-open the "`Details`" toggle below that location by clicking on it, go
-`Back` in the browser, and finally click on the original link).
+Still, you may want to update these files for _oper_ and _prog_ (but
+not for AUID accounts, which are FSL__x__ specific) to stay consistent
+with the default. More details about the changes are given in the
+<<gui_rc,Cleanup GUI rc files for oper and prog>> FS change item below
+(if that link doesn't work in your browser, click on this link
+instead: <<misc_enhance,Make miscellaneous enhancements>>, open the
+"`Details`" toggle below that location by clicking on it, go `Back` in
+the browser, and finally click on the original link).
 
 +
 [%collapsible]
@@ -856,10 +857,10 @@ have nested collapsible boxes inside them if there are many sub-items.
 [%collapsible]
 ====
 
-The code was updated for FSL11 (Debian _Bullseye_). The FSL11
-distribution is latest FSL__x__ Linux distribution. The installation
-instructions can be found at: https://nvi-inc.github.io/fsl11/. The
-related changes are:
+The code was updated for FSL11 (based on Debian _Bullseye_). FSL11 is
+latest FSL__x__ Linux distribution. The installation instructions can
+be found at: https://nvi-inc.github.io/fsl11/. The related changes
+are:
 
 .. <<f95,f95>>:[[f95]] Changes for new _f95_ compiler version
 
@@ -1067,8 +1068,8 @@ _reindent_ are installed in _~prog/.local_):
 Two new environment variables, `FS_F95_NO_ALLOW_ARGUMENT_MISMATCH` and
 `FS_PYTHON_VERSION`, were added to assist with compilation on
 pre-FSL11 systems. They only need to be set once in _prog_'s login
-`rc` files on these systems. Their use is explained in the next two
-items.
+`rc` files on these systems. Their use is explained in the previous
+two sub-items.
 
 =====
 
@@ -1101,8 +1102,7 @@ the `schedule`, `proc`, and `log` commands.
 With the last two characters of the names usually taken up by the
 two-character station code, this allows experiment names to be 16
 characters or less. This provides support for the IVS Master File _v2_
-"`session code`" lengths of 12 characters or less. The _fsvue_ and
-_logex_ programs were not updated for this change.
+"`session code`" lengths of 12 characters or less.
 
 This change is largely transparent to the users. The four visible
 effects are:
@@ -1127,7 +1127,7 @@ Previously, it just truncated longer names to eight characters.
 * The _lognm_ script will put out log names up to 18 characters in
 length, previously the maximum was eight.
 
-The _fsvue_ and _logex_ programs were no updated for this change. If
+The _fsvue_ and _logex_ programs were not updated for this change. If
 you are using these programs, we will look into updating them (please
 contact Ed). If they were working before, they should continue to work
 for names of eight characters or less.
@@ -1138,10 +1138,11 @@ and the experiment (schedule) name. The old variables are still
 present and hold up to the first eight characters of the longer names.
 This is intended to make the changes backward compatible for station
 programs (such as _antcn_ and _telegraf_) that are pinned to the FS
-_10.0_ memory layout until they can be updated for the new variables.
-Of course, longer names will appear truncated in the downstream
-programs until they have been updated. The new and old variables are
-described in the <<Update station code>> step above.
+_10.0_ (or _10.1_) memory layout until they can be updated for the new
+variables. Of course, longer names will appear truncated in the
+downstream programs until they have been updated. The new and old
+variables are described in the *Details* collapsible box of the
+<<Update station code>> step above.
 
 ====
 
@@ -1633,6 +1634,19 @@ Now normal mode switching is always available.
 
 =====
 
+.. Log negative DBBC3 continuous T~sys~ values
+
++
+[%collapsible]
+=====
+
+Negative T~sys~ values occur with continuous calibration data if the
+polarity is incorrect. The polarity should be fixed, but the values
+are logged in case they are useful until the situation is rectified.
+They only difference from the correct values is the sign.
+
+=====
+
 .. Change the order of commands for DBBC3 syncing.
 
 +
@@ -1689,7 +1703,7 @@ Previously the time-out interval was a fixed 125 centiseconds (CS).
 Now it is 145 CS if the previous read did not time-out. If it did, the
 interval is adjusted to 100 CS until the next received packet. On the
 assumption that multicast transmissions are only delayed 25 CS or
-less, it allows a generous margin for delayed messages while still
+less, this allows a generous margin for delayed messages while still
 detecting missing packets. The interval must be less than 150 CS to
 avoid possibly missing a time-out after a delayed packet that didn't
 time-out.
@@ -1906,11 +1920,12 @@ current form of the options.
 When the display server is in use, a terminate confirmation prompt is
 included in _oprin_ as a safety mechanism to reduce the chances that
 the FS will be terminated while another user (client) is using the FS.
-Although it not recommended, if you don't want this prompt, you can
-set the variable to `off`. For all other values, including it not
-being set, the prompt will be used. The setting of this variable in
-the session that started the client, with either the _fs_ or
-_fsclient_, determines the behavior of _oprin_ for that client.
+Although it is not recommended to disable this prompt, if you don't
+want it, you can set the variable to `off`. For all other values,
+including it not being set, the prompt will be used. The setting of
+this variable in the session that started the client, with either the
+_fs_ or _fsclient_, determines the behavior of _oprin_ for that
+client.
 
 TIP: For simplicity, it is recommended that this variable be set the
 same, or not set, for all accounts/sessions that use _fs_ or
@@ -1999,12 +2014,12 @@ to report.
 The clock plotting was expanded to plot all data collected by commands
 with names that contain `fmout`, `gps`, and `maser`. Additionally,
 RDBE `dot2pps` and `dot2gps` data from multicast and `dbe_pps_offset`
-and `dbe_gps_offset` commands are plotted. The DBBC3 `pps2dot` data
-from multicast and the `mcast_time` command are plotted. For the RDBE
-and DBBC3, if both command stream and multicast versions are
-available, only the multicast is plotted unless the `-B` option is
-used, which will include both (plots can be further filtered with the
-`-g`/`-G` options).
+and `dbe_gps_offset` commands are plotted; DBBC3 `pps2dot` data from
+multicast and the `mcast_time` command are plotted. For the RDBE and
+DBBC3, if both command stream and multicast versions are available,
+only the multicast is plotted unless the `-B` option is used, which
+will include both (plots can be further filtered with the `-g`/`-G`
+options).
 
 Opposite signed versions of the same offset (e.g. `gps-fmout` and
 `fmout-gps`) are no longer combined in one plot (with appropriately
@@ -2216,8 +2231,8 @@ _pgplot_. Several differences have been noticed, so far, in _giza_
 version `1.2.0` (which is used by FSL11):
 
 NOTE: FSL11 offers an optional non-standard version of _pgperl_ that
-uses _pgplot_. Every effort has been made to make this "`safe,`"
-however using it is at your own risk. Installing FSL11 will not
+uses _pgplot_. Every effort has been made to make that "`safe,`"
+However using it is at your own risk. Installing FSL11 will not
 include it by default. You can find the directions for installing this
 non-standard package at:
 https://nvi-inc.github.io/fsl11/installation.html#_install_pgplot_version_of_pgperl.
@@ -2304,13 +2319,13 @@ don't contain a `location` line.
 ... The new `-S` option can be used to require a leading slash before
 the command name for `wx/`, `cable/`, and `cdms/` entries. For example
 with `-S`, the search string for `wx/` entries is `/wx/`. This is
-useful, for example, if there are non-data entry of the form `wx/` and
-the data entries are of the form, `/wx/.` The program accepts the form
-without the leading `/` because that is what some stations produce for
-the data entries and that will match for stations that do use as a
-leading `/`. This option is only to help for stations with non-data
-entries that do not have the leading `/` and data entries with the
-leading `/`.
+useful, for example, if there are non-data entries of the form `wx/`
+and the data entries are of the form, `/wx/.` The program accepts the
+form without the leading `/` by default because that is what some
+stations produce for the data entries and that will match for stations
+that do use as a leading `/`. This option is only helpful for stations
+with non-data entries that do not have the leading `/` and data
+entries with the leading `/`.
 
 ... The new `-T` option can used to specify a string to replace the
 log file name in the plot titles. This can be particular useful if
@@ -2613,7 +2628,7 @@ need to be updated. For systems using `init.d` (deprecated), the
 string assigned to the `DAEMON` variable in the
 _/etc/init.d/metserver.sh_ and/or _/etc/init.d/metclient.sh_ file
 needs to be updated by removing the string _st/_. Then the daemons
-need to restarted with, as appropriate:
+need to be restarted with, as appropriate:
 
   /etc/init.d/metserver.sh restart
   /etc/init.d/metserver.sh restart
@@ -2640,7 +2655,7 @@ repositories, the old versions, usually in _/usr2/st_, can be removed.
 ====
 
 . <<misc_enhance,Make miscellaneous enhancements>>[[misc_enhance]]:
-Make 21 miscellaneous enhancements, which include adding two new
+Make 20 miscellaneous enhancements, which include adding two new
 utility scripts.
 
 +
@@ -2816,19 +2831,6 @@ response.
 
 =====
 
-.. Log negative DBBC3 continuous T~sys~ values
-
-+
-[%collapsible]
-=====
-
-Negative T~sys~ values occur with continuous calibration data if the
-polarity is incorrect. The polarity should be fixed, but the values
-are logged in case they are useful until the situation is rectified.
-They only difference from the correct values is the sign.
-
-=====
-
 .. Add optional verbose output for _curl_/_wget_ in _fesh_ (closing
 https://github.com/nvi-inc/fs/issues/201[#201]).
 
@@ -2928,15 +2930,10 @@ could lead to a benign, but confusing error message.
 [%collapsible]
 =====
 
-Change the `check_ntp` procedure to not use the `-n` option of _ntpq_.
-Make aliases in _/etc/hosts_ for all NTP servers for easier reading of
-`ntpq -p`. Use aliases in _/etc/ntp.conf_ for easier viewing and
-maintenance. Add information on how to redact server FQDNs and IP
-addresses from log.
-
-The recommended NTP configuration can be found in _misc/ntp.txt_. The
-"`items`" listed in the following descriptions are where the change is
-covered in that file.
+The recommended NTP configuration can be found in _misc/ntp.txt_
+(https://github.com/nvi-inc/fs/blob/main/misc/ntp.txt). The "`items`"
+listed in the following descriptions are where the change is covered
+in that file.
 
 ... Change the `check_ntp` procedure to not use the `-n` option of
 _ntpq_
@@ -2964,7 +2961,7 @@ This defines descriptive aliases for `ntpq -p` to display. Item `6d`.
 With the aliases defined in _/etc/hosts_, this avoids the need to use
 IP addresses, which are harder to recognize. Without the defined
 aliases, using IP addresses was necessary to avoid problems when there
-is DNS outage. Item `2b`.
+is a DNS outage. Item `2b`.
 
 ... Add information on how to redact server FQDNs and IP addresses from
 log.
@@ -3000,8 +2997,8 @@ server is _not_ in use:
 
 +
 
-This would cause each copy of _erchk_ to get some subset of the error
-messages.
+Having more than one copy of _erchk_ would cause each copy to only get
+(different) subsets of the error messages.
 
 Thanks to Jon Quick (HartRAO) for reporting these issues.
 
@@ -3015,9 +3012,9 @@ Thanks to Jon Quick (HartRAO) for reporting these issues.
 
 This update prevents history entries from being changed if they are
 edited and then not used. This "`feature`" of changing the history
-entries can be quite frustrating, particularly in _bash_. It can be
-disabled in FSL9, FSL10, and FSL11, on a per user basis, by creating
-the file:
+entries can be quite frustrating, particularly in _bash_ (_oprin_ and
+_pfmed_ are also affected). It can be disabled in FSL9, FSL10, and
+FSL11, on a per user basis, by creating the file:
 
 .~/.inputrc
 [source]
@@ -3034,7 +3031,7 @@ set revert-all-at-newline on
 [%collapsible]
 =====
 
-... Enable pasting with middle mouse button for all windows except
+... Enable pasting with the middle mouse button for all windows except
 `Operator Input`
 
 +
@@ -3072,7 +3069,7 @@ If the login shell is _tcsh_, other action is required. For _gdm_
 (FSL8 and maybe earlier), it will be necessary to setup the same
 environment in _~/.profile_ as in _~/.login_ and keep the two files in
 sync. This is because _gdm_ appears to interpret _~/.xsession_ with
-either _sh_ or _bash_. For _gdm3_ (FSL9/10/11 and maybe later, the
+either _sh_ or _bash_. For _gdm3_ (FSL9/10/11 and maybe later), the
 _~/.xsession_ file seems to interpreted using the account's login
 shell. Thus for this case, `source{nbsp}.login` can be inserted as the
 first non-comment line to have it be used to set the environment.
@@ -3088,7 +3085,9 @@ _~/.xsession_ files
 This option runs the shell used by the __xterms__ as a login shell,
 i.e., it runs _~/.profile_ or _~/.login_ as appropriate when started.
 Since the environment was already set by _gdm_/_gdm3_, this was
-redundant.
+redundant (`-ls` is still used for the _xterm_ in _~/.xsession_ for a
+different reason, see farther below in the *Details* for <<auid,Update
+AUID default files for FSL11>>).
 
 ... Other _~/.fvwm2rc_ file cleanup.
 
@@ -3108,7 +3107,7 @@ _msg_, _rdbemsg_, _scnch_, and _erchk_.
 
 =====
 
-.. Update AUID default files for FSL11
+..  <<auid,Update AUID default files for FSL11>>[[auid]]:
 
 +
 [%collapsible]
@@ -3128,7 +3127,7 @@ _prog_x11_, which then run `startx` to start X11 on the console.
 account is inherited). The _/.xsession_ for the AUID account runs the
 _xterm_ with the `-ls` option which triggers running _~/.profile_. An
 `exit` command is used after the promotion script so that when the
-promoted session exists, the GUI is shutdown. This last step prevents
+promoted session exits, the GUI is shutdown. This last step prevents
 the AUID account from being active on the GUI after the window manager
 has changed to the one for the promoted account.
 
@@ -3139,9 +3138,9 @@ has changed to the one for the promoted account.
 A script is created for each AUID added. These scripts are run by the
 _~/.profile_ scripts for these accounts to allow per AUID user (the
 _sudo_ user) customization. The default version of these scripts just
-prints a message as a reminder that it is being running. There is no
-need for the user to update the script file for their AUID account
-unless it would be helpful.
+prints a message as a reminder that it is being run. There is no need
+for the user to update the script file for their AUID account unless
+it would be helpful.
 
 ... Cleanup _~/.fvwm2rc_
 
@@ -3477,7 +3476,7 @@ https://github.com/nvi-inc/fs/issues/191[#191]).
 
 There were two errors in class number handing of communicating with a
 DBBC2 (the FS refers to the device as a "`DBBC`"). They occurred in
-the periodic checking of the DBBC2 personality/version and the the VSI
+the periodic checking of the DBBC2 personality/version and the VSI
 clock rate. Crashes only seemed to happen when the DBBC2 is in a bad
 state, and then after about 35
 `ch{nbsp}-810{nbsp}Communication{nbsp}error{nbsp}for{nbsp} DBBC.`
@@ -3984,23 +3983,26 @@ other minor changes were made:
 * Use _root_ account for transferring files if allowed. If not, use
 other appropriate accounts.
 
-* Transfer logs directly to a reference copy.
+* User _rsync_ to preserve ownerships.
 
-* Add "`new system`" for logins to make it clear which system to use
+* Add "`new system`" for logins to make it clear which system to work
+on.
 
-* Use explicit _-old_ for reference copies of directories on the new
-system
+* Reorganize to create reference copies of old system directories in a
+dedicated directory first, then make working copies as appropriate.
 
-* Turn off write bit for reference copies
+* Turn off write permission for reference copies.
 
 * Recognize that _<version>_ for _/usr2/st-<version>_ may use other
 formats than semantic versioning.
 
-* Turn off write bit for `group` and `other` for _/usr2/st-<version>_.
+* Turn off write permission for `group` and `other` for
+_/usr2/st-<version>_.
 
 * Improve instructions for updating home directories.
 
-* Copy old _/etc_ and _/usr2_ to new machine for reference
+* Copy old _/etc_, _/usr/local/sbin_, _/usr/local/bin_, and reference
+copies of older systems for reference on the new system.
 
 * Add explanation for generating an _ssh_ key for _scp_ commands when
 converting to 64-bit.
@@ -4607,8 +4609,8 @@ the method in the document:
 . You should use all steps from
 <<../../../misc/64-bit_conversion.adoc#_login_as_root_on_the_new_system,Login
 as root on the new system>> through
-<<../../../misc/64-bit_conversion.adoc#_transfer_files,Transfer
-files`>>.
+<<../../../misc/64-bit_conversion.adoc#_customize_files_on_the_new_system,Customize
+files on the new system>>.
 
 . If your new system is 64-bit and you have not already updated your
 code for 64-bit, you should use the steps
@@ -4799,7 +4801,7 @@ the changes for 64-bit referred to in the <<Transfer files>> section
 of this appendix. If your new system is 64-bit, those changes will be
 needed now.
 
-* Likewise, if were using FSL10 (or an earlier FSL__X__), the changes
+* Likewise, if were using FSL10 (or an earlier FSL__x__), the changes
 in the <<update_station_code_for_fsl11,Update station code for FSL11>>
 sub-step in the <<Version 10.1>> subsection in this appendix may not
 have been applied.

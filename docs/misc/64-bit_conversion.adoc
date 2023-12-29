@@ -19,7 +19,7 @@
 //
 
 = Converting to a 64-bit System
-Version 1.9.1 - September 2023
+Version 1.10.0 - December 2023
 
 //:hide-uri-scheme:
 :sectnums:
@@ -37,10 +37,12 @@ Click the *Details* toggle below to unhide/hide the history.
 [%collapsible]
 ====
 
+* 1.10.0 -- Reorganize to put reference copies in their own directory
+first, them make working copies; use _rsync_ instead of _scp_; minor cleanup
 * 1.9.1 -- Add *NOTE* about not renaming _/usr2/log_
 * 1.9 -- Remove extraneous `log-old` from `chmod a-w ...`
 * 1.8 -- Improve customization of home directories; put Document revision history in a collapsible block
-* 1.7 -- Note other formats for `_st-version_`
+* 1.7 -- Note other formats for `st-_version_`
 * 1.6 -- Transfer logs directly to a reference copy
 * 1.5 -- Use _root_ on the old system to copy files if possible
 * 1.4 -- Add revision history
@@ -65,7 +67,7 @@ used as part of the upgrade path to go directly to a 64-bit system
 while upgrading to FS _10.0_.
 
 The approach here can also be used to transfer an existing 64-bit (or
-32-bit) FS installation to a new computer without changing OS
+32-bit) FS installation to a new system without changing OS
 (including architecture) and FS version. For that case, in place of
 the <<Install a 64-bit system>> step make sure you have the same OS
 (including architecture) and FS version installed on your new system
@@ -79,7 +81,7 @@ included in its installation guide and in the
 <<Install a 64-bit system>> step below.
 
 The process in this document assumes you will be installing to a new
-computer. This will allow you to set up the new system without
+system. This will allow you to set up the new system without
 disturbing your operational system.
 
 == Convert to using a 64-bit system
@@ -107,7 +109,7 @@ NOTE: If you are following these directions as part of installing FS
 _10.0_ on FSL10, that will still work, but we recommend using FS
 _10.2_ on FSL11 instead.
 
-You can install a non-FSL__X__ Linux distribution. However, we can't
+You can install a non-FSL__x__ Linux distribution. However, we can't
 provide as much support in that case. The FSL11 distribution is tuned
 to provide a complete platform for running the FS. For other
 distributions you may have to make adjustments for several things that
@@ -124,56 +126,84 @@ Login as _root_ on the new system.
 === Rename default directories
 
 NOTE: This step assumes you have installed a base FS, either along
-with FSL11 or using your own methods. If the latter and the normal
+with FSL11 or using your own methods. If the latter, and the normal
 default FS directories were not created, you can skip this step.
 
 . Rename the existing default station specific FS related directories
-on the new computer to get them out of the way:
+on the new system to get them out of the way:
 
       cd /usr2
       mv control   control.DEFAULT
       mv sched     sched.DEFAULT
       mv proc      proc.DEFAULT
 
-. If you use the _/usr2/tle_files_ directory on your old computer,
-you should rename the one on the new computer:
+. If you use the _/usr2/tle_files_ directory on your old system, you
+should rename the one on the new system:
 
       cd /usr2
       mv tle_files tle_files.DEFAULT
 
-. If your station software is in _/usr2/st-0.0.0_ on your old computer,
-you should rename the one on the new computer:
+. If your station software is in _/usr2/st-0.0.0_ on your old system,
+you should rename the one on the new system:
 
       cd /usr2
       mv st-0.0.0  st-0.0.0.DEFAULT
 
-NOTE: The _/usr2/log_ directory is not renamed since the transfer of
-that directory from the old computer will not replace the one of new
-computer. Instead, it will directly create a reference copy, as
-_/usr2/log-old_.
+NOTE: The _/usr2/log_ directory is not renamed since it will not be
+replaced with a copy of the directory from the old system.
+
+=== Create directory for reference copies
+
+It can be useful to have a reference copy of certain parts of the old
+system. In particular, you may want to preserve copies of the
+operational directories: _control_, _log_, _proc_, and _sched_; the
+last version of the station software; the home directories of _oper_
+and _prog_; old reference copies from previous updates; it may also be
+useful to preserve _/etc_. For this reason, the file transfer is
+organized around making reference copies and then making new working
+copies for items where that is appropriate. If you prefer, you can
+skip making reference copies and copy the operational directories of
+_control_, _log_, _proc_, and _sched_ directly to _/usr2_ on the new
+system.
+
+You can make a directory on _/usr2_ (usually the largest partition and
+one with ample room) to hold the reference copies. This might be,
+e.g., _/usr2/old_FSL9_, if your previous system was FSL9. You should
+use whatever naming scheme is appropriate for your situation. The
+current step and the following one use _/usr2/old_FSL9_ as an example.
+You should substitute the appropriate directory for your system.
+
+You can create the reference directory structure with:
+
+  mkdir -p /usr2/old_FSL9/usr2
 
 === Transfer files
 
 Your station specific FS related files can be transferred from the old
-computer using any convenient method. If both systems are on the
-network this can be particularly easy. The following example sub-steps
-use this approach. You should replace the `_old_` host name in the
+system using any convenient method. If both systems are on the network
+this can be particularly easy. The following example sub-steps use
+this approach. You should replace the `_old_` host name in the
 examples with your old system's host name. These commands must be
 executed as _root_, and except where noted, from the new system.
 
-TIP: For the reference copies of the old computer directories, the
-instructions use directory names on the new computer with a fixed
-string `-old` appended. You may prefer a different suffix, e.g., one
-that includes the name of your old computer.
+As an example, the sub-steps below use _/usr2/old_FSL9_ as the
+directory to hold the files from your system. You should substitute
+the appropriate directory for your system (see the previous step
+(<<Create directory for reference copies>>).
 
-[NOTE]
+TIP: If you want to copy-and-paste the example _rsync_ commands below
+as is (this is possible for nearly all of them, the exceptions are the
+one for `old:/usr2/st-_version_` and possibly for
+`old:/usr2/old_FSL8`), you can add an alias `_old_` for your old
+system in the _/etc/hosts_ file on the new system.
+
+[TIP]
 ====
 
-You may need to provide the appropriate password for each _scp_
-command below. If so, you can simplify the process by copying your
-new computer's _root_ public SSH keys to the old machine _oper_ and
-_prog_ accounts with _ssh-copy-id_ first. If _root_ doesn't have an ID
-yet, you will get an error like:
+You may need to provide the appropriate password for each _rsync_
+command below. If so, you can simplify the process by copying your new
+system's _root_ public SSH keys to the old system with _ssh-copy-id_
+first. If _root_ doesn't have an ID yet, you will get an error like:
 
  /usr/bin/ssh-copy-id: ERROR: No identities found
 
@@ -183,79 +213,85 @@ again.
 
 ====
 
-CAUTION: It is assumed that the new installation is on new hardware
-with disks more than large enough to accommodate all the data being
+NOTE: By default `-a` option of _rsync_ will copy symbolic links but
+not their _referents_ (_scp_ will follow the link and copy what it
+points to, the referent). This is usually what is appropriate for this
+application; it doesn't pull files from other directories. If you want
+to copy the referents, please see the `SYMBOLIC{nbsp}LINKS` section of
+`*man{nbsp}rsync*` for more information (adding `--copy-links` will
+give the behavior of _scp_).
+
+CAUTION: It is assumed that the new system is on new hardware with
+disks more than large enough to accommodate all the data being
 transferred. However, if you installed the new Linux on old hardware
 with small disks, there may be a space issue.
 
-WARNING: The instructions below assume that the existing system you
-are using has a standard FS configuration in terms of symbolic links
-and directories. If your system is different, you will need to adjust
-what you do accordingly, but you may still find the outline of steps
+WARNING: The instructions below assume that the old system you are
+using has a standard FS configuration in terms of symbolic links and
+directories. If your system is different, you will need to adjust what
+you do accordingly, but you may still find the outline of sub-steps
 useful.
 
 IMPORTANT: These instructions assume that you can login to the old
 system as _root_ using _ssh_. Allowing this is a security risk and
-should only be allowed temporarily for these command. If you are not
-able to allow it temporarily, you can use the _oper_ and _prog_ (or
-other) accounts as appropriate to transfer the files. In that case,
-there is risk that some files may not be copied due to
-ownership/permission issues. You may need to take other steps to copy
-those files.
+should only be permitted temporarily for these command. If you are not
+able to allow it, you can use the _oper_ and _prog_ (or other)
+accounts on the old system to transfer the files. In that case, there
+is risk that some files may not be copied due to ownership/permission
+issues. You may need to take other steps to copy those files.
 
-. Transfer operations directories:
+. Transfer operational directories:
 
-.. Transfer _control_, _sched_, and _proc_ from your `_old_` computer:
-
-+
-
-[subs="+quotes"]
-....
-cd /usr2
-scp -pqr root@_old_:/usr2/control .
-scp -pqr root@_old_:/usr2/sched .
-scp -pqr root@_old_:/usr2/proc .
-....
-+
-
-NOTE: Your _sched_ and _proc_ directories could be
-large and take a significant amount of time to transfer.
-
-.. Transfer _log_:
-+
-
-It can be useful to have your old log files on the new computer. The
-commands below transfer the logs on your old computer to be a
-reference copy on the new computer. The transfer from your `_old_`
-computer could take a long time:
+.. Transfer _control_, _log_, _proc_, and _sched_, from your `_old_`
+system:
 
 +
 
 [subs="+quotes"]
 ....
-cd /usr2
-scp -pqr root@_old_:/usr2/log log-old
-chown -R oper.rtx log-old
-chmod -R a-w log-old
+cd /usr2/old_FSL9/usr2
+rsync -aH _old_:/usr2/control .
+rsync -aH _old_:/usr2/log .
+rsync -aH _old_:/usr2/proc .
+rsync -aH _old_:/usr2/sched .
 ....
++
+
+NOTE: Your _log_ directory could be large and take a significant
+amount of time to transfer.
 
 .. Transfer _tle_files_:
 +
 
-If you use the _/usr2/tle_files_ directory on your `_old_` computer,
-you can also transfer it:
+If you use the _/usr2/tle_files_ directory on your `_old_` system, you
+can also transfer it:
 
 +
 
 [subs="+quotes"]
 ....
-cd /usr2
-scp -pqr root@_old_:/usr2/tle_files .
+cd /usr2/old_FSL9/usr2
+rsync -aH _old_:/usr2/tle_files .
 ....
 
-. Fix the permissions on the operations directories/files you
-transferred. You can fix their permissions and ownerships
-to the standard with:
++
+
+. Make "`starter`" working copies of the operational directories
+(except _log_):
+
+ cd /usr2
+ cp -a old_FSL9/usr2/control .
+ cp -a old_FSL9/usr2/proc .
+ cp -a old_FSL9/usr2/sched .
+
++
+
+and possibly:
+
+ cd /usr2
+ cp -a old_FSL9/usr2/tle_files .
+
+. Fix the ownership/permissions of the working copies you made:
 
     /usr2/fs/misc/fix_perm
 +
@@ -266,62 +302,47 @@ NOTE: If you don't have a _/usr2/tle_files_ directory, you will get a
 message that there is no such directory. That is benign unless you
 expect such a directory to be there.
 
-. Make back-up copies of the operational directories. This sub-step is
-optional but may be useful so that there are unmodified copies of the
-directories from the old machine to use for reference. You may want to
-set their permissions so they can't be modified accidentally.
-
-+
-[subs="+quotes"]
-....
-cd /usr2
-cp -a proc      proc-old
-cp -a control   control-old
-cp -a sched     sched-old
-chmod -R a-w proc-old control-old sched-old
-....
-
-+
-
-and possibly:
-
-+
-[subs="+quotes"]
-....
-cd /usr2
-cp -a tle_files tle_files-old
-chmod -R a-w tle_files-old
-....
-
-. Transfer your station software directory (and make a
-reference copy). This is usually the target directory
-pointed to by the _/usr2/st_ symbolic link. On your old
-computer, you can find its name with:
+. Transfer your station software directory (and make a working copy).
+This is usually the target directory pointed to by the _/usr2/st_
+symbolic link. On your old system, you can find its name with:
 
   ls -l /usr2/st
 +
 
-In the rest of this sub-step, the target `_st-version_` will be used.
+In the rest of this sub-step, the target `st-_version_` will be used.
 You should replace `_version_` with your version string. For example,
 use `_1.0.0_`, to make a target `_st-1.0.0_`. (You may need to adjust
-these commands if you have a different format for `_st-version_`,
+these commands if you have a different format for `st-_version_`,
 perhaps `_st-git_`.) If your target is `_st-0.0.0_` you should rename
-the default on the new computer first as described in the
+the default on the new system first as described in the
 <<Rename default directories>> step above.
 
-.. On the new computer, copy the target from the `_old_` computer to
-the new computer, e.g.:
++
+
+All the sub-steps below are executed on the new system:
+
+.. Copy the target from the `_old_` system to the new system:
+
++
+
+[subs="+quotes"]
+....
+cd /usr2/old_FSL9/usr2
+rsync -aH __old__:/usr2/st-_version_ .
+....
+
+.. Create a local working copy
 
 +
 
 [subs="+quotes"]
 ....
 cd /usr2
-scp -pqr root@__old__:/usr2/st-_version_ .
+cp -a old_FSL9/usr2/st-_version_ .
 ....
 
-.. On the new computer, set the _/usr2/st_ symbolic link to point to
-the target directory:
+.. Set the _/usr2/st_ symbolic link to point to the target directory:
+
 +
 
 [subs="+quotes"]
@@ -330,8 +351,8 @@ cd /usr2
 ln -fsn st-_version_ st
 ....
 
-.. On the new computer, you should set its ownership and prevent users
-other than _prog_ from modifying it:
+.. Set its ownership to prevent users other than _prog_ from modifying
+it:
 
 +
 [subs="+quotes"]
@@ -341,57 +362,134 @@ chown -R prog.rtx st-_version_
 chmod -R go-w st-_version_
 ....
 
-.. On the new computer, you can make a reference copy and prevent it
-from being modified with:
-
 +
 
-+
-[subs="+quotes"]
-....
-cd /usr2
-cp -a st-_version_ st-_version_-old
-chmod -R a-w st-_version_-old
-....
-
-. Copy your _oper_ and _prog_ directories to the new computer. This
+. Copy your _oper_ and _prog_ directories to the new system. This
 sub-step is optional. The FSL11 installation made default home
-directories for these users on _/usr2_. If you did not have customized
-content for the users on the old computer, you could just use the
-versions on the new computer. Still it may be useful to have a copy of
+directories for these users on _/usr2_. If you had not customized
+content for the users on the old system, you could just use the
+versions on the new system. Still it may be useful to have a copy of
 your old directories on the new system for reference, especially if
 you realize later that there were additional programs and files you
-want to use on the new system. In the commands below `_old_` is the
-name of your old computer.
-
-.. You can accomplish the transfers as _root_ using:
-+
-
-[subs="+quotes"]
-....
-cd /usr2
-scp -pqr root@_old_:~ oper-old
-scp -pqr root@_old_:~ prog-old
-....
-
-.. You probably want to set their ownership and prevent them from
-being modified accidentally:
+want to use on the new system. You can accomplish the transfers as
+_root_ using:
 
 +
 
 [subs="+quotes"]
 ....
-chown -R oper.rtx /usr2/oper-old
-chmod -R a-w /usr2/oper-old
-
-chown -R prog.rtx /usr2/prog-old
-chmod -R a-w /usr2/prog-old
+cd /usr2/old_FSL9/usr2
+rsync -aH _old_:/usr2/oper .
+rsync -aH _old_:/usr2/prog .
 ....
 
-.. Customize the home directories on the new computer to include any
-features you want from the old system.
+. Transfer other files.
 
 +
+
+You may need or want copies of other directories. These might include:
+_/etc_; _/usr/local/sbin_ and _/usr/local/bin_ (for RAID and AUID
+scripts); other directories from _/usr2_:
+
++
+[subs="+quotes"]
+....
+cd /usr2/old_FSL9
+rsync -aH --copy-links _old_:/etc .
+rsync -aH --mkpath _old_:/usr/local/sbin usr/local/sbin
+rsync -aH --mkpath _old_:/usr/local/bin usr/local/bin
+...
+....
+
++
+
+and possibly reference copies of even older installations
+(`/usr2/old_FSL8` and/or others):
+
++
+[subs="+quotes"]
+....
+cd /usr2/
+rsync -aH __old__:/usr2/old_FSL8 .
+...
+....
+
+. Set the permissions of the reference directory.
+
++
+
+You should probably set the entire directory to _not_ have write
+permission:
+
+  cd /usr2
+  chmod -R a-w old_FSL9
+
+=== Optional cleanup
+
+IMPORTANT: This optional step is to be performed by _oper_. Be sure to
+change accounts if you decide to do it.
+
+If you would like, you can make a clean start by deleting old
+experiment files from _/usr2/proc_ and _/usr2/sched_. Copies of the
+files deleted are preserved in the reference directory in case they
+are ever needed.
+
+One possible strategy is to identify the most recent file you _want_
+to delete (the `*lt*` alias, or the `*ls{nbsp}-lt{nbsp}|{nbsp}less*`
+command, is useful for identifying it). In _/usr2/proc_, for example,
+that might be _vo3347gs.prc_.  Working as _oper_ enter:
+
+TIP: If you use this method, make sure that _station.prc_,
+_point.prc_, and any other procedure libraries that you use routinely,
+have been updated more recently than the file you identified. The
+_touch_ command could be used to change their modification times.
+
+  cd /usr2/proc
+  find . -type f ! -newer vo3347gs.prc | xargs rm -f
+
+Likewise for  _/usr2/sched_, the most recent file you _want_ to delete
+might, for example, be _vo3347gs.lst_. Working as _oper_ enter:
+
+TIP: If you use this method, make sure that any other procedure files
+(typically _.snp_ files) that you use routinely, have been updated
+more recently than the file you identified.
+
+  cd /usr2/sched
+  find . -type f ! -newer vo3347gs.lst | xargs rm -f
+
+If you accidentally delete any files that you wanted to keep from
+either directory, you can copy them (as _oper_) from the reference
+directory when you discover they are missing. Files copied later in
+this scenario may require changes depending on the details of the FS
+updates you apply before then.
+
+Other approaches can be used for delete files you don't want. You
+could also delete any sub-directory structure in either or both of
+these directories, if you want.
+
+=== Customize files on the new system
+
+There are several things you may need to adjust on the new system.
+These include:
+
+.. Install additional Debian packages
+
++
+
+You may need to install packages for your new system that you had
+installed on the old system.
+
+.. Copy/merge additional system files, such as:
+
++
+[disc]
+* _/etc/hosts_
+* _/etc/ntp.conf_
+* _/etc/hosts.allow_
+* _/etc/hosts.deny_
+
+.. Customize the _oper_ and _prog_ home directories on the new system
+to include any features you want from the old system.
 
 +
 
@@ -402,44 +500,31 @@ to _bash_ (the default for FSL10 and later), you will need to
 translate customized settings from your _~/.login_ and _~/.cshrc_
 files.
 
-. At this point you are principle done transferring files.
-However, it is also possible that you may need or want
-other files or changes such as:
-
-.. Copy other files or programs from the old system
-+
-
-This might include directories and log files that exist as copies from
-even older computers. You can use a similar process to the one above.
-If you have enough space and can _ssh_ into your old computer as
-_root_ (which should only be allowed temporarily), you can make
-reference copies of the entire _/etc_/ and _/usr2_ directories from
-your `_old_` computer with:
+.. Update operational directories _control_, _proc_, and _sched_
 
 +
 
+If you will be using a new FS version on the new system you may need
+to update files in these directories (and others). This is covered in
+the update notices you will need to apply for the new version.
+
+.. Update station software
+
 +
-[subs="+quotes"]
-....
-cd /usr2
-mkdir OLD_PC
-cd OLD_PC
-scp -pqr root@_old_:/etc .
-scp -pqr root@_old_:/usr2 .
-chmod -R a-w /usr2/OLD_PC
-....
 
-.. Install additional Debian packages
-.. Copy/merge additional configuration files, such as:
+If you are moving to a new FS and FSL__x__ version, any needed changes
+are covered in the FS update notice. If you are converting to 64-bit,
+instructions can be found in the following steps.
 
-    /etc/hosts
-    /etc/hosts.allow
-    /etc/hosts.deny
-    /etc/ntp.conf
++
+
+If there is other software you use, you would need to install that as
+well.
 
 === Login as prog on the new system
 
-Login as _prog_ on the new system.
+The following steps up to <<Reboot>> should be executed as _prog_ on
+the new system.
 
 === Update station programs for 64-bit
 
@@ -455,9 +540,8 @@ this step and go directly to the <<Make local software>> step below.
 If you don't have any FORTRAN station code or you have already
 converted it to _f95_, skip this sub-step.
 
-Use of _f95_ is necessary
-on 64-bit systems. If you have station programs
-in FORTRAN, please email Ed so he is aware.
+Use of _f95_ is necessary on 64-bit systems. If you have station
+programs in FORTRAN, please email Ed so he is aware.
 
 You will need to adapt your __Makefile__s
 to use the same compiler options as the FS, which can be
@@ -472,11 +556,12 @@ to your __Makefile__s for FORTRAN programs:
 
 If you don't have any C station code, you can skip this sub-step.
 
-If you have C station code, it should work as written unless
-you have declared integers that interface to the FS as `long`.
-For a start at fixing those, please see
-https://github.com/dehorsley/unlongify.
-The following steps describe how to install and use the _unlongify_ tool.
+If you have C station code, it should work as written unless you have
+declared integers that interface to the FS as `long` (this was
+actually a common practice due to the example code that been
+provided). For a start at fixing those, please see
+https://github.com/dehorsley/unlongify.  The following sub-steps
+describe how to install and use the _unlongify_ tool.
 
 ===== Install go language
 
@@ -506,9 +591,9 @@ mechanism. To install it this way, as _root_ use:
 You can install the latest version of _go_, but this is outside the
 normal security update mechanism. In this case, you will need to
 manage your own updates, which may not be suitable for an operational
-environment.  If you use this method it is recommended that you
-sign-up for _go_ language announcements so that you will be informed
-when a security update is available.  You can sign-up at
+environment. If you use this method it is recommended that you sign-up
+for _go_ language announcements so that you will be informed when a
+security update is available. You can sign-up at
 https://groups.google.com/forum/#!forum/golang-announce.
 
 Another alternative is to delete the latest _go_ (`*rm -rf
@@ -530,10 +615,10 @@ to highlight `Cancel` and then press kbd:[Enter].
 
 ===== Configure prog account for go language
 
-Once you have the _go_ language installed, you need to define
-the `GOPATH` environment variable and include it in _prog_'s
-path.  The default _~prog/.profile_ file includes two commands
-(commented out by default) to accomplish these things:
+Once you have the _go_ language installed, you need to define the
+`GOPATH` environment variable and include it in _prog_'s path. The
+default _~prog/.profile_ file includes two commands (commented out by
+default) to accomplish these things:
 
  #export GOPATH=~/go
  #PATH="$GOPATH/bin:/usr/local/bin/go:$PATH"
@@ -556,11 +641,11 @@ at the URL above (as _prog_):
 
 ===== Use unlongify
 
-Please read the _README.md_ file, which is displayed at the
-URL above. Alternatively, it can be viewed at
-_~/prog/go/src/github.com/dehorsley/unlongify/README.md_ where
-it was installed by the above command. Please pay particular
-attention to the `Note` about system calls.
+Please read the _README.md_ file, which is displayed at the URL above.
+Alternatively, it can be viewed at
+_~/prog/go/src/github.com/dehorsley/unlongify/README.md_ where it was
+installed by the above command. Please pay particular attention to the
+`Note` about system calls.
 
 TIP: The _unlongify_ program attempts to process all _*.h_ and _*.c_
 files in the path specified as its argument. If it encounters a file
@@ -584,21 +669,18 @@ If _/usr2/st/Makefile_ is set-up in the standard way, you can do this with:
        cd /usr2/st
        make rmdoto rmexe all
 
-NOTE: At this point, you are only trying to verify the code will _make_
-successfully.  You may still need to debug it in the <<Test the FS>> step
-below.
-
 Once your code __make__s successfully, you can continue, but you may
 need to debug it in the <<Test the FS>> step below.
 
 === Reboot
 
-IMPORTANT: Reboot the computer.  This is important for initializing shared
-memory for the new version.
+IMPORTANT: Reboot the computer. This is important for initializing
+shared memory for the new version.
 
-=== Login as oper
+=== Login as oper on the new system
 
-The remaining steps assume you are logged in as _oper_.
+The remaining steps assume you are logged in as _oper_ on the new
+system.
 
 === Test the FS
 
