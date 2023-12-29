@@ -21,7 +21,7 @@
 :doctype: book
 
 = FS 10.2 Update Notes
-Version 1.0 - November 2023
+Version 1.0 - December 2023
 
 :sectnums:
 :stem: latexmath
