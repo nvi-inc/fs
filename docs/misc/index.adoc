@@ -19,10 +19,10 @@
 //
 
 = Index of fs/misc/
-Version 0.3 - June 2021
+Version 0.4 - December 2023
 
-<<64-bit_conversion.adoc#,Conversion to 64-bits from a 32-bit System>>
+<<64-bit_conversion.adoc#,Converting to a 64-bit System>>
 
 <<font_conventions.adoc#,FS Document Font Conventions>>
 
-<<env_vars.adoc#,FS environment variable use>>
+<<env_vars.adoc#,FS Environment Variables>>
