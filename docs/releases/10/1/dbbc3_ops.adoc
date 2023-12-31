@@ -28,7 +28,7 @@
 :experimental:
 :downarrow: &downarrow;
 E. Himwich, J. Quick
-Version 5.2.9 - November 2023
+Version 5.2.10 - December 2023
 
 == Introduction
 
@@ -86,15 +86,17 @@ on the details of the commands with `help=_command_`.
 +
 
 CAUTION: The syntax of this command is different than the DBBC2
-version. Most significantly, the `_samples_` parameter has been moved
-to the end in the DBBC3 version. The meanings of the `_frequency_` and
-`_option_` parameters are changed somewhat.
+version. Most significantly, the `_samples_` parameter has been moved.
+The meanings of the `_frequency_` and `_option_` parameters are
+changed somewhat. There are additional parameters for T~sys~
+filtering.
 
 +
 
 NOTE: For FS _10.1_, operation was only tested with polarity `2` and
 for early releases of DDC_U and DDC_V firmware. That support was
 discovered to be incompatible with some later DDC_V _v124_ releases.
+There were also no T~sys~ filtering parameters.
 
 * `core3h` -- Low-level communication with Core3H boards
 
@@ -133,7 +135,9 @@ typical command form, but rarely used.
 [%collapsible]
 ====
 
-** Monitor form
+[disc]
+
+* Monitor form
 
 +
 
@@ -143,7 +147,7 @@ configuration. That will work for `core3h_mode`, which will query all
 the boards. In addition, you can query a single board by specifying
 its number as the first parameter.
 
-** Checking form
+* Checking form
 
 +
 
@@ -155,7 +159,7 @@ Any deviations are reported as errors. The actual configuration is
 reported in the same format as the monitor form. This form is used to
 check the configuration.
 
-** Force form
+* Force form
 
 +
 
@@ -176,12 +180,19 @@ command form.
 * `fivept` -- Pointing measurements
 
 * `if` -- This command was expanded to have ``_condition_``s for
-whether each possible DBBC3 BBC and IF is active.
+whether each possible DBBC3 BBC and IF is active and whether the DBBC3
+firmware is `DDC`.
 
 +
 
-Usage examples can be found in the `iread` and `bread` procedures in
-the default _/usr2/fs/st.default/d3fbstation.prc_ procedure library.
+Usage examples can be found in the `iread`, `bread`, and `caltsys`
+procedures in the default _/usr2/fs/st.default/d3fbstation.prc_
+procedure library.
+
++
+
+NOTE: In _10.1_, `DDC` is not available as a `_condition_` for the
+DBBC3 and `caltsys` is not included.
 
 * `if__x__` -- `_x_` from `a` to `h` -- IF CoMo setup and monitoring
 
@@ -431,7 +442,9 @@ size, you can make the change directly in the `vdif_frame` commands
 that you enter, replacing `8000` with your value. Please also read the
 introductory part of the <<Handling other VDIF frame payload sizes>>
 appendix for information about the error messages that changing the
-payload size will cause.
+payload size will cause. (You will also need to modify the payload
+size used by the recorder with an additional `jive5ab=VDIF_...` , as
+described in that same section.)
 
 ... Set the `destination` lines.
 
@@ -586,6 +599,9 @@ occurs after there have been none in the last 60 read attempts. After
 the initial report, it will give a summary error report of the
 time-outs in batches of 60 attempts, ending with a report of no
 time-outs for 60 attempts, when that occurs.
+
+NOTE: In FS _10.1_, each time-out is reported individually, i.e.,
+there is no summary.
 
 When `data_valid` is `off`, the FS will only report a time-out if it
 does not appear to be associated with DBBC3 command usage.
@@ -890,8 +906,8 @@ versions.
 ====
 
 Except for `Time`, the DBBC3 based data are from the previous second's
-multicast. Hence for continuous calibration, the T~sys~ values are
-from two seconds in the past. For DDC_V firmware, time is not
+multicast. (Hence for continuous calibration, the T~sys~ values are
+from two seconds in the past.) For DDC_V firmware, time is not
 available in the multicast so the message arrival second is used
 instead.
 
@@ -958,37 +974,40 @@ In FS _10.1_:
 
 === Modes
 
-The T~sys~ monitor display has three modes:
+The T~sys~ monitor display has three modes that affect how T~sys~ data
+is displayed:
 
 * `Rec` shows IFs with channels configured for recording
+
 +
+
+Only BBC T~sys~ fields for channels being recorded are populated.
 This is intended for normal observing.
 
 * `Def` shows IFs with defined LO values
+
 +
-This may be useful for pointing or calibration runs.
+
+All BBC T~sys~ fields on defined IFs are populated. This may be useful
+for pointing or calibration runs.
 
 * `All` shows all IFs
+
++
+
+If no IFs are defined and no channels are being recorded (e.g., at FS
+startup), T~sys~ fields for all side-bands are blank.
 
 By default, if any channels are configured for recording (selected by
 the bit masks in the `core3h_mode` commands), the display will go into
 the `Rec` mode. If there are no channels being recorded, but there are
-LOs defined for some IFs, it will go into the `Def` mode. If neither the
-`Rec` nor `Def` mode is triggered, it will go into the `All` mode and
-automatically change to one of other modes as appropriate. It is also
-possible to change to the `All` mode from `Rec` or `Def` with a single
-character (`l`) command. Another `l` will toggle the display back to the
-previous mode. The current mode is displayed in the upper right hand
-corner.
-
-=== Tsys values
-
-In the `Rec` mode, only BBC T~sys~ fields for side-bands being
-recorded are populated.
-
-In the `All` mode, if no IFs are defined and no channels are being
-recorded (e.g., at FS startup), T~sys~ fields for all side-bands are
-blank.
+LOs defined for some IFs, it will go into the `Def` mode. If neither
+the `Rec` nor `Def` mode is triggered, it will go into the `All` mode
+and automatically change to one of other modes as appropriate. It is
+also possible to change to the `All` mode from `Rec` or `Def` with a
+single character (`l`) command. Another `l` will toggle the display
+back to the appropriate non-`All` mode. The current mode is displayed
+in the upper right hand corner.
 
 NOTE: During the transition of configuring the Core3H board between
 `core3h_mode=begin` and `core3h_mode=end`, which channels are being
@@ -996,8 +1015,7 @@ recorded is not fully defined. The T~sys~ display will show the most
 recently selected channels (new or old) to avoid having the values
 disappear momentarily if the old configuration is re-commanded.
 
-Finite values outside of the range, `-999.` to `999.9`, which won't
-fit in the available field width, are displayed as dollar signs, `$`.
+=== Tsys values
 
 There are two regimes, described below: <<Continuous calibration>> and
 <<Legacy (noncontinuous) calibration>>.
@@ -1014,10 +1032,14 @@ only the first encountered is reported. The order is:
 
 . ``N lo `` -- the LO is not defined
 
-. `Ntcal` -- no Tcal value was found
+. `Ntcal` -- no T~cal~ value was found
 
 . `N cal` -- continuous calibration not enabled (and a legacy
 measurement has not been made yet)
+
+Finite values outside of the range, `-999.` to `999.9`, which won't
+fit in the available field width, are displayed as dollar signs,
+`++$$$$$++`.
 
 The T~sys~ values are calculated using the averaging and filtering
 methods described in `*help=cont_cal*`. Negative (including
@@ -1119,7 +1141,7 @@ identify the problem.
 _Legacy_ calibration refers to explicitly turning the noise diode on
 and off to make calibration measurements. Incorrect values (negative,
 infinity, and overflow) and for BBCs or LOs not configured are
-displayed as dollar signs, `$`. If the T~cal~ it not defined `Ntcal`
+displayed as dollar signs, `$`. If the T~cal~ is not defined, `Ntcal`
 is shown in inverse video. If no measurement has been made yet,
 `N{nbsp}cal` is shown in inverse video.
 
@@ -1202,12 +1224,12 @@ boards. Other checks may also be added in the future.
 == Setting FS time
 
 It is expected that normally the FS computer will be using NTP and the
-FS time model is set to `computer` (see _misc/ntp.txt_ for more
-information). If good NTP servers are available, that should give the
-best time in the FS. The _setcl_ program should not be used with DBBC3
-and NTP. The best way to monitor DBBC3 time is with the `mcast_time`
-command, which should at least be placed in `midob` and can of course
-be used manually as well.
+FS time model will be set to `computer` (see _/usr2/fs/misc/ntp.txt_
+for more information). If good NTP servers are available, that should
+give the best time in the FS. The _setcl_ program should not be used
+with DBBC3 and NTP. The best way to monitor DBBC3 time is with the
+`mcast_time` command, which should at least be placed in `midob` and
+can of course be used manually as well.
 
 No suitable NTP servers may be available either because network
 connectivity is poor and/or there are no local functioning NTP
@@ -1237,12 +1259,9 @@ case, the last parameter, `_hsecs_` (centiseconds), on the
 `mcast_time/0` output is the value to put in the file; it may vary at
 the few centisecond level. (If _setcl_ it being used, it will probably
 work to subtract the last value on the `#setcl#model/old` from
-`_hsecs_` before putting it in the file.)
-
-+
-
-You can also get the value from the timestamps of logged multicast
-data or the `Arrival` value of the T~sys~ monitor display (_monit7_).
+`_hsecs_` before putting it in the file.) You can also get the value
+from the timestamps of logged multicast data or the `Arrival` value of
+the T~sys~ monitor display (_monit7_).
 
 +
 
@@ -1333,11 +1352,14 @@ The counts are given in the order of diode _on_ then _off_
 
 +
 
-The T~sys~ values are calculated using the averaging method described
-in `*help=cont_cal*`. They are logged every `_samples_` (from the
-`cont_cal` command) iterations of the `_cycle_` period for the `tpicd`
-command (see `*help=tpicd*`). In other words, the T~sys~ logging
-interval is the product of `_samples_` times `_cycle_`.
+The T~sys~ values are calculated using the averaging (and filtering)
+method described in `*help=cont_cal*`. They are logged every
+`_samples_` (from the `cont_cal` command) iterations of the `_cycle_`
+period for the `tpicd` command (see `*help=tpicd*`). In other words,
+the T~sys~ logging interval is the product of `_samples_` times
+`_cycle_`. Normally, the value of `_cycle_` should be `100`
+centiseconds (one second), resulting in T~sys~ being logged every
+`_samples_` seconds.
 
 +
 
@@ -1345,11 +1367,13 @@ When averaging is turned off, invalid (overflow, infinity, and "`on`"
 and/or "`off`" zero TPIs) and out-of-range values are logged as dollar
 signs, `$`. When averaging is turned on, the same invalid values are
 logged as dollar signs only if no valid in-range values have occurred.
+Negative values indicate that the `_polarity_` selected with the
+`cont_cal` command is wrong.
 
 +
 
 NOTE: For FS _10.1_, negative T~sys~ values are recorded as dollar
-signs, `$`, and averaging is not implemented.
+signs, `$`, and averaging (and filtering) is not implemented.
 
 Even when not being logged, multicast data is normally being received.
 A subset can be seen in the T~sys~ monitor display. For continuous
@@ -1362,7 +1386,7 @@ the multicast data squeezed out, and compressed full logs. Please see
 
 == drudg support
 
-The DBBC3 related _drudg_ changes include:
+The DBBC3 related _drudg_ features include:
 
 * Support for up to eight IFs (`a`-`h`) with up to 16 dual side-band
 BBCs each (overall `001`-`128`) for VEX (_.vex_) schedule files.
@@ -1376,13 +1400,13 @@ BBCs (`009`-`016`) on IF `b` for Mark IV (_.skd_) schedule files.
 NOTE: For a _.skd_ schedule that would normally have a number of
 channels for an IF that is not a power of two, the channels for that
 IF will need to be increased to the next power of two. For example,
-for  _S_/_X_: _X_-band using 10 channels, will need to be expanded to
-use 16; _S_-band using six channels will need to be expanded to eight.
-The expanded set of channels to be recorded can flow from the catalog,
-so their use is automatic for the scheduler and the station. This is
-just an example that will allow recording of all the normal data.
-Other adjustments may be needed for efficient media use, data
-transfer, and correlation.
+for _S_/_X_: _X_-band using 10 channels will need to be expanded to
+use 16 (or reduced to eight); _S_-band using six channels will need to
+be expanded to eight. The different set of channels to be recorded can
+flow from the catalog, so their use could be automatic for the
+scheduler and the station. These are just examples that will allow
+recording. Other adjustments may be needed for efficient media use,
+data transfer, and correlation.
 
 * The appropriate <<DBBC3 related commands>> are used in setup
 procedures.
@@ -1494,7 +1518,8 @@ They are:
 
 
 .. Consider copying the new or updated explanatory comments for the
-new and updated parameters from the example file to your local copy.
+new and updated parameters from the example file
+(_/usr2/fs/st.default/control/skedf.ctl_) to your local copy.
 
 +
 
@@ -1537,9 +1562,8 @@ You will probably want to update many other procedures or replace them
 with DBBC3 versions. The example/default DBBC3 `station` procedure
 library is _/usr2/fs/st.default/proc/d3fbstation.prc_. You can place a
 copy in your _/usr2/proc/_ directory with (adjusting the target file
-name appropriately to avoid overwriting an existing file; use
-eighteen, in FS _10.1_ eight, characters or less for the part before
-`.prc`):
+name appropriately to avoid overwriting an existing file; use 18 (in
+FS _10.1_: eight) characters or less for the part before `.prc`:
 
   cd /usr2/proc
   cp /usr2/fs/st.default/proc/d3fbstation.prc d3fbstat.prc
@@ -1568,8 +1592,8 @@ This method is particularly well suited for installing a new system
 but can be useful for updating an existing system as well. If the FS
 is running, `terminate` it first. Then use the commands (adjusting the
 target filename in the `mv` command appropriately to avoid overwriting
-an existing file; use eighteen, in FS _10.1_ eight, characters or
-less for the part before `.prc`):
+an existing file; use 18 (in FS _10.1_: eight) characters or less for
+the part before `.prc`:
 
   cd /usr2/proc
   mv station.prc statold.prc
@@ -1693,7 +1717,8 @@ display geometry values>> table below.
 
 TIP: If you vary the number of BBCs per IF in your configuration, you
 can setup the geometry for the most you use and can resize the window
-to a smaller size after it is opened, if you want.
+to a smaller size after it is opened or leave it as is, whatever you
+prefer.
 
 ====
 
@@ -1751,7 +1776,8 @@ able use the T~sys~ display monitor commands on the console.
 .. Log out and back in to put these changes into effect.
 
 .. You should  make the corresponding changes for _prog_ while logged
-in as _prog_.
+in as _prog_. Unless _prog_'s _rc_ files have special customizations,
+this might be done by copying _oper_'s updated files.
 
 . Start the FS, or restart it if it was already running.
 
@@ -1778,7 +1804,7 @@ These are generally broken into two groups, described in sections
 environment variables exist to help the end user adapt to variations
 in DBBC3 behaviour between different firmware releases. Several
 variables are provided to give flexibility for handling different
-variations.
+situations.
 
 NOTE: In FS _10.1_, none of these environment variables are available.
 
@@ -1803,7 +1829,7 @@ not need to be defined for the firmware releases in the
 |======
 
 Other releases may require setting some environment variables. In
-particular, some releases of DDC_V, _v124_, may require
+particular, some earlier releases of DDC_V _v124_ may require
 `FS_DBBC3_MULTICAST_BBC_ON_OFF_SWAP` to be set to `1`, when the
 continuous calibration polarity is `2`.
 
@@ -1971,7 +1997,8 @@ interpreted as `1`.
 
 This appendix provides methods for verifying the
 <<Continuous calibration polarity>> and the
-<<USB/LSB TPI swap status>>
+<<USB/LSB TPI swap status>>. You should verify the polarity before
+checking the USB/LSB swap status.
 
 NOTE: In FS _10.1_, these procedures can be used without the
 environment variables, which are not available,  to check the related
@@ -2051,6 +2078,9 @@ strong signal in only one side-band of one BBC.
 Follow the steps below. If the results do not show that the test
 signal is in the expected side-band, please contact Ed.
 
+. Verify the <<Continuous calibration polarity>> in the previous
+section.
+
 . Make sure the environment variable
 `FS_DBBC3_MULTICAST_BBC_TPI_USB_LSB_SWAP` is _not_ set, or if it is
 set, that it is set to `1`.
@@ -2087,14 +2117,14 @@ stem:[\mathit{T_{sys}}] value of the side-band of the BBC where the
 test signal is expected to be is in fact higher than the other
 side-band.
 
-. We have not seen it, but it might be possible for the mulitcast and
+. We have not seen it, but it might be possible for the multicast and
 `bbc__NNN__` commands to have different USB/LSB swaps. So in principle
 both the T~sys~ monitor display and `bbc__NNN__` commands should be
 checked (see the *CAUTION* above for the latter). It is also possible
 to verify the USB/LSB swaps status for both the gains in the
 `bbc__NNN__` command and those in `bbc_gain` command. Separate
-environment variables are provided in case any need to be adjusted
-independently.
+environment variables are provided for each case to allow them to be
+adjusted independently.
 
 
 [appendix]
@@ -2155,9 +2185,9 @@ to set the answer for an interactive prompt for whether or not to use
 ``**fesh -h**`` for more information.
 
 Thanks to Jon Quick (HartRAO) and Marjolein Verkouter (JIVE) for
-suggesting this option. They also suggested that it may be utilized as
-part of future features for additional checking and resetting of the
-system.
+suggesting this approach. They also suggested that it may be utilized
+as part of future features for additional checking and resetting of
+the system.
 
 [appendix]
 
@@ -2688,7 +2718,7 @@ would otherwise be the correct setup:
 
    proc=r5012kk
    echo=on
-   core3h01=force
+   setup01=force
    echo=off
 
 You will need to identify the `\#dbbcn#[core3h=_n_,vdif_frame ...` and
@@ -2704,9 +2734,9 @@ CAUTION: The examples below do not necessarily contain correct values.
 They are just offered to show the form of the commands.
 
 . Create a new SNAP procedure, perhaps called `vdif_8200`, that
-contains all the other values in the `core3h=_n_,vdif_frame ...`
+contains all the other values in the `core3h=_n_,vdif_frame{nbsp}...`
 commands recorded in the previous section, but with the new payload
-size, for example:
+size. For example, insert:
 
    dbbc3=core3h=1,vdif_frame 2 8 8200 ct=off
    dbbc3=core3h=2,vdif_frame 2 8 8200 ct=off
@@ -2717,10 +2747,10 @@ size, for example:
    dbbc3=core3h=7,vdif_frame 2 8 8200 ct=off
    dbbc3=core3h=8,vdif_frame 2 8 8200 ct=off
 
-. Add a `jive5ab=mode=VDIF_...` command, replacing the `_8000` in the
-output you recorded with, for this example, `_8200`, to the setup
-procedure (`setup01` in this example) __after__ the call to
-`mk5c_config`/`fb_config`. For example, add the command:
+. In the same procedure, add a `jive5ab=mode=VDIF_...` command that
+contains all the other values from the `mode{nbsp}={nbsp}VDIF_...`
+command recorded in the previous section, but with the new payload
+size. For example, add the command:
 
    jive5ab=mode=VDIF_8200-8192-64-2
 
@@ -2738,14 +2768,14 @@ Continuing the example, enter:
    setup01=force
    vdif_8200
 
+IMPORTANT: The order of the last two commands above is critical to
+avoid having the overall setup procedure overwrite the new payload
+value.
+
 Afterwards, you need to re-sync the time as described in the
 <<Sync time>> subsection and start the data transmission as
 described in the <<Start data transmission>> subsection, both in the
 <<Alternate Core3H board configuration method>> appendix.
-
-IMPORTANT: The order of the last two commands above is critical to
-avoid having the overall setup procedure overwrite the new payload
-value for the Core3H boards.
 
 NOTE: The reason for setting the new Core3H payload size _outside_ of
 the overall setup procedure is so that when using that procedure
