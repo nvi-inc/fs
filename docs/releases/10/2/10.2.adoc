@@ -21,7 +21,7 @@
 :doctype: book
 
 = FS 10.2 Update Notes
-Version 1.0 - December 2023
+Version 1.0.1 - January 2024
 
 :sectnums:
 :stem: latexmath
@@ -34,6 +34,7 @@ Version 1.0 - December 2023
 :sectnums!:
 == Document revision history
 
+* 1.0.1 -- Typo in _curl_/_wget_ verbose option in _fesh_ fixed
 * 1.0 -- Initial release
 
 :sectnums:
@@ -2839,8 +2840,8 @@ https://github.com/nvi-inc/fs/issues/201[#201]).
 =====
 
 When the `-v` option is used in _fesh_ verbose output is enabled to
-for _curl_ and _wget_. This can useful debugging connection issues.
-The `-v` option still includes verbose output for _drudg_.
+for _curl_ and _wget_. This can be useful for debugging connection
+issues. The `-v` option still includes verbose output for _drudg_.
 
 Thanks to Eskil Varenius (Onsala) for suggesting this.
 
