@@ -1,0 +1,251 @@
+//
+// Copyright (c) 2023 NVI, Inc.
+//
+// This file is part of the FSL10 Linux distribution.
+// (see http://github.com/nvi-inc/fsl10).
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <http://www.gnu.org/licenses/>.
+//
+
+= Pointing Model File
+W. E. Himwich
+FS Operations Manual - Version 9.13 - July 1, 2019
+
+:stem: stem
+:sectnums:
+
+<<<
+
+== Introduction
+
+This manual describes the standard pointing model control file
+_mdlpo.ctl_. This control file is read by the _error_ program and at
+some stations by _antcn_. The file format is described briefly. A
+sample file is listed. The functional form of the model is described
+so that the file contents can be identified with the parameters in the
+model. A more detailed description of the model and its derivation is
+available in the *Pointing Model Derivation* manual.
+
+== File Format
+
+The file contains eight non-comment records, all free format. An
+asterisk * in column one makes the line a comment. The use of comments
+is strongly encouraged to help identify why a particular model was
+updated, who did it, and how well it works. All angles and model
+parameter are given in decimal degrees except for model slope
+parameters (stem:[P_{9}] and stem:[P_{12)]), which are degrees/radian.
+Please see the <<Model Form>> section below for the meaning of the
+parameters. The contents of the eight non-comment records are given in
+<<files,Non-comment records in pointing model file>> table below.
+
+.Non-comment records in pointing model file
+[#file]
+[width="100%",cols="^12%,<88%",options="header",]
+|===
+|Record |Contents
+
+|1| Model Number; Model Generation Time: Year, Day-of-year, Hours, Minutes, Seconds
+|2| stem:[\Phi] followed by 30 control flags, `1` or `0`, to indicate whether a parameter is on or off
+|3| model parameter values 1-5
+|4| model parameter values 6-10
+|5| model parameter values 11-15
+|6| model parameter values 16-20
+|7| model parameter values 21-25
+|8| model parameter values 26-30
+|===
+
+NOTE: Some older files don't have the final 10 control flagss in the
+second record, nor do they have the the final two records. In other
+words, they only have 20 parameters.
+
+The value of stem:[\Phi] is used in model terms that represent
+gravitational sag terms. Its value should be the actual elevation
+angle of the \+Y, +EL or +DC axis (the north pole of the coordinate
+system). For the standard antenna types XYNS, XYEW, AZEL, and HADC,
+the nominal values of stem:[\Phi] are stem:[0°],
+stem:[0°], stem:[+ 90°], and the geodetic latitude,
+respectively.
+
+The flags are used to indicate which parameters are in use. Normally,
+the flags are set to either `1` or `0`. A control flag value of `0`
+indicates that the corresponding parameter is not in use. A flag value
+of `1` indicates that that parameter is in use. Note that `0.0` is a
+valid parameter value. The program _error_, which estimates models
+from data, uses the non-zero control flag values of `2`, `3`, and `4`
+for additional control during model fitting. A `2` indicates that the
+associated parameter is “hardwired,” i.e. its value is not to be
+adjusted. A `3` indicates that the associated parameter is to be
+adjusted, but parameters with flag values of `1` and `2` are to be
+treated as hardwired. Any parameter that started with a flag of `3` is
+given a flag value of `1` in the output model. A parameter flag of `3`
+is intended to be used to update a subset of the model without
+affecting other parameters. This would be useful for example when the
+encoders have been re-zeroed or the box offset has changed. A `4`
+indicates that a parameter is in use but is not to be estimated in the
+new model. Any ``4``s are replaced by ``0``s in the output model file.
+The interpretation by _error_ of different values for the control
+flags are summarized in the
+<<flags,Control Flag Interpretation by the _error_ program>> table
+below.
+
+.Control Flag Interpretation by the _error_ program
+[#flags]
+[width="100%",cols="^12%,<88%",options="header",]
+|===
+|Value |Interpretation
+
+|`0` |Not in use, ignore value
+|`1` |Parameter in use
+|`2` |Parameter is in use, but value is hardwired
+|`3` |Update ``3``s only, hardwire ``1``s and ``2``s (to update subsets)
+|`4` |In current model, but don't use in new model
+|===
+
+== Sample Control File
+
+This section lists a sample control file with all zero parameter
+values. It is the default file available in
+_/usr2/fs/st.default/control/mdlpo.ctl_. The working version of this
+file is normally kept in _/usr2/control/mdlpo.ctl_.
+
+IMPORTANT: Be sure to set the value of stem:[\Phi] before using
+the file.
+
+Sample file listing:
+
+```
+*
+* 00th set of coefficents
+*
+  0 0 0 0 0 0 0
+*
+    0.0   1 1 1 1 1  1 1 1 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0 0
+*
+  0.0 0.0 0.0 0.0 0.0
+*
+  0.0 0.0 0.0 0.0 0.0
+*
+  0.0 0.0 0.0 0.0 0.0
+*
+  0.0 0.0 0.0 0.0 0.0
+*
+  0.0 0.0 0.0 0.0 0.0
+*
+  0.0 0.0 0.0 0.0 0.0
+*
+```
+
+== Model Form
+
+The standard model is described in detail in the *Pointing Model
+Derivation* manual. For reference purposes, the functional form of the
+model is described briefly here. The function is expressed in terms of
+two pointing coordinates which are called stem:[X] and stem:[Y]. As
+written the model is intended for XY antennas.  However, models for
+azimuth-elevation (AZEL) or hour-angle- declination (HADC) antennas
+have the same functional form as XY models. Hence stem:[AZ] or
+stem:[HA] can be substituted for stem:[X] and stem:[EL] or stem:[DC]
+could be substituted for stem:[Y] in the equations below. Note that
+stem:[P_{2}], X-angle sag, is identically zero when stem:[\Phi]=±90°,
+i.e. for HADC antennas at the north or south pole or for AZEL
+antennas.
+
+The value of the model for a given (stem:[X], stem:[Y]) is
+the correction to add to the _a priori_ pointing angles to get the
+corrected angles. The corrections depend on the value of
+stem:[\Phi], the uncorrected pointing angles stem:[X] and
+stem:[Y], and the values of the parameters
+stem:[P_{1}]through stem:[P_{23}]. More parameters, up to a
+total of thirty, can be defined within the limits of the current
+software. The model is in the form of two equations, one for the
+stem:[X] angle correction, stem:[\Delta Χ], the other for
+the stem:[Y] angle correction, stem:[\Delta Y]. The current
+model is:
+
+[stem]
+++++
+\Delta Χ = P_{1} - P_{2}\cos\Phi\sin X\sec Y + P_{3}\tan Y - P_{4}\sec Y + P_{5}\sin X\tan Y - P_{6}\cos X\tan Y \
++ P_{12}X + P_{13}\cos X + P_{14}\sin X + P_{17}\cos 2X + P_{18}\sin 2X
+++++
+
+[stem]
+++++
+\Delta Y = P_{5}\cos X + P_{6}\sin X + P_{7} - P_{8}\left( \cos\Phi\cos X\sin Y - \sin\Phi\cos Y \right) + P_{9}Y + P_{10}\cos Y \
++ P_{11}\sin Y + P_{15}\cos 2X  + P_{16}\sin 2X  + P_{19}\cos 8Y  + P_{20}\sin 8Y \
++ P_{21}\cos X + P_{22}\sin X + P_{23}\tan Y
+++++
+
+where:
+
+[none]
+
+* stem:[\Delta X]=X-angle Pointing Correction
+
+* stem:[\Delta Y]=Y-angle Pointing Correction
+
+* stem:[X]=Uncorrected X-angle
+
+* stem:[Y]=Uncorrected Y-angle
+
+* stem:[\Phi]=Elevation angle of stem:[Y = + 90°]
+
+* stem:[P_{1}]=X-angle Encoder Offset
+
+* stem:[P_{2}]=X-angle Sag
+
+* stem:[P_{3}]=Axis Skew
+
+* stem:[P_{4}]=Box Offset
+
+* stem:[P_{5}]=Tilt Out, tilt of stem:[Y = + 90°] toward stem:[(X,\ Y) = \ (0°,0°)]
+
+* stem:[P_{6}]=Tilt Over, tilt of stem:[Y = + 90°] toward stem:[(X,\ Y) = \ (90°,0°)]
+
+** Tilt Amplitude is stem:[\sqrt{P_{5}^{2} + P_{6}^{2}}]
+
+** Tilt Direction is stem:[Y = + 90°] toward stem:[(X,Y) = (]atan2 stem:[(P6,P5),0°)]
+
+* stem:[P_{7}]=Y-angle Encoder Offset
+
+* stem:[P_{8}]=Y-angle Sag
+
+* stem:[P_{9}]=__ad hoc__ Y-angle Slope
+
+* stem:[P_{10}]=__ad hoc__ stem:[\Delta Y\cos Y] Coefficient
+
+* stem:[P_{11}]=__ad hoc__ stem:[\Delta Y\sin Y] Coefficient
+
+* stem:[P_{12}]=__ad hoc__ X-angle Slope
+
+* stem:[P_{13}]=__ad hoc__ stem:[\Delta X\cos X] Coefficient
+
+* stem:[P_{14}]=__ad hoc__ stem:[\Delta X\sin X] Coefficient
+
+* stem:[P_{15}]=__ad hoc__ stem:[\Delta Y\cos 2X] Coefficient
+
+* stem:[P_{16}]=__ad hoc__ stem:[\Delta Y\sin 2X] Coefficient
+
+* stem:[P_{17}]=__ad hoc__ stem:[\Delta X\cos 2X] Coefficient
+
+* stem:[P_{18}]=__ad hoc__ stem:[\Delta X\sin 2X] Coefficient
+
+* stem:[P_{19}]=__ad hoc__ stem:[\Delta Y\cos 8Y] Coefficient
+
+* stem:[P_{20}]=__ad hoc__ stem:[\Delta Y\sin 8Y] Coefficient
+
+* stem:[P_{21}]=__ad hoc__ stem:[\Delta Y\cos X] Coefficient
+
+* stem:[P_{22}]=__ad hoc__ stem:[\Delta Y\sin X] Coefficient
+
+* stem:[P_{23}]=__ad hoc__ stem:[\Delta Y\tan Y] Coefficient
