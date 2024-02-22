@@ -21,7 +21,7 @@
 :doctype: book
 
 = FS 10.2 Update Notes
-Version 1.0.1 - January 2024
+Version 1.0.2 - February 2024
 
 :sectnums:
 :stem: latexmath
@@ -3178,7 +3178,7 @@ argument. It outputs the `SIG` and `VAL` records with a `G/T` column
 appended. Note that the values in the `SIG` records are the RMS
 scatters of the underlying data propagated to the final quantities,
 not the sigmas of the means for those quantities. A `-u` option can be
-used to map the results to unity gain. Use
+used to map the results to unity on the gain curve. Use
 `*/usr2/fs/misc/govert{nbsp}-h*` for help with the script.
 
 Thanks to Stuart Weston (Warkworth) for requesting this capability and
