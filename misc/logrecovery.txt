@@ -1,22 +1,92 @@
-This file contains a note describing a method to recover a log file
-that has been accidently deleted. The chances of this method
-succeeding are inversely proportional to how many changes have been
-made to the disk since the file was deleted. Please note that the
-format of the log entry time stamp has changed since the original note
-was written. With the current time stamps, you would enter the shown
-commands as:
+/usr2/fs/misc/logrecovery.txt             2024.02.29   Version 2.0
+
+INTRODUCTION
+
+This file contains a note from Pablo de Vicente describing a method to
+recover a log file that has been accidentally deleted. The chances of
+this method succeeding are inversely proportional to how many changes
+have been made to the disk since the file was deleted. Please note
+that the format of the log entry time stamp has changed since the
+original note was written. With the current time stamps, you would
+enter the shown commands as:
 
     # cd /
     # grep ^1997.078 /dev/sda3 > cb302a.log
     # grep ^1997.079 /dev/sda3 > cb302b.log
 
-Please note also if you have IDE disks, the device name would be /dev/hda3.
+Please note also if you have IDE disks, the device name would be
+/dev/hda3.
 
-Thanks to Pablo for figuring this out and writing it up.
+Thanks to Pablo for figuring this out and writing it up. More
+detailed, and up to date, instructions are presented next, followed by
+Pablo's original note.
 
-From: Pablo de Vicente <vicente@cay.oan.es>
+DETAILED INSTRUCTIONS
+
+. Unmount the file system, /usr2, if possible.
+
+. cd
+
+. cut -c-4096 /dev/vg0/usr2 | egrep -a ‘^2024\.(149|150)’ >out.log
+
+  Replace ‘^2024\.(149|150)’ with the regex for the dates of your log.
+  You can use each date in a separate command and append ('>>' instead
+  of '>') for commands after the first one, but specifying all dates
+  in one command will be faster. Specifying them separately in date
+  order _may_ eliminate the need for the sort command below, but that
+  is not guaranteed.
+
+  The use of 'cut' prevents an overly long run of data without a
+  new-line from causing '[e]grep' to exhaust memory. The length of
+  '4096' (equal to or more than twice the longest possible log entry)
+  allows for two lines that are concatenated without a new-line to be
+  recovered. This might happen if a line is truncated at the end of a
+  block and the next contiguous block starts (or ends) a different log
+  entry.
+
+  You will probably need to use a different device file name, instead
+  of '/dev/vg0/usr2', if your system is not a standard FSL10 or FSL11
+  system or the disks are configured differently.
+
+. tr -cd ‘[:print:][:space:]’ <out.log >out2.log
+
+  This will eliminate all the (probably inevitable) non-printing and
+  non-white space characters in the file. It may not be appropriate to
+  use this command if you expect such characters and they are
+  important.
+
+. sort -s -k1.1,1.20 out2.log >out3.log
+
+  This will (stably) time sort the entries.
+
+. Copy out3.log to the correct name
+
+. Possible fix-ups:
+
+.. The first line is probably be missing. The second line can be
+   cloned and its contents adjusted to make a replacement.
+
+.. There may be some lines, both fore and aft, that are from other
+   logs. There may also be additional lines interspersed from other
+   logs, e.g., metclient logs. You may want to delete the extraneous
+   lines.
+
+.. Some lines, some of them partial, may be mashed together. You or
+   may not want to fix them.
+
+.. There may still be some lines with the same time-tag that are out
+   of order. You or may not to fix that.
+
+.. You may want to add some FS log comment lines explaining that the
+   log was recovered and any changes you made or missing sections.
+
+. Remount /usr2 if you had unmounted it.
+
+ORIGINAL NOTE FROM PABLO
+
+From: Pablo de Vicente <>
 Subject: file recovery
-To: pcfs@vega.gsfc.nasa.gov
+To: pcfs@...
 Date: Fri, 21 Mar 97 13:35:21 MET
 Mailer: Elm [revision: 70.85]
 Status: RO
