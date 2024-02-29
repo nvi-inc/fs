@@ -202,15 +202,17 @@ int fd;
           "\007!! help! ** copying to recover file: please wait ... starting.\n");
   while(count==countw && 0 < (count= read(fd,buf_copy,BUFFSIZE))) {
     countw= write(fd2,buf_copy,count);
-    if(size >0) {
-      cum+=count;
-      rte_rawt(&after);
-      if((after-before)>seconds*100) {
-        fprintf(stderr,
-                "\007!! help! ** copying to recover log file '%s', please wait ... %2d%%\n",
-                lnamef, (int) (cum*100./size));
-        seconds=seconds+2;
-      }
+    cum+=count;
+    rte_rawt(&after);
+    if((after-before)>seconds*100) {
+      if(size >0)
+          fprintf(stderr,
+                  "\007!! help! ** copying to recovery file: please wait ... %2d%%\n",
+                  (int) (cum*100./size));
+      else
+          fprintf(stderr,
+                  "\007!! help! ** copying to recovery file: please wait ...\n");
+      seconds=seconds+2;
     }
   }
   if(count < 0) {
