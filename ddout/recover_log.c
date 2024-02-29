@@ -24,6 +24,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include "../include/params.h"
 #include "../include/fs_types.h"
@@ -83,7 +84,7 @@ char buff[ ];
   int2str(buff,it[1],-2,1);
   strcat(buff,".");
   int2str(buff,it[0],-2,1);
-  sprintf(buff+strlen(buff),":\"ddout recovered log file '%s'\n",lnamef);
+  sprintf(buff+strlen(buff),":\"ddout recovered log file, resulting file: '%s'\n",lnamef);
 
   errno=0;
   count=write(fd,buff,strlen(buff));
@@ -101,35 +102,85 @@ int recover_log(lnamef,fd)
 char lnamef[];
 int fd;
 {
-  int fail, fd2;
+  int fail, fd2, recovered_in_name;
   int before, after, seconds;
   ssize_t count, countw, cum;
   off_t size, offset;
   static char buf_copy[BUFFSIZE];
+  int inode, inode2;
+  char file_name[sizeof(FS_ROOT "/log/")+MAX_SKD+sizeof(".log_recovered.XXXXXX")-1];
 
   fd2=open(lnamef,O_RDONLY);  /* check to see if the file exists */
-  if (fd2 >= 0) {
-    goto done;
+  if (fd2 < 0) {
+    if (errno != ENOENT)
+      perror("\007!! help! ** error checking for existence of log file");
+    else
+      fprintf(stderr,"\007!! help! ** log file '%s' doesn't exist\n",lnamef);
+  } else {
+    struct stat file_stat;
+    int ret;
+
+    ret = fstat(fd, &file_stat);
+    if (ret < 0) {
+      perror("\007!! help! ** error getting inode of open log file");
+    } else {
+      inode = file_stat.st_ino;
+
+      ret = fstat(fd2, &file_stat);
+      if (ret < 0) {
+        perror("\007!! help! ** error getting inode of file with the open log file's name");
+      } else {
+        inode2 = file_stat.st_ino;
+
+        if(inode == inode2)
+          goto done;         /* we are good */
+
+        fprintf(stderr,"\007!! help! ** file '%s' is not the open log file\n", lnamef);
+      }
+    }
   }
+
+/* something went wrong; no matter what it was, we will try to recover the open
+   log; this is our only chance */
 
   shm_addr->abend.other_error=1;
-  if(errno != ENOENT) {
-    perror("\007!! help! ** checking for existence of log file");
-    return fd;
-  }
-
   fail=FALSE;
-  fprintf(stderr,"\007!! help! ** log file '%s' doesn't exist, attempting to recover by copying.\n",
-          lnamef);
+  recovered_in_name=FALSE;
+  fprintf(stderr,"\007!! help! ** attempting to recover '%s' by copying.\n", lnamef);
+  if(fd2 >= 0 && close(fd2) < 0)
+    perror("\007!! help! ** error closing file with the log file name");
 
-  fd2 = open(lnamef, O_RDWR|O_SYNC|O_CREAT,PERMISSIONS); /* try to create it */
+  strcpy(file_name,lnamef);
+  fd2 = open(file_name, O_RDWR|O_SYNC|O_CREAT|O_EXCL,PERMISSIONS); /* try to create it */
   if (fd2 < 0) {
-    fprintf(stderr,
-            "\007!! help! ** can't create file '%s', giving up\n",
-            lnamef);
-    fail=TRUE;
-    goto fail;
+    if(errno != EEXIST)
+      perror("\007!! help! ** error creating log file");
+    else
+      fprintf(stderr,"\007!! help! ** file '%s' already exists\n",file_name);
+
+    strcat(file_name,"_recovered");
+    fd2 = open(file_name, O_RDWR|O_SYNC|O_CREAT|O_EXCL,PERMISSIONS); /* try to create it */
+    if (fd2 < 0) {
+      if(errno != EEXIST)
+        perror("\007!! help! ** error creating .log_recovery file");
+      else
+        fprintf(stderr,"\007!! help! ** file '%s' already exists\n",file_name);
+
+      strcat(file_name,".XXXXXX");
+      fd2 = mkstemp(file_name); /* try to create it */
+      if (fd2 < 0) {
+        if (errno != EEXIST)
+          perror("\007!! help! ** error creating .log_recovery.XXXXXX file, giving up");
+        else
+          fprintf(stderr,"\007!! help! **  could not create a unique file name, giving up");
+        fail=TRUE;
+        goto fail;
+      } else
+        recovered_in_name=TRUE;
+    } else
+      recovered_in_name=TRUE;
   }
+  fprintf(stderr,"!! help! ** good news, created '%s' for recovery\n",file_name);
 
   /* now try to make a copy */
   size=lseek(fd,0L,SEEK_CUR);
@@ -148,8 +199,7 @@ int fd;
   rte_rawt(&before);
   seconds=2;
   fprintf(stderr,
-          "\007!! help! ** copying to recover log file '%s', please wait ... starting.\n",
-          lnamef);
+          "\007!! help! ** copying to recover file: please wait ... starting.\n");
   while(count==countw && 0 < (count= read(fd,buf_copy,BUFFSIZE))) {
     countw= write(fd2,buf_copy,count);
     if(size >0) {
@@ -164,17 +214,16 @@ int fd;
     }
   }
   if(count < 0) {
-    fprintf(stderr,"\007!! help! ** failed, error reading original file, giving up\n",lnamef);
+    fprintf(stderr,"\007!! help! ** failed, error reading original log file, giving up\n");
     perror("\007!! help! ** reading original file");
     fail=TRUE;
   } else if (count!=0 && count!=countw) {
-    fprintf(stderr,"\007!! help! ** failed, error writing to '%s', giving up\n",lnamef);
-    perror("\007!! help! ** writing recovered log");
+    fprintf(stderr,"\007!! help! ** failed, error writing to recovery file\n");
+    perror("\007!! help! ** writing recovery file");
     fail=TRUE;
   } else
     fprintf(stderr,
-            "!! help! ** copying to recover log file '%s', done.\n",
-            lnamef);
+            "!! help! ** copying to recovery file: done.\n");
 
 fail:
   if(fail) {
@@ -186,16 +235,23 @@ fail:
   } else {
     int ierr;
 
-    fprintf(stderr,"!! help! ** good news, log file '%s' seems to be recovered, please check it.\n",lnamef);
-    ierr=write_comment(lnamef,fd2,buf_copy);
+    fprintf(stderr,"!! help! ** good news, the log file seems to be recovered\n");
+    fprintf(stderr,"!! help! ** good news, the recovery file is: '%s', please check it.\n",file_name);
+
+    ierr=write_comment(file_name,fd2,buf_copy);
     if(ierr < -5)
-      fprintf(stderr,"\007!! help! ** problem adding comment at end of recovered file, see above, may be benign\n");
+      fprintf(stderr,"\007!! help! ** problem adding comment at end of recovery file, see above, may be benign\n");
     else if (ierr < -3)
-      fprintf(stderr,"\007!! help! ** problem adding pre-comment new-line at end of recovered file, see above, may be benign\n");
+      fprintf(stderr,"\007!! help! ** problem adding pre-comment new-line at end of recovery file, see above, may be benign\n");
     else if (ierr < 0)
-      fprintf(stderr,"\007!! help! ** problem checking for new-line at end of recovered file, see above, may be benign\n");
+      fprintf(stderr,"\007!! help! ** problem checking for new-line at end of recoverd file, see above, may be benign\n");
     else
-      fprintf(stderr,"!! help! ** recovery comment successfully added to recovered log.\n");
+      fprintf(stderr,"!! help! ** recovery comment successfully added to recovery file.\n");
+
+    if(recovered_in_name) {
+      fprintf(stderr,"!! help! ** NOTE WELL: If you re-opened the same log file, the file with that name (whatever it is),\n");
+      fprintf(stderr,"!! help! ** NOTE WELL: not the recovery file, is getting the new log entries.\n");
+    }
   }
 
 done:
