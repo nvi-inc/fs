@@ -46,13 +46,13 @@ char buff[ ];
 
   offset=lseek(fd, -1L, SEEK_END);
   if(offset == (off_t) -1) {
-    perror("\007!! help! ** seeking last byte");
+    perror("\007!! help! ** error seeking last byte");
     return -1;
   }
 
   count=read(fd,buff,1);
   if(count < 0) {
-    perror("\007!! help! ** reading last byte");
+    perror("\007!! help! ** error reading last byte");
     return -2;
   } else if (count == 0) {
     fprintf(stderr,"\007!! help! ** couldn't read last byte for unknown reason\n");
@@ -64,7 +64,7 @@ char buff[ ];
     errno=0;
     count=write(fd,buff,1);
     if(count < 0 || count == 0 && errno !=0) {
-      perror("\007!! help! ** writing pre-comment new-line");
+      perror("\007!! help! ** error writing pre-comment new-line");
       return -4;
     } else if(count ==0) {
       fprintf(stderr,"\007!! help! ** couldn't add pre-comment new-line for unknown reason\n");
@@ -89,7 +89,7 @@ char buff[ ];
   errno=0;
   count=write(fd,buff,strlen(buff));
   if(count < 0 || count == 0 && errno !=0) {
-    perror("\007!! help! ** writing comment");
+    perror("\007!! help! ** error writing comment");
     return -6;
   } else if(count ==0) {
     fprintf(stderr,"\007!! help! ** couldn't add comment for unknown reason\n");
@@ -146,7 +146,7 @@ int fd;
   shm_addr->abend.other_error=1;
   fail=FALSE;
   recovered_in_name=FALSE;
-  fprintf(stderr,"\007!! help! ** attempting to recover '%s' by copying.\n", lnamef);
+  fprintf(stderr,"!! help! ** attempting to recover '%s' by copying\n", lnamef);
   if(fd2 >= 0 && close(fd2) < 0)
     perror("\007!! help! ** error closing file with the log file name");
 
@@ -172,7 +172,7 @@ int fd;
         if (errno != EEXIST)
           perror("\007!! help! ** error creating .log_recovery.XXXXXX file, giving up");
         else
-          fprintf(stderr,"\007!! help! **  could not create a unique file name, giving up");
+          fprintf(stderr,"\007!! help! ** could not create a unique file name, giving up");
         fail=TRUE;
         goto fail;
       } else
@@ -180,16 +180,15 @@ int fd;
     } else
       recovered_in_name=TRUE;
   }
-  fprintf(stderr,"!! help! ** good news, created '%s' for recovery\n",file_name);
+  fprintf(stderr,"!! help! ** Good news: created file '%s' for recovery.\n",file_name);
 
   /* now try to make a copy */
   size=lseek(fd,0L,SEEK_CUR);
   if(size < 0)
-    perror("\007!! help! ** determining size of old file to copy: no progress meter");
+    perror("\007!! help! ** error determining size of open log file to copy: no progress meter");
   offset=lseek(fd, 0L, SEEK_SET);
   if(offset < 0) {
-    perror("\007!! help! ** rewinding old file to copy");
-    fprintf(stderr,"\007!! help! ** can't rewind original file, giving up\n");
+    perror("\007!! help! ** error rewinding open log file to copy, giving up");
     fail=TRUE;
     goto fail;
   }
@@ -199,7 +198,7 @@ int fd;
   rte_rawt(&before);
   seconds=2;
   fprintf(stderr,
-          "\007!! help! ** copying to recover file: please wait ... starting.\n");
+          "!! help! ** copying to recovery file: please wait ... starting\n");
   while(count==countw && 0 < (count= read(fd,buf_copy,BUFFSIZE))) {
     countw= write(fd2,buf_copy,count);
     cum+=count;
@@ -207,25 +206,23 @@ int fd;
     if((after-before)>seconds*100) {
       if(size >0)
           fprintf(stderr,
-                  "\007!! help! ** copying to recovery file: please wait ... %2d%%\n",
+                  "!! help! ** copying to recovery file: please wait ... %2d%%\n",
                   (int) (cum*100./size));
       else
           fprintf(stderr,
-                  "\007!! help! ** copying to recovery file: please wait ...\n");
+                  "!! help! ** copying to recovery file: please wait ...\n");
       seconds=seconds+2;
     }
   }
   if(count < 0) {
-    fprintf(stderr,"\007!! help! ** failed, error reading original log file, giving up\n");
-    perror("\007!! help! ** reading original file");
+    perror("\007!! help! ** error reading open log file, giving up");
     fail=TRUE;
   } else if (count!=0 && count!=countw) {
-    fprintf(stderr,"\007!! help! ** failed, error writing to recovery file\n");
-    perror("\007!! help! ** writing recovery file");
+    perror("\007!! help! ** error writing recovery file, giving up");
     fail=TRUE;
   } else
     fprintf(stderr,
-            "!! help! ** copying to recovery file: done.\n");
+            "!! help! ** copying to recovery file: done\n");
 
 fail:
   if(fail) {
@@ -237,8 +234,8 @@ fail:
   } else {
     int ierr;
 
-    fprintf(stderr,"!! help! ** good news, the log file seems to be recovered\n");
-    fprintf(stderr,"!! help! ** good news, the recovery file is: '%s', please check it.\n",file_name);
+    fprintf(stderr,"!! help! ** Good news: the log file seems to be recovered.\n");
+    fprintf(stderr,"!! help! ** The recovery file is: '%s', please check it.\n",file_name);
 
     ierr=write_comment(file_name,fd2,buf_copy);
     if(ierr < -5)
@@ -248,7 +245,7 @@ fail:
     else if (ierr < 0)
       fprintf(stderr,"\007!! help! ** problem checking for new-line at end of recoverd file, see above, may be benign\n");
     else
-      fprintf(stderr,"!! help! ** recovery comment successfully added to recovery file.\n");
+      fprintf(stderr,"!! help! ** Recovery comment successfully added to recovery file.\n");
 
     if(recovered_in_name) {
       fprintf(stderr,"!! help! ** NOTE WELL: If you re-opened the same log file, the file with that name (whatever it is),\n");
@@ -258,8 +255,8 @@ fail:
 
 done:
   if(fd2 >= 0 && close(fd2) < 0) {
+    perror("\007!! help! ** error closing fd2");
     shm_addr->abend.other_error=1;
-    perror("\007!! help! ** closing fd2");
   }
 
   return fd;
