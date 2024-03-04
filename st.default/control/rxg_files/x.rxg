@@ -54,8 +54,8 @@ ELEV POLY 1.0
 *
 *     ends with a line containing end_tcal_table
 *
-*     MAXIMUM ENTRIES 400, group by polarization
-*                          then sorted by increasing freq
+*     MAXIMUM ENTRIES 1200, group by polarization
+*                           then sorted by increasing freq
 *
 rcp 8080.0   9.8 
 end_tcal_table

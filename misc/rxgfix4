@@ -1,0 +1,171 @@
+#!/usr/bin/perl
+# Usage: rxgfix4 file
+
+require "getopts.pl";
+
+exit -1 if (!&Getopts("dh"));
+
+if ($#ARGV < 0 && !defined($opt_h)) {
+    print "For help, use: $0 -h\n";
+    exit -1;
+} elsif (defined($opt_h)) {
+    print "
+Usage: rxgfix4 [-dh] [files]
+
+  Fixes .rxg files Tcal table size limit comment in 'files'.
+
+  In the comment section before the active Tcal table (only),
+  lines:
+      *     MAXIMUM ENTRIES 100, group by polarization
+    and
+      *     MAXIMUM ENTRIES 400, group by polarization
+    and
+      *     MAXIMUM ENTRIES 600, group by polarization
+    are replaced with:
+       *     MAXIMUM ENTRIES 1200, group by polarization
+  and lines:
+       *                          then sorted by increasing freq
+    are replaced with:
+       *                           then sorted by increasing freq
+
+  If a file is changed, the original is preserved with a '.bak'
+  extension.
+
+  If any of the files don't exist or has a '.bak' version already, the
+  script will give up before doing any processing. The '-d' option can
+  be used to delete all matching '.bak' files before processing.
+
+  Options:
+    -d    Delete old back-up files at start
+    -h    Print this help page.
+";
+    exit -1;
+
+}
+
+FILE: foreach $name (@ARGV) {
+
+    $bak = $name . ".bak";
+    $out = $name;
+    if (!-e $name) {
+        $bad_n=1;
+        print "Can't find $name\n";
+    }
+
+# check for .bak file
+
+    if (-e $bak) {
+        if (!defined($opt_d)) {
+            $bad_b=1;
+            print "Backup file $bak already exists.\n";
+        } elsif (!unlink($bak)){
+            $bad_b=1;
+            print "Deleting $bak failed: $!.\n";
+        } else {
+            print "Deleted $bak\n";
+        }
+    }
+}
+if ($bad_n) {
+    print "  Couldn't find file(s) listed above.\n";
+}
+if ($bad_b) {
+    print
+"  Some back-up file(s), see messages above, already exist or couldn't
+  be deleted. Unless there is an error deleting them, you can delete
+  them as part of the processing by adding the -d option.
+";
+}
+if ($bad_n || $bad_b) {
+    die "Giving up.\n";
+}
+
+FILE: foreach $name (@ARGV) {
+
+    $bak = $name . ".bak";
+    $out = $name;
+    if (!-e $name) {
+       die "Can't find $name Quitting.\n";
+    }
+
+# rename the original if we can and open the files
+
+    if (-e $bak) {
+        die "Backup-file $bak already exists, giving up.\n";
+    }
+
+    rename ($out,$bak) ||die "renaming $out to $bak failed: $!, giving up.\n";
+
+    if(!open(BAK,$bak)) {
+        print "Failed to open $bak: $!\n";
+        if(!rename($bak,$out)) {
+            print "Unable to rename $bak to $out: $!\n";
+            die "Please fix whatever the problem is and rename it yourself.\n";
+        } else {
+            die "I renamed $bak to $out for you.\n";
+        }
+    }
+
+    if(!open(OUT,">" . $out)) {
+        print "Failed to open $out: $!\n";
+        if((!close(BAK)) || (!rename($bak,$out))) {
+            print "Unable to rename $bak to $out: $!\n";
+            die "Please fix whatever the problem is and rename it yourself.\n";
+        } else {
+            die "I renamed $bak to $out for you.\n";
+        }
+    }
+
+#process
+    print "Processing $name\n";
+    $count=0;
+    $rename=0;
+    $change=0;
+    while(<BAK>) {
+        if(/^[^*]/) {
+          $count++;
+        }
+        if($count==6) {
+            if(/^\*     MAXIMUM ENTRIES [146]00, group by polarization/) {
+                 print OUT "*     MAXIMUM ENTRIES 1200, group by polarization\n";
+                 $change=1;
+            } elsif(/^\*                          then sorted by increasing freq/) {
+                 print OUT "*                           then sorted by increasing freq\n";
+                 $change=1;
+            } else {
+                 print OUT;
+            }
+        } else {
+            print OUT;
+        }
+
+    }
+#
+# clean-up
+#
+    if(!close(OUT)) {
+        $rename=1;
+        print "Warning: Unable to close '$out': $!\n";
+    }
+    if(!close(BAK)) {
+        $rename=1;
+        print "Warning: Unable to close '$bak': $!\n";
+    }
+
+    if($rename || !$change) {
+        if(!rename($bak,$out)) {
+            print "Warning: Unable to rename '$bak' to '$out': $!\n";
+            if($rename) {
+                print "Warning: Please fix whatever the problem is and rename it yourself,\n";
+                print "Warning: probably using 'mv $bak $out'\n";
+            } else {
+                print "Warning: It appears that $out did not need any changes,\n";
+                print "Warning: but to be safe you should probably \"";
+                print "Warning: use 'mv $bak $out'\n";
+            }
+        } elsif($rename) {
+            print "Warning: I renamed '$bak' to '$out' for you.\n";
+
+        }
+    }
+}
