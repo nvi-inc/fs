@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2020, 2022, 2023 NVI, Inc.
+# Copyright (c) 2023, 2024 NVI, Inc.
 #
 # This file is part of FSL10 Linux distribution.
 # (see http://github.com/nvi-inc/fsl10).
@@ -18,15 +18,10 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-DOC_DIR = releases misc manuals
+.PHONY: all
 
-.PHONY: all $(DOC_DIR)
-
-all: index.html $(DOC_DIR)
-
-$(DOC_DIR):
-	$(MAKE) -C $@
+all: index.html snaplang.html file.html snapcmd.html
 
 %.html: %.adoc
-	asciidoctor $^
+	asciidoctor -a toc $^
 
