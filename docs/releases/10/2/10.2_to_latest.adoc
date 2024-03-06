@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020-2023 NVI, Inc.
+// Copyright (c) 2020-2024 NVI, Inc.
 //
 // This file is part of VLBI Field System
 // (see http://github.com/nvi-inc/fs).
@@ -21,7 +21,7 @@
 :doctype: book
 
 = FS 10.2 to Latest Commit Update Notes
-Version 4.9 - February 2023
+Version 1.0 - March 2024
 
 :sectnums:
 :stem: latexmath
@@ -39,10 +39,10 @@ release is not intended for operations. The intended use of this
 document is to collect update information, as it becomes available,
 before the next release.
 
-IMPORTANT: Commits that are not tagged for release may have
-significant issues including: not building, crashing, and
-incompatibilities with operational observation schedule files. Such
-commits are intended for testing only. _Let the user beware._
+//IMPORTANT: Commits that are not tagged for release may have
+//significant issues including: not building, crashing, and
+//incompatibilities with operational observation schedule files. Such
+//commits are intended for testing only. _Let the user beware._
 
 CAUTION: It is expected that those using the latest commit are experts
 and will manage the differences for updating to the next official
@@ -53,7 +53,8 @@ document, appropriately adjusted and renamed as the update from the old
 release to the new release, were completed. However, this may not be
 complete. _Let the user beware._
 
-This document is up to date with the `10.2.0` commit. Due to small
+This document is up to date with the
+`49ebb3d65cc249b1cd826c318f2217a564256c69` commit. Due to small
 increments, such as updating this document, that may not be the
 literal last commit, but the differences should be small unless you
 happen to `pull` between a significant change and this document being
@@ -61,9 +62,9 @@ updated.
 
 == Upgrading from 10.2 to the latest commit
 
-IMPORTANT: Since there are no commits beyond the `10.2.0` commit yet,
-there is nothing to do and you should ignore his entire document. The
-instructions below are placeholders.
+//IMPORTANT: Since there are no commits beyond the `10.2.0` commit yet,
+//there is nothing to do and you should ignore his entire document. The
+//instructions below are placeholders.
 
 You must have already upgraded to _10.2.0_ according to the
 <<10.2.0.adoc#,FS 10.2 Update Notes>> document before installing
@@ -71,9 +72,9 @@ this update.
 
 === Fetch the latest commit
 
-IMPORTANT: Since there are no commits beyond the `10.2.0` commit yet,
-there is nothing to do and you should ignore skip this entire
-document. The instructions below are placeholders.
+//IMPORTANT: Since there are no commits beyond the `10.2.0` commit yet,
+//there is nothing to do and you should ignore skip this entire
+//document. The instructions below are placeholders.
 
 There are two alternatives:
 
@@ -89,9 +90,9 @@ then as _prog_ execute:
 
 +
 
-IMPORTANT: Since there are no commits beyond the `10.2.0` commit yet,
-there is nothing to do and you should ignore skip this entire
-document. The instructions below are placeholders.
+//IMPORTANT: Since there are no commits beyond the `10.2.0` commit yet,
+//there is nothing to do and you should ignore skip this entire
+//document. The instructions below are placeholders.
 
 +
 
@@ -103,50 +104,82 @@ from an archive>> subsection in the
 that:
 
 +
-[square]
+[disc]
 
 * For FSL8, you will need the *TIP* in the `*wget*` step.
 
 * For the __tag__ in the `*wget*` and `*tar*` commands, use the short
-SHA for the commit, `98ccc361`.
+SHA for the commit. For example, for commit
+`49ebb3d65cc249b1cd826c318f2217a564256c69` use `49ebb3d6`.
 
 * After extracting the archive, change the name of the output
 directory to use the latest feature release and the short SHA of the
-commit, like _fs-10.2.0-98ccc361_, which will then be used in the
-following `*cd*` command. For example (for the _source_ directory,
-kbd:[Tab] completion is your friend):
+commit, like _fs-10.2.0-49ebb3d6_, which will then be used in the
+following `*cd*` command. For example (kbd:[Tab] completion is your
+friend):
 
- mv fs-98ccc361ea9f18d719f158f7c70c96edadb32607 fs-10.2.0-98ccc361
- cd /usr2/fs-10.2.0-98ccc361
+ cd /usr2
+ mv fs-49ebb3d65cc249b1cd826c318f2217a564256c69 fs-10.2.0-49ebb3d6
+ cd /usr2/fs-10.2.0-49ebb3d6
 
 * You will end the "`installing from an archive`" with the step
 setting the link for __/usr2/fs__ by running *`make install`*.
 
 === Update your station code.
 
+This step is not needed at this time.
+
 Except if noted otherwise, these steps should all be performed as
 _prog_.
 
-This step is not needed at this time.
-
 === Reboot
 
-IMPORTANT: This will make sure the FS server is stopped and shared
-memory is reallocated.
-
 This step is not needed at this time.
+
+IMPORTANT: This will make sure shared memory is reallocated.
 
 === Additional steps
 
 Except if noted otherwise, these steps should all be performed as
 _oper_.
 
-There are no additional steps yet.
+. Optionally, update the comments in your _.rxg_ files to correctly
+show the correct maximum number of T~cal~ table entries allowed.
 
-=== Review changes
++
 
-Please see the <<Changes since 10.2.0>> section below for the details
-of the changes since that release.
+A script, _/usr2/fs/misc/rxgfix4_, has been provided for this. If the
+original version of the affected comments have been preserved, the
+will be updated to the new form. Only the comments immediately before
+the active T~cal~ entries will be updated.
+
+.. Execute:
+
+   cd /usr2/control/rxg_files
+   /usr2/fs/misc/rxgfix4 *.rxg
+
++
+
++
+
+If the script stops because there are existing _.bak_ files, you can
+delete them, if it is safe to do so,  by adding the `-d` option (see
+`*/usr2/fs/misc/rxgfix4{nbsp}-h*` for the details) to the command
+_before_ the files to be updated. If it is not safe to delete them,
+you could, for example, rename them to end in _.bak2_ with
+`*rename{nbsp}'s/.bak$/.bak2/'{nbsp}++*++.rxg.bak*` first. The
+_rename_, command, by default, will not overwrite existing files, but
+you might want to check that your new ending is not already in use for
+some _.rxg_ backup files to avoid possibly mixing different
+"`generations`" of backups.
+
++
+
++
+
+NOTE: If you don't have the (_perl_ based) _rename_ command, you can
+install it on FSL__x__ systems as _root_ with
+`*apt-get{nbsp}install{nbsp}rename*`.
 
 == Changes since 10.2.0
 
@@ -158,26 +191,212 @@ connect to specific issues reported at
 https://github.com/nvi-inc/fs/issues.
 
 A complete history of changes can be found using the `git log` command
-from within the FS _git_ archive directory, usually _/usr2/fs-git_.
+from within the FS _git_ working directory, usually _/usr2/fs-git_.
 
-Each change is listed as a numbered title, then usually a few summary
-sentences, followed by a _toggle_:
+Each change is listed as a numbered summary typically followed by a
+"`Details`" _toggle_, like:
 
 [%collapsible]
 ====
 Details are shown here.
 ====
 
-that can be clicked on to toggle showing (or not showing) the details.
-In this way, you can view the summary as a list and only reveal the
-details of items that interest you. The summary sentences and/or the
-details toggle may be omitted if they would not add any new
-information, usually because it is already covered in the numbered
-title item and/or the details are very brief.
+that can be clicked on to toggle showing (or not showing) a
+collapsible box with the details. In this way, you can view the
+summary as a list and only reveal the details of items that interest
+you. The collapsible box may be omitted if providing further details
+didn't seem warranted. The collapsible boxes for the details may also
+have nested collapsible boxes inside them if there are many sub-items.
 
 === FS changes
 
-There are no FS changes yet.
+. Update comments in _.rxg_ files for the current maximum number of
+T~cal~ table entries (closing
+https://github.com/nvi-inc/fs/issues/211[#211]).
+
++
+[%collapsible]
+====
+
+The comments in the example _.rxg_ files
+(_/usr2/fs/st.default/control/rxg_files/*.rxg_) had not kept up with
+the expansion of the size of the T~cal~ table, first from `400`
+entries to `600` and then `1200`. The files have now been updated.
+
+A script, _/usr2/fs/misc/rxgfix4_, has been provided for optional use
+to update the working _.rxg_ files at station. If the original version
+of the comments, with `400`, have been preserved, they will be updated
+to the new form. Only the comments immediately before the active
+T~cal~ entries will be updated. Lines that list `100` and `600` as the
+maximum will also be updated. The former was apparently the size in
+some preliminary versions before the first official release ((_9.6.9_,
+September 2003, commit `7c26ea900dee19b01958e5c4ad846b89d64638c5`)
+that supported _.rxg_ files. The latter was never provided as an
+example, but is covered just in case. See
+`*/usr2/fs/misc/rxgfix4{nbsp}-h*` for the details.
+
+====
+
+. Improve recovery for loss of an open log file.
+
++
+[%collapsible]
+====
+
+.. Handle the open log file being replaced by a file that is renamed
+to the open log file's name.
+
++
+
+Previously automatic lost log file recovery worked if either the log
+file open in the FS have been deleted (_rm_) or renamed (_mv_). It did
+not cover the case of a different file being renamed to have the name
+of the open file. That latter most case is now detected by comparing
+the ``inode``s of the open log file and the file with the name of the
+open log. If they don't agree they aren't the same file. In that case,
+the open log file will be recovered to a file with __recovered_
+appended to the original name. If a file with that name already
+exists, the log will instead be recovered to a file with:
+
++
+[subs="+quotes"]
+....
+__recovered.<XXXXXX>_
+....
+
++
+
+appended at the original name, where `_<XXXXXX>_` is a random string,
+chosen the kernel, that makes the filename unique, e.g., _3fDhIa_.
+
++
+
+There is a consequence of this feature that may not initially appear
+to be intuitive. It occurs if the user was re-opening the original
+file (with `log=...` or `schedule=...`) when the `inode` mismatch was
+discovered. In this case, new log entires will be appended to the file
+with the original name (regardless of what was already in it), not the
+recovered log file. The recovery process doesn't know what the new (if
+there is one) log file's name is, but will print a message warning
+about this possibility, which can occur whenever the recovery file's
+name includes _recovered_. In retrospect, this may not seem so
+unintuitive after all.
+
++
+
+[WARNING]
+=====
+
+The case of an open log file being overwritten by copying onto it
+(_cp_) is not handled. So it is not possible to automatically recover
+the log in that case. It should still be possible to recover, most, if
+not all, of a log lost in this way using the technique described in
+_/usr2/misc/logrecovery.txt_
+
+Two possible approaches to prevent overwriting by copying (_cp_) onto
+an open log are described in the *Details* collapsible box below.
+Neither have been implemented at this time.
+
+[%collapsible]
+======
+
+Two possible solutions to this are:
+
+. Use _chattr_ to make the open log file _append_ only.
+
++
+
+The approach would be for _ddout_ to use _chattr_ to set _attribute_
+`+a` on the log file after opening to make it append only. When the
+log is closed, it would be changed to `-a` to allow the file to be
+used normally thereafter. It is probably necessary to include
+`O_APPEND` in the _flags_ for `open()` calls in _ddout_ in case for
+some reason `-a` was not applied (probably a crash) when a log was
+closed. To employ this method, it is necessary to give _chattr_ the
+capability to set the append attribute (as _root_):
+
+ setcap cap_linux_immutable=eip /usr/bin/chattr
+
++
+
+There are two minor drawbacks to this approach:
+
+.. If an existing log file is owned by a different user (perhaps
+_prog_), the attributes can't be changed.
+
+.. If the attribute is not changed back to `-a` (perhaps due to a
+crash), the file becomes very difficult to work with (no
+renaming/moving, editing, compressing, etc.) until that is corrected.
+
+. Use mandatory file locking to prevent overwriting of the open log
+file.
+
++
+
+In this case, the _/usr2_ partition must be mounted with the `mand`
+option. _ddout_ would create new logs with a _mode_ including
+`S_ISGID`. It should set the _mode_ of an existing file that it opens
+to include `S_ISGID` Then it would need to lock the entire file
+(`.l_whence = SEEK_SET`; `.l_start = 0`, `.l_len = 0`) for reading
+(`.l_type = RDLCK`). When the log is closed, _ddout_ would clear its
+`setgid` bit.
+
++
+
+There are four minor drawbacks to this approach:
+
+.. If an existing log file is owned by a different user (perhaps
+_prog_), the `setgid` bit can't be set/cleared.
+
+.. If the `setgid` bit is not cleared (perhaps due to a crash), it
+will follow the file, including being compressed or renamed, until
+that is corrected.
+
+.. Mandatory file locking is not considered reliable, but the example
+cases where there may be problems do not seem relevant to this use.
+
+.. Although not deprecated, it seems as though mandatory file locking
+may be headed to extinction.
+
+======
+
+=====
+.. Make recovery more robust.
+
++
+
+Previously if errors were detected while determining if the log file
+existed, recovery would be aborted. The code has been restructured to
+not give up for this case or for a problem determining the `inode`
+values. It now aborts only if an unrecoverable error occurs in the
+process of recopying the log contents. Making the recovery as robust
+as possible is prudent since this is the only chance to accomplish
+this.
+
+.. Update _/usr2/misc/logrecovery.txt_ note.
+
++
+
+The note has been updated for more modern systems and to include more
+specific steps.
+
+.. Make miscellaneous improvements:
+
++
+
+[disc]
+* Simplify recovery logic
+* Show recovery activity even if a percentage can't be shown
+* Make error reports more consistent
+* Report partial recovery even if an error occurred
+
+====
+
+. Cleanup _10.2_ web documents
+
++
+
+Miscellaneous wording and typographic corrections were made.
 
 === drudg changes
 
