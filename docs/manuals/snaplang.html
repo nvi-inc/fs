@@ -1,0 +1,1460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.17">
+<meta name="author" content="N. R. Vandenberg">
+<title>SNAP Language</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<style>
+/*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
+/* Uncomment the following line when using as a custom stylesheet */
+/* @import "https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700"; */
+html{font-family:sans-serif;-webkit-text-size-adjust:100%}
+a{background:none}
+a:focus{outline:thin dotted}
+a:active,a:hover{outline:0}
+h1{font-size:2em;margin:.67em 0}
+b,strong{font-weight:bold}
+abbr{font-size:.9em}
+abbr[title]{cursor:help;border-bottom:1px dotted #dddddf;text-decoration:none}
+dfn{font-style:italic}
+hr{height:0}
+mark{background:#ff0;color:#000}
+code,kbd,pre,samp{font-family:monospace;font-size:1em}
+pre{white-space:pre-wrap}
+q{quotes:"\201C" "\201D" "\2018" "\2019"}
+small{font-size:80%}
+sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}
+sup{top:-.5em}
+sub{bottom:-.25em}
+img{border:0}
+svg:not(:root){overflow:hidden}
+figure{margin:0}
+audio,video{display:inline-block}
+audio:not([controls]){display:none;height:0}
+fieldset{border:1px solid silver;margin:0 2px;padding:.35em .625em .75em}
+legend{border:0;padding:0}
+button,input,select,textarea{font-family:inherit;font-size:100%;margin:0}
+button,input{line-height:normal}
+button,select{text-transform:none}
+button,html input[type=button],input[type=reset],input[type=submit]{-webkit-appearance:button;cursor:pointer}
+button[disabled],html input[disabled]{cursor:default}
+input[type=checkbox],input[type=radio]{padding:0}
+button::-moz-focus-inner,input::-moz-focus-inner{border:0;padding:0}
+textarea{overflow:auto;vertical-align:top}
+table{border-collapse:collapse;border-spacing:0}
+*,::before,::after{box-sizing:border-box}
+html,body{font-size:100%}
+body{background:#fff;color:rgba(0,0,0,.8);padding:0;margin:0;font-family:"Noto Serif","DejaVu Serif",serif;line-height:1;position:relative;cursor:auto;-moz-tab-size:4;-o-tab-size:4;tab-size:4;word-wrap:anywhere;-moz-osx-font-smoothing:grayscale;-webkit-font-smoothing:antialiased}
+a:hover{cursor:pointer}
+img,object,embed{max-width:100%;height:auto}
+object,embed{height:100%}
+img{-ms-interpolation-mode:bicubic}
+.left{float:left!important}
+.right{float:right!important}
+.text-left{text-align:left!important}
+.text-right{text-align:right!important}
+.text-center{text-align:center!important}
+.text-justify{text-align:justify!important}
+.hide{display:none}
+img,object,svg{display:inline-block;vertical-align:middle}
+textarea{height:auto;min-height:50px}
+select{width:100%}
+.subheader,.admonitionblock td.content>.title,.audioblock>.title,.exampleblock>.title,.imageblock>.title,.listingblock>.title,.literalblock>.title,.stemblock>.title,.openblock>.title,.paragraph>.title,.quoteblock>.title,table.tableblock>.title,.verseblock>.title,.videoblock>.title,.dlist>.title,.olist>.title,.ulist>.title,.qlist>.title,.hdlist>.title{line-height:1.45;color:#7a2518;font-weight:400;margin-top:0;margin-bottom:.25em}
+div,dl,dt,dd,ul,ol,li,h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6,pre,form,p,blockquote,th,td{margin:0;padding:0}
+a{color:#2156a5;text-decoration:underline;line-height:inherit}
+a:hover,a:focus{color:#1d4b8f}
+a img{border:0}
+p{line-height:1.6;margin-bottom:1.25em;text-rendering:optimizeLegibility}
+p aside{font-size:.875em;line-height:1.35;font-style:italic}
+h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{font-family:"Open Sans","DejaVu Sans",sans-serif;font-weight:300;font-style:normal;color:#ba3925;text-rendering:optimizeLegibility;margin-top:1em;margin-bottom:.5em;line-height:1.0125em}
+h1 small,h2 small,h3 small,#toctitle small,.sidebarblock>.content>.title small,h4 small,h5 small,h6 small{font-size:60%;color:#e99b8f;line-height:0}
+h1{font-size:2.125em}
+h2{font-size:1.6875em}
+h3,#toctitle,.sidebarblock>.content>.title{font-size:1.375em}
+h4,h5{font-size:1.125em}
+h6{font-size:1em}
+hr{border:solid #dddddf;border-width:1px 0 0;clear:both;margin:1.25em 0 1.1875em}
+em,i{font-style:italic;line-height:inherit}
+strong,b{font-weight:bold;line-height:inherit}
+small{font-size:60%;line-height:inherit}
+code{font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;font-weight:400;color:rgba(0,0,0,.9)}
+ul,ol,dl{line-height:1.6;margin-bottom:1.25em;list-style-position:outside;font-family:inherit}
+ul,ol{margin-left:1.5em}
+ul li ul,ul li ol{margin-left:1.25em;margin-bottom:0}
+ul.square li ul,ul.circle li ul,ul.disc li ul{list-style:inherit}
+ul.square{list-style-type:square}
+ul.circle{list-style-type:circle}
+ul.disc{list-style-type:disc}
+ol li ul,ol li ol{margin-left:1.25em;margin-bottom:0}
+dl dt{margin-bottom:.3125em;font-weight:bold}
+dl dd{margin-bottom:1.25em}
+blockquote{margin:0 0 1.25em;padding:.5625em 1.25em 0 1.1875em;border-left:1px solid #ddd}
+blockquote,blockquote p{line-height:1.6;color:rgba(0,0,0,.85)}
+@media screen and (min-width:768px){h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{line-height:1.2}
+h1{font-size:2.75em}
+h2{font-size:2.3125em}
+h3,#toctitle,.sidebarblock>.content>.title{font-size:1.6875em}
+h4{font-size:1.4375em}}
+table{background:#fff;margin-bottom:1.25em;border:1px solid #dedede;word-wrap:normal}
+table thead,table tfoot{background:#f7f8f7}
+table thead tr th,table thead tr td,table tfoot tr th,table tfoot tr td{padding:.5em .625em .625em;font-size:inherit;color:rgba(0,0,0,.8);text-align:left}
+table tr th,table tr td{padding:.5625em .625em;font-size:inherit;color:rgba(0,0,0,.8)}
+table tr.even,table tr.alt{background:#f8f8f7}
+table thead tr th,table tfoot tr th,table tbody tr td,table tr td,table tfoot tr td{line-height:1.6}
+h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{line-height:1.2;word-spacing:-.05em}
+h1 strong,h2 strong,h3 strong,#toctitle strong,.sidebarblock>.content>.title strong,h4 strong,h5 strong,h6 strong{font-weight:400}
+.center{margin-left:auto;margin-right:auto}
+.stretch{width:100%}
+.clearfix::before,.clearfix::after,.float-group::before,.float-group::after{content:" ";display:table}
+.clearfix::after,.float-group::after{clear:both}
+:not(pre).nobreak{word-wrap:normal}
+:not(pre).nowrap{white-space:nowrap}
+:not(pre).pre-wrap{white-space:pre-wrap}
+:not(pre):not([class^=L])>code{font-size:.9375em;font-style:normal!important;letter-spacing:0;padding:.1em .5ex;word-spacing:-.15em;background:#f7f7f8;border-radius:4px;line-height:1.45;text-rendering:optimizeSpeed}
+pre{color:rgba(0,0,0,.9);font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;line-height:1.45;text-rendering:optimizeSpeed}
+pre code,pre pre{color:inherit;font-size:inherit;line-height:inherit}
+pre>code{display:block}
+pre.nowrap,pre.nowrap pre{white-space:pre;word-wrap:normal}
+em em{font-style:normal}
+strong strong{font-weight:400}
+.keyseq{color:rgba(51,51,51,.8)}
+kbd{font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;display:inline-block;color:rgba(0,0,0,.8);font-size:.65em;line-height:1.45;background:#f7f7f7;border:1px solid #ccc;border-radius:3px;box-shadow:0 1px 0 rgba(0,0,0,.2),inset 0 0 0 .1em #fff;margin:0 .15em;padding:.2em .5em;vertical-align:middle;position:relative;top:-.1em;white-space:nowrap}
+.keyseq kbd:first-child{margin-left:0}
+.keyseq kbd:last-child{margin-right:0}
+.menuseq,.menuref{color:#000}
+.menuseq b:not(.caret),.menuref{font-weight:inherit}
+.menuseq{word-spacing:-.02em}
+.menuseq b.caret{font-size:1.25em;line-height:.8}
+.menuseq i.caret{font-weight:bold;text-align:center;width:.45em}
+b.button::before,b.button::after{position:relative;top:-1px;font-weight:400}
+b.button::before{content:"[";padding:0 3px 0 2px}
+b.button::after{content:"]";padding:0 2px 0 3px}
+p a>code:hover{color:rgba(0,0,0,.9)}
+#header,#content,#footnotes,#footer{width:100%;margin:0 auto;max-width:62.5em;*zoom:1;position:relative;padding-left:.9375em;padding-right:.9375em}
+#header::before,#header::after,#content::before,#content::after,#footnotes::before,#footnotes::after,#footer::before,#footer::after{content:" ";display:table}
+#header::after,#content::after,#footnotes::after,#footer::after{clear:both}
+#content{margin-top:1.25em}
+#content::before{content:none}
+#header>h1:first-child{color:rgba(0,0,0,.85);margin-top:2.25rem;margin-bottom:0}
+#header>h1:first-child+#toc{margin-top:8px;border-top:1px solid #dddddf}
+#header>h1:only-child,body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
+#header .details{border-bottom:1px solid #dddddf;line-height:1.45;padding-top:.25em;padding-bottom:.25em;padding-left:.25em;color:rgba(0,0,0,.6);display:flex;flex-flow:row wrap}
+#header .details span:first-child{margin-left:-.125em}
+#header .details span.email a{color:rgba(0,0,0,.85)}
+#header .details br{display:none}
+#header .details br+span::before{content:"\00a0\2013\00a0"}
+#header .details br+span.author::before{content:"\00a0\22c5\00a0";color:rgba(0,0,0,.85)}
+#header .details br+span#revremark::before{content:"\00a0|\00a0"}
+#header #revnumber{text-transform:capitalize}
+#header #revnumber::after{content:"\00a0"}
+#content>h1:first-child:not([class]){color:rgba(0,0,0,.85);border-bottom:1px solid #dddddf;padding-bottom:8px;margin-top:0;padding-top:1rem;margin-bottom:1.25rem}
+#toc{border-bottom:1px solid #e7e7e9;padding-bottom:.5em}
+#toc>ul{margin-left:.125em}
+#toc ul.sectlevel0>li>a{font-style:italic}
+#toc ul.sectlevel0 ul.sectlevel1{margin:.5em 0}
+#toc ul{font-family:"Open Sans","DejaVu Sans",sans-serif;list-style-type:none}
+#toc li{line-height:1.3334;margin-top:.3334em}
+#toc a{text-decoration:none}
+#toc a:active{text-decoration:underline}
+#toctitle{color:#7a2518;font-size:1.2em}
+@media screen and (min-width:768px){#toctitle{font-size:1.375em}
+body.toc2{padding-left:15em;padding-right:0}
+#toc.toc2{margin-top:0!important;background:#f8f8f7;position:fixed;width:15em;left:0;top:0;border-right:1px solid #e7e7e9;border-top-width:0!important;border-bottom-width:0!important;z-index:1000;padding:1.25em 1em;height:100%;overflow:auto}
+#toc.toc2 #toctitle{margin-top:0;margin-bottom:.8rem;font-size:1.2em}
+#toc.toc2>ul{font-size:.9em;margin-bottom:0}
+#toc.toc2 ul ul{margin-left:0;padding-left:1em}
+#toc.toc2 ul.sectlevel0 ul.sectlevel1{padding-left:0;margin-top:.5em;margin-bottom:.5em}
+body.toc2.toc-right{padding-left:0;padding-right:15em}
+body.toc2.toc-right #toc.toc2{border-right-width:0;border-left:1px solid #e7e7e9;left:auto;right:0}}
+@media screen and (min-width:1280px){body.toc2{padding-left:20em;padding-right:0}
+#toc.toc2{width:20em}
+#toc.toc2 #toctitle{font-size:1.375em}
+#toc.toc2>ul{font-size:.95em}
+#toc.toc2 ul ul{padding-left:1.25em}
+body.toc2.toc-right{padding-left:0;padding-right:20em}}
+#content #toc{border:1px solid #e0e0dc;margin-bottom:1.25em;padding:1.25em;background:#f8f8f7;border-radius:4px}
+#content #toc>:first-child{margin-top:0}
+#content #toc>:last-child{margin-bottom:0}
+#footer{max-width:none;background:rgba(0,0,0,.8);padding:1.25em}
+#footer-text{color:hsla(0,0%,100%,.8);line-height:1.44}
+#content{margin-bottom:.625em}
+.sect1{padding-bottom:.625em}
+@media screen and (min-width:768px){#content{margin-bottom:1.25em}
+.sect1{padding-bottom:1.25em}}
+.sect1:last-child{padding-bottom:0}
+.sect1+.sect1{border-top:1px solid #e7e7e9}
+#content h1>a.anchor,h2>a.anchor,h3>a.anchor,#toctitle>a.anchor,.sidebarblock>.content>.title>a.anchor,h4>a.anchor,h5>a.anchor,h6>a.anchor{position:absolute;z-index:1001;width:1.5ex;margin-left:-1.5ex;display:block;text-decoration:none!important;visibility:hidden;text-align:center;font-weight:400}
+#content h1>a.anchor::before,h2>a.anchor::before,h3>a.anchor::before,#toctitle>a.anchor::before,.sidebarblock>.content>.title>a.anchor::before,h4>a.anchor::before,h5>a.anchor::before,h6>a.anchor::before{content:"\00A7";font-size:.85em;display:block;padding-top:.1em}
+#content h1:hover>a.anchor,#content h1>a.anchor:hover,h2:hover>a.anchor,h2>a.anchor:hover,h3:hover>a.anchor,#toctitle:hover>a.anchor,.sidebarblock>.content>.title:hover>a.anchor,h3>a.anchor:hover,#toctitle>a.anchor:hover,.sidebarblock>.content>.title>a.anchor:hover,h4:hover>a.anchor,h4>a.anchor:hover,h5:hover>a.anchor,h5>a.anchor:hover,h6:hover>a.anchor,h6>a.anchor:hover{visibility:visible}
+#content h1>a.link,h2>a.link,h3>a.link,#toctitle>a.link,.sidebarblock>.content>.title>a.link,h4>a.link,h5>a.link,h6>a.link{color:#ba3925;text-decoration:none}
+#content h1>a.link:hover,h2>a.link:hover,h3>a.link:hover,#toctitle>a.link:hover,.sidebarblock>.content>.title>a.link:hover,h4>a.link:hover,h5>a.link:hover,h6>a.link:hover{color:#a53221}
+details,.audioblock,.imageblock,.literalblock,.listingblock,.stemblock,.videoblock{margin-bottom:1.25em}
+details{margin-left:1.25rem}
+details>summary{cursor:pointer;display:block;position:relative;line-height:1.6;margin-bottom:.625rem;outline:none;-webkit-tap-highlight-color:transparent}
+details>summary::-webkit-details-marker{display:none}
+details>summary::before{content:"";border:solid transparent;border-left:solid;border-width:.3em 0 .3em .5em;position:absolute;top:.5em;left:-1.25rem;transform:translateX(15%)}
+details[open]>summary::before{border:solid transparent;border-top:solid;border-width:.5em .3em 0;transform:translateY(15%)}
+details>summary::after{content:"";width:1.25rem;height:1em;position:absolute;top:.3em;left:-1.25rem}
+.admonitionblock td.content>.title,.audioblock>.title,.exampleblock>.title,.imageblock>.title,.listingblock>.title,.literalblock>.title,.stemblock>.title,.openblock>.title,.paragraph>.title,.quoteblock>.title,table.tableblock>.title,.verseblock>.title,.videoblock>.title,.dlist>.title,.olist>.title,.ulist>.title,.qlist>.title,.hdlist>.title{text-rendering:optimizeLegibility;text-align:left;font-family:"Noto Serif","DejaVu Serif",serif;font-size:1rem;font-style:italic}
+table.tableblock.fit-content>caption.title{white-space:nowrap;width:0}
+.paragraph.lead>p,#preamble>.sectionbody>[class=paragraph]:first-of-type p{font-size:1.21875em;line-height:1.6;color:rgba(0,0,0,.85)}
+.admonitionblock>table{border-collapse:separate;border:0;background:none;width:100%}
+.admonitionblock>table td.icon{text-align:center;width:80px}
+.admonitionblock>table td.icon img{max-width:none}
+.admonitionblock>table td.icon .title{font-weight:bold;font-family:"Open Sans","DejaVu Sans",sans-serif;text-transform:uppercase}
+.admonitionblock>table td.content{padding-left:1.125em;padding-right:1.25em;border-left:1px solid #dddddf;color:rgba(0,0,0,.6);word-wrap:anywhere}
+.admonitionblock>table td.content>:last-child>:last-child{margin-bottom:0}
+.exampleblock>.content{border:1px solid #e6e6e6;margin-bottom:1.25em;padding:1.25em;background:#fff;border-radius:4px}
+.exampleblock>.content>:first-child{margin-top:0}
+.exampleblock>.content>:last-child{margin-bottom:0}
+.sidebarblock{border:1px solid #dbdbd6;margin-bottom:1.25em;padding:1.25em;background:#f3f3f2;border-radius:4px}
+.sidebarblock>:first-child{margin-top:0}
+.sidebarblock>:last-child{margin-bottom:0}
+.sidebarblock>.content>.title{color:#7a2518;margin-top:0;text-align:center}
+.exampleblock>.content>:last-child>:last-child,.exampleblock>.content .olist>ol>li:last-child>:last-child,.exampleblock>.content .ulist>ul>li:last-child>:last-child,.exampleblock>.content .qlist>ol>li:last-child>:last-child,.sidebarblock>.content>:last-child>:last-child,.sidebarblock>.content .olist>ol>li:last-child>:last-child,.sidebarblock>.content .ulist>ul>li:last-child>:last-child,.sidebarblock>.content .qlist>ol>li:last-child>:last-child{margin-bottom:0}
+.literalblock pre,.listingblock>.content>pre{border-radius:4px;overflow-x:auto;padding:1em;font-size:.8125em}
+@media screen and (min-width:768px){.literalblock pre,.listingblock>.content>pre{font-size:.90625em}}
+@media screen and (min-width:1280px){.literalblock pre,.listingblock>.content>pre{font-size:1em}}
+.literalblock pre,.listingblock>.content>pre:not(.highlight),.listingblock>.content>pre[class=highlight],.listingblock>.content>pre[class^="highlight "]{background:#f7f7f8}
+.literalblock.output pre{color:#f7f7f8;background:rgba(0,0,0,.9)}
+.listingblock>.content{position:relative}
+.listingblock code[data-lang]::before{display:none;content:attr(data-lang);position:absolute;font-size:.75em;top:.425rem;right:.5rem;line-height:1;text-transform:uppercase;color:inherit;opacity:.5}
+.listingblock:hover code[data-lang]::before{display:block}
+.listingblock.terminal pre .command::before{content:attr(data-prompt);padding-right:.5em;color:inherit;opacity:.5}
+.listingblock.terminal pre .command:not([data-prompt])::before{content:"$"}
+.listingblock pre.highlightjs{padding:0}
+.listingblock pre.highlightjs>code{padding:1em;border-radius:4px}
+.listingblock pre.prettyprint{border-width:0}
+.prettyprint{background:#f7f7f8}
+pre.prettyprint .linenums{line-height:1.45;margin-left:2em}
+pre.prettyprint li{background:none;list-style-type:inherit;padding-left:0}
+pre.prettyprint li code[data-lang]::before{opacity:1}
+pre.prettyprint li:not(:first-child) code[data-lang]::before{display:none}
+table.linenotable{border-collapse:separate;border:0;margin-bottom:0;background:none}
+table.linenotable td[class]{color:inherit;vertical-align:top;padding:0;line-height:inherit;white-space:normal}
+table.linenotable td.code{padding-left:.75em}
+table.linenotable td.linenos,pre.pygments .linenos{border-right:1px solid;opacity:.35;padding-right:.5em;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}
+pre.pygments span.linenos{display:inline-block;margin-right:.75em}
+.quoteblock{margin:0 1em 1.25em 1.5em;display:table}
+.quoteblock:not(.excerpt)>.title{margin-left:-1.5em;margin-bottom:.75em}
+.quoteblock blockquote,.quoteblock p{color:rgba(0,0,0,.85);font-size:1.15rem;line-height:1.75;word-spacing:.1em;letter-spacing:0;font-style:italic;text-align:justify}
+.quoteblock blockquote{margin:0;padding:0;border:0}
+.quoteblock blockquote::before{content:"\201c";float:left;font-size:2.75em;font-weight:bold;line-height:.6em;margin-left:-.6em;color:#7a2518;text-shadow:0 1px 2px rgba(0,0,0,.1)}
+.quoteblock blockquote>.paragraph:last-child p{margin-bottom:0}
+.quoteblock .attribution{margin-top:.75em;margin-right:.5ex;text-align:right}
+.verseblock{margin:0 1em 1.25em}
+.verseblock pre{font-family:"Open Sans","DejaVu Sans",sans-serif;font-size:1.15rem;color:rgba(0,0,0,.85);font-weight:300;text-rendering:optimizeLegibility}
+.verseblock pre strong{font-weight:400}
+.verseblock .attribution{margin-top:1.25rem;margin-left:.5ex}
+.quoteblock .attribution,.verseblock .attribution{font-size:.9375em;line-height:1.45;font-style:italic}
+.quoteblock .attribution br,.verseblock .attribution br{display:none}
+.quoteblock .attribution cite,.verseblock .attribution cite{display:block;letter-spacing:-.025em;color:rgba(0,0,0,.6)}
+.quoteblock.abstract blockquote::before,.quoteblock.excerpt blockquote::before,.quoteblock .quoteblock blockquote::before{display:none}
+.quoteblock.abstract blockquote,.quoteblock.abstract p,.quoteblock.excerpt blockquote,.quoteblock.excerpt p,.quoteblock .quoteblock blockquote,.quoteblock .quoteblock p{line-height:1.6;word-spacing:0}
+.quoteblock.abstract{margin:0 1em 1.25em;display:block}
+.quoteblock.abstract>.title{margin:0 0 .375em;font-size:1.15em;text-align:center}
+.quoteblock.excerpt>blockquote,.quoteblock .quoteblock{padding:0 0 .25em 1em;border-left:.25em solid #dddddf}
+.quoteblock.excerpt,.quoteblock .quoteblock{margin-left:0}
+.quoteblock.excerpt blockquote,.quoteblock.excerpt p,.quoteblock .quoteblock blockquote,.quoteblock .quoteblock p{color:inherit;font-size:1.0625rem}
+.quoteblock.excerpt .attribution,.quoteblock .quoteblock .attribution{color:inherit;font-size:.85rem;text-align:left;margin-right:0}
+p.tableblock:last-child{margin-bottom:0}
+td.tableblock>.content{margin-bottom:1.25em;word-wrap:anywhere}
+td.tableblock>.content>:last-child{margin-bottom:-1.25em}
+table.tableblock,th.tableblock,td.tableblock{border:0 solid #dedede}
+table.grid-all>*>tr>*{border-width:1px}
+table.grid-cols>*>tr>*{border-width:0 1px}
+table.grid-rows>*>tr>*{border-width:1px 0}
+table.frame-all{border-width:1px}
+table.frame-ends{border-width:1px 0}
+table.frame-sides{border-width:0 1px}
+table.frame-none>colgroup+*>:first-child>*,table.frame-sides>colgroup+*>:first-child>*{border-top-width:0}
+table.frame-none>:last-child>:last-child>*,table.frame-sides>:last-child>:last-child>*{border-bottom-width:0}
+table.frame-none>*>tr>:first-child,table.frame-ends>*>tr>:first-child{border-left-width:0}
+table.frame-none>*>tr>:last-child,table.frame-ends>*>tr>:last-child{border-right-width:0}
+table.stripes-all>*>tr,table.stripes-odd>*>tr:nth-of-type(odd),table.stripes-even>*>tr:nth-of-type(even),table.stripes-hover>*>tr:hover{background:#f8f8f7}
+th.halign-left,td.halign-left{text-align:left}
+th.halign-right,td.halign-right{text-align:right}
+th.halign-center,td.halign-center{text-align:center}
+th.valign-top,td.valign-top{vertical-align:top}
+th.valign-bottom,td.valign-bottom{vertical-align:bottom}
+th.valign-middle,td.valign-middle{vertical-align:middle}
+table thead th,table tfoot th{font-weight:bold}
+tbody tr th{background:#f7f8f7}
+tbody tr th,tbody tr th p,tfoot tr th,tfoot tr th p{color:rgba(0,0,0,.8);font-weight:bold}
+p.tableblock>code:only-child{background:none;padding:0}
+p.tableblock{font-size:1em}
+ol{margin-left:1.75em}
+ul li ol{margin-left:1.5em}
+dl dd{margin-left:1.125em}
+dl dd:last-child,dl dd:last-child>:last-child{margin-bottom:0}
+li p,ul dd,ol dd,.olist .olist,.ulist .ulist,.ulist .olist,.olist .ulist{margin-bottom:.625em}
+ul.checklist,ul.none,ol.none,ul.no-bullet,ol.no-bullet,ol.unnumbered,ul.unstyled,ol.unstyled{list-style-type:none}
+ul.no-bullet,ol.no-bullet,ol.unnumbered{margin-left:.625em}
+ul.unstyled,ol.unstyled{margin-left:0}
+li>p:empty:only-child::before{content:"";display:inline-block}
+ul.checklist>li>p:first-child{margin-left:-1em}
+ul.checklist>li>p:first-child>.fa-square-o:first-child,ul.checklist>li>p:first-child>.fa-check-square-o:first-child{width:1.25em;font-size:.8em;position:relative;bottom:.125em}
+ul.checklist>li>p:first-child>input[type=checkbox]:first-child{margin-right:.25em}
+ul.inline{display:flex;flex-flow:row wrap;list-style:none;margin:0 0 .625em -1.25em}
+ul.inline>li{margin-left:1.25em}
+.unstyled dl dt{font-weight:400;font-style:normal}
+ol.arabic{list-style-type:decimal}
+ol.decimal{list-style-type:decimal-leading-zero}
+ol.loweralpha{list-style-type:lower-alpha}
+ol.upperalpha{list-style-type:upper-alpha}
+ol.lowerroman{list-style-type:lower-roman}
+ol.upperroman{list-style-type:upper-roman}
+ol.lowergreek{list-style-type:lower-greek}
+.hdlist>table,.colist>table{border:0;background:none}
+.hdlist>table>tbody>tr,.colist>table>tbody>tr{background:none}
+td.hdlist1,td.hdlist2{vertical-align:top;padding:0 .625em}
+td.hdlist1{font-weight:bold;padding-bottom:1.25em}
+td.hdlist2{word-wrap:anywhere}
+.literalblock+.colist,.listingblock+.colist{margin-top:-.5em}
+.colist td:not([class]):first-child{padding:.4em .75em 0;line-height:1;vertical-align:top}
+.colist td:not([class]):first-child img{max-width:none}
+.colist td:not([class]):last-child{padding:.25em 0}
+.thumb,.th{line-height:0;display:inline-block;border:4px solid #fff;box-shadow:0 0 0 1px #ddd}
+.imageblock.left{margin:.25em .625em 1.25em 0}
+.imageblock.right{margin:.25em 0 1.25em .625em}
+.imageblock>.title{margin-bottom:0}
+.imageblock.thumb,.imageblock.th{border-width:6px}
+.imageblock.thumb>.title,.imageblock.th>.title{padding:0 .125em}
+.image.left,.image.right{margin-top:.25em;margin-bottom:.25em;display:inline-block;line-height:0}
+.image.left{margin-right:.625em}
+.image.right{margin-left:.625em}
+a.image{text-decoration:none;display:inline-block}
+a.image object{pointer-events:none}
+sup.footnote,sup.footnoteref{font-size:.875em;position:static;vertical-align:super}
+sup.footnote a,sup.footnoteref a{text-decoration:none}
+sup.footnote a:active,sup.footnoteref a:active{text-decoration:underline}
+#footnotes{padding-top:.75em;padding-bottom:.75em;margin-bottom:.625em}
+#footnotes hr{width:20%;min-width:6.25em;margin:-.25em 0 .75em;border-width:1px 0 0}
+#footnotes .footnote{padding:0 .375em 0 .225em;line-height:1.3334;font-size:.875em;margin-left:1.2em;margin-bottom:.2em}
+#footnotes .footnote a:first-of-type{font-weight:bold;text-decoration:none;margin-left:-1.05em}
+#footnotes .footnote:last-of-type{margin-bottom:0}
+#content #footnotes{margin-top:-.625em;margin-bottom:0;padding:.75em 0}
+div.unbreakable{page-break-inside:avoid}
+.big{font-size:larger}
+.small{font-size:smaller}
+.underline{text-decoration:underline}
+.overline{text-decoration:overline}
+.line-through{text-decoration:line-through}
+.aqua{color:#00bfbf}
+.aqua-background{background:#00fafa}
+.black{color:#000}
+.black-background{background:#000}
+.blue{color:#0000bf}
+.blue-background{background:#0000fa}
+.fuchsia{color:#bf00bf}
+.fuchsia-background{background:#fa00fa}
+.gray{color:#606060}
+.gray-background{background:#7d7d7d}
+.green{color:#006000}
+.green-background{background:#007d00}
+.lime{color:#00bf00}
+.lime-background{background:#00fa00}
+.maroon{color:#600000}
+.maroon-background{background:#7d0000}
+.navy{color:#000060}
+.navy-background{background:#00007d}
+.olive{color:#606000}
+.olive-background{background:#7d7d00}
+.purple{color:#600060}
+.purple-background{background:#7d007d}
+.red{color:#bf0000}
+.red-background{background:#fa0000}
+.silver{color:#909090}
+.silver-background{background:#bcbcbc}
+.teal{color:#006060}
+.teal-background{background:#007d7d}
+.white{color:#bfbfbf}
+.white-background{background:#fafafa}
+.yellow{color:#bfbf00}
+.yellow-background{background:#fafa00}
+span.icon>.fa{cursor:default}
+a span.icon>.fa{cursor:inherit}
+.admonitionblock td.icon [class^="fa icon-"]{font-size:2.5em;text-shadow:1px 1px 2px rgba(0,0,0,.5);cursor:default}
+.admonitionblock td.icon .icon-note::before{content:"\f05a";color:#19407c}
+.admonitionblock td.icon .icon-tip::before{content:"\f0eb";text-shadow:1px 1px 2px rgba(155,155,0,.8);color:#111}
+.admonitionblock td.icon .icon-warning::before{content:"\f071";color:#bf6900}
+.admonitionblock td.icon .icon-caution::before{content:"\f06d";color:#bf3400}
+.admonitionblock td.icon .icon-important::before{content:"\f06a";color:#bf0000}
+.conum[data-value]{display:inline-block;color:#fff!important;background:rgba(0,0,0,.8);border-radius:50%;text-align:center;font-size:.75em;width:1.67em;height:1.67em;line-height:1.67em;font-family:"Open Sans","DejaVu Sans",sans-serif;font-style:normal;font-weight:bold}
+.conum[data-value] *{color:#fff!important}
+.conum[data-value]+b{display:none}
+.conum[data-value]::after{content:attr(data-value)}
+pre .conum[data-value]{position:relative;top:-.125em}
+b.conum *{color:inherit!important}
+.conum:not([data-value]):empty{display:none}
+dt,th.tableblock,td.content,div.footnote{text-rendering:optimizeLegibility}
+h1,h2,p,td.content,span.alt,summary{letter-spacing:-.01em}
+p strong,td.content strong,div.footnote strong{letter-spacing:-.005em}
+p,blockquote,dt,td.content,span.alt,summary{font-size:1.0625rem}
+p{margin-bottom:1.25rem}
+.sidebarblock p,.sidebarblock dt,.sidebarblock td.content,p.tableblock{font-size:1em}
+.exampleblock>.content{background:#fffef7;border-color:#e0e0dc;box-shadow:0 1px 4px #e0e0dc}
+.print-only{display:none!important}
+@page{margin:1.25cm .75cm}
+@media print{*{box-shadow:none!important;text-shadow:none!important}
+html{font-size:80%}
+a{color:inherit!important;text-decoration:underline!important}
+a.bare,a[href^="#"],a[href^="mailto:"]{text-decoration:none!important}
+a[href^="http:"]:not(.bare)::after,a[href^="https:"]:not(.bare)::after{content:"(" attr(href) ")";display:inline-block;font-size:.875em;padding-left:.25em}
+abbr[title]{border-bottom:1px dotted}
+abbr[title]::after{content:" (" attr(title) ")"}
+pre,blockquote,tr,img,object,svg{page-break-inside:avoid}
+thead{display:table-header-group}
+svg{max-width:100%}
+p,blockquote,dt,td.content{font-size:1em;orphans:3;widows:3}
+h2,h3,#toctitle,.sidebarblock>.content>.title{page-break-after:avoid}
+#header,#content,#footnotes,#footer{max-width:none}
+#toc,.sidebarblock,.exampleblock>.content{background:none!important}
+#toc{border-bottom:1px solid #dddddf!important;padding-bottom:0!important}
+body.book #header{text-align:center}
+body.book #header>h1:first-child{border:0!important;margin:2.5em 0 1em}
+body.book #header .details{border:0!important;display:block;padding:0!important}
+body.book #header .details span:first-child{margin-left:0!important}
+body.book #header .details br{display:block}
+body.book #header .details br+span::before{content:none!important}
+body.book #toc{border:0!important;text-align:left!important;padding:0!important;margin:0!important}
+body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-break-before:always}
+.listingblock code[data-lang]::before{display:block}
+#footer{padding:0 .9375em}
+.hide-on-print{display:none!important}
+.print-only{display:block!important}
+.hide-for-print{display:none!important}
+.show-for-print{display:inherit!important}}
+@media amzn-kf8,print{#header>h1:first-child{margin-top:1.25rem}
+.sect1{padding:0!important}
+.sect1+.sect1{border:0}
+#footer{background:none}
+#footer-text{color:rgba(0,0,0,.6);font-size:.9em}}
+@media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}
+</style>
+</head>
+<body class="article">
+<div id="header">
+<h1>SNAP Language</h1>
+<div class="details">
+<span id="author" class="author">N. R. Vandenberg</span><br>
+<span id="revdate">FS Version 7.2 - July 1 1989</span>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_introduction">1. Introduction</a></li>
+<li><a href="#_general_description_of_snap">2. General Description of SNAP</a></li>
+<li><a href="#_snap_definitions">3. SNAP Definitions</a></li>
+<li><a href="#_function_commands">4. Function Commands</a>
+<ul class="sectlevel2">
+<li><a href="#_general_syntax">4.1. General Syntax</a></li>
+<li><a href="#_syntax_examples">4.2. Syntax Examples</a></li>
+<li><a href="#_mat_module_functions">4.3. MAT Module Functions</a></li>
+<li><a href="#_quick_vs_long_functions">4.4. Quick vs. Long Functions</a></li>
+</ul>
+</li>
+<li><a href="#_control_commands">5. Control Commands</a>
+<ul class="sectlevel2">
+<li><a href="#_time_flow_control">5.1. Time Flow Control</a></li>
+<li><a href="#_timed_waits_and_timed_offsets">5.2. Timed Waits and Timed Offsets</a></li>
+<li><a href="#_time_scheduling">5.3. Time-Scheduling</a></li>
+<li><a href="#_cancellation_of_time_scheduled_commands">5.4. Cancellation of Time-Scheduled Commands</a></li>
+<li><a href="#_waiting_for_completion">5.5. Waiting for Completion</a></li>
+</ul>
+</li>
+<li><a href="#_comments">6. Comments</a></li>
+<li><a href="#_command_streams">7. Command Streams</a></li>
+<li><a href="#_procedures">8. Procedures</a>
+<ul class="sectlevel2">
+<li><a href="#_invoking_procedures">8.1. Invoking Procedures</a></li>
+<li><a href="#_opening_procedure_libraries">8.2. Opening Procedure Libraries</a></li>
+<li><a href="#_priority_of_procedures">8.3. Priority of Procedures</a></li>
+<li><a href="#_field_system_procedure_handling">8.4. Field System Procedure Handling</a></li>
+<li><a href="#_modifying_procedures">8.5. Modifying Procedures</a></li>
+</ul>
+</li>
+<li><a href="#_immediate_execution_operator_commands">9. Immediate Execution Operator Commands</a></li>
+<li><a href="#_formats_for_time_and_angles">10. Formats for Time and Angles</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="_introduction">1. Introduction</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The Mark Ill Field System uses the SNAP (Standard Notation for Astronomy
+Procedures) language for experiment control. The language was proposed
+originally in early 1979; during 1979 the initial implementation of some
+of the features of SNAP was accomplished. Since that time, more of the
+specifications have been implemented in later versions of the Mark Ill
+Field System. As of version <em>3.1</em>, all of SNAP was implemented except for
+the &#8220;wait for completion&#8221; feature and logical branching.</p>
+</div>
+<div class="paragraph">
+<p>The scope of intended use for SNAP has been reduced from its original
+conception. Since it appears that primarily VLBI experiments will be
+controlled via SNAP, certain changes have been made in the
+specifications. This Manual contains a description of SNAP as it is
+currently implemented specifically for Mark Ill VLBI experiment control.
+In the flow of VLBI data, the Field System of programs fit between the
+scheduling system and the delogging and correlator system.</p>
+</div>
+<div class="paragraph">
+<p>Refer to the companion SNAP Command manual for detailed descriptions of
+the implemented commands. Refer to the Standard Procedures manual for
+lists of procedures that are commonly used.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_general_description_of_snap">2. General Description of SNAP</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>SNAP has the following general attributes:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Time-sequencing is an integral part of SNAP. Commands are executed one
+after another. The language provides the ability to suspend execution of
+a stream of commands until a certain time has passed or an event has
+occurred.</p>
+</li>
+<li>
+<p>Logging is automatic for all commands, responses, and errors for full
+accountability after the experiment. Display on the operator&#8217;s console
+of all high-level commands for on-line monitoring is automatic, with
+optional expanded display for detailed monitoring.</p>
+</li>
+<li>
+<p>The syntax and protocol for SNAP are simple for operators to learn and
+use quickly. Only a few basic &#8220;rules&#8221; of protocol need be learned prior
+to using any command.</p>
+</li>
+<li>
+<p>Often-used sequences of commands may be defined as procedures and then
+invoked as a single higher-level command. Procedures may be nested
+within procedures.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_snap_definitions">3. SNAP Definitions</h2>
+<div class="sectionbody">
+<table class="tableblock frame-none grid-none stretch">
+<colgroup>
+<col style="width: 25%;">
+<col style="width: 75%;">
+</colgroup>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>function</em></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A SNAP word which has an action and/or a parameter
+value or set of parameter values associated with it. Functions are
+&#8220;built-in&#8221; to SNAP and cannot be modified in the field.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>command</em></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A contiguous set of non-blank characters requesting an
+action (or actions). Each SNAP command is both delimited and
+terminated by either a space(s) or carriage return. A single command
+may set, query, or log functions and parameters; invoke a procedure;
+or control the time flow of events.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>procedure</em></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A defined sequence of commands that may be invoked
+with the procedure name. Procedures are defined in terms of existing
+commands.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>control commands</em></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Those commands which control the flow of the
+execution of the command list.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>schedule file</em></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A disk file containing all of the information
+required to control data-taking during an experiment.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>schedule procedure library</em></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The set of procedures associated with
+a single schedule.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>station procedure library</em></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The set of local station-defined
+procedures.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>vocabulary</em></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The set of all defined words (functions and
+procedures) recognized by SNAP. A SNAP word may be up to 12 characters
+long, although abbreviations of 3 to 6 characters will typically be
+used. The character set <code>a</code> through <code>z</code> (upper case is available, but
+strongly discouraged) and 0 through 9 may be used; the first letter of
+all words is restricted to <code>a</code> through <code>z</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>special character</em></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">one of a set of reserved characters which have
+a special meaning within SNAP and may not be used in procedure or
+function names. All of the characters which are non-numeric and
+non-alphabetic are reserved special characters.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_function_commands">4. Function Commands</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>A function is a SNAP word that may have a parameter value or values
+associated with it. All functions are &#8220;built-in&#8221; commands, i.e.,
+they cannot be modified by the operator. The value(s) of a function&#8217;s
+parameters may be queried and logged at any time, simply by invoking
+the function name as a command. In a log entry, the character <code>/</code> is
+used to indicate a response to a user query for parameter value(s). In
+a command, the character <code>=</code> is used to assign value(s) to
+parameter(s) of a function.</p>
+</div>
+<div class="sect2">
+<h3 id="_general_syntax">4.1. General Syntax</h3>
+<div class="literalblock">
+<div class="content">
+<pre><em>function</em></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This command asks for a response giving the current status or value of
+the function. In the case of a Mark Ill module, the status and settings
+on the module are read back and the response is displayed and logged.</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre><em>function</em>/<em>parml</em>,<em>parm2</em>,...</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This is the general form for all responses to function commands. Each
+parameter in the response corresponds to the same parameter in the
+command. The response may have additional parameters which are known as
+&#8220;monitor-only&#8221; parameters, i.e., parameters which cannot be specified.</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre><em>function</em>=<em>parm</em>,<em>parm2</em></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This is the general syntax for all function commands which set
+parameters. In the case of a Mark Ill module, this command will send the
+parameters to the module. These parameters are known as <em>settable
+parameters</em>, i.e., they may be specified and will be used to set up the
+module. Each parameter may be integer, floating point, ASCII, <code>*</code> or null.
+A null parameter specifies the default value for the parameter, if any.
+A parameter specified as <code>*</code> means that the parameter&#8217;s value is to be
+left unchanged.</p>
+</div>
+<div class="paragraph">
+<p>A number of SNAP functions take the names of Mark Ill modules as
+parameters. In these cases, various forms of the module names are
+accepted. For instance, <code>v1</code>, <code>v01</code>, <code>vc1</code> and <code>vc01</code> all signify
+video converter number one, and <code>v10</code>, <code>vc10</code> and <code>va</code> all signify
+video converter number ten. The IF distributor may be called either
+<code>IF</code> or <code>IFD</code>, and a single channel can be specified as <code>i<em>n</em></code>, <code>if<em>n</em></code> or
+<code>IFD<em>n</em></code>, where <em>n</em> is either <code>1</code> or <code>2</code>. The formatter can be called
+either <code>fm</code> or <code>form</code>, and the tape transport either <code>tp</code> or <code>tape</code>.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+This flexibility in naming Mark Ill modules applies <em>only</em> when
+they are being used as function parameters , and <em>not</em> as function
+names.  Function names must be entered exactly as listed in the SNAP
+Command manual.
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_syntax_examples">4.2. Syntax Examples</h3>
+<div class="paragraph">
+<p>As examples of the syntax described in the previous section
+<a href="#_general_syntax">General Syntax</a>, the following commands might be used.</p>
+</div>
+<div class="paragraph">
+<p>The command</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>vc01</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>would read back the current parameter values on video converter 1. The
+response might look like:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>vc01/123.5,2.0,u,0,0,rem,lock,365</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The command</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>vc01=123.5</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>would set the video converter to 123.5 MHz and use default values for
+all other settable parameters.</p>
+</div>
+<div class="paragraph">
+<p>The command</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>vc01=123.5,,*</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>would set the video converter to 123.5 MHz, use the default value for
+the bandwidth, and set the TPI to whatever had been specified in the
+last command to this module. The response to both commands would be</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>vc01/ack</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Detailed specifications for the settable and monitor-only parameters for
+all commands are in the SNAP Command manual (<mark>not yet available</mark>).</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_mat_module_functions">4.3. MAT Module Functions</h3>
+<div class="paragraph">
+<p>The following syntax is appropriate for those commands which refer to
+Mark Ill modules with an MAT interface. A note in the &#8220;comments&#8221;
+section for each command described in the SNAP Command manual (<mark>not
+yet available</mark>) indicates whether these functions are available.</p>
+</div>
+<table class="tableblock frame-none grid-none stretch">
+<colgroup>
+<col style="width: 20%;">
+<col style="width: 80%;">
+</colgroup>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p><code><em>module</em>=?</code></p>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Report the parameters last sent to the module. This command merely
+accesses values stored in the computer and has no effect on the module.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p><code><em>module</em>=alarm</code></p>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Query the alarm status, reset the alarm, and query again. Response to
+each query is <code>ack</code> or <code>nak</code>.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p><code><em>module</em>=test/reset</code></p>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Individual module reset function, identical to
+the system reset command, but for a single module.</p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>The MAT interface responds with <code>ack</code> to acknowledge communication. The
+response is <code>nak</code> if the alarm is on. Responses consisting only of <code>ack</code>s
+are not displayed unless the command <code>xdisp=on</code> was issued, and are not
+logged unless the command <code>xlog=on</code> was issued.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_quick_vs_long_functions">4.4. Quick vs. Long Functions</h3>
+<div class="paragraph">
+<p>Function commands fall into one of two types: &#8220;quick-response&#8221;
+functions and &#8220;long-execution&#8221; functions. &#8220;Quick&#8221; in this instance
+means on the order of seconds; the function <code>vc01</code>, for example, is a
+quick-response function. These functions <em>are completed</em> before the
+next command in the stream is started. The &#8220;long-execution&#8221;
+functions, e.g.,  the <code>source</code> command, which instructs the antenna to
+move to a new source, are those which take a long (or unknown) amount
+of time to complete.  These functions <em>are initiated only</em> then the
+next command in the stream is started. Functions which are of the
+long-execution type are so indicated in the &#8220;comments&#8221; section of
+the SNAP Command manual (<mark>not yet available</mark>).</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+There are no long-execution commands implemented at the present
+time. The <code>source</code> command, and any other which might be considered as
+long-execution commands, is treated as a quick-response command and the
+actual time of its completion is not available in SNAP.
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_control_commands">5. Control Commands</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_time_flow_control">5.1. Time Flow Control</h3>
+<div class="paragraph">
+<p>The time flow and time-sequencing of commands is controlled by the
+control command:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>!<em>time</em>        <span class="underline">(e.g., !123000)</span></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The <code>!</code> symbol may be regarded as a general &#8220;wait until&#8221; symbol.
+Execution of the command stream is suspended until the specified time
+occurs. For example, the series of commands:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>!123000
+qq=180
+!130000
+qq=90</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>have the following effect. First, the command stream is blocked until
+1230 UT.  Then, <code>qq</code> is to be set to <code>180</code> at 1230 UT.  The command
+stream is again blocked until 1300 UT, after which <code>qq</code> is set to
+<code>90</code>. Commands issued between <code>!<em>time</em></code> commands are executed in order
+of occurrence. Each command is completed before moving on to the next
+command, except for long-execution commands (see previous section).</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_timed_waits_and_timed_offsets">5.2. Timed Waits and Timed Offsets</h3>
+<div class="paragraph">
+<p>A timed wait may be executed by the command:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>!+<em>time-to-wait</em></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>For example, upon encountering the command <code>!+5m</code> a wait of five minutes
+will be completed before the next command in the command stream is
+executed.</p>
+</div>
+<div class="paragraph">
+<p>A timed offset with respect to some reference time is accomplished by
+using the symbol to establish a reference time, and then referring to
+this reference in a time-offset statement of the form
+<code>!*+<em>time-offset</em></code>. For example</p>
+</div>
+<table class="tableblock frame-none grid-none stretch">
+<colgroup>
+<col style="width: 16.6666%;">
+<col style="width: 83.3334%;">
+</colgroup>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p><code>!12h30m*</code></p>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Wait till 1230 UT, then set 1230 UT as the current reference</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p><code>!*+30m</code></p>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Wait until 1300  UT</p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>The &#8220;current time&#8221; may be established as the reference time with simply
+<code>!*</code>. A reference time remains in effect until it is explicitly updated
+with another <code>!<em>time</em>*</code> or <code>!*</code> command. Time-offsets provide a
+convenient way of controlling time-sequencing of actions within a
+user-defined procedure.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_time_scheduling">5.3. Time-Scheduling</h3>
+<div class="paragraph">
+<p>In some applications it is desired that certain actions be initiated at
+a specified time or at intervals regardless of the antenna pointing
+schedule, such as logging weather or certain system parameters. Actions
+of this type which do not interfere with other events in a command
+stream may bé time-scheduled as follows:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre><em>function-or-procedure</em>@<em>start-time</em>,<em>period</em>,<em>stop-time</em></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>where</p>
+</div>
+<table class="tableblock frame-none grid-none stretch">
+<colgroup>
+<col style="width: 25%;">
+<col style="width: 75%;">
+</colgroup>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p><code><em>function-or-procedure</em></code></p>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Any SNAP function or procedure.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p><code><em>start-time</em></code></p>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">UT time at which the command should first be executed. If
+<code><em>start-time</em></code> is not specified, all current time-scheduling for this
+command is cancelled. <code><em>start-time</em></code> may be specified as <code>!</code> meaning
+&#8220;now&#8221;, or as <code>!+<em>wait</em></code> to wait a specified time before starting.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p><code><em>period</em></code></p>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">How often to repeat the command. If <code><em>period</em></code> is not
+specified, the command is executed only once.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p><code><em>stop-time</em></code></p>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The last time to execute the command. If <code><em>stop-time</em></code> is
+not specified, the command will be repeated indefinitely until
+cancelled. <code><em>stop-time</em></code> may also be in the form <code>!+<em>wait</em></code> to stop after a
+specified time has passed.</p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>All of the fields <code><em>start-time</em></code>, <code><em>period</em></code>, and <code><em>stop-time</em></code> use
+the SNAP time format, see section <a href="#_formats_for_time_and_angles">Formats for Time and Angles</a>
+below. It is legal to time-schedule a command more than once; each
+time-scheduling will be handled independently.</p>
+</div>
+<div class="paragraph">
+<p>As an example of a time scheduled command,</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>wx@!,15m,140000</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>would schedule weather info to be logged every 15 minutes starting
+immediately and ending at 1400UT. Command execution would then proceed
+immediately to the next command in the command stream after doing the <code>wx</code>
+command for the first time.</p>
+</div>
+<div class="paragraph">
+<p>To cancel the above example <code>wx</code> monitor before 14H UT occurs, use the
+command:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>wx@</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Commands which are time-scheduled are inserted into the main line
+command stream at the specified time. Inadvertent nesting of
+procedures is not permitted in this operation, however. Thus,
+procedures which are time-scheduled may be subject to delay in
+execution until the currently-executing procedure, if any, is
+completed. There is no provision for asynchronous execution of more
+than the two main command streams. It is recommended that use of this
+feature be restricted to repetitive scheduling of non-interfering
+functions or procedures such as weather monitoring.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_cancellation_of_time_scheduled_commands">5.4. Cancellation of Time-Scheduled Commands</h3>
+<div class="paragraph">
+<p>There are a number of situations in which time-scheduled commands are
+cancelled. One, mentioned above, is when an explicit command to do so
+(e.g., <code>wx@</code>) is issued. In this case all occurrences of the specified
+command on the time-schedule list are cancelled.</p>
+</div>
+<div class="paragraph">
+<p>When an error occurs during execution of a time-scheduled function or
+procedure, the particular entry on the time-schedule list which is
+involved is cancelled from the list.</p>
+</div>
+<div class="paragraph">
+<p>When a new schedule is started with the <code>schedule=&#8230;&#8203;</code> command,
+anything on the time list related to a previous schedule is cancelled.
+This includes time scheduled procedures from the old schedule
+procedure library as well as procedures, functions and timed-waits
+initiated by the schedule.</p>
+</div>
+<div class="paragraph">
+<p>When the operator command stream is flushed with the <code>flush</code> command,
+all procedures, functions and timed-waits initiated by the operator
+are cancelled from the time-schedule list.</p>
+</div>
+<div class="paragraph">
+<p>When a new station procedure library is established with the
+<code>proc=&#8230;&#8203;</code> command, all time-scheduled procedures from the
+previous station library are cancelled.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_waiting_for_completion">5.5. Waiting for Completion</h3>
+<div class="paragraph">
+<p>The execution of commands in a command stream may be suspended awaiting
+the completion of a long-execution function or a time-scheduled function
+or procedure with the command:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>!<em>function-or-procedure-name</em></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If the named function or procedure is neither currently executing nor
+currently pre-scheduled, this command will have no effect and the
+command stream execution will proceed to the next command.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+This feature is not implemented.
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_comments">6. Comments</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Comments to be logged and displayed are entered with the following
+syntax:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>"Stay at the Indian Lodge in beautiful Fort Davis, Texas"</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>All of the characters between quotes are considered to be part of the
+comment. A quote character within the comment terminates the comment.
+The trailing <code>"</code> is not required.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_command_streams">7. Command Streams</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>A <em>command stream</em> is a series of commands which come from a given
+source. In the current implementation of SNAP, there are two command
+streams: the schedule&#8217;s and the operator&#8217;s. The operator command stream
+holds all commands typed by the operator and commands from within
+procedures invoked by the operator, The schedule command stream holds
+all commands found in the schedule file, and commands from within
+procedures invoked by the schedule.</p>
+</div>
+<div class="paragraph">
+<p>The schedule stream has priority over the operator stream. This means
+that commands from the operator stream will not be executed as long as
+there are schedule commands to be done. Once the schedule has come to
+a wait or a halt, the operator command stream will be treated.</p>
+</div>
+<div class="paragraph">
+<p>The operator initiates the schedule
+command stream by using the <code>schedule=&#8230;&#8203;</code>  command. The operator can also
+suspend execution of the schedule stream by using the <code>halt</code> command;
+execution of the schedule stream may be resumed by using the <code>cont</code>
+command.</p>
+</div>
+<div class="paragraph">
+<p>The schedule stream is &#8220;blocked&#8221; whenever a &#8220;wait until&#8221; command is
+issued and execution of the schedule will continue only when this time
+or event occurs. The operator stream is blocked due to execution of
+&#8220;wait until&#8221; commands which occur in procedures invoked by the operator.
+The operator may type in commands while the schedule is executing or
+while the operator stream is blocked. These commands will be stacked up
+as they are typed and executed once the schedule has come to a stopping
+place or the operator stream is unblocked.</p>
+</div>
+<div class="paragraph">
+<p>The operator can force a function command to be executed immediately
+without waiting for the schedule to come to a waiting place. See section
+<a href="#_immediate_execution_operator_commands">Immediate Execution Operator Commands</a> below.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_procedures">8. Procedures</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Procedures are user-defined and consist of a series of any existing
+SNAP commands, including ordinary commands, control commands and calls
+to other procedures. Procedures are grouped into libraries, up to two
+of which are available at any given time for use within the Field
+System.  Procedures may be defined, edited, deleted, copied, and
+listed by using the Field System program <em>pfmed</em> (<em>P</em>rocedure
+<em>F</em>ile <em>M</em>anager and <em>Ed</em>itor) which manages procedure
+libraries. Please refer to the <em>pfmed</em> manual (<mark>not yet available</mark>).</p>
+</div>
+<div class="sect2">
+<h3 id="_invoking_procedures">8.1. Invoking Procedures</h3>
+<div class="paragraph">
+<p>A procedure is invoked simply by its name. For example,</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>testproc</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>would invoke the procedure named <code>testproc</code>, which consists of SNAP
+commands to be executed in order. Procedures may be nested to 10 levels.</p>
+</div>
+<div class="paragraph">
+<p>Procedures may be passed a parameter consisting of up to 12 characters.
+This single parameter will be substituted for all occurrences of the
+character <code>$</code> in the commands which appear in the procedure. There may be
+commas embedded in the character string. For example, the procedure
+<code>skipf</code> could be passed the parameter <code>2m10s</code> by typing:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>skipf=2m10s</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>and this time-like parameter would be substituted for each <code>$</code> in the
+procedure.</p>
+</div>
+<div class="paragraph">
+<p>Procedures are recorded in the log file the first time they are invoked
+after a log file is started. If a procedure is edited with <em>pfmed</em>, the
+new version is automatically logged the next time the procedure is
+invoked.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_opening_procedure_libraries">8.2. Opening Procedure Libraries</h3>
+<div class="paragraph">
+<p>In the Field System there are available two libraries of procedures.
+When a new procedure library is opened, the names of all the procedures
+in the library are read into the Field System and these procedures
+become available to the operator.</p>
+</div>
+<div class="paragraph">
+<p>The procedure library named <em>station.prc</em> is known as the &#8220;station
+library&#8221;, and it normally contains procedures peculiar to the local
+site. When the Field System starts up, the <em>station.prc</em> procedure library
+is automatically opened and is kept open as long as the Field System is
+running.</p>
+</div>
+<div class="paragraph">
+<p>A second procedure library, the &#8220;schedule library&#8221;, is also available.
+When a new schedule is opened, the procedure library with the same name
+as the schedule (but with the <em>.prc</em> extension) becomes the schedule
+library. The schedule library may be opened or changed independently of
+the schedule with the <code>proc</code> command. When the Field System starts up,
+there is no schedule library open.</p>
+</div>
+<div class="paragraph">
+<p>When the <code>proc=&#8230;&#8203;</code> command is issued interactively, the following
+occurs:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>cancel all time-scheduled procedures and events related to the
+schedule procedure library and flush stacks</p>
+</li>
+<li>
+<p>close old library</p>
+</li>
+<li>
+<p>open new library and read in all procedure names</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>If the procedure library named in the command does not exist, you are
+left without a schedule procedure library open to the Field System.</p>
+</div>
+<div class="paragraph">
+<p>When a <code>schedule=&#8230;&#8203;</code> command is issued, the following happens:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>cancel all time-scheduled procedures and timed waits related to the
+previous schedule and flush stacks</p>
+</li>
+<li>
+<p>close previous schedule and schedule procedure library</p>
+</li>
+<li>
+<p>open new schedule and procedure library and read in all procedure
+names</p>
+</li>
+<li>
+<p>find place in the schedule</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>Even if the new schedule name is the same as the previous one, the
+above steps are done. If the schedule has no procedure library
+associated with it, the old schedule procedure library is closed and
+no new one is opened.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_priority_of_procedures">8.3. Priority of Procedures</h3>
+<div class="paragraph">
+<p>There are at most two libraries of procedures available at any one time:
+the station library <em>station.prc</em> and the schedule library, which may be
+station or schedule-specific. A procedure from the schedule library has
+precedence over any same-named procedure in the station library, i.e.,
+the station procedure can never be accessed. Also, a SNAP function has
+precedence over any same-named procedure in either library, i.e., the
+procedure could never be accessed.</p>
+</div>
+<div class="paragraph">
+<p>The list of SNAP function names is checked first, so any procedure with
+the same name as a &#8220;built-in&#8221; command could never be accessed.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_field_system_procedure_handling">8.4. Field System Procedure Handling</h3>
+<div class="paragraph">
+<p>When a schedule-invoked procedure is executing and a timed wait is
+encountered within the procedure, the schedule stream is blocked until
+the specified time, allowing the operator stream to be processed. Since
+the operator may invoke a procedure, it is therefore possible to have
+two procedures &#8220;executing&#8221; at the same time, one from each command
+stream.</p>
+</div>
+<div class="paragraph">
+<p>Therefore, to avoid confusion, there is an independent control structure
+for each command stream to handle procedures.</p>
+</div>
+<div class="paragraph">
+<p>The central component of the control structure is a stack which contains
+procedure identification and place-marking information for the current
+executing procedure and its calling procedure, If any, and so on up to a
+maximum nesting of 10 levels. While nesting is allowed, recursion,
+either direct or indirect, is not. That is, the same procedure may not
+occur twice on the same stack.</p>
+</div>
+<div class="paragraph">
+<p>As long as a procedure is in the midst of execution, no other commands
+from the corresponding command stream will be executed, even during
+timed waits, with the exception of immediate execution operator
+commands (see section <a href="#_immediate_execution_operator_commands">Immediate Execution Operator Commands</a> below)
+and time-scheduled events which are not procedure calls. Note that a
+time-scheduled procedure call will not be processed until the
+corresponding procedure stack is empty.  Thus, it is possible that the
+time-scheduled procedure may not execute when it is expected.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_modifying_procedures">8.5. Modifying Procedures</h3>
+<div class="paragraph">
+<p>Procedures may be modified at any time using the program <em>pfmed</em>. The new
+version of the procedure will not become available until the stack of
+procedures is empty of all references to the library in which the
+modified procedure resides. This restriction is related to the
+implementation of procedures as subcomponents of a single disk file.</p>
+</div>
+<div class="paragraph">
+<p>Editing procedures must be done using <em>pfmed</em>. Although procedure
+libraries are ASCII files, no other method of editing is supported, and
+any other method is actively discouraged.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_immediate_execution_operator_commands">9. Immediate Execution Operator Commands</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>There is an
+exception to the priority ordering of the schedule and operator command
+streams: the &#8220;immediate execution&#8221; operator commands. There is a set of
+commands which, when invoked by the operator, will be executed
+immediately after the currently-executing command is finished. This
+enables the operator to have some control over the schedule and to halt
+it (if necessary), turn on or off logging or display, interrupt a
+procedure, etc. Commands such as <code>halt</code>, <code>echo</code>, <code>break</code>, and <code>xdisp</code> are
+included in this set of commands.</p>
+</div>
+<div class="paragraph">
+<p>Time-scheduled functions are also handled immediately. In order to
+make <em>any function</em> execute immediately, time-schedule it for "`now".
+For example, to get the antenna pointing status logged as soon as the
+antenna comes on source, even though the schedule set-up is executing,
+you could use the command <code>onsource@!</code>. It is not possible to schedule
+procedures for immediate execution since they involve many commands.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_formats_for_time_and_angles">10. Formats for Time and Angles</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Several commands allow times to be specified. Currently, in all time
+formats, the following limits are checked:</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Unit</th>
+<th class="tableblock halign-left valign-top">Range</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">days</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1 -  366</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">hours</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0 - 23</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">minutes</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0 - 59</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">seconds</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0 - 59</p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>This means, for example, that a time of 90 seconds must be specified as
+<code>1m30s.</code></p>
+</div>
+<div class="paragraph">
+<p>The default format for <code><em>time</em></code> is fully numeric:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre> <em>yydddhhmmss.sss</em>  <span class="underline">or</span>  <em>yymmddhhmmss.sss</em></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The year, month, and date may be truncated from the left, but hours,
+minutes, and seconds must always be specified, i.e. this format has at
+least six digits and leading zeros must be supplied. Each field of
+<code><em>time</em></code> may also be specified with a suffix in the alternative format:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre><em>yy</em>y<em>ddd</em>d<em>hh</em>h<em>mm</em>m<em>ss</em>s  <span class="underline">or</span>  <em>yy</em>y<em>mm</em>m<em>dd</em>d<em>hh</em>h<em>mm</em>m<em>ss</em>s</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Leading or trailing fields may be omitted, but the fields included must
+be in order of decreasing significance from left to right. Only the
+right-most field may contain a non-integer value.</p>
+</div>
+<div class="paragraph">
+<p>Examples of correctly specified time fields:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>12h  <span class="underline">or</span>  120000  <span class="underline">(12 hours)</span></pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>4.25m  <span class="underline">or</span>  4m15s  <span class="underline">or</span>  000415  <span class="underline">(4 min, 15 sec)</span></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Angles are used to specify source positions and offsets. The default
+format is fully numeric:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre><em>hhmmss.ss</em>  <span class="underline">or</span>  <em>sddmmss.ss</em></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>for hours or degrees, respectively. This format always requires that at
+least six digits be specified. Each field of an angle may also be
+specified with a suffix appropriate to the field:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre><em>hh</em>h<em>mm</em>m<em>ss</em>s  <span class="underline">or</span>  <em>sdd</em>d<em>mm</em>m<em>ss</em>s</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>for hours or degrees, respectively. Any of the fields may be integer or
+real values. The fields must be in order of decreasing significance from
+left to right.</p>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Last updated 2024-03-05 08:14:46 -0500
+</div>
+</div>
+</body>
+</html>
