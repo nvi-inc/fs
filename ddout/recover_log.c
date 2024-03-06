@@ -146,6 +146,8 @@ int fd;
   shm_addr->abend.other_error=1;
   fail=FALSE;
   recovered_in_name=FALSE;
+  cum=0;
+
   fprintf(stderr,"!! help! ** attempting to recover '%s' by copying\n", lnamef);
   if(fd2 >= 0 && close(fd2) < 0)
     perror("\007!! help! ** error closing file with the log file name");
@@ -194,7 +196,6 @@ int fd;
   }
   count=0;
   countw=0;
-  cum=0;
   rte_rawt(&before);
   seconds=2;
   fprintf(stderr,
@@ -231,6 +232,10 @@ fail:
     fprintf(stderr,"\007!! help! ** portion of time tag for the date(s) of the session. Try to\n");
     fprintf(stderr,"\007!! help! ** do as little as possible to the file system until you\n");
     fprintf(stderr,"\007!! help! ** dismount it. Please see /usr2/fs/misc/logrecovery.txt for details.\n");
+    if(cum>0) {
+      fprintf(stderr,"!! help! ** Some of the log was recovered before the copying failed.\n");
+      fprintf(stderr,"!! help! ** The recovery file is: '%s', please check it.\n",file_name);
+    }
   } else {
     int ierr;
 
@@ -246,11 +251,11 @@ fail:
       fprintf(stderr,"\007!! help! ** problem checking for new-line at end of recoverd file, see above, may be benign\n");
     else
       fprintf(stderr,"!! help! ** Recovery comment successfully added to recovery file.\n");
+  }
 
-    if(recovered_in_name) {
-      fprintf(stderr,"!! help! ** NOTE WELL: If you re-opened the same log file, the file with that name (whatever it is),\n");
-      fprintf(stderr,"!! help! ** NOTE WELL: not the recovery file, is getting the new log entries.\n");
-    }
+  if(recovered_in_name) {
+    fprintf(stderr,"!! help! ** NOTE WELL: If you re-opened the same log file, the file with that name (whatever it is),\n");
+    fprintf(stderr,"!! help! ** NOTE WELL: not the recovery file, is getting the new log entries.\n");
   }
 
 done:
