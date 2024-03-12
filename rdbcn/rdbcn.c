@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, 2022, 2023 NVI, Inc.
+ * Copyright (c) 2020, 2022-2024 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -64,10 +64,10 @@ extern void herror(const char * s); /* Needed on HP-UX */
 
 extern struct fscom *shm_addr;
 
-#define BUFSIZE 1024 /* size of the input and output buffers */
+#define BUFSIZE MAX_CLS_MSG_BYTES /* size of the input and output buffers */
 /*#define DEBUG
  */
-static unsigned char inbuf[BUFSIZE];   /* input message buffer */
+static unsigned char inbuf[BUFSIZE+1];   /* input message buffer */
 static unsigned char outbuf[BUFSIZE];  /* output message buffer */
 static char who[ ]="cn";
 static char what[ ]="ad";
@@ -570,7 +570,7 @@ int ip[5];
 
   msgflg = save = 0;
   for (i=0;i<in_recs;i++) {
-    if ((nchars = cls_rcv(in_class,inbuf,BUFSIZE-1,&rtn1,&rtn2,msgflg,save)) <= 0) {
+    if ((nchars = cls_rcv(in_class,inbuf,BUFSIZE,&rtn1,&rtn2,msgflg,save)) <= 0) {
 #ifdef DEBUG
       printf ("%s failed to get a request buffer\n",me);
 #endif
@@ -698,7 +698,7 @@ int ip[5];
       outbuf[strlen(outbuf)-1]=0;
 
     if(outbuf[0]!=0 && ip[2] <=0) {
-      outbuf[511]=0; /* truncate to maximum class record size, cls_snd
+      outbuf[MAX_CLS_MSG_BYTES-1]=0; /* truncate to maximum class record size, cls_snd
 			can't do this because it doesn't know it is a string,
 			cls_rcv() calling should do it either since this 
 			would require many more changes */

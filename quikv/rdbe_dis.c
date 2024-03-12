@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020, 2024 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -28,8 +28,8 @@
 #include "../include/fscom.h"
 #include "../include/shm_addr.h"
 
-#define MAX_OUT 512
-#define BUFSIZE 513
+#define MAX_OUT MAX_CLS_MSG_BYTES
+#define BUFSIZE MAX_CLS_MSG_BYTES
 extern char unit_letters[];
 
 void rdbe_dis(command,itask,iwhich,ip,out_class,out_recs)
@@ -46,7 +46,7 @@ int *out_recs;
       int msgflg=0;  /* argument for cls_rcv - unused */
       int save=0;    /* argument for cls_rcv - unused */
       int nchars;
-      char inbuf[BUFSIZE],*first;
+      char inbuf[BUFSIZE+1],*first;
       int n;
       char who[3];
 
@@ -62,7 +62,7 @@ int *out_recs;
 
       for (i=0;i<ip[1];i++) {
 	if ((nchars =
-	     cls_rcv(ip[0],inbuf,BUFSIZE-1,&rtn1,&rtn2,msgflg,save)) <= 0) {
+	     cls_rcv(ip[0],inbuf,BUFSIZE,&rtn1,&rtn2,msgflg,save)) <= 0) {
 	  ierr = -401;
 	  goto error;
 	}
