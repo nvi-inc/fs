@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020, 2024 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -28,7 +28,7 @@
 #include "../include/fscom.h"         /* shared memory definition */
 #include "../include/shm_addr.h"      /* shared memory pointer */
 
-#define BUFSIZE 512
+#define BUFSIZE MAX_CLS_MSG_BYTES
 extern char unit_letters[];
 
 void rdbe(command,itask,ip)
