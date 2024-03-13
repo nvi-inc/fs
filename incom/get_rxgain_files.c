@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 NVI, Inc.
+ * Copyright (c) 2020-2021i, 2024 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -65,7 +65,7 @@ void get_rxgain_files(ierr)
             *ierr=-21;
     }
     if(*ierr!=0) {
-      if(ierr != -22)
+      if(*ierr != -22)
         printf("failing rxg file: `%s`\n",outbuf);
       if(*ierr%100>=-3 || *ierr==-12 || *ierr==-11)
          logit(NULL,errno,"un");
