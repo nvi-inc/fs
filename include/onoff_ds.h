@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020, 2024 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -18,6 +18,33 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 /* header file for onoff data structures */
+
+struct onoff_cmd_dummy_10_0_0 { /* for pinned 10.0.0 memory layout */
+  int rep;              /* repetitions, number */
+  int intp;             /* integration period, seconds */
+  float cutoff;         /* angle to switch to el instead of az offs, degrees */
+  float step;           /* step size in FWHMs */
+  int wait;             /* wait time for on to off transition */
+  float ssize;           /* source size, radians */
+  char proc[33];        /* procedure for first points */
+  struct onoff_devices_dummy_10_0_0 {
+    char lwhat[4];      /* device ID */
+    char pol;           /* polarization */
+    int ifchain;        /* which IF */
+    float flux;         /* source flux */
+    float corr;         /* source structure correction */
+    double center;      /* detector center frequency */
+    float fwhm;         /* full width half maximum (degrees) */
+    float tcal;        /* cal temperature */
+    float dpfu;         /* degrees per flux unit (gain) */
+    float gain;        /* gain curve, maximum=1.0 */
+  } devices[270];
+  // 270=2*128+8+6 for 10.0.0: 2*MAX_DBBC3_BBC+MAX_DBBC3_IF+MAX_USER_DEV
+  int itpis[270];        /* control array for which devices */
+  float fwhm;        /* FWHM for detector with the widest beam */
+  int stop_request;     /* stop request issued? */
+  int setup;            /* have we been set-up */
+};
 
 struct onoff_cmd {
   int rep;              /* repetitions, number */

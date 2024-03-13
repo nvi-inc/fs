@@ -89,11 +89,14 @@
 #define MAX_DBBC3_IF    8     
 #define MAX_DBBC3_DET    (2*MAX_DBBC3_BBC+MAX_DBBC3_IF)
 
-/* must be the largest number of detectors possible */
+#define MAX_R2DBE_DET    (MAX_R2DBE_CH*MAX_R2DBE_IF*MAX_RDBE)
+
+/* must be the largest number of legacy detectors possible */
+/* cannot change until users can unpin from 10.0.0 memory layout */
 #define MAX_GLOBAL_DET    MAX_DBBC3_DET
 
 /* must be the largest number of legacy and continuous detectors possible */
-#define MAX_ONOFF_RACK_DET   MAX_DBBC3_DET
+#define MAX_ONOFF_RACK_DET   MAX_R2DBE_DET
 #define MAX_ONOFF_DET   (MAX_ONOFF_RACK_DET+MAX_USER_DEV)
 
 #define DEV_VFM     "fm"
@@ -107,7 +110,7 @@
    Hierarchy: rack/drive, then rack_type/drive_type
    "*_type" must be unqiue within each specific rack or drive */ 
 #define DBBC3       0x4000
-  /* rack_types: DDCU, DDCV , drive_types: none  */
+  /* rack_types: DDCU, DDCV, DDCE; drive_types: none  */
 #define RDBE        0x2000
   /* rack_types: RDBE, R2DBE, drive_types: none  */
 #define MK6        0x1000
@@ -215,6 +218,8 @@
 #define MAX_RDBE    4
 #define MAX_RDBE_CH  16
 #define MAX_RDBE_IF   2
+#define MAX_R2DBE_CH  64
+#define MAX_R2DBE_IF   2
 
 #define MAX_LO     (MAX_RDBE*MAX_RDBE_IF)
 
