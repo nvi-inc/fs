@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 NVI, Inc.
+ * Copyright (c) 2020-2021, 2024 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -177,11 +177,11 @@ void handler(int sig) {
  */
 
 void setup_signals() {
-	sigset_t fullset = {};
+	sigset_t fullset;
 	sigfillset(&fullset);
 	pthread_sigmask(SIG_BLOCK, &fullset, NULL);
 
-	struct sigaction sa = {};
+	struct sigaction sa;
 	sa.sa_handler       = handler;
 	sigfillset(&sa.sa_mask);
 

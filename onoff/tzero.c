@@ -189,7 +189,7 @@ int tzero(cont,ip,onoff,rut,accum,ierr)
       for(i=0;i<MAX_ONOFF_RACK_DET;i++)
 	itpis[i]=0;
 
-    snprintf(buf2,sizeof(buf2)," Integrating for %d seconds: zero level",
+    snprintf((char *) buf2,sizeof(buf2)," Integrating for %d seconds: zero level",
              onoff->intp);
     logit(buf2,0,NULL);
     get_samples(cont,ip,itpis,onoff->intp,rut,accum,&acdum,&ierr2);
