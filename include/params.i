@@ -89,10 +89,13 @@ c
       integer MAX_MK6
       integer MAX_RDBE_IF
       integer MAX_RDBE_CH
+      integer MAX_R2DBE_IF
+      integer MAX_R2DBE_CH
       integer MAX_RDBE
       integer MAX_DBBC3_BBC
       integer MAX_DBBC3_IF
       integer MAX_DBBC3_DET
+      integer MAX_R2DBE_DET
       integer MAX_USER_DEV
       integer MAX_GLOBAL_DET
       integer MAX_ONOFF_RACK_DET
@@ -177,6 +180,8 @@ C
       parameter ( MAX_RDBE = 4 )
       parameter ( MAX_RDBE_IF = 2 )
       parameter ( MAX_RDBE_CH = 16 )
+      parameter ( MAX_R2DBE_IF = 2 )
+      parameter ( MAX_R2DBE_CH = 64 )
       parameter ( MAX_DAS = 2 )
       parameter ( FS_ROOT='/usr2')
 C
@@ -195,9 +200,10 @@ C
       parameter ( MAX_DBBC3_BBC  =128)
       parameter ( MAX_DBBC3_IF   = 8)
       parameter ( MAX_DBBC3_DET  = 2*MAX_DBBC3_BBC+MAX_DBBC3_IF)
+      parameter ( MAX_R2DBE_DET  = MAX_R2DBE_CH*MAX_RDBE_IF*MAX_RDBE)
       parameter ( MAX_GLOBAL_DET = MAX_DBBC3_DET)
       parameter ( MAX_USER_DEV = 6)
-      parameter ( MAX_ONOFF_RACK_DET = MAX_DBBC3_DET)
+      parameter ( MAX_ONOFF_RACK_DET = MAX_R2DBE_DET)
       parameter ( MAX_ONOFF_DET = MAX_ONOFF_RACK_DET + MAX_USER_DEV)
 C
       parameter ( CH_PRIOR=-04)

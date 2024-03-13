@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020, 2024 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -189,10 +189,20 @@ int get_samples(cont,ip,itpis,intg,rut,accum,accum2,ierr)
 	if(itpis[j]!=0) {
 	  sample.avg[j]=dtpi[j];
 	}
-    } else if(shm_addr->equip.rack==RDBE) {
+    } else if(shm_addr->equip.rack==RDBE &&
+	      shm_addr->equip.rack_type==RDBE) {
       if(tpget_rdbe(cont,ip,itpis,ierr,dtpi,dtpi2))
 	return -1;
       for(j=0;j<MAX_RDBE_DET;j++)
+	if(itpis[j]!=0) {
+	  sample.avg[j]=dtpi[j];
+	  sample2.avg[j]=dtpi2[j];
+	}
+    } else if(shm_addr->equip.rack==RDBE &&
+	      shm_addr->equip.rack_type==R2DBE) {
+      if(tpget_r2dbe(cont,ip,itpis,ierr,dtpi,dtpi2))
+	return -1;
+      for(j=0;j<MAX_R2DBE_DET;j++)
 	if(itpis[j]!=0) {
 	  sample.avg[j]=dtpi[j];
 	  sample2.avg[j]=dtpi2[j];

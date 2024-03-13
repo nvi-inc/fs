@@ -445,7 +445,8 @@ int ip[5];                           /* ipc parameters */
 	      }
 	    }
 	  }
-	} else if(shm_addr->equip.rack==RDBE) {
+	} else if(shm_addr->equip.rack==RDBE &&
+		  shm_addr->equip.rack_type==RDBE) {
 	  int ifch, ichan, irdbe, ifchain;
 	  for(i=0;i<MAX_RDBE_DET;i++) {
 	    irdbe=i/(MAX_RDBE_IF*MAX_RDBE_CH);
@@ -454,6 +455,17 @@ int ip[5];                           /* ipc parameters */
 	    ichan=(i%(MAX_RDBE_IF*MAX_RDBE_CH))%MAX_RDBE_CH;
 	    lcl.devices[i].ifchain=ifchain;
 	    lcl.devices[i].center=shm_addr->lo.lo[ifchain-1]+1024-32*ichan;
+	  }
+	} else if(shm_addr->equip.rack==RDBE &&
+		  shm_addr->equip.rack_type==R2DBE) {
+	  int ifch, ichan, irdbe, ifchain;
+	  for(i=0;i<MAX_R2DBE_DET;i++) {
+	    irdbe=i/(MAX_R2DBE_IF*MAX_R2DBE_CH);
+	    ifch=(i%(MAX_R2DBE_IF*MAX_R2DBE_CH))/MAX_R2DBE_CH;
+	    ifchain=irdbe*MAX_R2DBE_IF+ifch+1;
+	    ichan=(i%(MAX_R2DBE_IF*MAX_R2DBE_CH))%MAX_R2DBE_CH;
+	    lcl.devices[i].ifchain=ifchain;
+	    lcl.devices[i].center=shm_addr->lo.lo[ifchain-1]+32*ichan;
 	  }
 	} else if(shm_addr->equip.rack==DBBC3) {
 	  for (i=0;i<MAX_DBBC3_BBC*2;i++) {

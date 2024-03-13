@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, 2022 NVI, Inc.
+ * Copyright (c) 2020, 2022, 2024 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -55,8 +55,8 @@ void wcounts(label,azoff,eloff,onoff,accum)
       continue;
 
     if(
-       (rack==RDBE && ((onoff->intp==1 &&strlen(buff)>68)
-		       ||(onoff->intp!=1 &&strlen(buff)>59))) ||
+       (rack==RDBE && ((onoff->intp==1 &&strlen(buff)>64)
+		       ||(onoff->intp!=1 &&strlen(buff)>55))) ||
        (dbbc2_pfb && 
         ((onoff->intp==1 &&strlen(buff)>68)
             ||(onoff->intp!=1 &&strlen(buff)>59))) ||
@@ -87,7 +87,8 @@ void wcounts(label,azoff,eloff,onoff,accum)
     strcat(buff," ");
     if(onoff->intp==1) {
       if(rack==RDBE) {
-	dble2str(buff,       accum->avg[i],-9,0);
+	dble2str(buff,       accum->avg[i],-11,0);
+      printf(" buf '%s;\n",buff);
       buff[strlen(buff)-1]=0;
       } else if(dbbc2_pfb) {
 	dble2str(buff,       accum->avg[i],-8,3);
@@ -97,9 +98,9 @@ void wcounts(label,azoff,eloff,onoff,accum)
       }
     } else {
       if(rack==RDBE) {
-	dble2str(buff,       accum->avg[i],-9,1);
+	dble2str(buff,       accum->avg[i],-11,1);
 	strcat(buff," ");
-	dble2str(buff,       accum->sig[i],-9,1);
+	dble2str(buff,       accum->sig[i],-11,1);
       } else if(dbbc2_pfb) {
 	dble2str(buff,       accum->avg[i],-9,4);
 	strcat(buff," ");
@@ -115,6 +116,3 @@ void wcounts(label,azoff,eloff,onoff,accum)
     logit_nd(buff,0,NULL);
 
 }
-
-
-

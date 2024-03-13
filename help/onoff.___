@@ -23,7 +23,7 @@ Settable parameters:
                     seconds allowed, default 120.
 
           devices   One or more of all standard device mnemonics for
-                    Mark III/IV/5, VLBA/4/5, LBA4, LBA4, DBBC, RDBE,
+                    Mark III/IV/5, VLBA/4/5, LBA4, LBA4, DBBC, RDBE, R2DBE,
                     and DBBC3. For all those rack types except LBA:
                     'all'.  In addition, for:
 
@@ -31,7 +31,7 @@ Settable parameters:
 
                     Mark III/IV/5: allvc, formvc, and formif
 
-                    RDBE: a0, a1, ..., d1 for all channels on that IF.
+                    RDBE, R2DBE: a0, a1, ..., d1 for all channels on that IF.
 
                     VLBA/4/5, DBBC, and DBBC3: allbbc, alll, allu,
                     formbbc, and formif
@@ -114,8 +114,8 @@ met:
     detector, the appropriate BBC IF input have be selected with an
     appropriate bbcXX=... or bbcXXX=... command.
 
-For RDBEs when 'all' or entire IF is specified, all channels '00' are
-omitted since they are not usually useful. They can be added by
+For R(2)DBEs when 'all' or entire IF is specified, all channels '00'
+are omitted since they are not usually useful. They can be added by
 specifying them as additional devices.
  
 If a noise diode temperature is less than zero, it is assumed that
