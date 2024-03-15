@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020, 2022 NVI, Inc.
+* Copyright (c) 2020, 2022, 2024 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -164,8 +164,14 @@ C           do nothing ...
                ierr=-111
                goto 80010
             endif
-         else if(RDBE.eq.rack) then
+         else if(RDBE.eq.rack.and.RDBE.eq.rack_type) then
             call fc_rdbcn_d(ldevfp,ierr,ip)
+            if(ierr.ne.0) then
+               ierr=-81
+               goto 80010
+            endif
+         else if(RDBE.eq.rack.and.R2DBE.eq.rack_type) then
+            call fc_r2dbcn_d(ldevfp,ierr,ip)
             if(ierr.ne.0) then
                ierr=-81
                goto 80010

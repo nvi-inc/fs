@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020, 2022, 2023 NVI, Inc.
+* Copyright (c) 2020, 2022-2024 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -211,8 +211,16 @@ C
      &          (rack_type.eq.DBBC_PFB.or.rack_type.eq.DBBC_PFB_FILA10G)
      &          ) then
            call dbbcn_pfb(dtpi,ierr)
-        else if(RDBE.eq.rack) then
+        else if(RDBE.eq.rack.and.RDBE.eq.rack_type) then
            call rdbcn(dtpi,dtpi2,ierr,icont,isamples)
+           if(imode.ne.0.and.i.eq.1.and.icont.ne.0) then
+              if(isamples.gt.intp) then
+                 intp=isamples
+              endif
+           endif
+c           write(6,*) 'volts ',dtpi,dtpi2
+        else if(RDBE.eq.rack.and.R2DBE.eq.rack_type) then
+           call r2dbcn(dtpi,dtpi2,ierr,icont,isamples)
            if(imode.ne.0.and.i.eq.1.and.icont.ne.0) then
               if(isamples.gt.intp) then
                  intp=isamples

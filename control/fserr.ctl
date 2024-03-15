@@ -6098,6 +6098,9 @@ Unrecognized DBBC3 detector.
 QZ -220
 Unrecognized RDBE detector.
 ""
+QZ -221
+Unrecognized R2DBE detector.
+""
 QZ -301
 FIVPT is not dormant.
 ""
