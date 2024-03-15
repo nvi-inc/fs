@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020, 2023  NVI, Inc.
+* Copyright (c) 2020, 2023, 2024 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -306,6 +306,8 @@ C
          endif
          goto 410
       endif
+      call fs_get_rack(rack)
+      call fs_get_rack_type(rack_type)
       if(MK3.eq.rack.or.MK4.eq.rack) then
         if(cjchar(ldevfp,1).ne.'i') goto 405
         if(ichcm_ch(ldevfp,1,'i1').ne.0) goto 402
@@ -386,11 +388,22 @@ c
          ichan=ias2b(ldevfp,1,2)
          irdbe=index("abcdefghihklm",cjchar(ldevfp,3))
          ifc=index("01234567",cjchar(ldevfp,4))
-         if(irdbe.lt.1.or.irdbe.gt.MAX_RDBE .or.
-     *        ifc.lt.1.or.ifc.gt.MAX_RDBE_IF.or.
-     *        ichan.lt.0.or.ichan.ge.MAX_RDBE_CH) then
-            ierr=-220
-            goto 990
+         if(RDBE.eq.rack_type) then
+             if(irdbe.lt.1.or.irdbe.gt.MAX_RDBE .or.
+     *           ifc.lt.1.or.ifc.gt.MAX_RDBE_IF.or.
+     *           ichan.lt.0.or.ichan.ge.MAX_RDBE_CH) then
+               ierr=-220
+               goto 990
+            endif
+            ichain=ifc
+         else if(R2DBE.eq.rack_type) then
+            if(irdbe.lt.1.or.irdbe.gt.MAX_RDBE .or.
+     *           ifc.lt.1.or.ifc.gt.MAX_R2DBE_IF.or.
+     *           ichan.lt.0.or.ichan.ge.MAX_R2DBE_CH) then
+               ierr=-221
+               goto 990
+            endif
+            ichain=ifc
          endif
       else if(DBBC3.eq.rack) then
          if('i'.eq.cjchar(ldevfp,1,1)) then
