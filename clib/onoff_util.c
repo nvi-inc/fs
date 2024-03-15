@@ -161,9 +161,9 @@ char *ptr;
       }
       for(i=(sizeof(luser)/sizeof(char *))-2;i<sizeof(luser)/sizeof(char *);i++) {
 	if(strcmp(ptr,luser[i])==0) {
-	  lcl->itpis[MAX_GLOBAL_DET+i]=1;
-	  strncpy(lcl->devices[MAX_GLOBAL_DET+i].lwhat,luser[i],2);
-	  memcpy(lcl->devices[MAX_GLOBAL_DET+i].lwhat+2,"  ",2);
+	  lcl->itpis[MAX_ONOFF_RACK_DET+i]=1;
+	  strncpy(lcl->devices[MAX_ONOFF_RACK_DET+i].lwhat,luser[i],2);
+	  memcpy(lcl->devices[MAX_ONOFF_RACK_DET+i].lwhat+2,"  ",2);
 	  goto done;
 	}
       }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, 2022, 2023 NVI, Inc.
+ * Copyright (c) 2020, 2022-2024 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -145,7 +145,7 @@ main()
   for(j=0;j<MAX_ONOFF_DET;j++) {
     if(onoff.itpis[j]!=0) {
       use_cal=use_cal ||onoff.devices[j].tcal>0.0;
-      if(j<MAX_GLOBAL_DET) {
+      if(j<MAX_ONOFF_RACK_DET) {
 	rack_det=TRUE;
 	cont[j]=cont0;
       } else {

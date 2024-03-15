@@ -45,14 +45,14 @@ int get_samples(cont,ip,itpis,intg,rut,accum,accum2,ierr)
   }
 
   non_station=FALSE;
-  for(i=0;i<MAX_GLOBAL_DET;i++)
+  for(i=0;i<MAX_ONOFF_RACK_DET;i++)
     if(itpis[i]!=0) {
       non_station=TRUE;
       break;
     }
 
-  kst1=itpis[MAX_GLOBAL_DET+4];
-  kst2=itpis[MAX_GLOBAL_DET+5];
+  kst1=itpis[MAX_ONOFF_RACK_DET+4];
+  kst2=itpis[MAX_ONOFF_RACK_DET+5];
   station=kst1||kst2;
   
   if(non_station) {
@@ -208,9 +208,9 @@ int get_samples(cont,ip,itpis,intg,rut,accum,accum2,ierr)
     }
     if(station) {
       if(kst1)
-	sample.avg[MAX_GLOBAL_DET+4]=shm_addr->user_dev1_value;
+	sample.avg[MAX_ONOFF_RACK_DET+4]=shm_addr->user_dev1_value;
       if(kst2)
-	sample.avg[MAX_GLOBAL_DET+5]=shm_addr->user_dev2_value;
+	sample.avg[MAX_ONOFF_RACK_DET+5]=shm_addr->user_dev2_value;
     }
 
     sample.stm=stm-rut;

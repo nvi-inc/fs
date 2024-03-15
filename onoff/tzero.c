@@ -48,10 +48,10 @@ int tzero(cont,ip,onoff,rut,accum,ierr)
   ifc[0]=ifc[1]=ifc[2]=ifc[3]=FALSE;
   ierr2=0;
 
-  kst1=onoff->itpis[MAX_GLOBAL_DET+4];
+  kst1=onoff->itpis[MAX_ONOFF_RACK_DET+4];
   if(kst1)
     kst1z=shm_addr->user_device.zero[4];
-  kst2=onoff->itpis[MAX_GLOBAL_DET+5];
+  kst2=onoff->itpis[MAX_ONOFF_RACK_DET+5];
   if(kst2)
     kst2z=shm_addr->user_device.zero[5];
 
@@ -186,7 +186,7 @@ int tzero(cont,ip,onoff,rut,accum,ierr)
        shm_addr->equip.rack!=LBA4&&
        shm_addr->equip.rack!=VLBA&&
        shm_addr->equip.rack!=VLBA4) /* doctor up a local copy */
-      for(i=0;i<MAX_GLOBAL_DET;i++)
+      for(i=0;i<MAX_ONOFF_RACK_DET;i++)
 	itpis[i]=0;
 
     snprintf(buf2,sizeof(buf2)," Integrating for %d seconds: zero level",
@@ -248,14 +248,14 @@ int tzero(cont,ip,onoff,rut,accum,ierr)
   }
 
   if (kst1 && !kst1z) {
-    accum->avg[MAX_GLOBAL_DET+4] = 0.0;
-    accum->sig[MAX_GLOBAL_DET+4] = 0.0;
+    accum->avg[MAX_ONOFF_RACK_DET+4] = 0.0;
+    accum->sig[MAX_ONOFF_RACK_DET+4] = 0.0;
     accum->count=1;
     
   }
   if (kst2 && !kst2z) {
-    accum->avg[MAX_GLOBAL_DET+5] = 0.0;
-    accum->sig[MAX_GLOBAL_DET+5] = 0.0;
+    accum->avg[MAX_ONOFF_RACK_DET+5] = 0.0;
+    accum->sig[MAX_ONOFF_RACK_DET+5] = 0.0;
     accum->count=1;
   }
 

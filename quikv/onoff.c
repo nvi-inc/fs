@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021, 2023 NVI, Inc.
+ * Copyright (c) 2020-2021, 2023-2024 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -516,11 +516,11 @@ int ip[5];                           /* ipc parameters */
 	}
 
 	/* user devices */
-	for (i=MAX_GLOBAL_DET;i<MAX_ONOFF_DET;i++)
+	for (i=MAX_ONOFF_RACK_DET;i<MAX_ONOFF_DET;i++)
 	    if(lcl.itpis[i]!=0) {
-	      lcl.devices[i].ifchain=i-MAX_GLOBAL_DET+MAX_LO+1;
+	      lcl.devices[i].ifchain=i-MAX_ONOFF_RACK_DET+MAX_LO+1;
 	      lcl.devices[i].lwhat[0]='u';
-	      lcl.devices[i].lwhat[1]=hex[i-MAX_GLOBAL_DET+1];
+	      lcl.devices[i].lwhat[1]=hex[i-MAX_ONOFF_RACK_DET+1];
 	      lcl.devices[i].center=
 		shm_addr->user_device.center[lcl.devices[i].ifchain-(1+MAX_LO)];
 	      switch(shm_addr->user_device.sideband[lcl.devices[i].ifchain-(1+MAX_LO)]) {
