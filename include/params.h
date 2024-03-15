@@ -91,8 +91,10 @@
 
 /* must be the largest number of detectors possible */
 #define MAX_GLOBAL_DET    MAX_DBBC3_DET
-#define MAX_ONOFF_DET   (MAX_GLOBAL_DET+MAX_USER_DEV)
 
+/* must be the largest number of legacy and continuous detectors possible */
+#define MAX_ONOFF_RACK_DET   MAX_DBBC3_DET
+#define MAX_ONOFF_DET   (MAX_ONOFF_RACK_DET+MAX_USER_DEV)
 
 #define DEV_VFM     "fm"
 #define DEV_VIA     "ia"

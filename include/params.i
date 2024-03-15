@@ -93,7 +93,10 @@ c
       integer MAX_DBBC3_BBC
       integer MAX_DBBC3_IF
       integer MAX_DBBC3_DET
+      integer MAX_USER_DEV
       integer MAX_GLOBAL_DET
+      integer MAX_ONOFF_RACK_DET
+      integer MAX_ONOFF_DET
       integer CH_PRIOR      ! chekr        realtime priority
       integer CL_PRIOR      ! clock func.  realtime priority
       integer FS_PRIOR      ! Field System realtime priority
@@ -193,6 +196,9 @@ C
       parameter ( MAX_DBBC3_IF   = 8)
       parameter ( MAX_DBBC3_DET  = 2*MAX_DBBC3_BBC+MAX_DBBC3_IF)
       parameter ( MAX_GLOBAL_DET = MAX_DBBC3_DET)
+      parameter ( MAX_USER_DEV = 6)
+      parameter ( MAX_ONOFF_RACK_DET = MAX_DBBC3_DET)
+      parameter ( MAX_ONOFF_DET = MAX_ONOFF_RACK_DET + MAX_USER_DEV)
 C
       parameter ( CH_PRIOR=-04)
       parameter ( CL_PRIOR=-08)
