@@ -62,6 +62,7 @@ main()
   int ifchain;
   int count;
   char *dir[2];
+  char *plural="";
 
 /* connect to the FS */
 
@@ -348,6 +349,8 @@ main()
     dir[0]="cw";
     dir[1]="ccw";
   }
+  if (onoff.intp != 1)
+    plural="s";
 
   ini_accum(&onoff.itpis,&ons);
   ini_accum(&onoff.itpis,&ofs);
@@ -377,10 +380,11 @@ main()
     }
 
     if(cont0)
-      snprintf(buff,sizeof(buff)," Integrating for %d seconds", onoff.intp);
+      snprintf(buff,sizeof(buff)," Integrating for %d second%s",
+               onoff.intp, plural);
     else
-      snprintf(buff,sizeof(buff)," Integrating for %d seconds: cal off",
-               onoff.intp);
+      snprintf(buff,sizeof(buff)," Integrating for %d second%s: cal off",
+               onoff.intp, plural);
     logit(buff,0,NULL);
     if(get_samples(cont,ip,&onoff.itpis,onoff.intp,rut,&sample,&sampl2,&ierr))
       goto error_recover;
@@ -401,7 +405,8 @@ main()
 
     if(use_cal) {
       scmds("calonnf");
-      snprintf(buff,sizeof(buff)," Integrating for %d seconds: cal on", onoff.intp);
+      snprintf(buff,sizeof(buff)," Integrating for %d second%s: cal on",
+               onoff.intp, plural);
       logit(buff,0,NULL);
       if(get_samples(cont,ip,&onoff.itpis,onoff.intp,rut,&sample,&sampl2,&ierr))
 	goto error_recover;
@@ -419,7 +424,8 @@ main()
       goto error_recover;
 
     if(use_cal) {
-      snprintf(buff,sizeof(buff)," Integrating for %d seconds: cal on", onoff.intp);
+      snprintf(buff,sizeof(buff)," Integrating for %d second%s: cal on",
+               onoff.intp, plural);
       logit(buff,0,NULL);
       if(get_samples(cont,ip,&onoff.itpis,onoff.intp,rut,&sample,&sampl2,&ierr))
 	goto error_recover;
@@ -430,10 +436,11 @@ main()
     }
 
     if(cont0)
-      snprintf(buff,sizeof(buff)," Integrating for %d seconds", onoff.intp);
+      snprintf(buff,sizeof(buff)," Integrating for %d second%s",
+               onoff.intp, plural);
     else
-      snprintf(buff,sizeof(buff)," Integrating for %d seconds: cal off",
-               onoff.intp);
+      snprintf(buff,sizeof(buff)," Integrating for %d second%s: cal off",
+               onoff.intp, plural);
     logit(buff,0,NULL);
     if(get_samples(cont,ip,&onoff.itpis,onoff.intp,rut,&sample,&sampl2,&ierr))
       goto error_recover;
@@ -470,10 +477,11 @@ main()
     koff=FALSE;
 
   if(cont0)
-    snprintf(buff,sizeof(buff)," Integrating for %d seconds", onoff.intp);
+    snprintf(buff,sizeof(buff)," Integrating for %d second%s",
+             onoff.intp, plural);
   else
-    snprintf(buff,sizeof(buff)," Integrating for %d seconds: cal off",
-             onoff.intp);
+    snprintf(buff,sizeof(buff)," Integrating for %d second%s: cal off",
+             onoff.intp, plural);
   logit(buff,0,NULL);
   if(get_samples(cont,ip,&onoff.itpis,onoff.intp,rut,&sample,&sampl2,&ierr))
     goto error_recover;
@@ -486,8 +494,8 @@ main()
   
   if(use_cal) {
     scmds("calonnf");
-    snprintf(buff,sizeof(buff)," Integrating for %d seconds: cal on",
-             onoff.intp);
+    snprintf(buff,sizeof(buff)," Integrating for %d second%s: cal on",
+             onoff.intp, plural);
     logit(buff,0,NULL);
     if(get_samples(cont,ip,&onoff.itpis,onoff.intp,rut,&sample,&sampl2,&ierr))
       goto error_recover;
