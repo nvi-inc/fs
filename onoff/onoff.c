@@ -98,12 +98,25 @@ main()
 
   if(shm_addr->equip.rack==RDBE) { /* remove inactive RDBEs */
     int some=0;
+    int max_if=0;
+    int max_ch=0;
+    int max_det=0;
     int removed[MAX_RDBE];
+
     for (i=0;i<MAX_RDBE;i++)
       removed[i]=0;
-    for (i=0;i<MAX_RDBE_DET;i++)
+    if(shm_addr->equip.rack_type==RDBE) {
+      max_if=MAX_RDBE_IF;
+      max_ch=MAX_RDBE_CH;
+      max_det=MAX_RDBE_DET;
+    } else if(shm_addr->equip.rack_type==R2DBE) {
+      max_if=MAX_R2DBE_IF;
+      max_ch=MAX_R2DBE_CH;
+      max_det=MAX_R2DBE_DET;
+    }
+    for (i=0;i<max_det;i++)
       if(1==onoff.itpis[i]) {
-        int irdbe=i/(MAX_RDBE_IF*MAX_RDBE_CH);
+        int irdbe=i/(max_if*max_ch);
         if(shm_addr->rdbe_active[irdbe]==0) {
           onoff.itpis[i]=0;
           removed[irdbe]=1;
@@ -116,7 +129,7 @@ main()
         lwhat[1]=unit_letters[i+1];
         logita(NULL,8,ip+3,lwhat);
       }
-    for (i=0;i<MAX_RDBE_DET;i++)
+    for (i=0;i<max_det;i++)
       some=some || 1==onoff.itpis[i];
     if(!some) {  /* none left */
       memcpy(ip+3,"nf",2);
