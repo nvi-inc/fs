@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 NVI, Inc.
+ * Copyright (c) 2020-2021, 2024 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -438,6 +438,11 @@ int server_main(int argc, char *argv[]) {
 }
 
 int main(int argc, char *argv[]) {
+        if (geteuid() == 0) {
+          fprintf(stderr, "The FS server cannot be run by root.\n");
+          exit(255);
+        }
+
 	if (argc < 2) {
 		printf("fsserver [cmd...]\n");
 		printf("query the fs server\n");

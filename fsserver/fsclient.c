@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, 2023 NVI, Inc.
+ * Copyright (c) 2020, 2023-2024 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -744,6 +744,11 @@ int main(int argc, char **argv) {
 
 	// TODO: check if X11 available
 	// TODO: todo add CLI flag
+
+        if (geteuid() == 0) {
+          fprintf(stderr, "The FS client cannot be run by root.\n");
+          exit(255);
+        }
 
 	int opt;
 	int option_index;

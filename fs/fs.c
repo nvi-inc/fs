@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021, 2023 NVI, Inc.
+ * Copyright (c) 2020-2021, 2023-2024 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -138,6 +138,10 @@ main(int argc_in,char *argv_in[])
     int iret;
     int val;
 
+    if (geteuid() == 0) {
+      fprintf(stderr, "The FS cannot be run by root.\n");
+      exit(255);
+    }
 	bool arg_background = false;
 	bool arg_no_x11 = false;
 	bool arg_no_server = true;
