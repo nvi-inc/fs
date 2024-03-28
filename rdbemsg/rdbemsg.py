@@ -803,6 +803,9 @@ class msg_tk(tkinter.Tk):
         print(process.communicate()[0])
         process.stdin.close()
 
+        subprocess.Popen(["inject_snap", '"' + SUBJECT], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        TEXTlist = TEXT.splitlines()
+        [subprocess.Popen(["inject_snap", '"' + line], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL) for line in TEXTlist]
 
 if __name__ == "__main__":
     app = msg_tk(None)
