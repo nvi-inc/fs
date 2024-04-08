@@ -553,4 +553,6 @@ typedef struct fscom {
 
   struct onoff_cmd onoff;
 
+  struct rdbe_data_send_cmd rdbe_data_send[MAX_RDBE+1];
+
 } Fscom;

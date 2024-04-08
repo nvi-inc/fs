@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020, 2024 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -111,3 +111,4 @@
 #include "dbbc_pfbx_ds.h"
 #include "dbbcvsi_clk_ds.h"
 #include "dbbc3_core3h_modex_ds.h"
+#include "rdbe_data_send_ds.h"
