@@ -65,6 +65,57 @@ response not received for dbe_atten
 2B -902
 program error: strdup() failed for dbe_atten
 ""
+2C -101
+No default for transmission status; or no default for RDBE to address
+""
+2C -201
+Error decoding transmission status, must be 'on' or 'off'; or first parameter is not a valid RDBE to address
+""
+2C -202
+Start time string format is YYYY-DDD-HH-MM-SS
+""
+2C -203
+End time string format is YYYY-DDD-HH-MM-SS
+""
+2C -204
+Delta time must be a positive integer
+""
+2C -301
+No RDBEs active, see active_rdbes command.
+""
+2C -302
+Delta time cannot be specified if end time is specified
+""
+2C -401
+error retrieving class for dbe_data_send, rdb?W
+""
+2C -451
+Class buffer error from command response.
+""
+2C -501
+error decording status for dbe_data_send, rdb?W
+""
+2C -502
+error decording start time for dbe_data_send, rdb?W
+""
+2C -503
+error decording end time for dbe_data_send, rdb?W
+""
+2C -504
+error decording dot time for dbe_data_send, rdb?W
+""
+2C -505
+error decording delta start time for dbe_data_send, rdb?W
+""
+2C -506
+error decording delta stop time for dbe_data_send, rdb?W
+""
+2C -901
+response not received for dbe_data_send
+""
+2C -902
+program error: strdup() failed for dbe_data_send, rdb?W
+""
 2M -101
 No default for <InString>; or no default for RDBE to address
 ""

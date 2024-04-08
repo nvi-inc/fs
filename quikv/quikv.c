@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2022 NVI, Inc.
+ * Copyright (c) 2020-2022, 2024 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -468,6 +468,9 @@ loop:
 	break;
       case 122:
 	rdbe_atten(&command,itask,ip);
+	break;
+      case 123:
+	rdbe_data_send(&command,itask,ip);
 	break;
       case 130:
 	dbbc_vsix(&command,itask,ip);

@@ -560,6 +560,13 @@ void cshm_init()
   shm_addr->dbbc3_command_count=0;
   shm_addr->dbbc3_command_active=0;
 
+  for(i=0;i<MAX_RDBE+1;i++) {
+    m5state_init(&shm_addr->rdbe_data_send[i].status.state);
+    m5state_init(&shm_addr->rdbe_data_send[i].start.state);
+    m5state_init(&shm_addr->rdbe_data_send[i].end.state);
+    m5state_init(&shm_addr->rdbe_data_send[i].delta.state);
+  }
+
   return;
 }
 
