@@ -1,0 +1,44 @@
+		    data_send - Data transmission control (RDBE racks)
+
+            Syntax:     data_send=<status>,<start>,<end>,<delta>
+                        data_send=<rdbe>,<status>,<start>,<end>,<delta>
+
+            Response:   data_send(<rdbe>)/<status>,<start>,<end>,,<dot>,<delta_start>,<delta_stop>
+
+
+Settable parameters:
+        <rdbe>     letter: 'a','b', 'c', or 'd' for individual RDBE to address
+        <status>   'on' or 'off'. No default. For response, 'waiting' is also possible.
+        <start>    Start time for valid data, format YYYY-DDD-HH-MM-SS.
+                   Default: no value, which implies "now". See Comments.
+        <end>      End time for valid data, format YYYY-DDD-HH-MM-SS.
+                   Cannot be supplied if <delta> is specified. See Comments.
+                   Default: no value, which implies <start> plus"now".
+        <delta>    Duration time for valid data, positive integer seconds
+                   Cannot be supplied if <end> is specified.
+                   Default: no value.
+
+Monitor-only parameters:
+        <dot>         Current DOT time, format YYYY-DDD-HH-MM-SS.
+        <delta_start> VDIF integer second to start transmitting
+        <delta_end>   VDIF integer second to stop transmitting
+
+Comments:
+Like all RDBE commands, this command can either operate on all active
+RDBEs or a particular one.  If the first parameter is specified as a
+single letter in the range of possible RDBEs, the command is for that
+RDBE only.  Responses always include the letter of the RDBE in
+parenthesizes appended to the command name.  Active RDBEs are defined
+by the "active_rdbes" command.  At start-up all configured RDBEs are
+considered active.
+
+To query all active devices use 'data_send'.  To query a single
+device, use data_send=<rdbe>.  To command a single device there must
+be at least two commas after the <rdbe> parameter.  Any supplied
+<rdbe> parameter that does not match a possible RDBE is assumed to be
+an <if> parameter for an all active devices command.
+
+The device only accepts a certain range of values for <start> and
+<end>. Perhaps a "reasonableness" criteria is being applied. As a
+result, some otherwise correctly formatted values will be rejected by
+the device.
