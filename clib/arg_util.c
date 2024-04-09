@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020, 2024 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -469,4 +469,39 @@ int flag;                            /* TRUE if default is okay */
     }
 end:
     return -200;
+}
+int arg_char(ptr,cptr,dflt,flag)   /* parse arg string for int */
+char *ptr;                           /* ptr to string */
+char *cptr;                          /* ptr to store result */
+char dflt;                           /* default result value */
+int flag;                            /* TRUE if default is okay */
+
+/* this routine handles SNAP argument interpretation for int arguments */
+/* "*" use current value (already stored in *cptr) on entry */
+/* ""  (empty string) use default if flag is TRUE, if FALSE, error */
+/* other strings are decoded as int */
+/* return value: 0 no errror, -100 no default allowed and arg was "" */
+/*                            -200 wouldn't decode                   */
+{
+    int ierr,i;
+
+    ierr=0;
+
+    if(ptr == NULL || *ptr == '\0') {
+      if (flag)
+        *cptr=dflt;
+      else
+        ierr=-100;
+      return ierr;
+    }
+    if(0==strcmp(ptr,"*"))
+      return ierr;
+
+    if(strlen(ptr)!=1)
+      ierr=-200;
+    else
+      *cptr=ptr[0];
+
+end:
+    return ierr;
 }
