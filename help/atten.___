@@ -1,9 +1,9 @@
-		    rdbe_atten - Input attenuation (RDBE racks)
+		    atten - Input attenuation (RDBE racks)
 
-            Syntax:     rdbe_atten=<if>,<atten>,<target>
-                        rdbe_atten=<rdbe>,<if>,<atten>,<target>
+            Syntax:     atten=<if>,<atten>,<target>
+                        atten=<rdbe>,<if>,<atten>,<target>
 
-            Response:   rdbe_atten(<rdbe>)/,,,<0>,<atten0>,<rms0>,<1>,<atten1>,<rms1>
+            Response:   atten(<rdbe>)/,,,<0>,<atten0>,<rms0>,<1>,<atten1>,<rms1>
 
 
 Settable parameters:
@@ -31,11 +31,11 @@ parenthesizes appended to the command name.  Active RDBEs are defined
 by the "active_rdbes" command.  At start-up all configured RDBEs are
 considered active.
 
-To query all active devices use 'rdbe_atten'.  To query a single
-device, use rdbe_atten=<rdbe>.  To command a single device there must
-be at least two commas after the <rdbe> parameter.  Any supplied
-<rdbe> parameter that does not match a possible RDBE is assumed to be
-an <if> parameter for an all active devices command.
+To query all active devices use 'atten'.  To query a single device,
+use atten=<rdbe>.  To command a single device there must be at least
+two commas after the <rdbe> parameter.  Any supplied <rdbe> parameter
+that does not match a possible RDBE is assumed to be an <if> parameter
+for an all active devices command.
 
 When commanding a first generation RDBE, there is a response showing
 the actual values for the IFs adjusted.
