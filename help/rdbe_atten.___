@@ -1,38 +1,46 @@
-		    rdbe_atten - RDBE attenuation
+		    rdbe_atten - Input attenuation (RDBE racks)
 
-            Syntax:     rdbe_attenX=<if>,<atten>,<target>
+            Syntax:     rdbe_atten=<if>,<atten>,<target>
+                        rdbe_atten=<rdbe>,<if>,<atten>,<target>
 
-            Response:   rdbe_attenX/,,,<0>,<atten0>,<RMS0>,<1>,<atten1>,<RMS1>
+            Response:   rdbe_atten(<rdbe>)/,,,<0>,<atten0>,<rms0>,<1>,<atten1>,<rms1>
 
 
 Settable parameters:
-        X          letter: 'a','b', 'c', 'd', or null for all active RDBEs
+        <rdbe>     letter: 'a','b', 'c', or 'd' for individual RDBE to address
         <if>       IF to adjust: 0, 1, or "both". Default: both
         <atten>    attenuation value , 0-31.5 in 0.5 steps, or "auto"
                    when commanding to cause the RDBE(s) to automatically
                    adjust the level to get a raw sample RMS of <target>.
-		   Default: auto.
+                   Default: auto.
         <target>   target RMS value: 0.0-128.0. Default is specified by the
                    rdbe.ctl control file. A non-default <target> cannot
                    be used with a numeric <atten>.
 
 Monitor-only parameters:
-        <x>        "0" or "1", the next two values are for that IF
-        <attenx>   attenuation value for this IF.
-        <RMSx>     RMS value for this IF.
+        <N>        "0" or "1", the next two values are for that IF
+        <attenN>   attenuation value for this IF N.
+        <rmsN>     RMS value for this IF N.
 
 Comments:
-Like all commands that start with "rdbe", this command can either
-operate on an individual RDBE if the letter for that RDBE is appended
-to the command, or all active RDBEs if no letter is appended.  The
-response always includes the letter of the RDBE the response came
-from.  Active RDBEs are defined by the "active_rdbes" command.  At
-start-up all configured RDBEs are considered active.
+Like all RDBE commands, this command can either operate on all active
+RDBEs or a particular one.  If the first parameter is specified as a
+single letter in the range of possible RDBEs, the command is for that
+RDBE only.  Responses always include the letter of the RDBE in
+parenthesizes appended to the command name.  Active RDBEs are defined
+by the "active_rdbes" command.  At start-up all configured RDBEs are
+considered active.
 
-When commanding non-'2' RDBEs, there is a response showing the actual
-values for the IFs adjusted.
+To query all active devices use 'rdbe_atten'.  To query a single
+device, use rdbe_atten=<rdbe>.  To command a single device there must
+be at least two commas after the <rdbe> parameter.  Any supplied
+<rdbe> parameter that does not match a possible RDBE is assumed to be
+an <if> parameter for an all active devices command.
+
+When commanding a first generation RDBE, there is a response showing
+the actual values for the IFs adjusted.
 
 For a query, if an RMS value is outside the range specified in the
 rdbe.ctl control file, an error will be reported. For a command to a
-non-'2' RDBE, the same report will be made unless the attenuation was
-explicitly set to 31.5.
+first generation RDBE, the same report will be made unless the
+attenuation was explicitly set to 31.5.

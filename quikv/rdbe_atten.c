@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020, 2024 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -19,8 +19,8 @@
  */
 /* rdbe_atten SNAP command */
 
-#include <stdio.h> 
-#include <string.h> 
+#include <stdio.h>
+#include <string.h>
 #include <sys/types.h>
 
 #include "../include/params.h"
@@ -37,146 +37,185 @@ int itask;                            /* sub-task, ifd number +1  */
 int ip[5];                           /* ipc parameters */
 {
   int ilast, ierr, ind, i, count, j;
-      char *ptr;
-      char *arg_next();
-      int out_recs[MAX_RDBE], out_class[MAX_RDBE];
-      char outbuf[BUFSIZE];
-      struct rdbe_atten_cmd lclc;
-      int increment;
-      int iplast[5];
-      int iwhich;
-      int rtn_class=0;
-      int rtn_recs=0;
-      int some;
+  char *ptr;
+  char *arg_next();
+  int out_recs[MAX_RDBE], out_class[MAX_RDBE];
+  char outbuf[BUFSIZE];
+  struct rdbe_atten_cmd lclc;
+  int increment;
+  int iplast[5];
+  int iwhich;
+  int rtn_class=0;
+  int rtn_recs=0;
+  int some=FALSE;
+  char *prdbe,*str,rdbe;
+  int irdbe, kmon=0, kcom=0;
 
-      void skd_run(), skd_par();      /* program scheduling utilities */
+  void skd_run(), skd_par();      /* program scheduling utilities */
 
-      if(itask == 0) {
-	some=FALSE;
-	for (i=0;i<MAX_RDBE;i++)
-	  if(shm_addr->rdbe_active[i]!=0){
-	    some=TRUE;
-	    break;
-	  }
-	
-	if(!some) {
-	  ierr=-301;
-	  goto error;
-	}
+  irdbe=0;   /* assume this is an all device command to begin with */
+
+  if (command->equal != '=') {
+    for (i=0;i<MAX_RDBE;i++)
+      if(shm_addr->rdbe_active[i]) {
+        some=TRUE;
+        out_recs[i]=0;
+        out_class[i]=0;
       }
+    if(!some) {
+      ierr=-301;
+      goto error;
+    }
 
-      if (command->equal != '=' ) {
-	char *str;
-	for (i=0;i<MAX_RDBE;i++)
-	  if(itask == i+1 || shm_addr->rdbe_active[i]!=0 && itask ==0 ) {
-	    out_recs[i]=0;
-	    out_class[i]=0;
-	  }
-	str="dbe_atten?;\n";
-	for (i=0;i<MAX_RDBE;i++)
-	  if(itask == i+1 || shm_addr->rdbe_active[i]!=0 && itask ==0 ) {
-	    cls_snd(&out_class[i], str, strlen(str) , 0, 0);
-	    out_recs[i]++;
-	  }
-	goto rdbcn;
-      } else if (command->argv[0]==NULL) goto parse;  /* simple equals */
-      else if (command->argv[1]==NULL) /* special cases */
-	if (*command->argv[0]=='?') {
-	  iwhich=0;
-	  rdbe_atten_dis(command,itask,iwhich,ip,&rtn_class,&rtn_recs);
-	  ip[0]=rtn_class;
-	  ip[1]=rtn_recs;
-	  return;
-	}
-
-/* if we get this far it is a set-up command so parse it */
-
-parse:
-      ilast=0;                                      /* last argv examined */
-      memcpy(&lclc,&shm_addr->rdbe_atten[itask],sizeof(lclc));
-
-      count=1;
-      while( count>= 0) {
-        ptr=arg_next(command,&ilast);
-        ierr=rdbe_atten_dec(&lclc,&count, ptr);
-        if(ierr !=0 ) goto error;
+    str="dbe_atten?;\n";
+    for (i=0;i<MAX_RDBE;i++)
+      if(shm_addr->rdbe_active[i]) {
+        cls_snd(&out_class[i], str, strlen(str) , 0, 0);
+        out_recs[i]++;
       }
-
-      if(itask == 0) 
-	memcpy(&shm_addr->rdbe_atten[itask],&lclc,sizeof(lclc));
-
-      for (i=0;i<MAX_RDBE;i++)
-	if(itask == i+1 || shm_addr->rdbe_active[i]!=0 && itask ==0 ) {
-	  memcpy(&shm_addr->rdbe_atten[i+1],&lclc,sizeof(lclc));
-	}
-      
-      for (i=0;i<MAX_RDBE;i++)
-	if(itask == i+1 || shm_addr->rdbe_active[i]!=0 && itask ==0 ) {
-	  out_recs[i]=0;
-	  out_class[i]=0;
-	}
-
-      rdbe_atten_2_rdbe(outbuf,&lclc);
-      if(outbuf[0]!=0)
-	for (i=0;i<MAX_RDBE;i++)
-	  if(itask == i+1 || shm_addr->rdbe_active[i]!=0 && itask ==0 ) {
-	    cls_snd(&out_class[i], outbuf, strlen(outbuf) , 0, 0);
-	    out_recs[i]++;
-	  }
-
- rdbcn:
-      for (i=0;i<MAX_RDBE;i++)
-	if(itask == i+1 || shm_addr->rdbe_active[i]!=0 && itask == 0) {
-	  char name[6];
-	  ip[0]=1;
-	  ip[1]=out_class[i];
-	  ip[2]=out_recs[i];
-	  sprintf(name,"rdbc%c",unit_letters[i+1]);
-	  iwhich=i+1;
-	  skd_run_p(name,'p',ip,&iwhich); /* from here until the last
-                                            skd_run_p(NULL,'w',...) is
-                                            processed, we have to handle
-                                            errors locally, no passing up
-                                            i.e. too hard to unwind */
-	}
-      for(j=0;j<5;j++)
-	iplast[j]=0;
-
-      for (i=0;i<MAX_RDBE;i++)
-	if(itask == i+1 || shm_addr->rdbe_active[i]!=0 && itask == 0) {
-	  skd_run_p(NULL,'w',ip,&iwhich);
-	  skd_par(ip);
-	  if(ip[2]<0) {
-	    if(ip[0]!=0) {
-	      cls_clr(ip[0]);
-	      ip[0]=ip[1]=0;
-	    }
-	  } else
-	    rdbe_atten_dis(command,itask,iwhich,ip,&rtn_class,&rtn_recs);
-	  if(itask !=0)
-	    continue;
-
-	  if(ip[2]!=0 && iplast[2]!=0) {
-	    logita(NULL,iplast[2],iplast+3,iplast+4);
-	  }
-	  if(ip[2]!=0)
-	    for(j=2;j<5;j++)
-	      iplast[j]=ip[j];
-	}
-                                 /* local error processing no longer require */
-      if(iplast[2]!=0)
-	for(j=2;j<5;j++)
-	  ip[j]=iplast[j];
-
+    kmon=1;
+    goto rdbcn;
+  } else if (command->argv[0]==NULL) { /* simple equals */
+    goto parse;
+  } else if (command->argv[1]==NULL) /* special cases */
+    if (*command->argv[0]=='?') {
+      kcom=1;
+      rdbe_atten_dis(command,irdbe,ip,&rtn_class,&rtn_recs,kcom,kmon);
       ip[0]=rtn_class;
       ip[1]=rtn_recs;
-
       return;
+    }
+
+  /* is the first parameter the RDBE to address? */
+
+  rdbe=' ';
+  ierr=arg_char(command->argv[0],&rdbe,' ',FALSE);
+  if(ierr ==-100) {
+    ierr=0;
+    goto parse;
+  }
+  prdbe=strchr(unit_letters+1,rdbe);
+  if(ierr==-200||prdbe==NULL|| prdbe-unit_letters>MAX_RDBE ) {
+    ierr=0;
+    goto parse;
+  }
+
+/* if we get this far it is for one device */
+
+  irdbe=prdbe-unit_letters;
+  if (command->argv[1]!=NULL && *command->argv[1]=='?'
+      && command->argv[2] == NULL) {
+    kcom=1;
+    rdbe_atten_dis(command,irdbe,ip,&rtn_class,&rtn_recs,kcom,kmon);
+    ip[0]=rtn_class;
+    ip[1]=rtn_recs;
+    return;
+  } else if (command->argv[1]==NULL) {
+    for (i=0;i<MAX_RDBE;i++) {
+      out_recs[i]=0;
+      out_class[i]=0;
+    }
+    str="dbe_atten?;\n";
+    cls_snd(&out_class[irdbe-1], str, strlen(str) , 0, 0);
+    out_recs[irdbe-1]++;
+    kmon=1;
+    goto rdbcn;
+  }
+
+parse:
+  ilast=0;                                      /* last argv examined */
+  if(irdbe!=0)
+    ilast++;
+  memcpy(&lclc,&shm_addr->rdbe_atten[irdbe],sizeof(lclc));
+
+  count=1;
+  while( count>= 0) {
+    ptr=arg_next(command,&ilast);
+    ierr=rdbe_atten_dec(&lclc,&count, ptr);
+    if(ierr !=0 ) goto error;
+  }
+
+  for (i=0;i<MAX_RDBE;i++) {
+    out_recs[i]=0;
+    out_class[i]=0;
+    if(shm_addr->rdbe_active[i]!=0 && irdbe ==0)
+      some=TRUE;
+  }
+
+  if(irdbe==0) {
+    if(!some) {
+      ierr=-301;
+      goto error;
+    }
+    memcpy(&shm_addr->rdbe_atten[irdbe],&lclc,sizeof(lclc));
+  }
+
+  for (i=0;i<MAX_RDBE;i++)
+    if(irdbe == i+1 || shm_addr->rdbe_active[i]!=0 && irdbe ==0 ) {
+      memcpy(&shm_addr->rdbe_atten[i+1],&lclc,sizeof(lclc));
+    }
+
+  rdbe_atten_2_rdbe(outbuf,&lclc);
+  if(outbuf[0]!=0)
+    for (i=0;i<MAX_RDBE;i++)
+      if(irdbe == i+1 || shm_addr->rdbe_active[i]!=0 && irdbe ==0 ) {
+        cls_snd(&out_class[i], outbuf, strlen(outbuf) , 0, 0);
+        out_recs[i]++;
+      }
+
+rdbcn:
+  for (i=0;i<MAX_RDBE;i++)
+    if(out_recs[i]) {
+      char name[6];
+      ip[0]=1;
+      ip[1]=out_class[i];
+      ip[2]=out_recs[i];
+      sprintf(name,"rdbc%c",unit_letters[i+1]);
+      iwhich=i+1;
+      skd_run_p(name,'p',ip,&iwhich); /* from here until the last
+                                         skd_run_p(NULL,'w',...) is
+                                         processed, we have to handle
+                                         errors locally, no passing up
+                                         i.e. too hard to unwind */
+    }
+  for(j=0;j<5;j++)
+    iplast[j]=0;
+
+  for (i=0;i<MAX_RDBE;i++)
+    if(irdbe == i+1 || shm_addr->rdbe_active[i]!=0 && irdbe == 0) {
+      skd_run_p(NULL,'w',ip,&iwhich);
+      skd_par(ip);
+      if(ip[2]<0) {
+        if(ip[0]!=0) {
+          cls_clr(ip[0]);
+          ip[0]=ip[1]=0;
+        }
+      } else
+        rdbe_atten_dis(command,iwhich,ip,&rtn_class,&rtn_recs,kcom,kmon);
+      if(irdbe !=0)
+        continue;
+
+      if(ip[2]!=0 && iplast[2]!=0) {
+        logita(NULL,iplast[2],iplast+3,iplast+4);
+      }
+      if(ip[2]!=0)
+        for(j=2;j<5;j++)
+          iplast[j]=ip[j];
+    }
+  /* local error processing no longer require */
+  if(iplast[2]!=0)
+    for(j=2;j<5;j++)
+      ip[j]=iplast[j];
+
+  ip[0]=rtn_class;
+  ip[1]=rtn_recs;
+
+  return;
 
 error:
-      ip[0]=0;
-      ip[1]=0;
-      ip[2]=ierr;
-      memcpy(ip+3,"2b",2);
-      return;
+  ip[0]=0;
+  ip[1]=0;
+  ip[2]=ierr;
+  memcpy(ip+3,"2b",2);
+  return;
 }
