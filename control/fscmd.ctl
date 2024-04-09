@@ -594,7 +594,7 @@ rdbeb        qkr 12002 01 FFFFFFFFFFFF
 rdbec        qkr 12003 01 FFFFFFFFFFFF
 rdbed        qkr 12004 01 FFFFFFFFFFFF
 active_rdbes qkr 12100 01 FFFFFFFFFFFF
-rdbe_atten   qkr 12200 01 FFFFFFFFFFFF
+atten        qkr 12200 01 FFFFFFFFFFFF
 *dbbc pfb
 vsi1         qkr 13000 01 0800FFFFFFFF
 vsi2         qkr 13001 01 0800FFFFFFFF
