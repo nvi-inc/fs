@@ -6,7 +6,7 @@ Parameters must since single characters
 Parameters must be 'a', 'b', ...,  'd' (to maximum possible number of RDBEs).
 ""
 2B -201
-Error decoding IF value, must be both, 0, or 1.
+Error decoding IF value, must be both, 0, or 1; or first parameter is not a valid RDBE to address
 ""
 2B -202
 Error decoding attenuator value, must be auto, 0, 0.5, 1.0, ..., 31.0,31.5.
