@@ -589,10 +589,6 @@ mk6b         qkr 10002 01 FFFFFFFFFFFF
 active_mk6s  qkr 11200 01 FFFFFFFFFFFF
 *RDBE
 rdbe         qkr 12000 01 FFFFFFFFFFFF
-rdbea        qkr 12001 01 FFFFFFFFFFFF
-rdbeb        qkr 12002 01 FFFFFFFFFFFF
-rdbec        qkr 12003 01 FFFFFFFFFFFF
-rdbed        qkr 12004 01 FFFFFFFFFFFF
 active_rdbes qkr 12100 01 FFFFFFFFFFFF
 atten        qkr 12200 01 FFFFFFFFFFFF
 *dbbc pfb

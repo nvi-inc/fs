@@ -65,8 +65,11 @@ response not received for dbe_atten
 2B -902
 program error: strdup() failed for dbe_atten
 ""
+2M -101
+No default for <InString>; or no default for RDBE to address
+""
 2M -301
-must specify at least 1 argument for rdbe command
+command does not have a monitor form
 ""
 2M -302
 No RDBEs active, see active_rdbes command.
