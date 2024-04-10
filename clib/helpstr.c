@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020, 2024 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -193,7 +193,9 @@ int rlen;
 		     (ch1 == 'k' && (K4K3 == *rack || K4MK4 == *rack || K4 == *rack)) ||
 		     (ch1 == 'l' && (LBA == *rack || LBA4 == *rack)) ||
 		     (ch1 == 'd' && DBBC == *rack) || (ch1 == 'a' && 0 != *rack) ||
-             (ch1 == 'j' && DBBC3 == *rack)) &&
+		     (ch1 == 'j' && DBBC3 == *rack) ||
+		     (ch1 == 'r' && RDBE  == *rack)
+         ) &&
 
 		    (ch2 == '_' ||
 		     ch2 == '+' ||
