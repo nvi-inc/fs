@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2023 NVI, Inc.
+ * Copyright (c) 2020-2024 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -29,6 +29,8 @@
 #include "../include/shm_addr.h"      /* shared memory pointer */
 
 #define BUFSIZE 2048
+
+void skd_run(), skd_par();      /* program scheduling utilities */
 
 static void add_check_queries( out_recs, out_class, board, all)
     int *out_recs;
@@ -203,8 +205,6 @@ void dbbc3_core3h_modex(command,itask,ip)
     int mismatch;
 
     static char *board[]={" ","1","2","3","4","5","6","7","8"};
-
-    void skd_run(), skd_par();      /* program scheduling utilities */
 
     if (command->equal != '=') {
         int options;
