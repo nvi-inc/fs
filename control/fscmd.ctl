@@ -590,7 +590,7 @@ active_mk6s  qkr 11200 01 FFFFFFFFFFFF
 *RDBE
 rdbe         qkr 12000 01 FFFFFFFFFFFF
 active_rdbes qkr 12100 01 FFFFFFFFFFFF
-atten        qkr 12200 01 FFFFFFFFFFFF
+atten        qkr 12200 01 2000FFFFFFFF
 *dbbc pfb
 vsi1         qkr 13000 01 0800FFFFFFFF
 vsi2         qkr 13001 01 0800FFFFFFFF
