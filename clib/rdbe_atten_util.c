@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020, 2024 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -193,7 +193,7 @@ struct rdbe_atten_mon *lclm;
     if(lclm->ifc[i].atten.state.known == 1) 
       if(lclm->ifc[i].atten.atten >= 0 &&
 	 lclm->ifc[i].atten.atten <NATTEN_KEY) { 
-        if(lclm->ifc[i].atten.atten < 16) {
+        if(lclm->ifc[i].atten.atten < 20) {
           strcat(output," ");
           output=output+strlen(output);
         }
