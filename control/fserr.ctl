@@ -1,6 +1,6 @@
 ""
 2A -301
-Parameters must since single characters
+Parameters must be single characters
 ""
 2A -302
 Parameters must be 'a', 'b', ...,  'd' (to maximum possible number of RDBEs).
