@@ -62,6 +62,7 @@ int kmon;
   else
     strcpy(output,command->name);
   strcat(output,"/");
+  who[1]=unit_letters[iwhich];
 
   if(kcom) {
     memcpy(&lclc,&shm_addr->rdbe_atten[iwhich],sizeof(lclc));
@@ -73,7 +74,6 @@ int kmon;
     }
     return;
   } else {
-    who[1]=unit_letters[iwhich];
     iclass=ip[0];
     nrecs=ip[1];
     for (i=0;i<nrecs;i++) {
@@ -87,7 +87,6 @@ int kmon;
       }
       if(i==0)
         if(0!=rdbe_2_rdbe_atten(inbuf,&lclm,ip)) {
-          memcpy(ip+4,who,2);
           if(i<nrecs-1)
             cls_clr(iclass);
           goto error;
@@ -133,13 +132,15 @@ int kmon;
   for (i=0;i<5;i++) ip[i]=0;
   cls_snd(out_class,output,strlen(output),0,0);
   (*out_recs)++;
+  if(ierr==0)
+    return;
 
 error2:
   ip[0]=0;
   ip[1]=0;
   ip[2]=ierr;
   memcpy(ip+3,"2b",2);
-  memcpy(ip+4,who,2);
 error:
+  memcpy(ip+4,who,2);
   return;
 }

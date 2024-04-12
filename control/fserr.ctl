@@ -30,10 +30,7 @@ IF 0 RMS too high, rdb?W
 IF 1 RMS too high, rdb?W
 ""
 2B -401
-error retrieving class for IF0 query for dbe_atten, rdb?W
-""
-2B -402
-error retrieving class for IF1 query for dbe_atten, rdb?W
+error retrieving class for dbe_atten, rdb?W
 ""
 2B -451
 Class buffer error from command response.
@@ -50,10 +47,10 @@ error decording first RMS for dbe_atten, rdb?W
 2B -504
 error decording second IF for dbe_atten, rdb?W
 ""
-2B -502
+2B -505
 error decording second attenuator for dbe_atten, rdb?W
 ""
-2B -503
+2B -506
 error decording second RMS for dbe_atten, rdb?W
 ""
 2B -603
@@ -63,7 +60,7 @@ can't specific numberic attenuation and target
 response not received for dbe_atten
 ""
 2B -902
-program error: strdup() failed for dbe_atten
+program error: strdup() failed for dbe_atten, rdb?W
 ""
 2C -101
 No default for transmission status; or no default for RDBE to address
