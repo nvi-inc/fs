@@ -482,7 +482,7 @@ void cshm_init()
     shm_addr->rdbe_active[i]=0;
   }
 
-  for(i=0;i<MAX_RDBE;i++) {
+  for(i=0;i<MAX_RDBE+1;i++) {
     m5state_init(&shm_addr->rdbe_atten[i].ifc.state);
     m5state_init(&shm_addr->rdbe_atten[i].atten.state);
     m5state_init(&shm_addr->rdbe_atten[i].target.state);
