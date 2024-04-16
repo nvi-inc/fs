@@ -21,7 +21,7 @@
 :doctype: book
 
 = FS 10.2 to Latest Commit Update Notes
-Version 1.0 - March 2024
+Version 1.1 - April 2024
 
 :sectnums:
 :stem: latexmath
@@ -54,8 +54,8 @@ release to the new release, were completed. However, this may not be
 complete. _Let the user beware._
 
 This document is up to date with the
-`49ebb3d65cc249b1cd826c318f2217a564256c69` commit. Due to small
-increments, such as updating this document, that may not be the
+`34f86a265f4bb35c87b392514acde837fa8ce0b5` (`34f86a26`) commit. Due to
+small increments, such as updating this document, that may not be the
 literal last commit, but the differences should be small unless you
 happen to `pull` between a significant change and this document being
 updated.
@@ -83,8 +83,8 @@ connections to _github_ and you are using _git_ (as is recommended)
 then as _prog_ execute:
 
  cd /usr2/fs-git
- git checkout main
- git pull
+ git fetch
+ git checkout -q 34f86a26
 
 . If you are using FSL8, or otherwise unable to use _git_:
 
@@ -109,18 +109,18 @@ that:
 * For FSL8, you will need the *TIP* in the `*wget*` step.
 
 * For the __tag__ in the `*wget*` and `*tar*` commands, use the short
-SHA for the commit. For example, for commit
-`49ebb3d65cc249b1cd826c318f2217a564256c69` use `49ebb3d6`.
+SHA for the commit. For example, for commit under discussion here,
+`34f86a265f4bb35c87b392514acde837fa8ce0b5`, use `34f86a26`.
 
 * After extracting the archive, change the name of the output
 directory to use the latest feature release and the short SHA of the
-commit, like _fs-10.2.0-49ebb3d6_, which will then be used in the
-following `*cd*` command. For example (kbd:[Tab] completion is your
-friend):
+commit, like _fs-10.2.0-20-g34f86a26_ (note the _g_ before the short
+SHA), which will then be used in the following `*cd*` command. For
+example (kbd:[Tab] completion is your friend for the long SHA):
 
  cd /usr2
- mv fs-49ebb3d65cc249b1cd826c318f2217a564256c69 fs-10.2.0-49ebb3d6
- cd /usr2/fs-10.2.0-49ebb3d6
+ mv fs-34f86a265f4bb35c87b392514acde837fa8ce0b5 fs-10.2.0-20-g34f86a26
+ cd /usr2/fs-10.2.0-20-g34f86a26
 
 * You will end the "`installing from an archive`" with the step
 setting the link for __/usr2/fs__ by running *`make install`*.
@@ -389,6 +389,84 @@ specific steps.
 * Show recovery activity even if a percentage can't be shown
 * Make error reports more consistent
 * Report partial recovery even if an error occurred
+
+====
+
+. Improve overall _Makefile_ (closing
+https://github.com/nvi-inc/fs/issues/212[#212]).
+
++
+[%collapsible]
+====
+
+In FSL11, the `*make{nbsp}install*` command would fail if the source
+directory was not owned by _root_. While this situation would not
+normally occur, it could if the `*make{nbsp}install*` was executed a
+second time after an initial installation. This might happen, for
+example, if `*make{nbsp}install*` were used to reset the _/usr2/fs_
+link. The failure occurred because of a confluence of two issues: (i)
+_git_ was unnecessarily used to determine the version of the FS during
+for the `install` target and (ii) the  version of _git_ in FSL11, and
+probably later versions, will throw an error if the directory is not
+owned by the user. The problem was resolved by removing the use of
+_git_ to determine the FS version for `*make{nbsp}install*`.
+
+Thanks to Jon Quick (HartRAO) for reporting this issue.
+
+Two further enhancement were made:
+
+[disc]
+
+* `*make{nbsp}install*` can only be used by _root_ and `install` is
+the only _make_ target allowed for _root_.
+
+* When using a source directory created from an archive, if the
+directory name is incorrectly formed (missing the tag information), an
+explanatory error will be reported and the install aborted. This
+approach reports the problem as early as possible, in particular
+before trying to _make_ the FS. Likewise, for other _make_ targets, an
+incorrectly formed directory name from an archive will give an
+explanatory error message specific to this case before aborting.
+
+====
+
+. Add _rdbemsg_ emails to experiment log as comments (closing
+https://github.com/nvi-inc/fs/issues/213[#213]).
+
++
+[%collapsible]
+====
+
+Including the emails in the log avoids having to enter comments from the
+email messages a second time to get them into the log.
+
+When originally written, the program that became _rdbemsg_ did not run
+on FS computers and could not easily add comments to the log. Due to
+on oversight when the program was ported to FS computers, adding the
+email message to the log, as _msg_ does, was not added. This has been
+corrected for both the _python2_ and _python3_ versions of _rdbemsg_.
+
+Thanks to the staff at KPGO for reporting this issue.
+
+====
+
+. Prevent _root_ from running the FS.
+
++
+[%collapsible]
+====
+
+The FS is a user application. It is risky, and a potential security
+issue, to run it as _root_. In particular, the `sy=...` command, if
+misused either accidentally or on purpose, could cause serious damage.
+To avoid this, the FS startup program, _fs_, the server, _fsserver_,
+and the client program, _fsclient_, will refuse to run if the user is
+_root_. This is not strictly necessary for the client, but it was
+included for consistency. Off-line utilities, including _pfmed_, can
+still be run by _root_, but this is not recommended and should be
+avoided. It may lead to problems. However, it would not be inherently
+dangerous.
+
 
 ====
 
