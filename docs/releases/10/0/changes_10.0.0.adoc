@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020-2022 NVI, Inc.
+// Copyright (c) 2020-2022, 2024 NVI, Inc.
 //
 // This file is part of VLBI Field System
 // (see http://github.com/nvi-inc/fs).
@@ -19,7 +19,7 @@
 //
 
 = Changes from FS9
-Version 1.9 - January 2022
+Version 2.0 - April 2024
 
 //:hide-uri-scheme:
 :sectnums:
@@ -213,6 +213,27 @@ section.
 .. Improve structure and correct some errors from original _.txt_ version.
 
 .. Make many typo/wording fixes.
+
+. Change the name of the _go_ program to _rte_go_.
+
++
+
+The _go_ program emulates a facility of the RTE operating system that
+was used to support passing control from SNAP back to an external
+program (typically _aquire_, _fivpt_, _holog_, and _onoff_) after it
+had suspended itself to wait for FS commands to be executed. The
+program was renamed to _rte_go_ to make room for the _go_ compiler,
+which is now being used for some software.
+
++
+
+Instructions for updating local _.prc_ files for this change are
+included in the <<10.0.0.adoc#_convert_from_go_to_rte_go,Convert from
+go to rte_go>> sub-step of the <<10.0.0.adoc#_update_prc_files,Update
+.prc files>> step of the
+<<10.0.0.adoc#_upgrading_from_an_fs9_version,Upgrading from an FS9
+version>> section of the <<10.0.0.adoc#,FS 10.0.0 Update Notes>>
+document.
 
 . [[fesh]] Update and expand _fesh_.
 +
