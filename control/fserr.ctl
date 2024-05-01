@@ -113,6 +113,60 @@ response not received for dbe_data_send
 2C -902
 program error: strdup() failed for dbe_data_send, rdb?W
 ""
+2D -102
+No default for channel numbers
+""
+2D -201
+The specified IF must be 0, 1, or both; or first parameter is not a valid RDBE to address.
+""
+2D -202
+Channel numbers must be 0-15 for RDBE, 0-63 for R2DBE
+""
+2D -301
+No RDBEs active, see active_rdbes command.
+""
+2D -302
+Maximum number of channels is 16 for RDBE, 64 for R2DBE
+""
+2D -303
+Number of channels for R2DBE must be 8, 16, or 32.
+""
+2D -400
+Too many class responses for dbe_chsel queries, rdb?W
+""
+2D -401
+error retrieving class for first dbe_chsel query, rdb?W
+""
+2D -402
+error retrieving class for second dbe_chsel query, rdb?W
+""
+2D -451
+Class buffer error from command response for dbe_chsel, rdb?W
+""
+2D -501
+Error decoding IF from first dbe_chsel query, rdb?W
+""
+2D -502
+Error decoding a channel from first dbe_chsel query, rdb?W
+""
+2D -511
+Error decoding IF from second dbe_chsel query, rdb?W
+""
+2D -512
+Error decoding a channel from second dbe_chsel query, rdb?W
+""
+2D -901
+response not received for first dbe_chsel query, rdb?W
+""
+2D -902
+program error: strdup() failed for first dbe_chsel query, rdb?W
+""
+2D -911
+response not received for second dbe_chsel query, rdb?W
+""
+2D -912
+program error: strdup() failed for second dbe_chsel query, rdb?W
+""
 2M -101
 No default for <InString>; or no default for RDBE to address
 ""
