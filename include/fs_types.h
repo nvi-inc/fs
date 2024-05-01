@@ -112,3 +112,4 @@
 #include "dbbcvsi_clk_ds.h"
 #include "dbbc3_core3h_modex_ds.h"
 #include "rdbe_data_send_ds.h"
+#include "rdbe_channels_ds.h"

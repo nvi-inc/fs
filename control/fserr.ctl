@@ -113,6 +113,27 @@ response not received for dbe_data_send
 2C -902
 program error: strdup() failed for dbe_data_send
 ""
+2D -102
+No default for channel numbers
+""
+2D -201
+The specified IF must be 0, 1, or both.
+""
+2D -202
+Channel numbers must be 0-15 for RDBE, 0-63 for R2DBE
+""
+2D -301
+No RDBEs active, see active_rdbes command.
+""
+2D -302
+Maximum number of channels is 16 for RDBE, 64 for R2DBE
+""
+2D -501
+Error decoding IF from dbe_chsel, rdb?W
+""
+2D -502
+Error decoding a channel from dbe_chsel, rdb?W
+""
 2M -101
 No default for <InString>; or no default for RDBE to address
 ""
