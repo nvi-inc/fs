@@ -555,4 +555,6 @@ typedef struct fscom {
 
   struct rdbe_data_send_cmd rdbe_data_send[MAX_RDBE+1];
 
+  struct rdbe_channels_cmd rdbe_channels[MAX_RDBE+1];
+
 } Fscom;

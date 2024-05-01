@@ -1,0 +1,55 @@
+		   channels - Output channel selection (RDBE racks)
+
+            Syntax:     channels=<if>,<list>
+                        channels=<rdbe>,<if>,<list>
+
+            Response:   channels(<rdbe>)/<if>,<list>
+
+
+Settable parameters:
+        <rdbe>     letter: 'a','b', 'c', or 'd' for individual RDBE to address
+                   No default.
+        <if>       IF: '0', '1', or 'both'. Default: 'both'
+        <list>     list of 8, 16, or 32 comma separated channels,
+                   numbered 0-63. See comments. No default.
+
+Monitor-only parameters:
+
+Comments:
+Like all RDBE commands, this command can either operate on all active
+RDBEs or a particular one.  If no <rdbe> parameter is specified (this
+would probably be the most common case), the command will operate on
+all active RDBEs.  However, if the <rdbe> parameter is specified as a
+single letter in the range of possible RDBEs, the command is for that
+RDBE only.  Responses always include the letter of the RDBE in
+parenthesizes appended to the command name.  Active RDBEs are defined
+by the 'active_rdbes' command.  At start-up all configured RDBEs are
+considered active.
+
+To query all active devices use 'channels'.  To query a single device,
+use channels=<rdbe>.  To command a single device there must be at
+least two commas (possibly intermingled with other parameter data, as
+appropriate) after the <rdbe> parameter.  Any supplied <rdbe>
+parameter that does not match a possible RDBE is assumed to be an <if>
+parameter for an all active devices command.
+
+Asterisk, '*', for previous value, is not supported for any parameter.
+
+The order of the channels in <list> determines the order of channels
+in the generated VDIF. The number of channels for <if> '1' must agree
+with that commanded for <if> '0'. The channels for <if> '0' must be
+commanded first. If 'both' is used, this is handled automatically. The
+number of channels, 8/16/32, per IF determines the combined overall
+output data rate for both IFs, 2/4/8 Gbps, respectively.
+
+Data transmission by the RDBE must be stopped ('data_send=off') at
+least one second before commanding the channels. It can be restarted
+at least one second afterwards. For example, to set all active RDBEs
+to send channels 31, 30, 28, 26, 23, 19, 18, and 17 (in that order
+in the VDIF) from both IFs (2 Gbps output per RDBE), you can use:
+
+  data_send=off
+  !+1s
+  channels=,31,30,28,26,23,19,18,17
+  !+1s
+  data_send=on
