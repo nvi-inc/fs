@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2022 NVI, Inc.
+ * Copyright (c) 2020-2022, 2024 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -99,6 +99,9 @@ main()
     }
 
 
+    char *append_only=getenv("FS_LOG_APPEND_ONLY");
+    if(append_only && strcmp(append_only,"1"))
+      append_only=NULL;
 
 /* SECTION 1 */
     
@@ -321,7 +324,7 @@ Messenger:
 
       strcat(lnamef, sllog);
       strcat(lnamef, ".log");
-      fd = open(lnamef, O_RDWR|O_CREAT,PERMISSIONS);
+      fd = open(lnamef, O_RDWR|O_CREAT|O_APPEND,PERMISSIONS);
       rte_rawt(&last_sync);
       if (fd < 0) {  /* if open/create failed, try recovering */
 	shm_addr->abend.other_error=1;
@@ -349,7 +352,7 @@ Messenger:
 		  "\007!! help! ** now trying to re-open log file %s\n",
 		  sllog);
 	  play_wav(1);
-	  fd = open(lnamef, O_RDWR|O_CREAT,PERMISSIONS);
+	  fd = open(lnamef, O_RDWR|O_CREAT|O_APPEND,PERMISSIONS);
 	  rte_rawt(&last_sync);
 	  if(fd >=0) {
 	    memcpy(shm_addr->LLOG2,llog0,MAX_SKD);
@@ -367,6 +370,9 @@ Messenger:
 	}
       }
       if(fd >= 0) {
+        if(append_only) {
+          sprintf(buf2,"chattr +a %s",lnamef);
+        ierr=s
 	memcpy(llog0, shm_addr->LLOG2,MAX_SKD);
 	offset= lseek(fd, 0L, SEEK_END);
 	if (offset > 0) {
