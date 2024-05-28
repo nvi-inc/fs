@@ -265,39 +265,39 @@ eight BBCs for a Core3H board; Mask2, the second eight. In the table,
 the first eight BBCs for a board are generically numbered 1-8; the
 second eight, 9-16.
 
- Bit   Mask2  Mask1
-  1     9US    1US
-  2     9UM    1UM
-  3     9LS    1LS
-  4     9LM    1LM
-  5    10US    2US
-  6    10UM    2UM
-  7    10LS    2LS
-  8    10LM    2LM
-  9    11US    3US
- 10    11UM    3UM
- 11    11LS    3LS
- 12    11LM    3LM
- 13    12US    4US
- 14    12UM    4UM
- 15    12LS    4LS
- 16    12LM    4LM
- 17    13US    5US 
- 18    13UM    5UM 
- 19    13LS    5LS 
- 20    13LM    5LM 
- 21    14US    6US
- 22    14UM    6UM
- 23    14LS    6LS
- 24    14LM    6LM
- 25    15US    7US
- 26    15UM    7UM
- 27    15LS    7LS
- 28    15LM    7LM
- 29    16US    8US
- 30    16UM    8UM
- 31    16LS    8LS
- 32    16LM    8LM
+ Bit   Mask2  Mask1
+  1     9US    1US
+  2     9UM    1UM
+  3     9LS    1LS
+  4     9LM    1LM
+  5    10US    2US
+  6    10UM    2UM
+  7    10LS    2LS
+  8    10LM    2LM
+  9    11US    3US
+ 10    11UM    3UM
+ 11    11LS    3LS
+ 12    11LM    3LM
+ 13    12US    4US
+ 14    12UM    4UM
+ 15    12LS    4LS
+ 16    12LM    4LM
+ 17    13US    5US
+ 18    13UM    5UM
+ 19    13LS    5LS
+ 20    13LM    5LM
+ 21    14US    6US
+ 22    14UM    6UM
+ 23    14LS    6LS
+ 24    14LM    6LM
+ 25    15US    7US
+ 26    15UM    7UM
+ 27    15LS    7LS
+ 28    15LM    7LM
+ 29    16US    8US
+ 30    16UM    8UM
+ 31    16LS    8LS
+ 32    16LM    8LM
 
 The number of BBCs available per board may be 8, 12, or 16 depending
 on the hardware configuration. If the number of BBCs available per
