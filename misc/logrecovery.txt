@@ -27,9 +27,9 @@ DETAILED INSTRUCTIONS
 
 . cd
 
-. cut -c-4096 /dev/vg0/usr2 | egrep -a ‘^2024\.(149|150)’ >out.log
+. cut -c-4096 /dev/vg0/usr2 | egrep -a '^2024\.(149|150)' >out.log
 
-  Replace ‘^2024\.(149|150)’ with the regex for the dates of your log.
+  Replace '^2024\.(149|150)' with the regex for the dates of your log.
   You can use each date in a separate command and append ('>>' instead
   of '>') for commands after the first one, but specifying all dates
   in one command will be faster. Specifying them separately in date
@@ -48,7 +48,7 @@ DETAILED INSTRUCTIONS
   of '/dev/vg0/usr2', if your system is not a standard FSL10 or FSL11
   system or the disks are configured differently.
 
-. tr -cd ‘[:print:][:space:]’ <out.log >out2.log
+. tr -cd '[:print:][:space:]' <out.log >out2.log
 
   This will eliminate all the (probably inevitable) non-printing and
   non-white space characters in the file. It may not be appropriate to
@@ -93,7 +93,7 @@ Status: RO
 
  To whom it may concern,
 
- After the last CORE observation, the person who was observing removed by 
+ After the last CORE observation, the person who was observing removed by
  error the log file we had just produced. Fortunately
  no other operation was done at the PC till we discovered that the file was
  not there. We have been lucky and could recover the whole file. Just in
@@ -101,7 +101,7 @@ Status: RO
 
  1) As root I unmounted the /usr2 partition, to avoid writing on it.
  2) As root we made a search on that partition looking for the character
-    string with the date of the two days during which the obsevation 
+    string with the date of the two days during which the obsevation
     was done,
 
     # cd /
