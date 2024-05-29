@@ -51,7 +51,7 @@ data field is set to reflect the commanded position, see the
 pass command for more information. (Not yet implemented for
 VLBA.)
 
-For VLBA2 drives, the voltage units are actually in kè (0.1
-microns) of head position. This implies that the scale is
-expanded by a factor of about 1500 over the LVDT voltage scale
-of other drives.
+For VLBA2 drives, the voltage units are actually in kilo-angstroms
+(0.1 microns) of head position. This implies that the scale is
+expanded by a factor of about 1500 over the LVDT voltage scale of
+other drives.
