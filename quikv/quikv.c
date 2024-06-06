@@ -475,6 +475,9 @@ loop:
       case 124:
 	rdbe_channels(&command,itask,ip);
 	break;
+      case 125:
+	rdbe_pc_offset(&command,itask,ip);
+	break;
       case 130:
 	dbbc_vsix(&command,itask,ip);
 	break;
