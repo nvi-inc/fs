@@ -602,6 +602,11 @@ void cshm_init()
         shm_addr->rdbe_channels[i].ifc[j].channels.channels[k]=-1;
     }
   }
+
+  for(i=0;i<MAX_RDBE+1;i++) {
+      m5state_init(&shm_addr->rdbe_pc_offset[i].offset.state);
+  }
+
   return;
 }
 

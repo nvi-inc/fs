@@ -57,7 +57,7 @@ error decording second RMS for dbe_atten, rdb?W
 can't specific numberic attenuation and target
 ""
 2B -901
-response not received for dbe_atten
+response not received for dbe_atten, rdb?W
 ""
 2B -902
 program error: strdup() failed for dbe_atten, rdb?W
@@ -108,7 +108,7 @@ error decording delta start time for dbe_data_send, rdb?W
 error decording delta stop time for dbe_data_send, rdb?W
 ""
 2C -901
-response not received for dbe_data_send
+response not received for dbe_data_send, rdb?W
 ""
 2C -902
 program error: strdup() failed for dbe_data_send, rdb?W
@@ -179,8 +179,32 @@ No RDBEs active, see active_rdbes command.
 2M -401
 error retrieving class from ?W
 ""
+2P -201
+Error decoding offset; must be a positive value
+""
+2P -301
+No RDBEs active, see active_rdbes command.
+""
+2P -302
+LO and/or pcal spacing undefined for channel 0 of RDBE?W, can't calculate default offset
+""
+2P -401
+error retrieving class for dbe_pcal query, rdb?W
+""
+2P -451
+Class buffer error from command response.
+""
+2P -501
+error decording offset for dbe_pcal query, rdb?W
+""
+2P -901
+response not received for dbe_pcal query, rdb?W
+""
+2P -902
+program error: strdup() failed for dbe_pcal query, rdb?W
+""
 2T -501
-Error decoding dbe_tsys response from rdb?W.
+Error decoding dbe_tsys response from rdb?W
 ""
 2T -502
 Non-zero return code in dbe_tsys response from rdb?W.
