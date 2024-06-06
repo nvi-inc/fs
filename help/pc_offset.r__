@@ -1,0 +1,66 @@
+		   pc_offset -  Set Phase-cal offset (RDBE racks)
+
+            Syntax:     pc_offset=<offset>
+                        pc_offset=<rdbe>,<offset>
+
+            Response:   pc_offset(<rdbe>)/<offset>
+
+
+Settable parameters:
+        <rdbe>     letter: 'a','b', 'c', or 'd' for individual RDBE to
+                   address. No default.
+
+        <offset>   The frequency (Hz) of the first phase-cal tone in
+                   the IF.  Default is value implied by the LO
+                   frequency and phase-cal spacing from the 'lo'
+                   command for the first IF of the RDBE. See comments.
+
+Monitor-only parameters:
+
+Comments:
+Like all RDBE commands, this command can either operate on all active
+RDBEs or a particular one.  If no <rdbe> parameter is specified (this
+would probably be the most common case), the command will operate on
+all active RDBEs.  However, if the <rdbe> parameter is specified as a
+single letter in the range of possible RDBEs, the command is for that
+RDBE only.  Responses always include the letter of the RDBE in
+parenthesizes appended to the command name.  Active RDBEs are defined
+by the 'active_rdbes' command.  At start-up all configured RDBEs are
+considered active.
+
+To query all active devices use 'pc_offset'.  To query a single
+device, use 'pc_offset=<rdbe>'.  To command a single device there must
+be at least two commas (possibly intermingled with other parameter
+data, as appropriate) after the <rdbe> parameter.  Any supplied <rdbe>
+parameter that does not match a possible RDBE is assumed to be an
+<offset> parameter for an all active devices command.
+
+The default <offset> is implied by the 'frequency' and 'spacing'
+values of the 'lo' command for the first IF (0) of the RDBE. If all
+RDBEs are commanded with the default in one command, the values for
+each active RDBE are determined from that RDBE's first IF (0).
+
+For R2DBEs, which are Nyquist Zone 1 (NZ1) devices, the default
+<offset> is calculated as:
+
+     <offset>=1e6*(<pcspace>-mod(<freq>,<pcspace>))
+
+where <freq> and <pcspace> are the correspond values from the 'lo'
+command for first IF of the relevant RDBE:
+
+    RDBE   IF
+     A     a0
+     B     b0
+     C     c0
+     D     d0
+
+This command is not implemented yet for first generation RDBEs, which
+are Nyquist Zone 2 (NZ2) devices sampling at 1024 MHz. When it is, the
+default <offset> will be  calculated as:
+
+     <offset>=1e6*mod(<freq>+1024,<pcspace>)
+
+The R2DBEs respond to a query with a value 16 times the commanded
+value, apparently only to single precision. The FS divides the
+response by 16 and rounds it using single precision. This gives a
+sensible monitor value in typical cases.
