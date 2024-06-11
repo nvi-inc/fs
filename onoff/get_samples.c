@@ -190,13 +190,20 @@ int get_samples(cont,ip,itpis,intg,rut,accum,accum2,ierr)
 	  sample.avg[j]=dtpi[j];
 	}
     } else if(shm_addr->equip.rack==RDBE) {
-      if(tpget_rdbe(cont,ip,itpis,ierr,dtpi,dtpi2))
-	return -1;
+// testing
       for(j=0;j<MAX_RDBE_DET;j++)
 	if(itpis[j]!=0) {
-	  sample.avg[j]=dtpi[j];
-	  sample2.avg[j]=dtpi2[j];
+	  sample.avg[j]=0.0;
+	  sample2.avg[j]=0.0;
 	}
+//      if(tpget_rdbe(cont,ip,itpis,ierr,dtpi,dtpi2))
+//	return -1;
+//      for(j=0;j<MAX_RDBE_DET;j++)
+//	if(itpis[j]!=0) {
+//	  sample.avg[j]=dtpi[j];
+//	  sample2.avg[j]=dtpi2[j];
+//	}
+// end testing
     } else if(shm_addr->equip.rack==DBBC3) {
       if(tpget_dbbc3(cont,ip,itpis,ierr,tpi,tpi2))
 	 return -1;

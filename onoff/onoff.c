@@ -104,7 +104,9 @@ main()
       if(1==onoff.itpis[i]) {
         int irdbe=i/(MAX_RDBE_IF*MAX_RDBE_CH);
         if(shm_addr->rdbe_active[irdbe]==0) {
-          onoff.itpis[i]=0;
+// testing
+//          onoff.itpis[i]=0;
+// end testing
           removed[irdbe]=1;
         }
       }
@@ -113,14 +115,18 @@ main()
         char lwhat[ ]="-a";
         memcpy(ip+3,"nf",2);
         lwhat[1]=unit_letters[i+1];
-        logita(NULL,8,ip+3,lwhat);
+// testing
+//        logita(NULL,8,ip+3,lwhat);
+// end testing
       }
     for (i=0;i<MAX_RDBE_DET;i++)
       some=some || 1==onoff.itpis[i];
     if(!some) {  /* none left */
       memcpy(ip+3,"nf",2);
-      logit(NULL,-8,ip+3);
-      goto loop;
+// testing
+//      logit(NULL,-8,ip+3);
+//      goto loop;
+// end testing
     }
   }
 

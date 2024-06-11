@@ -78,6 +78,17 @@ void rdbcn_v(double *dtpi, double *dtpi2, int ip[5], int *icont, int *isamples)
   int on[MAX_RDBE_CH],off[MAX_RDBE_CH];
   int ierr,ifcr;
 
+// testing
+
+  *dtpi=0.0;
+  *dtpi2=0.0;
+  *icont=1;  /*always continuous for now */
+  *isamples= 10;
+  ip[0]=ip[1]=0;
+  return;
+
+// end testing
+
   out_recs=0;
   out_class=0;
   sprintf(str,"dbe_tsys?%d;\n",ifc);

@@ -487,11 +487,13 @@ C
 C    LOOP BACK FOR MORE REPITIONS
 C
       iter=iter-1
-      if ((nrepfp.gt.0.and.iter.gt.0).or.
-     +  (nrepfp.lt.0.and.iter.gt.0.and.(ilon.eq.0.or.ilat.eq.0))) then
-        call offot(lonpos,latpos,lonosv,latosv,ilon,ilat,lbuf,isbuf)
-        goto 10
-      endif
+C  testing
+C      if ((nrepfp.gt.0.and.iter.gt.0).or.
+C     +  (nrepfp.lt.0.and.iter.gt.0.and.(ilon.eq.0.or.ilat.eq.0))) then
+C        call offot(lonpos,latpos,lonosv,latosv,ilon,ilat,lbuf,isbuf)
+C        goto 10
+C      endif
+C  end testing
       if (ilat.eq.1) savlt2=latosv
       if (ilon.eq.1) savln2=lonosv
       call gooff(savln2,savlt2,caxfp,nwait*2,ierr)
