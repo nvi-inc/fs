@@ -109,15 +109,14 @@ void exec_client(int no_x) {
 
 }
 
-//#define USAGE_SHORT "Usage: %s [-bnhf]\n"
-#define USAGE_SHORT "Usage: %s [-nh]\n"
+#define USAGE_SHORT "Usage: %s [-bnhf]\n"
 
 const char *usage_long_str = USAGE_SHORT "\n"
-"Start the VLBI Field System and programs listed in and stpgm.ctl\n"
+"Start the VLBI Field System and programs listed in and stnpgm.ctl\n"
 "  -n, --no-x          do not start programs requiring X11\n"
 "  -h, --help          print this message\n"
-//"  -b, --background    run the Field System in background/daemon mode\n"
-//"  -f, --foreground    run the Field System in foreground without server\n"
+"  -b, --background    run the Field System in background/daemon mode\n" 
+"  -f, --foreground    run the Field System in foreground without server\n" 
 ;
 
 main(int argc_in,char *argv_in[])
@@ -157,12 +156,10 @@ main(int argc_in,char *argv_in[])
     }
 
 	static struct option long_options[] = {
-// controlled only by FS_DISPLAY_SERVER
-//	    {"background", no_argument, NULL, 'b'},
+	    {"background", no_argument, NULL, 'b'},
 	    {"no-x",       no_argument, NULL, 'n'},
 	    {"help",       no_argument, NULL, 'h'},
-// controlled only by FS_DISPLAY_SERVER
-//	    {"foreground", no_argument, NULL, 'f'},
+	    {"foreground", no_argument, NULL, 'f'},
         // undocumented for server use
 	    {"internal",   no_argument, NULL, 'i'},
 
@@ -184,17 +181,15 @@ main(int argc_in,char *argv_in[])
 
 	int opt;
 	int option_index;
-//	while ((opt = getopt_long(argc_in, argv_in, "bnhfi", long_options,
-	while ((opt = getopt_long(argc_in, argv_in, "nhi", long_options,
+	while ((opt = getopt_long(argc_in, argv_in, "bnhfi", long_options,
 	                          &option_index)) != -1) {
 		switch (opt) {
 		case 0:
 			// All long options are handled by their short form
 			break;
-// doesn't make sense with control via FS_DISPLAY_SERVER
-//		case 'b':
-//			arg_background = true;
-//			break;
+		case 'b':
+			arg_background = true;
+			break;
 		case 'n':
 			arg_no_x11 = true;
 			break;
@@ -202,10 +197,9 @@ main(int argc_in,char *argv_in[])
 			fprintf(stderr, usage_long_str, argv_in[0]);
 			exit(EXIT_SUCCESS);
 			break;
-// doesn't make sense with control via FS_DISPLAY_SERVER
-//		case 'f':
-//            arg_no_server = true;
-//			break;
+		case 'f':
+            arg_no_server = true;
+			break;
 		case 'i':
 			arg_no_x11 = true;
             arg_no_server = true;
