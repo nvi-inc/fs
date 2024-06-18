@@ -109,14 +109,14 @@ void exec_client(int no_x) {
 
 }
 
-#define USAGE_SHORT "Usage: %s [-bnhf]\n"
+#define USAGE_SHORT "Usage: %s [-bnh]\n"
 
 const char *usage_long_str = USAGE_SHORT "\n"
-"Start the VLBI Field System and programs listed in and stnpgm.ctl\n"
+"Start the VLBI Field System and programs listed in and stpgm.ctl\n"
 "  -n, --no-x          do not start programs requiring X11\n"
 "  -h, --help          print this message\n"
 "  -b, --background    run the Field System in background/daemon mode\n" 
-"  -f, --foreground    run the Field System in foreground without server\n" 
+//"  -f, --foreground    run the Field System in foreground without server\n"
 ;
 
 main(int argc_in,char *argv_in[])
@@ -159,7 +159,8 @@ main(int argc_in,char *argv_in[])
 	    {"background", no_argument, NULL, 'b'},
 	    {"no-x",       no_argument, NULL, 'n'},
 	    {"help",       no_argument, NULL, 'h'},
-	    {"foreground", no_argument, NULL, 'f'},
+// controlled only by FS_DISPLAY_SERVER
+//	    {"foreground", no_argument, NULL, 'f'},
         // undocumented for server use
 	    {"internal",   no_argument, NULL, 'i'},
 
@@ -181,7 +182,7 @@ main(int argc_in,char *argv_in[])
 
 	int opt;
 	int option_index;
-	while ((opt = getopt_long(argc_in, argv_in, "bnhfi", long_options,
+	while ((opt = getopt_long(argc_in, argv_in, "bnhi", long_options,
 	                          &option_index)) != -1) {
 		switch (opt) {
 		case 0:
@@ -197,9 +198,10 @@ main(int argc_in,char *argv_in[])
 			fprintf(stderr, usage_long_str, argv_in[0]);
 			exit(EXIT_SUCCESS);
 			break;
-		case 'f':
-            arg_no_server = true;
-			break;
+// doesn't make sense with control via FS_DISPLAY_SERVER
+//		case 'f':
+//            arg_no_server = true;
+//			break;
 		case 'i':
 			arg_no_x11 = true;
             arg_no_server = true;
