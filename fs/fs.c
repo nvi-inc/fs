@@ -109,15 +109,15 @@ void exec_client(int no_x) {
 
 }
 
-//#define USAGE_SHORT "Usage: %s [-bnhf]\n"
-#define USAGE_SHORT "Usage: %s [-nh]\n"
+#define USAGE_SHORT "Usage: %s [-Cnh]\n"
 
 const char *usage_long_str = USAGE_SHORT "\n"
-"Start the VLBI Field System and programs listed in and stpgm.ctl\n"
-"  -n, --no-x          do not start programs requiring X11\n"
-"  -h, --help          print this message\n"
-//"  -b, --background    run the Field System in background/daemon mode\n"
+"Start the VLBI Field System and programs listed in stpgm.ctl\n"
+"  -C, --no-client     don't start client (only with server enabled); USE WITH\n"
+"                        CAUTION: there is no feedback showing start-up failure\n"
 //"  -f, --foreground    run the Field System in foreground without server\n"
+"  -h, --help          print this message\n"
+"  -n, --no-x          do not start programs requiring X11\n"
 ;
 
 main(int argc_in,char *argv_in[])
@@ -157,8 +157,7 @@ main(int argc_in,char *argv_in[])
     }
 
 	static struct option long_options[] = {
-// controlled only by FS_DISPLAY_SERVER
-//	    {"background", no_argument, NULL, 'b'},
+	    {"client-off", no_argument, NULL, 'C'},
 	    {"no-x",       no_argument, NULL, 'n'},
 	    {"help",       no_argument, NULL, 'h'},
 // controlled only by FS_DISPLAY_SERVER
@@ -184,17 +183,15 @@ main(int argc_in,char *argv_in[])
 
 	int opt;
 	int option_index;
-//	while ((opt = getopt_long(argc_in, argv_in, "bnhfi", long_options,
-	while ((opt = getopt_long(argc_in, argv_in, "nhi", long_options,
+	while ((opt = getopt_long(argc_in, argv_in, "Cnhi", long_options,
 	                          &option_index)) != -1) {
 		switch (opt) {
 		case 0:
 			// All long options are handled by their short form
 			break;
-// doesn't make sense with control via FS_DISPLAY_SERVER
-//		case 'b':
-//			arg_background = true;
-//			break;
+		case 'C':
+			arg_background = true;
+			break;
 		case 'n':
 			arg_no_x11 = true;
 			break;
@@ -232,7 +229,7 @@ main(int argc_in,char *argv_in[])
 	}
 
     if (arg_background) {
-        fprintf(stderr, "fs: cannot run in background without server\n");
+        fprintf(stderr, "fs: cannot start without client unless using server\n");
         exit(EXIT_FAILURE);
     }
 
