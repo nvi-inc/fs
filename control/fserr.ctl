@@ -6815,6 +6815,9 @@ rdb?W: time field too long for dbe_dot? response for mode 4
 RA -122
 rdb?W: did not find change of second in alloted time
 ""
+RA -898
+rdb?W: Response too long, truncated version returned to caller, echo output shows full response.
+""
 RA -899
 rdb?W: unable to find or decode return code
 ""

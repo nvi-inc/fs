@@ -68,7 +68,9 @@ extern struct fscom *shm_addr;
 /*#define DEBUG
  */
 static unsigned char inbuf[BUFSIZE+1];   /* input message buffer */
-static unsigned char outbuf[BUFSIZE];  /* output message buffer */
+static unsigned char outbuf[9000];  /* output message buffer,
+                                       more than R2DBE 8192 max,
+                                       per Russ */
 static char who[ ]="cn";
 static char what[ ]="ad";
 
@@ -526,7 +528,7 @@ int ip[5];
   int rtn2;    /* argument for cls_rcv - unused */
   int msgflg;  /* argument for cls_rcv - unused */
   int save;    /* argument for cls_rcv - unused */
-  char secho[3*BUFSIZE];
+  char secho[BUFSIZE+1];
   char lbuf[7+BUFSIZE];
 
   int in_class;
@@ -673,23 +675,40 @@ int ip[5];
       rte_cmpt(centisec+3,centisec+5);
     }
 
-    if(iecho) {
+    if(iecho || strlen(outbuf)+1 > BUFSIZE) {
       int in, out;
-      if(strlen(secho) < sizeof(secho)-1)
-	strcat(secho,"<");
-      for(in=0,out=strlen(secho);
-	  in<sizeof(outbuf)-1 && outbuf[in]!=0 && out<sizeof(secho)-1;in++) {
-	if(outbuf[in]=='\n') {
-	  secho[out++]='\\';
-	  if(out >= sizeof(secho)-1)
-	    break;
-	  secho[out++]='n';
-	} else
-	  secho[out++]=outbuf[in];
+      int log_prefix_len = LOG_TIME_TAG_LEN+strlen("#rdbcn#");
+
+#define CHECK_LEN if(out >= sizeof(secho)-1-log_prefix_len) {\
+                    secho[sizeof(secho)-1-log_prefix_len]=0;\
+                    logit(secho,0,NULL);\
+                    out=0;\
+                    secho[out]=0;\
+                  }
+
+/* if what is already in secho exceeds the space needed for the
+ * log prefix, it will get truncated, but that is very unlikely */
+
+      out=strlen(secho);
+      CHECK_LEN
+      strcat(secho,"<");
+      out=strlen(secho);
+      CHECK_LEN
+
+      for(in=0; in<sizeof(outbuf)-1 && outbuf[in]!=0; in++) {
+        if(outbuf[in]=='\n') {
+          secho[out++]='\\';
+          CHECK_LEN
+          secho[out++]='n';
+          CHECK_LEN
+        } else {
+          secho[out++]=outbuf[in];
+          CHECK_LEN
+        }
       }
       secho[out]=0; 
-      if(strlen(secho) < sizeof(secho)-1)
-	strcat(secho,">");
+      if(strlen(secho) < sizeof(secho)-1-log_prefix_len)
+        strcat(secho,">");
       logit(secho,0,NULL);
       secho[0]=0;
     }
@@ -697,6 +716,11 @@ int ip[5];
     if(outbuf[0]!=0 && outbuf[strlen(outbuf)-1]=='\n')
       outbuf[strlen(outbuf)-1]=0;
 
+    if(ip[2]<0) {
+      close_socket();
+    }
+    if(strlen(outbuf)+1 > BUFSIZE)
+      ip[2]=-898;
     if(outbuf[0]!=0 && ip[2] <=0) {
       outbuf[MAX_CLS_MSG_BYTES-1]=0; /* truncate to maximum class record size, cls_snd
 			can't do this because it doesn't know it is a string,
@@ -707,7 +731,6 @@ int ip[5];
     }
 
     if(ip[2]<0) {
-      close_socket();
       goto error;
     }
 #ifdef DEBUG
