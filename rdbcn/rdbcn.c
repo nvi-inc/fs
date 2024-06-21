@@ -526,7 +526,7 @@ int ip[5];
   int rtn2;    /* argument for cls_rcv - unused */
   int msgflg;  /* argument for cls_rcv - unused */
   int save;    /* argument for cls_rcv - unused */
-  char secho[3*BUFSIZE];
+  char secho[BUFSIZE];
   char lbuf[7+BUFSIZE];
 
   int in_class;
@@ -676,20 +676,33 @@ int ip[5];
     if(iecho) {
       int in, out;
       if(strlen(secho) < sizeof(secho)-1)
-	strcat(secho,"<");
-      for(in=0,out=strlen(secho);
-	  in<sizeof(outbuf)-1 && outbuf[in]!=0 && out<sizeof(secho)-1;in++) {
-	if(outbuf[in]=='\n') {
-	  secho[out++]='\\';
-	  if(out >= sizeof(secho)-1)
-	    break;
-	  secho[out++]='n';
-	} else
-	  secho[out++]=outbuf[in];
+        strcat(secho,"<");
+      printf(" len %d secho '%s'\n",strlen(secho),secho);
+      for(in=0,out=strlen(secho); in<sizeof(outbuf)-1 && outbuf[in]!=0;in++) {
+        if(outbuf[in]=='\n') {
+          secho[out++]='\\';
+          if(out >= sizeof(secho)-1-strlen("2024.001.00:00:00.00#rdbcn#")) {
+            secho[out]=0; 
+            logit(secho,0,NULL);
+            out=0;
+            secho[out]=0;
+          }
+          secho[out++]='n';
+        } else {
+          secho[out++]=outbuf[in];
+      printf(" out %d size %d\n",out,sizeof(secho));
+          if(out >= sizeof(secho)-1-strlen("2024.001.00:00:00.00#rdbcn#")) {
+            secho[out]=0; 
+            logit(secho,0,NULL);
+            out=0;
+            secho[out]=0;
+          }
+        }
       }
       secho[out]=0; 
+      printf(" out %d secho '%s'\n",out,secho);
       if(strlen(secho) < sizeof(secho)-1)
-	strcat(secho,">");
+        strcat(secho,">");
       logit(secho,0,NULL);
       secho[0]=0;
     }
