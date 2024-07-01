@@ -21,7 +21,7 @@
 :doctype: book
 
 = FS 10.2 Update Notes
-Version 1.0.2 - February 2024
+Version 1.0.3 - July 2024
 
 :sectnums:
 :stem: latexmath
@@ -34,8 +34,10 @@ Version 1.0.2 - February 2024
 :sectnums!:
 == Document revision history
 
-* 1.0.1 -- Typo in _curl_/_wget_ verbose option in _fesh_ fixed
-* 1.0 -- Initial release
+* 1.0.3 -- July 2024 -- Fix typos
+* 1.0.2 -- February 2024 -- Fix _govert_ option `-u` description
+* 1.0.1 -- January 2024 -- Fix typo in _curl_/_wget_ verbose option in _fesh_
+* 1.0 -- December 2023 -- Initial release
 
 :sectnums:
 == Introduction
@@ -232,8 +234,8 @@ No output from the last command indicates a successful _make_.
 === Update station code
 
 This step is only needed if your station code uses certain shared
-memory variables for the schedule, log or procedure file names. If you
-do need this step, it will not become necessary until you receive
+memory variables for the schedule, log, or procedure file names. If
+you do need this step, it will not become necessary until you receive
 schedule files with more than six characters in the name (before the
 _.skd_ or _.vex_ extension) or you otherwise want to use _.snp_,
 _.prc_, or _.log_ files with names before the "`dot`" (_._) of more
@@ -603,8 +605,8 @@ not fit in the available space.
 These changes are recommended unless you have already made adjustments
 or prefer to keep the windows overlapped to save display space. If you
 don't use _monit3_ (pre-RDBE/DBBC3 T~sys~) or _monit7_ (DBBC3 T~sys~),
-it is recommended that you make these changes so that you have the
-default values. The positions of the windows and the title of the
+it is still recommended that you make these changes so that you have
+the default values. The positions of the windows and the title of the
 _monit7_ window can be adjusted with the commands:
 
  cd
@@ -737,8 +739,8 @@ and later if the login shell is _tcsh_.
 * Add any _monit6_, _monit7_, _msg_/_rdbemsg_, _scnch_, and _erchk_
 menu, hot-key, and settings that may be missing.
 
-* Change the menu for the _monit7_ menu entry to say `DBBC3` instead
-of `Tsys`
+* Change the menu for the _monit7_ menu entry to say `Monit: DBBC3`
+instead of `Monit: Tsys`.
 
 ====
 
@@ -924,8 +926,8 @@ recommended that the variable be set to `1`. That way the
 configuration will be forward compatible with a possible change to
 using _f95_.
 
-... Remove mixing of `integer*4` and `integer*2` as arguments for
-intrinsic `and()`.
+... Remove mixing of `integer*4` and `integer*2` values as arguments
+for intrinsic `and()`.
 
 =====
 
@@ -940,7 +942,7 @@ FSL11 has limited support for _python2_. In particular, there is no
 _logpl_, require `numpy`. Since most of the work converting was for
 these two programs, it seemed best if they all were converted. There
 is not expected to by any _python2_ in the next Debian release,
-_bookworm_.
+_bookworm_, and subsequent releases.
 
 The older _python2_ versions are still included in case they are
 needed. For older systems that are unable to use the _python3_
@@ -979,8 +981,8 @@ _python2_ to _python3_. It can installed, as _root_, with:
 
 +
 
-This utility will re-indent a script using 4-space indents and no hard
-tabs. It can be installed, with:
+This utility will re-indent a script using four spaces (and no hard
+tabs). It can be installed, with:
 
 .... First, as _root_:
 
@@ -995,7 +997,8 @@ tabs. It can be installed, with:
 +
 
 TIP: The `PATH=...` statement needs to be re-executed for each new
-login or new _bash_ shell.
+login (and previously running _bash_ shell). It can be added to
+_~/.profile_ to make it persistent.
 
 ... Change the _shebang_ lines to use _python3_
 
@@ -1120,7 +1123,8 @@ make this possible.
 
 * The display of procedure libraries for the `pfdl` command in _pfmed_
 now shows only three libraries per line. A key was also added to
-describe the prefix letters.
+describe the prefix letters (`>`: active, `A`: schedule, and `S`:
+station).
 
 * The `log=...` command now traps a log name that is too long.
 Previously, it just truncated longer names to eight characters.
@@ -1408,6 +1412,14 @@ the new average.
 
 +
 
+It may not be necessary to use different thresholds for different
+bands. Practical usage of this feature may be to have one set the
+thresholds high enough, in `initi`, to clip the outliers in the most
+affected band(s). Bands with little or no RFI may then still behave
+normally.
+
++
+
 This feature is experimental and may be changed and other filtering
 schemes may be added.
 
@@ -1558,9 +1570,9 @@ This makes it possible to identify error conditions even if averaging
 
 +
 
-The foreground color for cyan, green, and yellow backgrounds is black;
-red and blue, white. It was felt that these combinations were the
-easiest to read.
+Normally, the foreground color for cyan, green, and yellow backgrounds
+is black; for red and blue, white. It was felt that these combinations
+were the easiest to read.
 
 +
 
@@ -1580,18 +1592,18 @@ terminating (closing https://github.com/nvi-inc/fs/issues/204[#204]).
 
 +
 
-Pressing a desktop key combination that generates an escape sequence,
-such as kbd:[Ctrl+Alt+{downarrow}], when _monit7_ had the focus would
-cause it to terminate. To prevent this, use of kbd:[Esc] to terminate
-was removed. To prevent other characters in the escape sequence from
-being treated as _monit7_ commands, they are filtered according to
-"`CSI sequences`" at https://en.wikipedia.org/wiki/ANSI_escape_code.
-If an out-of-order byte is received, processing of the escape sequence
-is terminated and the byte is treated as a new input, either another
-escape sequence or a command. This effectively filters out the user
-pressing kbd:[Esc], or key combinations that generate escape
-sequences, possibly more than once in a row (including automatic
-repeat).
+Pressing a desktop key combination, such as
+kbd:[Ctrl+Alt+{downarrow}], that generates an escape sequence, when
+_monit7_ had the focus would cause it to terminate. To prevent this,
+use of kbd:[Esc] to terminate was removed. To prevent other characters
+in the escape sequence from being treated as _monit7_ commands, they
+are filtered according to "`CSI sequences`" at
+https://en.wikipedia.org/wiki/ANSI_escape_code.  If an out-of-order
+byte is received, processing of the escape sequence is terminated and
+the byte is treated as a new input, either another escape sequence or
+a command. This effectively filters out the user pressing kbd:[Esc],
+or key combinations that generate escape sequences, possibly more than
+once in a row (including automatic repeat).
 
 +
 
@@ -1861,6 +1873,8 @@ fail with the error message:
 
  fsclient.c:436 (fetch_state) error unable to connect to server: Connection refused
 
++
+
 Apparently, it takes the server a couple seconds to shutdown
 completely so it can be restarted. To avoid this error, a wait of up
 to two seconds since the previous FS exit is used. If a wait is
@@ -2039,11 +2053,11 @@ testing.
 [%collapsible]
 =====
 
-If fields for these data are present in the `wx/` log entries they
+If fields for these data are present in the `wx/` log entries, they
 will be plotted. This is in contrast to temperature, pressure and
 humidity, which are always plotted if `wx/` entires are present.
-Missing values for any fields are shown as "`out-of-range`" (near the
-top-edge of the corresponding plot).
+Missing values for plotted fields are shown as "`out-of-range`" (near
+the top-edge of the corresponding plot).
 
 =====
 
@@ -2225,14 +2239,15 @@ large vertical scales, but it improves the worst ones.
 [%collapsible]
 =====
 
-The _pgperl_ package provided by some Linux distributions (for example
-FSL11) may use the _giza_ plotting library instead of _pgplot_.
-Unfortunately, _giza_ is not yet a fully compatible replacement for
-_pgplot_. Several differences have been noticed, so far, in _giza_
-version `1.2.0` (which is used by FSL11):
+The _pgperl_ package provided by some Linux distributions (for
+example, FSL11) may use the _giza_ plotting library instead of
+_pgplot_. Unfortunately, at least some versions of _giza_ are not a
+fully compatible replacement for _pgplot_. Several differences have
+been noticed, so far, in _giza_ version `1.2.0` (which is used by
+FSL11):
 
 NOTE: FSL11 offers an optional non-standard version of _pgperl_ that
-uses _pgplot_. Every effort has been made to make that "`safe,`"
+uses _pgplot_. Every effort has been made to make that "`safe.`"
 However using it is at your own risk. Installing FSL11 will not
 include it by default. You can find the directions for installing this
 non-standard package at:
@@ -2267,16 +2282,19 @@ Versions that start with `GIZA_` also do not work.
 
 If the script detects that _giza_ is in use, it will adjust the
 line-width, except for plot device `/xw`, and use a larger open circle
-for "`bad'" points. The resulting plots are usable, but not as good as
-with _pgplot_. These adjustments can be disabled, individually, with
-`-Z` option if they cause a problem or if a later version of _giza_
-has better agreement with _pgplot_. If _giza_ is not detected, the
-`-Z` option can be used for force the adjustments. Please see the `-h`
-output for more details.
+for "`bad`" points. The resulting plots are usable, but not as good as
+with _pgplot_. These adjustments can be disabled, individually, using
+the `-Z` option, if they cause a problem or if a later version of
+_giza_ has better agreement with _pgplot_. If _giza_ is not detected,
+the `-Z` option can be used for force the adjustments. Please see the
+`-h` output for more details.
 
 One advantage of _giza_ is that a PDF file is available as an output
 device. Without _giza_, you can convert a PostScript file to PDF with
 _ps2pdf_.
+
+Marjolein Verkoutor (JIVE) points out that another advantage of _giza_
+is that it can produce PNG files.
 
 =====
 
@@ -2334,8 +2352,8 @@ more than one log is used on the command line, resulting in a
 "`merged`" plot.
 
 ... The old `-v` (version) option was moved to `-V` to make room for
-the new `-v` option, which plots phase differences between phase-cal
-tones within an RDBE IF.
+the new `-v` (VGOS) option, which plots phase differences between
+phase-cal tones within an RDBE IF.
 
 =====
 
@@ -2452,18 +2470,9 @@ The _skedf.ctl_ options for controlling how _drudg_ handles the
 
 =====
 
-Two things were missing to make the scheme work in a general way.
+Two changes were made to correct omissions that prevented this scheme
+from working in the most general way:
 
-... Add `undef` as a value for the `_state_` parameter to not command
-the device.
-
-+
-
-There was no way to set the defaults without commanding the device.
-This can be an issue if there is no correct choice for the `_state_`
-and/or some values may cause a device problem. Using `undef` for the
-`_state_` (instead of `on` or `off`) will now suppress sending the
-parameters to the device.
 
 ... Change the default value for the `_samples_` parameter to be
 the previous value.
@@ -2475,6 +2484,17 @@ Due to an oversight, it was not possible to set the default for the
 it had to be edited into each `cont_cal=...` command. This has been
 fixed so that the default for the `_samples_` will be the previous
 value (initially `10`).
+
+... Add `undef` as a value for the `_state_` parameter to not command
+the device.
+
++
+
+There was no way to set the defaults without commanding the device.
+This can be an issue if there is no correct general choice for the
+`_state_` and/or some values may cause a device problem. Using `undef`
+for the `_state_` (instead of `on` or `off`) allows setting the
+defaults for the other parameters without commanding the device.
 
 Thanks to Jon Quick (HartRAO) for pointing out that the implementation
 was incomplete and fruitful discussions about how to complete it.
@@ -2620,22 +2640,33 @@ updated to provide more relevant information.
 
 There is no need for existing users to update their versions of
 _metserver_ and _metclient_. However, it may be beneficial to update
-since any future improvements will be made using the repositories.
+since any future improvements will be made using the new repositories.
 
 Although a complete reinstall is not very difficult, a more limited
 update is relatively simple. Besides downloading the repositories and
 _make_-ing the programs, the scripts used to run the programs will
-need to be updated. For systems using `init.d` (deprecated), the
-string assigned to the `DAEMON` variable in the
+need to be updated. There are two possible procedures. Use the one
+below as appropriate depending on whether you are using `init.d` or
+`systemd` to run the programs.
+
+[disc]
+* For systems using `init.d` (deprecated):
+
++
+
+The string assigned to the `DAEMON` variable in the
 _/etc/init.d/metserver.sh_ and/or _/etc/init.d/metclient.sh_ file
 needs to be updated by removing the string _st/_. Then the daemons
 need to be restarted with, as appropriate:
 
   /etc/init.d/metserver.sh restart
-  /etc/init.d/metserver.sh restart
+  /etc/init.d/metclient.sh restart
 
-For systems using `systemd` (preferred), the existing
-_/usr2/st/metserver/metserver_systemd.sh_ and/or
+* For systems using `systemd` (preferred):
+
++
+
+The existing _/usr2/st/metserver/metserver_systemd.sh_ and/or
 _/usr2/st/meclient/meclient_systemd.sh_ scripts need to be copied to
 _/usr/local/sbin_ and the string assigned to the `DAEMON` variable in
 the new copies updated by removing the string _st/_. Additionally, the
@@ -2644,6 +2675,8 @@ repositories need to be copied over the ones in
 _/etc/systemd/system/_. Then the daemon needs to be reloaded:
 
  systemctl daemon-reload
+
++
 
 and the services restarted, as appropriate:
 
@@ -2675,7 +2708,7 @@ allows the user to change to a new schedule before the `Ready` form is
 opened. That obviates the need to reload the form, which might be
 overlooked, after the new schedule is opened.
 
-Thanks, to Jon Quick (HartRAO) for suggesting this.
+Thanks to Jon Quick (HartRAO) for suggesting this.
 
 =====
 
@@ -2711,7 +2744,7 @@ The error number for the `onoff` command was changed from `-307` to
 warning in both places so that the user does not need to wait until
 _onoff_ finishes to see it.) The warnings were also expanded to handle
 four character device mnemonics, which was missing before. The warning
-will still show-up in _sterp_ and _erchk_. It can be disable in the
+will still show-up in _sterp_ and _erchk_. It can be disabled in the
 latter using the _erchk.ctl_ control file.
 
 =====
@@ -2865,8 +2898,9 @@ The previous message was not informative.
 +
 
 Log file names that only consist of the station code are excluded.
-___full.log__ files are not accepted if the station code is `ll`
-unless __ll__ immediately precedes ___full.log__ in the file name.
+Files ending with ___full.log__ are not accepted if the station code
+is `ll` unless __ll__ immediately precedes ___full.log__ in the file
+name.
 
 =====
 
@@ -3086,9 +3120,9 @@ _~/.xsession_ files
 This option runs the shell used by the __xterms__ as a login shell,
 i.e., it runs _~/.profile_ or _~/.login_ as appropriate when started.
 Since the environment was already set by _gdm_/_gdm3_, this was
-redundant (`-ls` is still used for the _xterm_ in _~/.xsession_ for a
-different reason, see farther below in the *Details* for <<auid,Update
-AUID default files for FSL11>>).
+redundant (`-ls` is still used for the _xterm_ in _~/.xsession_ files
+of AUID accounts for a different reason, see farther below in the
+*Details* for <<auid,Update AUID default files for FSL11>>).
 
 ... Other _~/.fvwm2rc_ file cleanup.
 
@@ -3125,12 +3159,12 @@ automatically (the AUID account password may still need to be
 entered). This variable is set by the FSL11 scripts _oper_x11_ and
 _prog_x11_, which then run `startx` to start X11 on the console.
 `startx` does not run _~/.profile_ (the environment from the AUID
-account is inherited). The _/.xsession_ for the AUID account runs the
-_xterm_ with the `-ls` option which triggers running _~/.profile_. An
-`exit` command is used after the promotion script so that when the
-promoted session exits, the GUI is shutdown. This last step prevents
-the AUID account from being active on the GUI after the window manager
-has changed to the one for the promoted account.
+account is inherited). The _~/.xsession_ file for the AUID accounts
+runs the _xterm_ with the `-ls` option which triggers running
+_~/.profile_. An `exit` command is used after the promotion script so
+that when the promoted session exits, the GUI is shutdown. This last
+step prevents the AUID account from being active on the GUI after the
+window manager has changed to the one for the promoted account.
 
 ... Add default __~/.profile_<SUDO_USER>__ scripts to _~oper_ and _~prog_
 
@@ -4795,7 +4829,7 @@ changes that will only be possible to check now.
 
 For existing system FS version _10.2_, in principle nothing needs be
 changed in your local files and software. There however may be station
-code updates that you may not have applied yet:
+code updates that you not have applied yet:
 
 * If you had been using it on a 32-bit system you may not have made
 the changes for 64-bit referred to in the <<Transfer files>> section
