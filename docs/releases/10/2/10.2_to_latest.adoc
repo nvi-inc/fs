@@ -21,7 +21,7 @@
 :doctype: book
 
 = FS 10.2 to Latest Commit Update Notes
-Version 1.1 - April 2024
+Version 1.2 - July 2024
 
 :sectnums:
 :stem: latexmath
@@ -54,7 +54,7 @@ release to the new release, were completed. However, this may not be
 complete. _Let the user beware._
 
 This document is up to date with the
-`34f86a265f4bb35c87b392514acde837fa8ce0b5` (`34f86a26`) commit. Due to
+`bb5818dd028f5ffd46d732890da0ea2f62dfade1` (`bb5818dd`) commit. Due to
 small increments, such as updating this document, that may not be the
 literal last commit, but the differences should be small unless you
 happen to `pull` between a significant change and this document being
@@ -84,7 +84,7 @@ then as _prog_ execute:
 
  cd /usr2/fs-git
  git fetch
- git checkout -q 34f86a26
+ git checkout -q bb5818dd
 
 . If you are using FSL8, or otherwise unable to use _git_:
 
@@ -110,20 +110,31 @@ that:
 
 * For the __tag__ in the `*wget*` and `*tar*` commands, use the short
 SHA for the commit. For example, for commit under discussion here,
-`34f86a265f4bb35c87b392514acde837fa8ce0b5`, use `34f86a26`.
+`bb5818dd028f5ffd46d732890da0ea2f62dfade1`, use `bb5818dd`.
 
 * After extracting the archive, change the name of the output
 directory to use the latest feature release and the short SHA of the
-commit, like _fs-10.2.0-20-g34f86a26_ (note the _g_ before the short
+commit, like _fs-10.2.0-33-gbb5818dd_ (note the _g_ before the short
 SHA), which will then be used in the following `*cd*` command. For
 example (kbd:[Tab] completion is your friend for the long SHA):
 
  cd /usr2
- mv fs-34f86a265f4bb35c87b392514acde837fa8ce0b5 fs-10.2.0-20-g34f86a26
- cd /usr2/fs-10.2.0-20-g34f86a26
+ mv fs-bb5818dd028f5ffd46d732890da0ea2f62dfade1 fs-10.2.0-33-gbb5818dd
+ cd /usr2/fs-10.2.0-33-gbb5818dd
 
 * You will end the "`installing from an archive`" with the step
 setting the link for __/usr2/fs__ by running *`make install`*.
+
+=== Make the FS
+
+As _prog_:
+
+ cd /usr2/fs
+ make clean rmdoto rmexe all >& /dev/null
+ make -s
+
+No output from the last command indicates a successful _make_.
+
 
 === Update your station code.
 
@@ -420,13 +431,9 @@ Two further enhancement were made:
 * `*make{nbsp}install*` can only be used by _root_ and `install` is
 the only _make_ target allowed for _root_.
 
-* When using a source directory created from an archive, if the
-directory name is incorrectly formed (missing the tag information), an
-explanatory error will be reported and the install aborted. This
-approach reports the problem as early as possible, in particular
-before trying to _make_ the FS. Likewise, for other _make_ targets, an
-incorrectly formed directory name from an archive will give an
-explanatory error message specific to this case before aborting.
+* When installing from an archive, if the source directory name is
+incorrectly formed (missing the tag information), an explanatory error
+will be reported and the _make_ will be aborted.
 
 ====
 
@@ -450,6 +457,51 @@ Thanks to the staff at KPGO for reporting this issue.
 
 ====
 
+. Restore `-b` startup option (closing
+https://github.com/nvi-inc/fs/issues/216[#216]).
+
++
+[%collapsible]
+====
+
+The removal of the `-b` option in FS _10.2.0_ was a bit too hasty. The
+long form of the option was `--background`, which suggested that it
+was the inverse of `--foreground`. This was not the case. With the
+server enabled, it started the FS without a client. This might be
+convenient to use for starting the FS from a script or otherwise
+without the log being displayed on the terminal. A pitfall of using it
+is that there is no feedback about the whether the FS started
+correctly or had a start-up error and aborted. As a result, this
+option must be used with caution.
+
+To make it clearer that it does not start the client, the short option
+was changed to `-C` (_not_ client) and the long option to
+`--no-client`. The help output now includes a warning about the lack
+of feedback for startup errors.
+
+Thanks to Christian Kristukat (AGGO) for reporting the loss of
+functionality when the `-b` option was removed. Thanks to Beppe
+Maccaferri (Medicina) for pointing out the possible pitfall.
+
+====
+
+. Comment out all lines in example _mdlpo.ctl_ and _parpo.ctl_ files
+(closing https://github.com/nvi-inc/fs/issues/214[#214]).
+
++
+[%collapsible]
+====
+
+This prevents these example files being used accidentally with values
+that are incorrect for a new installation. Instead, the pointing
+analysis programs and/or _antcn_ (while reading the default
+_mdlpo.ctl_) will fail until the files have been setup with reasonable
+values for the antenna. While this may make the first time use for a
+new antenna a little painful, it is better than having incorrect
+values being used.
+
+====
+
 . Prevent _root_ from running the FS.
 
 +
@@ -467,6 +519,24 @@ still be run by _root_, but this is not recommended and should be
 avoided. It may lead to problems. However, it would not be inherently
 dangerous.
 
+====
+
+. Remove bad characters from ASCII files.
+
++
+[%collapsible]
+====
+
+A few ASCII files had non-ASCII characters in them.
+
+[disc]
+
+* There were UTF-8 characters in _help/core3h_mode.j___ and
+_misc/logrecover.txt_. They were removed.  They did not display
+properly on non-UTF-8 systems, principally FSL9 and earlier.
+
+* The extended ASCII character for angstroms (&Aring;) was incorrectly
+specified in the _help/lvdt.*_ files. It was replaced with the word.
 
 ====
 
