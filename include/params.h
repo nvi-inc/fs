@@ -224,3 +224,5 @@
 #define MAX_LO     (MAX_RDBE*MAX_RDBE_IF)
 
 #define MAX_SKD  18
+
+#define LOG_TIME_TAG_LEN strlen("2024.001.00:00:00.00")
