@@ -49,11 +49,13 @@ int *out_recs;
   char inbuf[BUFSIZE+1],*first;
   int n;
   char who[3];
+  int log_prefix_len;
 
   /* format output buffer */
 
   sprintf(output,"%s(%c)/",command->name,unit_letters[iwhich]);
   start=output+strlen(output);
+  log_prefix_len=strlen(output)+LOG_TIME_TAG_LEN+1;
 
   for (i=0;i<ip[1];i++) {
     if ((nchars =
@@ -66,14 +68,14 @@ int *out_recs;
     first=inbuf;
     while(strlen(first)>0) {
       *start=0;
-      if(strlen(first)+1<=sizeof(output)-strlen(output)) {
+      if(strlen(first)+1<=sizeof(output)-log_prefix_len) {
         strcpy(start,first);
         if(strlen(output)>0 && output[strlen(output)-1]=='\n')
           output[strlen(output)-1]='\0';
         first+=strlen(first);
       } else {
         int last;
-        n=sizeof(output)-strlen(output)-1;
+        n=sizeof(output)-log_prefix_len-1;
         for(last=n;last>(n-35) && last>0;last--) {
           if(first[last-1]==':') {
             n=last;
