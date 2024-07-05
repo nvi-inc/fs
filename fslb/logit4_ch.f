@@ -29,7 +29,7 @@
       ierr=0
       nchar=len(cmessg)
       if(nchar.gt.MAX_CLS_MSG_BYTES-27) then
-         call put_stderr('logit2_ch message too long\n'//char(0))
+         call put_stderr('logit4_ch message too long\n'//char(0))
       endif
       call char2hol(cmessg,lmessg,1,min(nchar,MAX_CLS_MSG_BYTES-27))
       call logit(lmessg,nchar,lsor,lprocn,ierr,lwho,lwhat,4)
