@@ -195,14 +195,19 @@ C
          else
             idum=ichmv(ldev,1,iprm,1,4)
          endif
-      else if (cjchar(iprm,1).eq.'*') then
+         goto 270
+      endif
+      if (cjchar(iprm,1).eq.'*') then
         idumm1 = ichmv(ldev,1,ldevfp,1,4)
-      else if(cjchar(iprm,1).eq.'u'
-     &        .and.index('56',cjchar(iprm,2)).ne.0) then
+        goto 270
+      endif
+      if(cjchar(iprm,1).eq.'u'.and.index('56',cjchar(iprm,2)).ne.0) then
         idumm1 = ichmv(ldev,1,iprm,1,2)
         call char2hol(' ',ldev,3,4)
+        goto 270
       endif
 C
+      call char2hol(' ',ldev,3,4)
       call fs_get_rack(rack)
       call fs_get_rack_type(rack_type)
       if (MK3.eq.rack.or.MK4.eq.rack.or.LBA4.eq.rack) then
