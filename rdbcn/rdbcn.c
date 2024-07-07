@@ -793,8 +793,7 @@ int ip[5];
     if(1==ip[2]) {
       int i, is;
 
-      strcpy(lbuf,me);
-      strcat(lbuf,"/");
+      lbuf[0]=0;
       is=strlen(lbuf);
       for(i=0;outbuf[i]!=0;i++)
 	if(isprint(outbuf[i]))
