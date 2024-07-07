@@ -185,26 +185,24 @@ C
       if (cjchar(iprm,1).ne.'*'.and.cjchar(iprm,1).ne.',') then
          call fs_get_rack(rack)
          call fs_get_rack_type(rack_type)
-         if (DBBC .eq. rack.and.
+         if(cjchar(iprm,1).eq.'u'.and.index('56',cjchar(iprm,2)).ne.0)
+     &      then
+           idumm1 = ichmv(ldev,1,iprm,1,2)
+           call char2hol(' ',ldev,3,4)
+         else if (DBBC .eq. rack.and.
      &        (DBBC_PFB.eq.rack_type.or.DBBC_PFB_FILA10G.eq.rack_type)
      &        ) then
             idum=ichmv(ldev(1),1,ibuf,ic1,inumb)
-        else if(RDBE.ne.rack.and.DBBC3.ne.rack) then
+         else if(RDBE.ne.rack.and.DBBC3.ne.rack) then
             ldev(1)=dtnam(iprm,1,inumb)
             call char2hol(' ',ldev,3,4)
          else
             idum=ichmv(ldev,1,iprm,1,4)
          endif
          goto 270
-      endif
-      if (cjchar(iprm,1).eq.'*') then
-        idumm1 = ichmv(ldev,1,ldevfp,1,4)
-        goto 270
-      endif
-      if(cjchar(iprm,1).eq.'u'.and.index('56',cjchar(iprm,2)).ne.0) then
-        idumm1 = ichmv(ldev,1,iprm,1,2)
-        call char2hol(' ',ldev,3,4)
-        goto 270
+      else if (cjchar(iprm,1).eq.'*') then
+         idumm1 = ichmv(ldev,1,ldevfp,1,4)
+         goto 270
       endif
 C
       call char2hol(' ',ldev,3,4)
