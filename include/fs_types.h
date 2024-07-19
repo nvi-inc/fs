@@ -114,3 +114,4 @@
 #include "rdbe_data_send_ds.h"
 #include "rdbe_channels_ds.h"
 #include "rdbe_pc_offset_ds.h"
+#include "rdbe_quantize_ds.h"

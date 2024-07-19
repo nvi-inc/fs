@@ -50,7 +50,7 @@ vlbabbcd.o vrepro_util.o vset_zero.o vsi4_util.o vst_util.o wvolt_util.o \
 caccess.o get_gain_rxg.o log_rxgfile.o dbbc3_core3h_modex_util.o \
 dbbc3_version_check.o mk5dbbc3d.o get_dbbc3time.o find_process.o \
 getenv_DBBC3.o r2dbe_2_tsysx.o r2dbcn_v.o rdbe_data_send_util.o\
-rdbe_channels_util.o rdbe_pc_offset_util.o
+rdbe_channels_util.o rdbe_pc_offset_util.o rdbe_quantize_util.o
 
 clib.a: $(OBJECTS)
 
