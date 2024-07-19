@@ -1,0 +1,45 @@
+		   quantize - Set channel quantization threshold (RDBE racks)
+
+            Syntax:     quantize=<if>,<channel>,<threshold>
+                        quantize=<rdbe>,<if>,<channel>
+
+            Response:   quantize(<rdbe>)/,,<0>,<levels>
+                        quantize(<rdbe>)/,,<1>,<levels>
+
+
+Settable parameters:
+        <rdbe>      letter: 'a','b', 'c', or 'd' for individual RDBE
+                    to address
+        <if>        IF to adjust: '0', '1', or 'both'. Default 'both'.
+        <channel>   Channel to set quantization for, 'all' or '0'-'63'
+                    for R2DBE.  Default 'all'. If the <threshold>
+                    parameter is unspecified, the device treats this
+                    parameter as being 'all'.
+        <threshold> Threshold for two-bit postive. Integer 0 to 2^32-1.
+                    Default is unspecified, which implies a level that
+                    sets the 'bstate' level to 68%.
+
+Monitor-only parameters:
+        <N>         "0" or "1", the remaining values are for that IF
+        <levels>    list of threshold levels in percent (0-100) for
+                    the channels selected by the 'channels' command,
+                    in the order of channels selected.  If none are
+                    selected for a given IF then all are reported for
+                    that IF.
+
+Comments:
+Like all RDBE commands, this command can either operate on all active
+RDBEs or a particular one.  If no <rdbe> parameter is specified (this
+would probably be the most common case), the command will operate on
+all active RDBEs.  However, if the <rdbe> parameter is specified as a
+single letter in the range of possible RDBEs, the command is for that
+RDBE only.  Responses always include the letter of the RDBE in
+parenthesizes appended to the command name.  Active RDBEs are defined
+by the 'active_rdbes' command.  At start-up all configured RDBEs are
+considered active.
+
+To query all active devices use 'quantize'.  To query a single device,
+use quantize=<rdbe>.  To command a single device there must be at
+least two commas after the <rdbe> parameter.  Any supplied <rdbe>
+parameter that does not match a possible RDBE is assumed to be an <if>
+parameter for an all active devices command.

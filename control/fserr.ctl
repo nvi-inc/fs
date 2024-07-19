@@ -167,6 +167,60 @@ response not received for second dbe_chsel query, rdb?W
 2D -912
 program error: strdup() failed for second dbe_chsel query, rdb?W
 ""
+2E -201
+Error decoding IF value, must be 'both', 0, or 1; or first parameter is not a valid RDBE to address
+""
+2E -202
+Error decoding channel, must be 'all' or 0-63 for R2DBE
+""
+2E -203
+Error decoding threshold, must be integer 1 to 2^32-1.
+""
+2E -301
+No RDBEs active, see active_rdbes command.
+""
+2E -400
+Too many class responses for dbe_quantize queries, rdb?W
+""
+2E -401
+error retrieving class for first dbe_quantize query, rdb?W
+""
+2E -402
+error retrieving class for second dbe_quantize query, rdb?W
+""
+2E -451
+Class buffer error from command response for dbe_quantize, rdb?W
+""
+2E -501
+error decording IF for first dbe_quantize query, rdb?W
+""
+2E -502
+error decording level for first dbe_quantize query, rdb?W
+""
+2E -503
+Too many levels from first dbe_quantize query, rdb?W
+""
+2E -511
+error decording IF for second dbe_quantize query, rdb?W
+""
+2E -512
+error decording level for second dbe_quantize query, rdb?W
+""
+2E -513
+Too many levels from second dbe_quantize query, rdb?W
+""
+2E -901
+response not received for first dbe_quantize query, rdb?W
+""
+2E -902
+program error: strdup() failed for first dbe_quantize query, rdb?W
+""
+2E -911
+response not received for second dbe_quantize query, rdb?W
+""
+2E -912
+program error: strdup() failed for second dbe_quantize query, rdb?W
+""
 2M -101
 No default for <InString>; or no default for RDBE to address
 ""
