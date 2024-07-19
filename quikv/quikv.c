@@ -478,6 +478,9 @@ loop:
       case 125:
 	rdbe_pc_offset(&command,itask,ip);
 	break;
+      case 126:
+	rdbe_quantize(&command,itask,ip);
+	break;
       case 130:
 	dbbc_vsix(&command,itask,ip);
 	break;

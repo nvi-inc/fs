@@ -594,6 +594,7 @@ atten        qkr 12200 01 2000FFFFFFFF
 data_send    qkr 12300 01 2000FFFFFFFF
 channels     qkr 12400 01 2000FFFFFFFF
 pc_offset    qkr 12500 01 2000FFFFFFFF
+quantize     qkr 12600 01 2000FFFFFFFF
 *dbbc pfb
 vsi1         qkr 13000 01 0800FFFFFFFF
 vsi2         qkr 13001 01 0800FFFFFFFF

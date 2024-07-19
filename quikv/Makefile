@@ -46,7 +46,8 @@ dbbc3_ifx_dis.o logmsg_dbbc3.o dbbc3_bbcnn.o dbbc3_bbcnn_dis.o\
 dbbc3_cont_cal.o dbbc3_cont_cal_dis.o dbbc3_iftpx.o dbbc3_iftpx_dis.o\
 lo_config.o dbbc3_core3h_modex.o dbbc3_core3h_modex_dis.o\
 dbbc3_mcast_time.o rdbe_data_send.o rdbe_data_send_dis.o\
-rdbe_channels.o rdbe_channels_dis.o rdbe_pc_offset.o rdbe_pc_offset_dis.o
+rdbe_channels.o rdbe_channels_dis.o rdbe_pc_offset.o rdbe_pc_offset_dis.o\
+rdbe_quantize.o rdbe_quantize_dis.o
 #mk6_record.o mk6_record_dis.o 
 
 LDLIBS += -lm

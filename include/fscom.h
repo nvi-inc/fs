@@ -559,4 +559,6 @@ typedef struct fscom {
 
   struct rdbe_pc_offset_cmd rdbe_pc_offset[MAX_RDBE+1];
 
+  struct rdbe_quantize_cmd rdbe_quantize[MAX_RDBE+1];
+
 } Fscom;

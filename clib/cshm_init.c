@@ -604,6 +604,14 @@ void cshm_init()
   }
 
   for(i=0;i<MAX_RDBE+1;i++) {
+    for (j=0;j<MAX_RDBE_IF;j++) {
+      m5state_init(&shm_addr->rdbe_quantize[i].ifc.state);
+      m5state_init(&shm_addr->rdbe_quantize[i].channel.state);
+      m5state_init(&shm_addr->rdbe_quantize[i].threshold.state);
+    }
+  }
+
+  for(i=0;i<MAX_RDBE+1;i++) {
       m5state_init(&shm_addr->rdbe_pc_offset[i].offset.state);
   }
 
