@@ -61,6 +61,9 @@ int rdbe_channels_dec(lcl,ifc,count,ptr)
       for (j=0;j<MAX_RDBE_IF;j++)  {
         if(*ifc==-1||*ifc==j) {
           int i;
+          lcl->ifc[j].ifc.ifc=j;
+          m5state_init(&lcl->ifc[j].ifc.state);
+          lcl->ifc[j].ifc.state.known=1;
           for (i=0;i<MAX_R2DBE_CH;i++)
             lcl->ifc[j].channels.channels[i]=-1;
           m5state_init(&lcl->ifc[j].channels.state);
@@ -101,11 +104,11 @@ int rdbe_channels_dec(lcl,ifc,count,ptr)
   return ierr;
 }
 
-void rdbe_channels_enc(output,count,lclc,ich)
+void rdbe_channels_enc(output,count,lclc,ifc)
   char *output;
   int *count;
   struct rdbe_channels_cmd *lclc;
-  int ich;
+  int ifc;
 {
   int ivalue;
 
@@ -113,13 +116,17 @@ void rdbe_channels_enc(output,count,lclc,ich)
 
   switch (*count) {
     case 1:
-      sprintf(output,"%d",ich);
+      if(lclc->ifc[ifc].ifc.ifc >= 0 && lclc->ifc[ifc].ifc.ifc <NIF_KEY)
+        m5key_encode(output,if_key,NIF_KEY,
+            lclc->ifc[ifc].ifc.ifc,&lclc->ifc[ifc].ifc.state);
+      else
+        strcat(output,BAD_VALUE);
       break;
     case 2:
-      if(lclc->ifc[ich].channels.state.known) {
+      if(lclc->ifc[ifc].channels.state.known) {
         int i;
-        for (i=0;i<MAX_R2DBE_CH && lclc->ifc[ich].channels.channels[i]!=-1; i++) {
-          sprintf(output,"%d,",lclc->ifc[ich].channels.channels[i]);
+        for (i=0;i<MAX_R2DBE_CH && lclc->ifc[ifc].channels.channels[i]!=-1; i++) {
+          sprintf(output,"%d,",lclc->ifc[ifc].channels.channels[i]);
           output=output+strlen(output);
         }
       }
@@ -132,20 +139,20 @@ void rdbe_channels_enc(output,count,lclc,ich)
   if(*count>0) *count++;
   return;
 }
-rdbe_channels_2_rdbe(ptr,lcl,ich)
+rdbe_channels_2_rdbe(ptr,lcl,ifc)
   char *ptr;
   struct rdbe_channels_cmd *lcl;
-  int ich;
+  int ifc;
 {
   strcpy(ptr,"dbe_chsel = ");
 
   ptr+=strlen(ptr);
-  sprintf(ptr,"%d ",ich);
-  if(lcl->ifc[ich].channels.state.known) {
+  sprintf(ptr,"%d ",ifc);
+  if(lcl->ifc[ifc].channels.state.known) {
     int i;
-    for(i=0;i<MAX_R2DBE_CH && lcl->ifc[ich].channels.channels[i]!=-1;i++) {
+    for(i=0;i<MAX_R2DBE_CH && lcl->ifc[ifc].channels.channels[i]!=-1;i++) {
       ptr+=strlen(ptr);
-      sprintf(ptr,": %d ",lcl->ifc[ich].channels.channels[i]);
+      sprintf(ptr,": %d ",lcl->ifc[ifc].channels.channels[i]);
     }
   }
 
@@ -153,7 +160,7 @@ rdbe_channels_2_rdbe(ptr,lcl,ich)
 
   return;
 }
-rdbe_2_rdbe_channels(ptr_in,lclc,ip) /* return values:
+rdbe_2_rdbe_channels(ptr_in,lclc,ip,irec) /* return values:
                                             *  0 == no error
                                             *  0 != error
                                             */
@@ -161,6 +168,7 @@ rdbe_2_rdbe_channels(ptr_in,lclc,ip) /* return values:
 
   struct rdbe_channels_cmd *lclc;  /* result structure with parameters */
   int ip[5];   /* standard parameter array */
+  int irec;
 {
   char *new_str, *ptr, *ptr2, *ptr_save;
   int count, ierr;
@@ -196,21 +204,20 @@ rdbe_2_rdbe_channels(ptr_in,lclc,ip) /* return values:
     while (ptr!=NULL) {
       switch (++count) {
         case 1:
-          if(1!=sscanf(ptr,"%d",&ifc)||ifc<0||ifc>=MAX_RDBE_IF) {
-            ierr=-501;
+          if(m5key_decode(ptr,
+                &lclc->ifc[irec].ifc.ifc,if_key,NIF_KEY,
+                &lclc->ifc[irec].ifc.state)) {
+            ierr=-500-count;
             goto error2;
           }
-          for(i=0;i<MAX_R2DBE_CH;i++)
-            lclc->ifc[ifc].channels.channels[i]=-1;
-          m5state_init(&lclc->ifc[ifc].channels.state);
-          lclc->ifc[ifc].channels.state.known=1;
           break;
         default:
           if(1!=sscanf(ptr,"%d",&ich)||ich<0||ich>MAX_R2DBE_CH) {
             ierr=-502;
             goto error2;
           }
-          lclc->ifc[ifc].channels.channels[count-2]=ich;
+          lclc->ifc[irec].channels.state.known=1;
+          lclc->ifc[irec].channels.channels[count-2]=ich;
           break;
       }
       ptr=strsep(&ptr_save,":");

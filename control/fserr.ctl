@@ -128,6 +128,18 @@ No RDBEs active, see active_rdbes command.
 2D -302
 Maximum number of channels is 16 for RDBE, 64 for R2DBE
 ""
+2D -303
+Number of channels for R2DBE must be 8, 16, or 32.
+""
+2D -400
+Too many class responses for dbe_chsel queries, rdb?W
+""
+2D -401
+error retrieving class for first dbe_chsel query, rdb?W
+""
+2D -402
+error retrieving class for second dbe_chsel query, rdb?W
+""
 2D -501
 Error decoding IF from dbe_chsel, rdb?W
 ""

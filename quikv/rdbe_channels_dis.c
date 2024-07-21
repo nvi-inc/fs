@@ -42,7 +42,7 @@ int *out_recs;
 int kcom;
 int kmon;
 {
-  int ierr, count, i;
+  int ierr, count, i, j;
   char output[MAX_OUT];
   int rtn1;    /* argument for cls_rcv - unused */
   int rtn2;    /* argument for cls_rcv - unused */
@@ -74,9 +74,22 @@ int kmon;
     }
     return;
   } else {
+    /* no command response */
+    for (i=0;i<MAX_RDBE_IF;i++) {
+      m5state_init(&lclc.ifc[i].ifc.state);
+      m5state_init(&lclc.ifc[i].channels.state);
+      for(j=0;j<MAX_R2DBE_CH;j++)
+        lclc.ifc[i].channels.channels[j]=-1;
+    }
+
     who[1]=unit_letters[iwhich];
     iclass=ip[0];
     nrecs=ip[1];
+    if(nrecs> MAX_RDBE_IF) {
+      ierr = -400;
+      cls_clr(iclass);
+      goto error2;
+    }
     for (i=0;i<nrecs;i++) {
       if ((nchars =
             cls_rcv(iclass,inbuf,BUFSIZE,&rtn1,&rtn2,msgflg,save)) <= 0) {
@@ -85,7 +98,7 @@ int kmon;
           cls_clr(iclass);
         goto error2;
       }
-      if(0!=rdbe_2_rdbe_channels(inbuf,&lclc,ip)) {
+      if(0!=rdbe_2_rdbe_channels(inbuf,&lclc,ip,i)) {
         memcpy(ip+4,who,2);
         if(i<nrecs-1)
           cls_clr(iclass);

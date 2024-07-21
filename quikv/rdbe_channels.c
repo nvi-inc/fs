@@ -144,6 +144,20 @@ parse:
     if(ierr !=0 ) goto error;
   }
 
+  if(shm_addr->equip.rack_type == R2DBE) {
+    for(j=0;j<MAX_RDBE_IF;j++) {
+      if(ifc==-1||ifc==j) {
+        for(i=0;i<MAX_R2DBE_CH;i++)
+          if(lclc.ifc[j].channels.channels[i]<0)
+            break;
+        if(i!=8 && i!=16 && i!=32) {
+          ierr=-303;
+          goto error;
+        }
+      }
+    }
+  }
+
   for (i=0;i<MAX_RDBE;i++) {
     out_recs[i]=0;
     out_class[i]=0;

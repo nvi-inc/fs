@@ -22,6 +22,10 @@
 struct rdbe_channels_cmd {
   struct {
     struct {
+      int ifc;
+      struct m5state state;
+    }  ifc;
+    struct {
       int channels[MAX_R2DBE_CH];
       struct m5state state;
     }  channels;
