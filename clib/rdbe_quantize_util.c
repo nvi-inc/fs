@@ -32,9 +32,9 @@
 #include "../include/fscom.h"         /* shared memory definition */
 #include "../include/shm_addr.h"      /* shared memory pointer */
 
-static char *both_key[ ]=         { "both"}; 
-static char   *if_key[ ]=         { "0", "1"}; 
-static char  *all_key[ ]=         { "all"}; 
+static char *both_key[ ]=         { "both"};
+static char   *if_key[ ]=         { "0", "1"};
+static char  *all_key[ ]=         { "all"};
 
 #define NBOTH_KEY sizeof(both_key)/sizeof( char *)
 #define NIF_KEY sizeof(if_key)/sizeof( char *)
@@ -48,7 +48,7 @@ int *count;
 char *ptr;
 {
     int ierr, i, arg_key();
-    
+
     ierr=0;
     if(ptr == NULL) ptr="";
 
@@ -105,8 +105,8 @@ struct rdbe_quantize_cmd *lclc;
 
   switch (*count) {
     case 1:
-      if(lclc->ifc.state.known == 1) 
-        if(lclc->ifc.ifc >= 0 && lclc->ifc.ifc <NIF_KEY) { 
+      if(lclc->ifc.state.known == 1)
+        if(lclc->ifc.ifc >= 0 && lclc->ifc.ifc <NIF_KEY) {
           m5key_encode(output,if_key,NIF_KEY,
               lclc->ifc.ifc,&lclc->ifc.state);
         } else if(lclc->ifc.ifc == -1) {
@@ -115,7 +115,7 @@ struct rdbe_quantize_cmd *lclc;
           strcat(output,BAD_VALUE);
       break;
     case 2:
-      if(lclc->channel.state.known == 1) 
+      if(lclc->channel.state.known == 1)
         if(lclc->channel.channel >= 0) {
           sprintf(output,"%d",lclc->channel.channel);
           m5state_encode(output,&lclc->channel.state);
@@ -133,7 +133,7 @@ struct rdbe_quantize_cmd *lclc;
     default:
       *count=-1;
   }
-  
+
   if(*count>0) *count++;
   return;
 }
@@ -150,8 +150,8 @@ int ifc;
 
   switch (*count) {
     case 1:
-      if(lclm->ifc[ifc].ifc.state.known == 1) 
-        if(lclm->ifc[ifc].ifc.ifc >= 0 && lclm->ifc[ifc].ifc.ifc <NIF_KEY) { 
+      if(lclm->ifc[ifc].ifc.state.known == 1)
+        if(lclm->ifc[ifc].ifc.ifc >= 0 && lclm->ifc[ifc].ifc.ifc <NIF_KEY) {
           strcat(output,",,, ");
           output=output+strlen(output);
           m5key_encode(output,if_key,NIF_KEY,
@@ -174,7 +174,7 @@ int ifc;
         } else {
           for (i=0; i<MAX_R2DBE_CH; i++)
             sprintf(output+strlen(output),"%d,",lclm->ifc[ifc].levels.levels[i]);
-          
+
           output[strlen(output)-1]='\0';
         }
       }
@@ -182,7 +182,7 @@ int ifc;
     default:
       *count=-1;
   }
-  
+
   if(*count>0) *count++;
   return;
 }
@@ -252,8 +252,7 @@ rdbe_2_rdbe_quantize(ptr_in,lclm,ip,irec) /* return values:
     while (ptr!=NULL) {
       switch (++count) {
         case 1:
-          if(1!=sscanf(ptr,"%d%c",&ifc,&ch)|| ifc<0 || ifc>=NIF_KEY ||
-              m5key_decode(ptr,
+          if(m5key_decode(ptr,
                 &lclm->ifc[irec].ifc.ifc,if_key,NIF_KEY,
                 &lclm->ifc[irec].ifc.state)) {
             ierr=-500-count;
