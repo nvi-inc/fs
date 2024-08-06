@@ -52,6 +52,7 @@ int rdbe_pc_offset_dec(lcl,count,ptr,irdbe)
 
   switch (*count) {
     case 1:
+      printf(" ptr '%s'\n",ptr);
       offset=lcl->offset.offset;
       ierr=arg_dble(ptr,&offset,0.0,FALSE);
       m5state_init(&lcl->offset.state);
@@ -67,8 +68,11 @@ int rdbe_pc_offset_dec(lcl,count,ptr,irdbe)
           ierr=0;
         }
       }
-      if(ierr==0)
-        lcl->offset.offset=offset+0.5;
+      if(ierr==0) {
+        lcl->offset.offset=offset;
+        lcl->offset.state.known=1;
+      printf(" offset %lf\n",offset);
+      }
       break;
     default:
       *count=-1;
@@ -90,7 +94,7 @@ void rdbe_pc_offset_enc(output,count,lclc)
 
   switch (*count) {
     case 1:
-      m5sprintf(output,"%u",&lclc->offset.offset,&lclc->offset.state);
+      m5sprintf(output,"%lf",&lclc->offset.offset,&lclc->offset.state);
       break;
     default:
       *count=-1;
@@ -106,7 +110,7 @@ rdbe_pc_offset_2_rdbe(ptr,lcl)
   strcpy(ptr,"dbe_pcal = ");
 
   if(lcl->offset.state.known) {
-    sprintf(ptr+strlen(ptr),"%u",lcl->offset.offset);
+    sprintf(ptr+strlen(ptr),"%lf",lcl->offset.offset);
   }
 
   strcat(ptr," ;\n");
@@ -157,7 +161,7 @@ rdbe_2_rdbe_pc_offset(ptr_in,lclc,ip) /* return values:
     while (ptr!=NULL) {
       switch (++count) {
         case 1:
-          if(m5sscanf(ptr,"%u",&lclc->offset.offset, &lclc->offset.state)) {
+          if(m5sscanf(ptr,"%lf",&lclc->offset.offset, &lclc->offset.state)) {
             ierr=-500-count;
             goto error2;
           }

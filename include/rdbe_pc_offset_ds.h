@@ -21,7 +21,9 @@
 
 struct rdbe_pc_offset_cmd {
   struct {
-    unsigned int offset;
-    struct m5state state;
-  } offset;
+    struct {
+      double offset;
+      struct m5state state;
+    } offset;
+  } ifc[MAX_RDBE_IF];
 };
