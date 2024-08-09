@@ -50,19 +50,19 @@ char buffer[BUFF_SIZE];
 char out[BUFF_SIZE];
 
  char *name, *command;
- int c, index, no_display, to;
+ int c, index, no_display, no_putpname, to;
  struct itimerval value;
 
  setup_ids();
- putpname(argv[0]);
 
  name = argv[0];
  command = NULL;
  no_display=0;
+ no_putpname=0;
  to=0;
 
  opterr = 0;
- while ((c = getopt (argc, argv, "lc:n:t:")) != -1) {
+ while ((c = getopt (argc, argv, "lpc:n:t:")) != -1) {
    switch (c) {
    case 't':
      to = atoi(optarg);
@@ -72,6 +72,9 @@ char out[BUFF_SIZE];
      break;
    case 'l':
      no_display = 1;
+     break;
+   case 'p':
+     no_putpname = 1;
      break;
    case 'c':
      command = optarg;
@@ -108,6 +111,8 @@ char out[BUFF_SIZE];
      err_out(out);
    }
  }
+
+ if (!no_putpname) putpname(argv[0]);
 
  if(command == NULL) {
    snprintf(out,OUT_SIZE,"%s:%s",name,"No command given");

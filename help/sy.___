@@ -46,6 +46,8 @@ utility program, 'popen' (pronounced "p-open"), which uses the
   -n name      name to use for log entries, default 'popen'
   -t time-out  time-out in seconds, default is none
   -l           suppress display of output, it will only be logged
+  -p           suppress '#popen#' in log output
+
 
 Quotes around the 'command' to be executed and its arguments are
 required unless there are no interior spaces, i.e., there is a single
@@ -69,8 +71,22 @@ command's _stdout_ output, and logs it in the FS log. Any output to
 _stderr_ would also be logged. All log entries will start with
 'uptime/'. An example display result is:
 
-21:46:20;sy=popen 'uptime -p 2>&1' -n uptime &
-21:46:20#popen#uptime/up 7 hours, 19 minutes
+  21:46:20;sy=popen 'uptime -p 2>&1' -n uptime &
+  21:46:20#popen#uptime/up 7 hours, 19 minutes
+
+The '-p' option can be used to suppress the leading '#popen#' in the
+log entry. In that case, the logging system automatically prepends a
+slash '/'. Thus if you have a program 'get_wx' that returns a string
+like 'wx/26.1,856.65,56.2', then:
+
+sy=popen 'get_wx 2>&1' -n wx -p &
+
+will make a display result like:
+
+  12:34:51/wx/26.1,856.65,56.2
+
+Note that it is not necessary to do this, but it certainly looks
+better.
 
 The '-t' option can be used to set a time-out. This can be especially
 useful to prevent an 'sy=...' command without an ampersand from
@@ -78,9 +94,9 @@ blocking execution indefinitely. If the command being run by 'popen'
 has its own time-out facility, it is recommended that it be used
 instead.
 
-If python 2.7 is available, an external program 's_client' can be used
-in 'sy=...' commands for simple ASCII transactions with devices over
-Ethernet sockets. It accepts options:
+If python 2.7 or later is available, an external program 's_client'
+can be used in 'sy=...' commands for simple ASCII transactions with
+devices over Ethernet sockets. It accepts options:
 
   -h host      host or IP to access, default 127.0.0.1
   -p port      port to access, default 5000
@@ -91,4 +107,4 @@ Ethernet sockets. It accepts options:
 The following is an example of using 's_client' with 'popen' to log
 command results (and errors):
 
-sy=popen 's_client -h hubpc -c "mci_data? pmc_vacuum" -t 20 2>&1' -n hpccn &
+  sy=popen 's_client -h hubpc -c "mci_data? pmc_vacuum" -t 20 2>&1' -n hpccn &
