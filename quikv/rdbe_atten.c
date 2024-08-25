@@ -56,12 +56,12 @@ int ip[5];                           /* ipc parameters */
   irdbe=0;   /* assume this is an all device command to begin with */
 
   if (command->equal != '=') {
-    for (i=0;i<MAX_RDBE;i++)
-      if(shm_addr->rdbe_active[i]) {
-        some=TRUE;
+    for (i=0;i<MAX_RDBE;i++) {
         out_recs[i]=0;
         out_class[i]=0;
-      }
+        if(shm_addr->rdbe_active[i])
+          some=TRUE;
+    }
     if(!some) {
       ierr=-301;
       goto error;
