@@ -221,6 +221,57 @@ response not received for second dbe_quantize query, rdb?W
 2E -912
 program error: strdup() failed for second dbe_quantize query, rdb?W
 ""
+2F -201
+First parameter is not a valid RDBE to address OR additional parameters are not supported
+""
+2F -301
+No RDBEs active, see active_rdbes command.
+""
+2F -302
+RDBE 'bstate' does not support '=' except to specify a single RDBE to monitor.
+""
+2F -303
+RDBE 'bstate' has no command parameters to report for '?'.
+""
+2F -400
+Too many class responses for dbe_bstate queries, rdb?W
+""
+2F -401
+error retrieving class for first dbe_bstate query, rdb?W
+""
+2F -402
+error retrieving class for second dbe_bstate query, rdb?W
+""
+2F -501
+error decording IF for first dbe_bstate query, rdb?W
+""
+2F -502
+error decording level for first dbe_bstate query, rdb?W
+""
+2F -503
+Too many levels from first dbe_bstate query, rdb?W
+""
+2F -511
+error decording IF for second dbe_bstate query, rdb?W
+""
+2F -512
+error decording level for second dbe_bstate query, rdb?W
+""
+2F -513
+Too many levels from second dbe_bstate query, rdb?W
+""
+2F -901
+response not received for first dbe_bstate query, rdb?W
+""
+2F -902
+program error: strdup() failed for first dbe_bstate query, rdb?W
+""
+2F -911
+response not received for second dbe_bstate query, rdb?W
+""
+2F -912
+program error: strdup() failed for second dbe_bstate query, rdb?W
+""
 2M -101
 No default for <InString>; or no default for RDBE to address
 ""

@@ -481,6 +481,9 @@ loop:
       case 126:
 	rdbe_quantize(&command,itask,ip);
 	break;
+      case 127:
+	rdbe_bstate(&command,itask,ip);
+	break;
       case 130:
 	dbbc_vsix(&command,itask,ip);
 	break;
