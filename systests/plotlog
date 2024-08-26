@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #
-# Copyright (c) 2020, 2022, 2023 NVI, Inc.
+# Copyright (c) 2020, 2022-2024 NVI, Inc.
 #
 # This file is part of VLBI Field System
 # (see http://github.com/nvi-inc/fs).
@@ -517,13 +517,31 @@ sub by_rdbe_tone {
     substr($a,2) cmp substr($b,2);
 }
 sub by_clocks {
-#For RDBEs by type, then by band then by (reverse) origin
+#For RDBEs by type, then by band, then by (reverse) origin,
+#   put dot2[gp]ps(.) before rdbe/!dbe_[gp]ps it both are preseent
+#   put any others before RDBE specifc data
 #For DBBC3 by IF, then (reverse) origin
 # all others alphabetize
     if(substr($a,0,2) eq 'rd' and substr($b,0,2) eq 'rd') {
        return (substr($a,-3) cmp substr($b,-3) or
            substr($a,4,1) cmp substr($b,4,1) or
            $b cmp $a);
+    } elsif($a =~ /^dot2[gp]ps\(.\)$/ and substr($b,0,3) eq 'rdt') {
+      return (substr($a,4,3) cmp substr($b,-3) or
+             substr($a,8,1) cmp substr($b,4,1) or 1);
+    } elsif(substr($a,0,3) eq 'rdt' and $b =~ /^dot2[gp]ps\(.\)$/) {
+      return (substr($a,-3) cmp substr($b,4,3) or
+            substr($a,4,1) cmp substr($b,8,1) or -1);
+    } elsif($a =~ /^dot2[gp]ps\(.\)$/ and substr($b,0,3) eq 'rdb') {
+      return (substr($a,4,3) cmp substr($b,-3) or
+             substr($a,8,1) cmp substr($b,4,1) or -1);
+    } elsif(substr($a,0,3) eq 'rdb' and $b =~ /^dot2[gp]ps\(.\)$/) {
+      return (substr($a,-3) cmp substr($b,4,3) or
+            substr($a,4,1) cmp substr($b,8,1) or 1);
+    } elsif($a =~ /^dot2[gp]ps\(.\)$/ and $b !~ /^dot2[gp]ps\(.\)$/) {
+      return (1);
+    } elsif($a !~ /^dot2[gp]ps\(.\)$/ and $b =~ /^dot2[gp]ps\(.\)$/) {
+      return (-1);
     } elsif(substr($a,0,11) eq 'mcast_time/' and substr($b,0,8) eq 'pps2dot/') {
        return (substr($a,-1) cmp substr($b,-1) or 1);
     } elsif(substr($b,0,11) eq 'mcast_time/' and substr($a,0,8) eq 'pps2dot/') {
@@ -564,7 +582,7 @@ if ($#ARGV < 0 &&!defined($opt_h) &&!defined($opt_V)) {
 }
 
 if(defined($opt_V)) {
-    print "[plotlog 2.4]\n";
+    print "[plotlog 2.5]\n";
     pgqinf("VERSION",$val,$len);
     print "using PGPLOT module version $PGPLOT::VERSION, PGPLOT $val library\n";
     exit 0;
@@ -596,9 +614,10 @@ expected.
 
 Clock data includes values from any suitable commands containing 'maser',
 'fmout', and/or 'gps' in their names, as well as RDBE GPS and PPS offsets, and
-DBBC3 'pps2dot' data. For RDBEs (and DBBC3s), if both multicast and monitor
-(DBBC3: 'mcast_time') values are present, only the multicast values will be
-plotted unless the '-B' option is specified in which case both will be plotted.
+DBBC3 'pps2dot' data. For RDBEs and DBBC3s, if both multicast and monitor (for
+the latter, RDBE: dot2gps/dot2pps and dbe_gps/dbe_pps, DBBC3: 'mcast_time')
+values are present, only the multicast values will be plotted unless the '-B'
+option is specified in which case both will be plotted.
 
 For RBDEs, unless the '-d' and/or '-D' options are specified, only the first
 phase-cal tone encountered for each IF is plotted. Any Perl regular expressions
@@ -1163,6 +1182,12 @@ foreach $file (@ARGV) {
 	    $clockv{$cmd}[$clockn{$cmd}]=$fields[0];
 	    $clockt{$cmd}[$clockn{$cmd}]=&time($_);
 	    $clockn{$cmd}++;
+	} elsif(/\/(dot2[gp]ps\(.\))/) {
+	    $cmd=$1;
+	    (undef,undef,@fields)=split('[/,]');
+	    $clockv{$cmd}[$clockn{$cmd}]=$fields[0];
+	    $clockt{$cmd}[$clockn{$cmd}]=&time($_);
+	    $clockn{$cmd}++;
 	} elsif(/dbtcn#(pps2dot)/) {
 	    $cmdp=$1;
 	    (undef,@fields)=split('[/,]');
@@ -1348,6 +1373,8 @@ if(@cdmst) {
 foreach $clock (sort by_clocks keys %clockn) {
     next if !defined($opt_B) && $clock =~ /rdbe(.)\/!dbe_(.)ps/ &&
         defined($clockn{"rdtc$1#dot2$2ps"}) ;
+    next if !defined($opt_B) && $clock =~ /dot2(.)ps\((.)\)/ &&
+        defined($clockn{"rdtc$2#dot2$1ps"}) ;
     next if !defined($opt_B) && $clock =~ /mcast_time\/(\w+)/ &&
         defined($clockn{"pps2dot/$1"}) ;
     $#val=-1;

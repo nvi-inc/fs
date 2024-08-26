@@ -1,0 +1,36 @@
+		   dot2pps - Report DOT2PPS offset (RDBE racks)
+
+            Syntax:     dot2pps
+                        dot2pps=<rdbe>
+
+            Response:   dot2pps(<rdbe>)/<offset>
+
+
+Settable parameters:
+        <rdbe>     letter: 'a','b', 'c', or 'd' for individual RDBE to
+                   address. No default.
+
+Monitor-only parameters:
+
+        <offset>   The offset between the DOT clock and the input 1 PPS
+                   in seconds. A positive value indicates that DOT came
+                   first.
+
+Comments:
+Like all RDBE commands, this command can either operate on all active
+RDBEs or a particular one.  If no <rdbe> parameter is specified (this
+would probably be the most common case), the command will operate on
+all active RDBEs.  However, if the <rdbe> parameter is specified as a
+single letter in the range of possible RDBEs, the command is for that
+RDBE only.  Responses always include the letter of the RDBE in
+parenthesizes appended to the command name.  Active RDBEs are defined
+by the 'active_rdbes' command.  At start-up all configured RDBEs are
+considered active.
+
+To query all active devices use 'dot2pps'.  To query a single device,
+use 'dot2pps=<rdbe>'.
+
+Due to the limited precision of the R2DBE's response, the 'dot2pps'
+data recorded in the log from the multicast should be used for any
+high accuracy work, especially if the value has a magnitude of one
+microsecond or more.

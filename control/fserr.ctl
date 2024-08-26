@@ -272,6 +272,30 @@ response not received for second dbe_bstate query, rdb?W
 2F -912
 program error: strdup() failed for second dbe_bstate query, rdb?W
 ""
+2G -201
+First parameter is not a valid RDBE to address OR additional parameters are not supported
+""
+2G -301
+No RDBEs active, see active_rdbes command.
+""
+2G -302
+RDBE 'dot2Xps' does not support '=' except to specify a single RDBE to monitor.
+""
+2G -303
+RDBE 'dot2Xps' has no command parameters to report for '?'.
+""
+2G -401
+error retrieving class for dbe_dot2Xps query, rdb?W
+""
+2G -501
+error decording offset for dbe_dot2Xps query, rdb?W
+""
+2G -901
+response not received for dbe_dot2Xps query, rdb?W
+""
+2G -902
+program error: strdup() failed for dbe_dot2Xps query, rdb?W
+""
 2M -101
 No default for <InString>; or no default for RDBE to address
 ""
