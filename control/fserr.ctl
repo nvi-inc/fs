@@ -351,10 +351,10 @@ Error decoding argument
 Argument must be 1 ... 4 (maximum possible number of Mark 5Cs).
 ""
 35 -401
-error retrieving class for dot query in get_RDBEtime
+error retrieving class for dot query in get_RDBEtime, rdb?W
 ""
 35 -402
-error decoding time in get_RDBEtime
+error decoding time in get_RDBEtime, rdb?W
 ""
 35 -403
 unknown RDBE unit in get_RDBEtime
