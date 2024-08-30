@@ -47,6 +47,7 @@ C
 C
       integer*2 ibuf(120),ibuft(10),ibuf2(10),ibuf4(40)
       integer ilen,trimlen,fc_get_vtime,fc_get_s2time,fc_get_5btime
+      integer fc_get_rdbetime,vdif_epoch
       integer it(6),get_buf, ireg(2), fc_rte_sett,iyrctl_fs
       integer fc_dad_pid
       integer*4 centiavg,secs_fm,secs_fs,centifs
@@ -329,6 +330,28 @@ C             two return buffers with imode = -53
            goto 998
         endif
         if(nerr.ne.0) call logit7ci(idum,idum,idum,-1, 29,'sc',0)
+        goto 200
+      else if (RDBE.eq.rack) then
+        call fs_get_rdbe_active(rdbe_active)
+        irdbe=0;
+        do i=1,MAX_RDBE
+           if(rdbe_active(i).ne.0.and.irdbe.eq.0) then
+             irdbe=i
+           endif
+        enddo
+        if(irdbe.eq.0) then
+           call logit7ci(idum,idum,idum,-1,-29,'sc',0)
+           goto 998
+        endif
+        idum=rn_take('fsctl',0)
+        idum=fc_get_rdbetime(centisec,it,ip,0,irdbe,vdif_epoch)
+        call rn_put('fsctl')
+        if(ip(3).lt.0) then
+           call logit7(idum,idum,idum,-1,ip(3),ip(4),ip(5))
+           nerr=nerr+1
+           if(nerr.le.3) goto 50
+           goto 998
+        endif
         goto 200
       else
          call logit7ci(idum,idum,idum,-1,-11,'sc',0)
