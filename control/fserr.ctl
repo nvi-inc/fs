@@ -7779,7 +7779,7 @@ SC  -10
 setcl: failed too many times, couldn't check formatter time
 ""
 SC  -11
-setcl: cannot set fs time without Mk3/4 VLBA/4, S2, K4*/MK4, DBBC/FiLa10G, DBBC3 rack or S2, K4, M5B recorder
+setcl: cannot set fs time without Mk3/4 VLBA/4, S2, K4*/MK4, DBBC/FiLa10G, DBBC3, RDBE rack or S2, K4, M5B recorder
 ""
 SC  -12
 setcl: FS to computer time difference 0.5 seconds or greater
@@ -7828,6 +7828,9 @@ setcl: DBBC3 multicast time must be available to set time, check FS_DBBC3_MULTIC
 ""
 SC  -29
 setcl: Core3H multicast time still bad after four tries.
+""
+SC  -30
+setcl: No active RDBEs
 ""
 SC -401
 Program error: prematurely out of rclcn response_buffer for device ?W
