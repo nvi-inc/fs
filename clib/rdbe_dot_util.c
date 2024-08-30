@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020, 2024 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -34,7 +34,7 @@
 
 char *m5trim();
 
-rdbe_2_dot(ptr_in,lclm,ip) /* return values:
+rdbe_2_rdbe_dot(ptr_in,lclm,ip) /* return values:
 				  *  0 == no error
 				  *  0 != error
 				  */
