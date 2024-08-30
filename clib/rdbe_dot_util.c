@@ -80,7 +80,7 @@ rdbe_2_rdbe_dot(ptr_in,lclm,ip) /* return values:
       case 1:
 	if(m5string_decode(ptr,lclm->time.time,sizeof(lclm->time.time),
 			   &lclm->time.state)) {
-	  ierr=-501;
+	  ierr=-500-count;
 	  goto error2;
 	}
 	break;
@@ -88,14 +88,14 @@ rdbe_2_rdbe_dot(ptr_in,lclm,ip) /* return values:
 	if(m5string_decode(ptr,lclm->DOT_OS_time_diff.DOT_OS_time_diff,
 			   sizeof(lclm->DOT_OS_time_diff.DOT_OS_time_diff),
 			   &lclm->DOT_OS_time_diff.state)) {
-	  ierr=-504;
+	  ierr=-500-count;
 	  goto error2;
 	}
 	break;
       case 3:
         if(m5sscanf(ptr,"%d",&lclm->vdif_epoch.vdif_epoch,
 		    &lclm->vdif_epoch.state)) {
-	  ierr=-505;
+	  ierr=-500-count;
 	  goto error2;
 	}
 	break;

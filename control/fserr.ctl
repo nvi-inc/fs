@@ -360,25 +360,19 @@ error decoding time in get_RDBEtime
 unknown RDBE unit in get_RDBEtime
 ""
 3E -501
-error decoding dot? time parameter
+error decording time for dbe_dot query, rdb?W
 ""
 3E -502
-error decoding dot? status parameter
+error decoding DOT_OS_time_diff for dbe_dot query, rdb?W
 ""
 3E -503
-error decoding dot? OS_time parameter
-""
-3E -504
-error decoding dot? DOT_OS_time_diff parameter
-""
-3E -505
-error decoding dot? vdif_epoch parameter
+error decoding vdif_epoch for dbe_dot query, rdb?W
 ""
 3E -901
-query response not received
+response not received for dbe_dot query, rdb?W
 ""
 3E -902
-program error: strdup() failed
+program error: strdup() failed for dbe_dot query, rdb?W
 ""
 3K -301
 command does not accept parameters
