@@ -598,6 +598,7 @@ quantize     qkr 12600 01 2000FFFFFFFF
 bstate       qkr 12700 01 2000FFFFFFFF
 dot2gps      qkr 12800 01 2000FFFFFFFF
 dot2pps      qkr 12801 01 2000FFFFFFFF
+dot          qkr 12900 01 2000FFFFFFFF
 *dbbc pfb
 vsi1         qkr 13000 01 0800FFFFFFFF
 vsi2         qkr 13001 01 0800FFFFFFFF

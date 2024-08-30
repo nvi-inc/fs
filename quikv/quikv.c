@@ -487,6 +487,9 @@ loop:
       case 128:
 	rdbe_dot2Xps(&command,itask,ip);
 	break;
+      case 129:
+	rdbe_dot(&command,itask,ip);
+	break;
       case 130:
 	dbbc_vsix(&command,itask,ip);
 	break;
