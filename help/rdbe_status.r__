@@ -1,0 +1,37 @@
+		   rdbe_status - Report RDBE status (RDBE racks)
+
+            Syntax:     rdbe_status
+                        rdbe_status=<rdbe>
+
+            Response:   rdbe_status(<rdbe>)/<status>
+
+
+Settable parameters:
+        <rdbe>     letter: 'a','b', 'c', or 'd' for individual RDBE to
+                   address. No default.
+
+Monitor-only parameters:
+
+        <status>   Hex bit value. R2DBE:
+                    Bit  Meaning
+                     0  System Ready
+                     1  Error message
+                     5  ADC configuration: 0 -- Error; 1 -- Successful
+                     6  Transmitting valid data
+                     7  Transmitting data marked invalid
+                     8  FPGA state: 0 -- FPGA not loaded; 1 -- FPGA loaded
+
+
+Comments:
+Like all RDBE commands, this command can either operate on all active
+RDBEs or a particular one.  If no <rdbe> parameter is specified (this
+would probably be the most common case), the command will operate on
+all active RDBEs.  However, if the <rdbe> parameter is specified as a
+single letter in the range of possible RDBEs, the command is for that
+RDBE only.  Responses always include the letter of the RDBE in
+parenthesizes appended to the command name.  Active RDBEs are defined
+by the 'active_rdbes' command.  At start-up all configured RDBEs are
+considered active.
+
+To query all active devices use 'rdbe_status'.  To query a single
+device, use 'rdbe_status=<rdbe>'.

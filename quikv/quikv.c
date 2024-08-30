@@ -504,6 +504,9 @@ loop:
 	  goto error;
         }
     break;
+      case 140:
+	rdbe_status(&command,itask,ip);
+	break;
 /* end modified mb */
       default:
 	ierr=-4;

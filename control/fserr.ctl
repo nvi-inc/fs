@@ -296,6 +296,30 @@ response not received for dbe_dot2Xps query, rdb?W
 2G -902
 program error: strdup() failed for dbe_dot2Xps query, rdb?W
 ""
+2H -201
+First parameter is not a valid RDBE to address
+""
+2H -301
+No RDBEs active, see active_rdbes command.
+""
+2H -302
+RDBE 'status' does not support '=' except to specify a single RDBE to monitor.
+""
+2H -303
+RDBE 'status' has no command parameters to report for '?'.
+""
+2H -401
+error retrieving class for dbe_status query, rdb?W
+""
+2H -501
+error decording status for dbe_status query, rdb?W
+""
+2H -901
+response not received for dbe_dostatus query, rdb?W
+""
+2H -902
+program error: strdup() failed for dbe_status query, rdb?W
+""
 2M -101
 No default for <InString>; or no default for RDBE to address
 ""
