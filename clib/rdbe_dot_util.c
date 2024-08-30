@@ -34,6 +34,36 @@
 
 char *m5trim();
 
+void rdbe_dot_mon(output,count,lclm,irdbe)
+char *output;
+int *count;
+struct rdbe_dot_mon *lclm;
+int irdbe;
+{
+  int i;
+
+  output=output+strlen(output);
+
+  switch (*count) {
+    case 1:
+      if(lclm->time.state.known == 1)
+          sprintf(output,"%s",lclm->time.time);
+      break;
+    case 2:
+      if(lclm->vdif_epoch.state.known == 1)
+          sprintf(output,"%3d",lclm->vdif_epoch.vdif_epoch);
+      break;
+    case 3:
+      if(lclm->DOT_OS_time_diff.state.known == 1)
+          sprintf(output," %s",lclm->DOT_OS_time_diff.DOT_OS_time_diff);
+      break;
+    default:
+      *count=-1;
+  }
+
+  if(*count>0) *count++;
+  return;
+}
 rdbe_2_rdbe_dot(ptr_in,lclm,ip) /* return values:
 				  *  0 == no error
 				  *  0 != error

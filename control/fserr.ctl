@@ -359,6 +359,21 @@ error decoding time in get_RDBEtime
 35 -403
 unknown RDBE unit in get_RDBEtime
 ""
+3E -201
+First parameter is not a valid RDBE to address OR additional parameters are not supported
+""
+3E -301
+No RDBEs active, see active_rdbes command.
+""
+3E -302
+RDBE 'dot' does not support '=' except to specify a single RDBE to monitor.
+""
+3E -303
+RDBE 'dot' has no command parameters to report for '?'.
+""
+3E -401
+error retrieving class for dbe_dot query, rdb?W
+""
 3E -501
 error decording time for dbe_dot query, rdb?W
 ""
