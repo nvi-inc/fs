@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020, 2024 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -107,7 +107,7 @@ endwin ();
 	printf(" get_RDBEtime: i %d nchars %d\n",i,nchars);
 #endif
 	if(i==0) {
-	  if(0!=rdbe_2_dot(inbuf,&lclm,ip)) {
+	  if(0!=rdbe_2_rdbe_dot(inbuf,&lclm,ip)) {
 	    goto error;
 	  }
 	} else if (i==1) {
