@@ -261,7 +261,7 @@ rdbe_2_rdbe_atten(ptr_in,lclm,ip) /* return values:
     ierr=-901;
     goto error;
   }
-  /* no monitor response */
+
   m5state_init(&lclm->ifc[0].ifc.state);
   m5state_init(&lclm->ifc[0].atten.state);
   m5state_init(&lclm->ifc[0].RMS.state);
