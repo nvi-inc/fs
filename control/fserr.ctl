@@ -297,7 +297,7 @@ response not received for dbe_dot2Xps query, rdb?W
 program error: strdup() failed for dbe_dot2Xps query, rdb?W
 ""
 2H -201
-First parameter is not a valid RDBE to address
+First parameter is not a valid RDBE to address OR additional parameters are not supported
 ""
 2H -301
 No RDBEs active, see active_rdbes command.
@@ -319,6 +319,42 @@ response not received for dbe_dostatus query, rdb?W
 ""
 2H -902
 program error: strdup() failed for dbe_status query, rdb?W
+""
+2I -201
+First parameter is not a valid RDBE to address OR additional parameters are not supported
+""
+2I -301
+No RDBEs active, see active_rdbes command.
+""
+2I -302
+RDBE 'rdbe_version' does not support '=' except to specify a single RDBE to monitor.
+""
+2I -303
+RDBE 'rdbe_version' has no command parameters to report for '?'.
+""
+2I -401
+error retrieving class for dbe_version query, rdb?W
+""
+2I -501
+error decording app for dbe_version query, rdb?W
+""
+2I -502
+error decording os for dbe_version query, rdb?W
+""
+2I -503
+error decording roach for dbe_version query, rdb?W
+""
+2I -504
+error decording timing for dbe_version query, rdb?W
+""
+2I -505
+error decording fpga for dbe_version query, rdb?W
+""
+2I -901
+response not received for dbe_version query, rdb?W
+""
+2I -902
+program error: strdup() failed for dbe_version query, rdb?W
 ""
 2M -101
 No default for <InString>; or no default for RDBE to address
