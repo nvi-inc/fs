@@ -118,3 +118,4 @@
 #include "rdbe_bstate_ds.h"
 #include "rdbe_dot2Xps_ds.h"
 #include "rdbe_status_ds.h"
+#include "rdbe_version_ds.h"
