@@ -356,6 +356,57 @@ response not received for dbe_version query, rdb?W
 2I -902
 program error: strdup() failed for dbe_version query, rdb?W
 ""
+2J -101
+No default for IP address; or no default for RDBE to address
+""
+2J -102
+No default for port number
+""
+2J -103
+No default for station ID.
+""
+2J -104
+No default for thread ID
+""
+2J -201
+IP address too long.
+""
+2J -202
+Port number must be a positive integer.
+""
+2J -203
+Station ID must be a hex value
+""
+2J -204
+Thread ID must be a non-negative integer
+""
+2J -301
+No RDBEs active, see active_rdbes command.
+""
+2J -401
+error retrieving class for dbe_connect, rdb?W
+""
+2J -451
+Class buffer error from command response.
+""
+2J -501
+error decording IP for dbe_connect, rdb?W
+""
+2J -502
+error decording port for dbe_connect, rdb?W
+""
+2J -503
+error decording station ID for dbe_connect, rdb?W
+""
+2J -504
+error decording thread ID for dbe_connect, rdb?W
+""
+2J -901
+response not received for dbe_connect, rdb?W
+""
+2J -902
+program error: strdup() failed for dbe_connect, rdb?W
+""
 2M -101
 No default for <InString>; or no default for RDBE to address
 ""

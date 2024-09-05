@@ -49,7 +49,8 @@ dbbc3_mcast_time.o rdbe_data_send.o rdbe_data_send_dis.o\
 rdbe_channels.o rdbe_channels_dis.o rdbe_pc_offset.o rdbe_pc_offset_dis.o\
 rdbe_quantize.o rdbe_quantize_dis.o rdbe_bstate.o rdbe_bstate_dis.o\
 rdbe_dot2Xps.o rdbe_dot2Xps_dis.o rdbe_dot.o rdbe_dot_dis.o\
-rdbe_status.o rdbe_status_dis.o rdbe_version.o rdbe_version_dis.o
+rdbe_status.o rdbe_status_dis.o rdbe_version.o rdbe_version_dis.o\
+rdbe_connect.o rdbe_connect_dis.o
 #mk6_record.o mk6_record_dis.o 
 
 LDLIBS += -lm
