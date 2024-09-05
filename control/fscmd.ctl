@@ -611,6 +611,7 @@ mcast_time   qkr 13201 01 4000FFFFFFFF
 *more RDBE
 rdbe_status  qkr 14000 01 2000FFFFFFFF
 rdbe_version qkr 14100 01 2000FFFFFFFF
+connect      qkr 14200 01 2000FFFFFFFF
 * boss internal
 cont         *xx 00000 02 FFFFFFFFFFFF
 halt         *xx 00000 03 FFFFFFFFFFFF

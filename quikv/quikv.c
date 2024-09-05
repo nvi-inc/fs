@@ -510,6 +510,9 @@ loop:
       case 141:
 	rdbe_version(&command,itask,ip);
 	break;
+      case 142:
+	rdbe_connect(&command,itask,ip);
+	break;
 /* end modified mb */
       default:
 	ierr=-4;

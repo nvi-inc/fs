@@ -615,6 +615,13 @@ void cshm_init()
       m5state_init(&shm_addr->rdbe_pc_offset[i].offset.state);
   }
 
+  for(i=0;i<MAX_RDBE+1;i++) {
+      m5state_init(&shm_addr->rdbe_connect[i].ip.state);
+      m5state_init(&shm_addr->rdbe_connect[i].port.state);
+      m5state_init(&shm_addr->rdbe_connect[i].station.state);
+      m5state_init(&shm_addr->rdbe_connect[i].thread.state);
+  }
+
   return;
 }
 
