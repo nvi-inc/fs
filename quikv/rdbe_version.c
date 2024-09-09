@@ -66,7 +66,10 @@ int ip[5];                           /* ipc parameters */
       goto error;
     }
 
-    str="dbe_version?;\n";
+    if(shm_addr->equip.rack_type == RDBE)
+      str="dbe_sw_version?;\n";
+    else
+      str="dbe_version?;\n";
     for (i=0;i<MAX_RDBE;i++)
       if(shm_addr->rdbe_active[i]) {
         cls_snd(&out_class[i], str, strlen(str) , 0, 0);
@@ -109,7 +112,10 @@ int ip[5];                           /* ipc parameters */
       out_class[i]=0;
     }
 
-    str="dbe_version?;\n";
+    if(shm_addr->equip.rack_type == RDBE)
+      str="dbe_sw_version?;\n";
+    else
+      str="dbe_version?;\n";
     cls_snd(&out_class[irdbe-1], str, strlen(str) , 0, 0);
     out_recs[irdbe-1]++;
     goto rdbcn;

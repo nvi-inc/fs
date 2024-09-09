@@ -67,7 +67,7 @@ int kmon;
 
   if(kcom) {
     memcpy(&lclc,&shm_addr->rdbe_quantize[iwhich],sizeof(lclc));
-  } else if (!kmon && shm_addr->equip.rack_type == R2DBE) {
+  } else if (!kmon) {
     ierr=logmsg_rdbe(output,command,ip,out_class,out_recs);
     if(ierr!=0) {
       ierr+=-450;
