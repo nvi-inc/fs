@@ -156,7 +156,7 @@ rdbe_channels_2_rdbe(ptr,lcl,ifc)
     }
   }
 
-  strcat(ptr," ;\n");
+  strcat(ptr,";\n");
 
   return;
 }
