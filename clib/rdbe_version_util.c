@@ -43,6 +43,11 @@ int irdbe;
 {
   int i;
 
+  if(shm_addr->equip.rack_type == RDBE && *count >= 3) {
+     *count=-1;
+     return;
+  }
+
   output=output+strlen(output);
 
   switch (*count) {

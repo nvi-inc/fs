@@ -152,7 +152,8 @@ rdbe_2_rdbe_pc_offset(ptr_in,lclc,ip) /* return values:
             ierr=-500-count;
             goto error2;
           }
-          lclc->offset.offset/=16;
+          if(shm_addr->equip.rack_type != RDBE)
+            lclc->offset.offset/=16;
           break;
         default:
           goto done;

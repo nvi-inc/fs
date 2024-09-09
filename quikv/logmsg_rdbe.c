@@ -24,6 +24,7 @@
 #include "../include/params.h"
 #include "../include/fs_types.h"
 #include "../include/fscom.h"
+#include "../include/shm_addr.h"
 
 #define BUFSIZE 2048
 extern char unit_letters[];
@@ -54,7 +55,7 @@ int *out_recs;
     if(i!=0)
       strcat(output,",");
     inbuf[nchars]=0;
-    if(NULL!=strstr(inbuf,"success"))
+    if(NULL!=strstr(inbuf,"success")||shm_addr->equip.rack_type==RDBE)
       strcat(output,"ack");
     else
       strcat(output,inbuf);

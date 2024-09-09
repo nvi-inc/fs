@@ -6956,6 +6956,12 @@ if3 switch 3 not available, check equip.ctl.
 Q+ -306
 if3 switch 4 not available, check equip.ctl.
 ""
+RA  904
+rdb?W: RDBE return code 4: error encountered (during attempt to execute)
+""
+RA  900 Place holder
+
+""
 RA   -1
 rdbc.: error opening rdb?W.ctl
 ""
@@ -7069,6 +7075,9 @@ rdb?W: Response too long, truncated version returned to caller, echo output show
 ""
 RA -899
 rdb?W: unable to find or decode return code
+""
+RA -900 Place holder
+
 ""
 RA -901
 rdb?W: RDBE return code 1: action initiated or enabled, but not completed

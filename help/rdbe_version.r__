@@ -32,3 +32,5 @@ considered active.
 
 To query all active devices use 'rdbe_version'.  To query a single
 device, use 'rdbe_version=<rdbe>'.
+
+First generation RDBEs only respond with <app> and <os>.

@@ -62,16 +62,21 @@ int ifc;
       break;
     case 2:
       if(lclm->ifc[ifc].levels.state.known) {
-        int i;
+        int i,total;
+
+        if(shm_addr->equip.rack_type == RDBE)
+          total=MAX_RDBE_CH;
+        else
+          total=MAX_R2DBE_CH;
 
         if(shm_addr->rdbe_channels[irdbe].ifc[ifc].channels.state.known) {
-          for (i=0; i<MAX_R2DBE_CH && shm_addr->rdbe_channels[irdbe].ifc[ifc].channels.channels[i]!=-1; i++) {
+          for (i=0; i<total && shm_addr->rdbe_channels[irdbe].ifc[ifc].channels.channels[i]!=-1; i++) {
             int channel=shm_addr->rdbe_channels[irdbe].ifc[ifc].channels.channels[i];
             sprintf(output+strlen(output),"%5.1f,",lclm->ifc[ifc].levels.levels[channel]);
           }
           output[strlen(output)-1]='\0';
         } else {
-          for (i=0; i<MAX_R2DBE_CH; i++)
+          for (i=0; i<total; i++)
             sprintf(output+strlen(output),"%5.1f,",lclm->ifc[ifc].levels.levels[i]);
 
           output[strlen(output)-1]='\0';
