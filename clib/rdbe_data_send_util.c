@@ -70,8 +70,7 @@ int rdbe_data_send_dec(lcl,count,ptr)
         ierr=-200;
       else {
         struct tm tm;
-        char *ptr2;
-        ptr2=(char *)strptime(ptr, "%Y-%j-%H-%M-%S", &tm);
+        char *ptr2=strptime(ptr, "%Y-%j-%H-%M-%S", &tm);
        if(NULL==ptr2 || *ptr2!=0)
           ierr=-200;
         else {
@@ -92,8 +91,7 @@ int rdbe_data_send_dec(lcl,count,ptr)
         ierr=-200;
       else {
         struct tm tm;
-        char *ptr2;
-        ptr2=(char *)strptime(ptr, "%Y-%j-%H-%M-%S", &tm);
+        char *ptr2=strptime(ptr, "%Y-%j-%H-%M-%S", &tm);
         if(NULL==ptr2 || *ptr2!=0)
           ierr=-200;
         else {
