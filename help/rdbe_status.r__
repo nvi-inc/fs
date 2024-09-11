@@ -12,7 +12,7 @@ Settable parameters:
 
 Monitor-only parameters:
 
-        <status>   Hex bit value. R2DBE:
+        <status>   Hex bit value.
                     Bit  Meaning
                      0  System Ready
                      1  Error message
@@ -20,7 +20,9 @@ Monitor-only parameters:
                      6  Transmitting valid data
                      7  Transmitting data marked invalid
                      8  FPGA state: 0 -- FPGA not loaded; 1 -- FPGA loaded
-
+                     9  Configuration found
+                    10  Configuration done
+                    11  Boot done
 
 Comments:
 Like all RDBE commands, this command can either operate on all active
