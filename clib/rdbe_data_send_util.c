@@ -158,7 +158,6 @@ void rdbe_data_send_mon(output,count,lclm)
 
   switch (*count) {
     case 1:
-      output=output+strlen(output);
       m5sprintf(output,"%s",&lclm->dot.dot,&lclm->dot.state);
       break;
     case 2:
