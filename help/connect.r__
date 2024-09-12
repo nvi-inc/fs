@@ -1,9 +1,9 @@
 		   connect -  Data connections (RDBE racks)
 
             Syntax:     connect=<offset>
-                        connect=<rdbe>,<ip>,<port>,<station>,<thread>>
+                        connect=<rdbe>,<ip>,<port>,<station>,<thread>
 
-            Response:   connect(<rdbe>)/<ip>,<port>,<station>,<thread>>
+            Response:   connect(<rdbe>)/<ip>,<port>,<station>,<thread>
 
 
 Settable parameters:
