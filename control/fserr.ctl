@@ -407,6 +407,54 @@ response not received for dbe_connect, rdb?W
 2J -902
 program error: strdup() failed for dbe_connect, rdb?W
 ""
+2K -201
+Error decoding personality type, must be less than 65 character; or first parameter is not a valid RDBE to address
+""
+2K -202
+Error decoding personality file, must be less than 65 character
+""
+2K -301
+No RDBEs active, see active_rdbes command.
+""
+2K -302
+RDBE personality command only available for first generation RDBEs
+""
+2K -401
+error retrieving class for dbe_personality, rdb?W
+""
+2K -451
+Class buffer error from command response.
+""
+2K -501
+error decording type for dbe_personality, rdb?W
+""
+2K -502
+error decording file for dbe_personality, rdb?W
+""
+2K -503
+error decording status for dbe_personality, rdb?W
+""
+2K -504
+error decording board for dbe_personality, rdb?W
+""
+2K -505
+error decording major for dbe_personality, rdb?W
+""
+2K -506
+error decording minor for dbe_personality, rdb?W
+""
+2K -507
+error decording rcs for dbe_personality, rdb?W
+""
+2K -508
+error decording fpga for dbe_personality, rdb?W
+""
+2K -901
+response not received for dbe_personality, rdb?W
+""
+2K -902
+program error: strdup() failed for dbe_personality, rdb?W
+""
 2M -101
 No default for <InString>; or no default for RDBE to address
 ""

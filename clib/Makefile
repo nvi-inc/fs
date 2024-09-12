@@ -52,7 +52,7 @@ dbbc3_version_check.o mk5dbbc3d.o get_dbbc3time.o find_process.o \
 getenv_DBBC3.o r2dbe_2_tsysx.o r2dbcn_v.o rdbe_data_send_util.o\
 rdbe_channels_util.o rdbe_pc_offset_util.o rdbe_quantize_util.o\
 rdbe_bstate_util.o rdbe_dot2Xps_util.o rdbe_status_util.o rdbe_version_util.o\
-rdbe_connect_util.o
+rdbe_connect_util.o rdbe_personality_util.o
 
 clib.a: $(OBJECTS)
 

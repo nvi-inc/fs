@@ -622,6 +622,11 @@ void cshm_init()
       m5state_init(&shm_addr->rdbe_connect[i].thread.state);
   }
 
+  for(i=0;i<MAX_RDBE+1;i++) {
+      m5state_init(&shm_addr->rdbe_personality[i].type.state);
+      m5state_init(&shm_addr->rdbe_personality[i].file.state);
+  }
+
   return;
 }
 
