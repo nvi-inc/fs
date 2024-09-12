@@ -513,6 +513,9 @@ loop:
       case 142:
 	rdbe_connect(&command,itask,ip);
 	break;
+      case 143:
+	rdbe_personality(&command,itask,ip);
+	break;
 /* end modified mb */
       default:
 	ierr=-4;

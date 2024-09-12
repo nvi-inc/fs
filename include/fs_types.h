@@ -120,3 +120,4 @@
 #include "rdbe_status_ds.h"
 #include "rdbe_version_ds.h"
 #include "rdbe_connect_ds.h"
+#include "rdbe_personality_ds.h"
