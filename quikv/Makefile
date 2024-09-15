@@ -50,7 +50,8 @@ rdbe_channels.o rdbe_channels_dis.o rdbe_pc_offset.o rdbe_pc_offset_dis.o\
 rdbe_quantize.o rdbe_quantize_dis.o rdbe_bstate.o rdbe_bstate_dis.o\
 rdbe_dot2Xps.o rdbe_dot2Xps_dis.o rdbe_dot.o rdbe_dot_dis.o\
 rdbe_status.o rdbe_status_dis.o rdbe_version.o rdbe_version_dis.o\
-rdbe_connect.o rdbe_connect_dis.o rdbe_personality.o rdbe_personality_dis.o
+rdbe_connect.o rdbe_connect_dis.o rdbe_personality.o rdbe_personality_dis.o\
+rdbe_chan_sel_en.c rdbe_chan_sel_en_dis.c
 #mk6_record.o mk6_record_dis.o 
 
 LDLIBS += -lm

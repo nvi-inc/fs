@@ -565,4 +565,6 @@ typedef struct fscom {
 
   struct rdbe_personality_cmd rdbe_personality[MAX_RDBE+1];
 
+  struct rdbe_chan_sel_en_cmd rdbe_chan_sel_en[MAX_RDBE+1];
+
 } Fscom;

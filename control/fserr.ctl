@@ -455,6 +455,48 @@ response not received for dbe_personality, rdb?W
 2K -902
 program error: strdup() failed for dbe_personality, rdb?W
 ""
+2L -201
+Error decoding rate, must be '2','4', or '8'; or first parameter is not a valid RDBE to address
+""
+2L -202
+Error decoding chsel, must be 'enable' or 'disabled'
+""
+2L -203
+Error decoding psn, must be 'enable' or 'disabled'
+""
+2L -204
+Error decoding vtp, must be 'enable' or 'disabled'
+""
+2L -301
+No RDBEs active, see active_rdbes command.
+""
+2L -302
+rate of '8' only allowed for chsel disable
+""
+2L -401
+error retrieving class for dbe_chsel_en, rdb?W
+""
+2L -451
+Class buffer error from command response.
+""
+2L -501
+error decording rate for dbe_chsel_en, rdb?W
+""
+2L -502
+error decording chsel for dbe_chsel_en, rdb?W
+""
+2L -503
+error decording psn for dbe_chsel_en, rdb?W
+""
+2L -504
+error decording vtp for dbe_chsel_en, rdb?W
+""
+2L -901
+response not received for dbe_chsel_en, rdb?W
+""
+2L -902
+program error: strdup() failed for dbe_chsel_en, rdb?W
+""
 2M -101
 No default for <InString>; or no default for RDBE to address
 ""
