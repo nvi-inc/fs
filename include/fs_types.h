@@ -121,3 +121,4 @@
 #include "rdbe_version_ds.h"
 #include "rdbe_connect_ds.h"
 #include "rdbe_personality_ds.h"
+#include "rdbe_chan_sel_en_ds.h"

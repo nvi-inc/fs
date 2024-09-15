@@ -613,6 +613,7 @@ rdbe_status  qkr 14000 01 2000FFFFFFFF
 rdbe_version qkr 14100 01 2000FFFFFFFF
 connect      qkr 14200 01 2000FFFFFFFF
 personality  qkr 14300 01 2000FFFFFFFF
+chan_sel_en  qkr 14400 01 2000FFFFFFFF
 * boss internal
 cont         *xx 00000 02 FFFFFFFFFFFF
 halt         *xx 00000 03 FFFFFFFFFFFF

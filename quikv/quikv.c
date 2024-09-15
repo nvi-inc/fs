@@ -516,6 +516,9 @@ loop:
       case 143:
 	rdbe_personality(&command,itask,ip);
 	break;
+      case 144:
+	rdbe_chan_sel_en(&command,itask,ip);
+	break;
 /* end modified mb */
       default:
 	ierr=-4;
