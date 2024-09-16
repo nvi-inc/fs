@@ -33,7 +33,7 @@
 
 extern char unit_letters[];
 
-void rdbe_quantize_dis(command,iwhich,ip,out_class,out_recs,kcom,kmon)
+void rdbe_quantize_dis(command,iwhich,ip,out_class,out_recs,kcom,kmon,kcombined,ifs,chans)
 struct cmd_ds *command;
 int iwhich;
 int ip[5];
@@ -41,6 +41,9 @@ int *out_class;
 int *out_recs;
 int kcom;
 int kmon;
+int kcombined;
+int ifs;
+int chans;
 {
   int ierr, count, i;
   char output[MAX_OUT];
@@ -67,7 +70,7 @@ int kmon;
 
   if(kcom) {
     memcpy(&lclc,&shm_addr->rdbe_quantize[iwhich],sizeof(lclc));
-  } else if (!kmon) {
+  } else if (!kmon && shm_addr->equip.rack_type != RDBE) {
     ierr=logmsg_rdbe(output,command,ip,out_class,out_recs);
     if(ierr!=0) {
       ierr+=-450;
@@ -83,7 +86,6 @@ int kmon;
       goto error2;
     }
     for (i=0;i<nrecs;i++) {
-      char *ptr;
       if ((nchars =
             cls_rcv(iclass,inbuf,BUFSIZE,&rtn1,&rtn2,msgflg,save)) <= 0) {
         ierr = -401-i;
@@ -95,6 +97,41 @@ int kmon;
         if(i<nrecs-1)
           cls_clr(iclass);
         goto error;
+      }
+      if (nrecs==1 && !kmon && shm_addr->equip.rack_type == RDBE && kcombined) {
+        char *ptr, *if0ptr, *if1ptr, *from_ptr, *to_ptr;
+        int j;
+        int iend;
+        ptr=strchr(inbuf,':');
+        if(ptr==NULL) {
+          if(i<nrecs-1)
+            cls_clr(iclass);
+          ierr=-410;
+          goto error2;
+        }
+        if0ptr=ptr+1;
+        if(chans==-1)
+          iend=MAX_RDBE_CH+1;
+        else
+          iend=2;
+        for(j=0;j<iend;j++) {
+          ptr=strchr(ptr+1,':');
+          if(ptr==NULL) {
+            if(i<nrecs-1)
+              cls_clr(iclass);
+            ierr=-411;
+            goto error2;
+          }
+        }
+        if1ptr=ptr+1;
+        for(from_ptr=if1ptr,to_ptr=if0ptr ;*from_ptr!=NULL; from_ptr++,to_ptr++)
+          *to_ptr=*from_ptr;
+        *to_ptr=*from_ptr;
+        if(0!=rdbe_2_rdbe_quantize(inbuf,&lclm,ip,i+1)) {
+          if(i<nrecs-1)
+            cls_clr(iclass);
+          goto error;
+        }
       }
     }
   }
@@ -110,13 +147,13 @@ int kmon;
     cls_snd(out_class,output,strlen(output),0,0);
     (*out_recs)++;
   } else {
-    for (i=0;i<MAX_RDBE_IF;i++) {
+    for (i=0;i<ifs;i++) {
       count=0;
       output[prefix]=0;
       while( count>= 0) {
         if (count > 0) strcat(output,",");
         count++;
-        rdbe_quantize_mon(output,&count,&lclm,iwhich,i);
+        rdbe_quantize_mon(output,&count,&lclm,iwhich,i,chans);
       }
       if(strlen(output)>0) output[strlen(output)-1]='\0';
       cls_snd(out_class,output,strlen(output),0,0);

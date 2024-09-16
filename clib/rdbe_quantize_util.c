@@ -137,12 +137,13 @@ struct rdbe_quantize_cmd *lclc;
   if(*count>0) *count++;
   return;
 }
-void rdbe_quantize_mon(output,count,lclm,irdbe,ifc)
+void rdbe_quantize_mon(output,count,lclm,irdbe,ifc,chans)
 char *output;
 int *count;
 struct rdbe_quantize_mon *lclm;
 int irdbe;
 int ifc;
+int chans;
 {
   int i;
 
@@ -170,14 +171,20 @@ int ifc;
           total=MAX_R2DBE_CH;
 
         if(shm_addr->rdbe_channels[irdbe].ifc[ifc].channels.state.known) {
-          for (i=0; i<total && shm_addr->rdbe_channels[irdbe].ifc[ifc].channels.channels[i]!=-1; i++) {
-            int channel=shm_addr->rdbe_channels[irdbe].ifc[ifc].channels.channels[i];
-            sprintf(output+strlen(output),"%4d,",lclm->ifc[ifc].levels.levels[channel]);
-          }
+          if(chans!=-1)
+            sprintf(output+strlen(output),"%4d,",lclm->ifc[ifc].levels.levels[0]);
+          else
+            for (i=0; i<total && shm_addr->rdbe_channels[irdbe].ifc[ifc].channels.channels[i]!=-1; i++) {
+              int channel=shm_addr->rdbe_channels[irdbe].ifc[ifc].channels.channels[i];
+              sprintf(output+strlen(output),"%4d,",lclm->ifc[ifc].levels.levels[channel]);
+            }
           output[strlen(output)-1]='\0';
         } else {
-          for (i=0; i<total; i++)
-            sprintf(output+strlen(output),"%4d,",lclm->ifc[ifc].levels.levels[i]);
+          if(chans!=-1)
+            sprintf(output+strlen(output),"%4d,",lclm->ifc[ifc].levels.levels[0]);
+          else
+            for (i=0; i<total; i++)
+              sprintf(output+strlen(output),"%4d,",lclm->ifc[ifc].levels.levels[i]);
 
           output[strlen(output)-1]='\0';
         }

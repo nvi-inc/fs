@@ -3,8 +3,8 @@
             Syntax:     quantize=<if>,<channel>,<threshold>
                         quantize=<rdbe>,<if>,<channel>
 
-            Response:   quantize(<rdbe>)/,,<0>,<levels>
-                        quantize(<rdbe>)/,,<1>,<levels>
+            Response:   quantize(<rdbe>)/,,,<0>,<levels>
+                        quantize(<rdbe>)/,,,<1>,<levels>
 
 
 Settable parameters:
@@ -21,11 +21,10 @@ Settable parameters:
 
 Monitor-only parameters:
         <N>         "0" or "1", the remaining values are for that IF
-        <levels>    list of threshold levels in percent (0-100) for
-                    the channels selected by the 'channels' command,
-                    in the order of channels selected.  If none are
-                    selected for a given IF then all are reported for
-                    that IF.
+        <levels>    list of threshold levels for the channels selected
+                    by the 'channels' command, in the order of channels
+                    selected.  If none are selected for a given IF then
+                    all are reported for that IF.
 
 Comments:
 Like all RDBE commands, this command can either operate on all active
@@ -43,3 +42,7 @@ use quantize=<rdbe>.  To command a single device there must be at
 least two commas after the <rdbe> parameter.  Any supplied <rdbe>
 parameter that does not match a possible RDBE is assumed to be an <if>
 parameter for an all active devices command.
+
+When commanded, the first generation RDBE responds with the resulting
+<levels>. If only a single <channel> was command, only the level for
+that channel is reported, per <if> commanded.
