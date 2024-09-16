@@ -49,7 +49,7 @@ int ip[5];                           /* ipc parameters */
   int rtn_recs=0;
   int some=FALSE;
   char *prdbe,*str,rdbe;
-  int irdbe, kmon=0, kcom=0;
+  int irdbe, kmon=0, kcom=0, kcombined=0, ifs=2, chans=-1;
 
   void skd_run(), skd_par();      /* program scheduling utilities */
 
@@ -86,7 +86,8 @@ int ip[5];                           /* ipc parameters */
   } else if (command->argv[1]==NULL) /* special cases */
     if (*command->argv[0]=='?') {
       kcom=1;
-      rdbe_quantize_dis(command,irdbe,ip,&rtn_class,&rtn_recs,kcom,kmon);
+      ifs=1;
+      rdbe_quantize_dis(command,irdbe,ip,&rtn_class,&rtn_recs,kcom,kmon,kcombined,ifs,chans);
       ip[0]=rtn_class;
       ip[1]=rtn_recs;
       return;
@@ -112,7 +113,8 @@ int ip[5];                           /* ipc parameters */
   if (command->argv[1]!=NULL && *command->argv[1]=='?'
       && command->argv[2] == NULL) {
     kcom=1;
-    rdbe_quantize_dis(command,irdbe,ip,&rtn_class,&rtn_recs,kcom,kmon);
+    ifs=1;
+    rdbe_quantize_dis(command,irdbe,ip,&rtn_class,&rtn_recs,kcom,kmon,kcombined,ifs,chans);
     ip[0]=rtn_class;
     ip[1]=rtn_recs;
     return;
@@ -164,6 +166,11 @@ parse:
       memcpy(&shm_addr->rdbe_quantize[i+1],&lclc,sizeof(lclc));
     }
 
+  kcombined=shm_addr->equip.rack_type == RDBE && lclc.ifc.ifc == -1;
+  if(shm_addr->equip.rack_type == RDBE && lclc.ifc.ifc != -1)
+    ifs=1;
+  chans=lclc.channel.channel;
+
   rdbe_quantize_2_rdbe(outbuf,&lclc);
   if(outbuf[0]!=0)
     for (i=0;i<MAX_RDBE;i++)
@@ -200,7 +207,7 @@ rdbcn:
           ip[0]=ip[1]=0;
         }
       } else
-        rdbe_quantize_dis(command,iwhich,ip,&rtn_class,&rtn_recs,kcom,kmon);
+        rdbe_quantize_dis(command,iwhich,ip,&rtn_class,&rtn_recs,kcom,kmon,kcombined,ifs,chans);
       if(irdbe !=0)
         continue;
 

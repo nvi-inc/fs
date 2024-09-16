@@ -188,6 +188,12 @@ error retrieving class for first dbe_quantize query, rdb?W
 2E -402
 error retrieving class for second dbe_quantize query, rdb?W
 ""
+2E -410
+error finding IF0 in combined command response for dbe_quantize, rdb?W
+""
+2E -411
+error finding IF1 in combined command response for dbe_quantize, rdb?W
+""
 2E -451
 Class buffer error from command response for dbe_quantize, rdb?W
 ""
