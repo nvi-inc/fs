@@ -31,3 +31,10 @@ considered active.
 
 To query all active devices use 'bstate'.  To query a single device,
 use bstate=<rdbe>.
+
+First generation RDBEs will report an error code of '4' (error
+encountered during attempt to execute) if any of the <levels> are too
+far from the canonical level of 68%. Since this is fairly common
+(possible due to do RFI), this is not reported as an error by the FS,
+but a string reporting the error is displayed and put in the log. The
+former so the operator gets some feedback; the latter for the record.

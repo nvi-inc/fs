@@ -764,6 +764,7 @@ int ip[5];
 	ip[2]=-899;
 	goto error;
       } else if(ierr != 0 && ierr != 1) {
+        int silent=shm_addr->equip.rack_type==RDBE && ierr == 4 && NULL!=strstr(outbuf,"bstate");
 	/* is there a trailing parameter that could contain an error message */
 	ptr=strchr(outbuf,':');
 	if(ptr!=NULL) {
@@ -774,20 +775,29 @@ int ip[5];
 	  if(ptr2!=NULL)
 	    *ptr2=0;
 	  
-	  while(*ptr!=0 && *ptr ==' ')
+	  while(*ptr!=0 && (*ptr ==' ' || *ptr == ':'))
 	    ptr++;
 	  if(*ptr!=0) {
-	    char save2[128];
-	    strcpy(save2,"rdb");
-	    strncat(save2,who,2);
-	    strcat(save2,": RDBE error information: ");
+	    char save2[1024];
+	    if(silent)
+	      strcpy(save2," RDBE bstate error 4 information: ");
+	    else {
+	      strcpy(save2,"rdb");
+	      strncat(save2,who,2);
+	      strcat(save2,": RDBE error information: ");
+            }
 	    strncat(save2,ptr,sizeof(save2)-strlen(save2));
 	    save2[sizeof(save2)-1]=0;
-	    logite(save2,-900,"ra");
+	    if(silent)
+	      logit(save2,0,NULL);
+	    else
+	      logite(save2,-900,"ra");
 	  }
 	}
-	ip[2]=-900-ierr;
-	goto error;
+	if(!silent) {
+	  ip[2]=-900-ierr;
+	  goto error;
+	}
       }
     }
     if(1==ip[2]) {
