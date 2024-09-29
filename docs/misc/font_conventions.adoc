@@ -1,6 +1,5 @@
-
 //
-// Copyright (c) 2020, 2021, 2023 NVI, Inc.
+// Copyright (c) 2020, 2021, 2023, 2024 NVI, Inc.
 //
 // This file is part of VLBI Field System
 // (see http://github.com/nvi-inc/fs).
@@ -20,7 +19,7 @@
 //
 
 = DRAFT FS Document Font Conventions
-Version 1.3 - October 2023
+Version 1.4 - September 2023
 
 :sectnums:
 
@@ -497,6 +496,30 @@ Tip text
 =====
 More note text
 ====
+
+=== Non-breaking spaces
+
+Non-breaking spaces can be entered as `+{nbsp}+`:
+
+....
+word1{nbsp}word2
+....
+
+renders as:
+
+word1{nbsp}word2
+
+=== Non-breaking hyphens
+
+Non-breaking hyphens can be entered as `+&#8209;+`:
+
+....
+word1&#8209;word2
+....
+
+renders as:
+
+word1&#8209;word2
 
 == Workarounds
 
