@@ -21,7 +21,7 @@
 :doctype: book
 
 = FS 10.2 to Latest Commit Update Notes
-Version 1.2 - July 2024
+Version 1.3 - September 2024
 
 :sectnums:
 :stem: latexmath
@@ -54,7 +54,7 @@ release to the new release, were completed. However, this may not be
 complete. _Let the user beware._
 
 This document is up to date with the
-`bb5818dd028f5ffd46d732890da0ea2f62dfade1` (`bb5818dd`) commit. Due to
+`d7eecb8bea991168b27daf0a4ec8ca3313c53cbd` (`d7eecb8b`) commit. Due to
 small increments, such as updating this document, that may not be the
 literal last commit, but the differences should be small unless you
 happen to `pull` between a significant change and this document being
@@ -84,7 +84,7 @@ then as _prog_ execute:
 
  cd /usr2/fs-git
  git fetch
- git checkout -q bb5818dd
+ git checkout -q d7eecb8b
 
 . If you are using FSL8, or otherwise unable to use _git_:
 
@@ -110,17 +110,17 @@ that:
 
 * For the __tag__ in the `*wget*` and `*tar*` commands, use the short
 SHA for the commit. For example, for commit under discussion here,
-`bb5818dd028f5ffd46d732890da0ea2f62dfade1`, use `bb5818dd`.
+`d7eecb8bea991168b27daf0a4ec8ca3313c53cbd`, use `d7eecb8b`.
 
 * After extracting the archive, change the name of the output
 directory to use the latest feature release and the short SHA of the
-commit, like _fs-10.2.0-33-gbb5818dd_ (note the _g_ before the short
+commit, like _fs-10.2.0-33-gd7eecb8b_ (note the _g_ before the short
 SHA), which will then be used in the following `*cd*` command. For
 example (kbd:[Tab] completion is your friend for the long SHA):
 
  cd /usr2
- mv fs-bb5818dd028f5ffd46d732890da0ea2f62dfade1 fs-10.2.0-33-gbb5818dd
- cd /usr2/fs-10.2.0-33-gbb5818dd
+ mv fs-d7eecb8bea991168b27daf0a4ec8ca3313c53cbd fs-10.2.0-33-gd7eecb8b
+ cd /usr2/fs-10.2.0-33-gd7eecb8b
 
 * You will end the "`installing from an archive`" with the step
 setting the link for __/usr2/fs__ by running *`make install`*.
@@ -540,11 +540,19 @@ specified in the _help/lvdt.*_ files. It was replaced with the word.
 
 ====
 
-. Cleanup _10.2_ web documents
+. Improve web documents
 
 +
+[%collapsible]
+====
 
-Miscellaneous wording and typographic corrections were made.
+.. Add examples for non-breaking spaces and hyphens to the Font
+Conventions.
+
+.. Miscellaneous wording and typographic corrections were made to the
+_10.2_ documents
+
+====
 
 === drudg changes
 
