@@ -26,7 +26,11 @@ shims/fs.prompt.o: shims/fs.prompt.c
 
 ../bin/shims/xterm: shims/xterm
 	@mkdir -p ../bin/shims/
-	cp -a shims/xterm ../bin/shims/
+ifeq ($(FS_PYTHON_VERSION),2)
+	cp -a shims/xterm-python2 ../bin/shims/xterm
+else
+	cp -a shims/xterm ../bin/shims/xterm
+endif
 
 
 include ../include.mk
