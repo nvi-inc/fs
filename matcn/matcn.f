@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020, 2023  NVI, Inc.
+* Copyright (c) 2020, 2023, 2024  NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -486,7 +486,7 @@ C
 c on first read, if time-out close and re-open, maybe a 
 C solution for an intermittent kernel 2.6 problem with SuperMicro C7SIM-Q?
         if(kfirst.and.ierr.eq.-4) then
-           call logit7ci(0,0,0,1,-104,'ma',ierr)
+           call logit7ci(0,0,0,1,-104,'ma',0)
            ierr=portclose(lumat)
            if (ierr.ne.0) call logit7ci(0,0,0,1,-103,'ma',ierr)
            lumat=-1
