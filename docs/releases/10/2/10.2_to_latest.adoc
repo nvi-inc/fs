@@ -21,7 +21,7 @@
 :doctype: book
 
 = FS 10.2 to Latest Commit Update Notes
-Version 1.3 - September 2024
+Version 1.4 - November 2024
 
 :sectnums:
 :stem: latexmath
@@ -39,22 +39,21 @@ release is not intended for operations. The intended use of this
 document is to collect update information, as it becomes available,
 before the next release.
 
-//IMPORTANT: Commits that are not tagged for release may have
-//significant issues including: not building, crashing, and
-//incompatibilities with operational observation schedule files. Such
-//commits are intended for testing only. _Let the user beware._
+IMPORTANT: Commits that are not tagged for release may have
+significant issues including: not building, crashing, and
+incompatibilities with operational observation schedule files. Such
+commits are intended for testing only. _Let the user beware._
 
 CAUTION: It is expected that those using the latest commit are experts
 and will manage the differences for updating to the next official
 release themselves. No specific documentation will be provided. What
 commit was last updated to will determine what needs to be done. It
-might work to verify that all the steps in the latest version of this
-document, appropriately adjusted and renamed as the update from the old
-release to the new release, were completed. However, this may not be
-complete. _Let the user beware._
+might work to verify that all the steps in the official release update
+notes were completed. However, that may not be complete. _Let the user
+beware._
 
 This document is up to date with the
-`d7eecb8bea991168b27daf0a4ec8ca3313c53cbd` (`d7eecb8b`) commit. Due to
+`941fb6c1afdfc99dd8fc52f184479487876afc0c` (`941fb6c1`) commit. Due to
 small increments, such as updating this document, that may not be the
 literal last commit, but the differences should be small unless you
 happen to `pull` between a significant change and this document being
@@ -78,13 +77,13 @@ this update.
 
 There are two alternatives:
 
-. If you are using FSL9, FSL10, or another system that supports
+. If you are using FSL9, FSL10, FSL11, or another system that supports
 connections to _github_ and you are using _git_ (as is recommended)
 then as _prog_ execute:
 
  cd /usr2/fs-git
  git fetch
- git checkout -q d7eecb8b
+ git checkout -q 941fb6c1
 
 . If you are using FSL8, or otherwise unable to use _git_:
 
@@ -110,17 +109,17 @@ that:
 
 * For the __tag__ in the `*wget*` and `*tar*` commands, use the short
 SHA for the commit. For example, for commit under discussion here,
-`d7eecb8bea991168b27daf0a4ec8ca3313c53cbd`, use `d7eecb8b`.
+`941fb6c1afdfc99dd8fc52f184479487876afc0c`, use `941fb6c1`.
 
 * After extracting the archive, change the name of the output
 directory to use the latest feature release and the short SHA of the
-commit, like _fs-10.2.0-33-gd7eecb8b_ (note the _g_ before the short
+commit, like _fs-10.2.0-40-g941fb6c1_ (note the _g_ before the short
 SHA), which will then be used in the following `*cd*` command. For
 example (kbd:[Tab] completion is your friend for the long SHA):
 
  cd /usr2
- mv fs-d7eecb8bea991168b27daf0a4ec8ca3313c53cbd fs-10.2.0-33-gd7eecb8b
- cd /usr2/fs-10.2.0-33-gd7eecb8b
+ mv fs-941fb6c1afdfc99dd8fc52f184479487876afc0c fs-10.2.0-40-g941fb6c1
+ cd /usr2/fs-10.2.0-40-g941fb6c1
 
 * You will end the "`installing from an archive`" with the step
 setting the link for __/usr2/fs__ by running *`make install`*.
@@ -194,8 +193,8 @@ install it on FSL__x__ systems as _root_ with
 
 == Changes since 10.2.0
 
-There are separate subsections with summaries of the changes in the FS
-and _drudg_.
+There are separate subsections below with summaries of the changes in
+the FS and _drudg_.
 
 Clickable links such as https://github.com/nvi-inc/fs/issues/36[#36]
 connect to specific issues reported at
@@ -220,6 +219,58 @@ didn't seem warranted. The collapsible boxes for the details may also
 have nested collapsible boxes inside them if there are many sub-items.
 
 === FS changes
+
+. Fix bug in the display server shim for _xterm_ on FSL11, restoring
+use of _autoftp_ (closing
+https://github.com/nvi-inc/fs/issues/218[#218]).
+
++
+[%collapsible]
+====
+
+The conversion to _python3_ for FSL11 (_bullseye_) missed
+_fsserver/shims/xterm_. As a result, it was not possible on FSL11
+systems to use _autoftp_ (or `sy=xterm ...`, which should be avoided
+anyway). The simple fix for this was to make separate _python2_ and
+_python3_ versions as we done for other _python_ scripts in FS _10.2_.
+This bug only occurred for FSL11 systems.
+
+====
+
+. Fix bug in the `satellite=...` command that prevented temporary TLE
+files from being closed (closing
+https://github.com/nvi-inc/fs/issues/220[#220]).
+
++
+[%collapsible]
+====
+
+When cleaning up at the end of processing, `satellite=...` commands
+were not closing the temporary TLE files. As a result, if many of the
+commands were used in a single invocation of the FS, the limit on the
+number of open files could be reached, causing subsequent
+`satellite=...` commands to fail. This situation could happen, e.g.,
+if many of the commands were used sequentially to approximate
+continuous tracking.
+
+Thanks to Jamie McCallum and David Schunck (both at Hobart) for
+finding this, reporting it, and providing the fix.
+
+====
+
+. Fix bug in the reporting of the `MA -104` error that caused an
+extraneous `(  -4)` to be displayed in the error message.
+
++
+[%collapsible]
+====
+
+The `MA -104` error is a warning that there may be a 30 second delay
+while a possible serial line error is worked around at the start-up of
+_matcn_. The value of an argument in the call to report the error had
+a value of `-4` instead of, the correct value, `0`.
+
+====
 
 . Update comments in _.rxg_ files for the current maximum number of
 T~cal~ table entries (closing
@@ -278,7 +329,7 @@ __recovered.<XXXXXX>_
 +
 
 appended at the original name, where `_<XXXXXX>_` is a random string,
-chosen the kernel, that makes the filename unique, e.g., _3fDhIa_.
+chosen by the kernel, that makes the filename unique, e.g., _3fDhIa_.
 
 +
 
@@ -302,7 +353,7 @@ The case of an open log file being overwritten by copying onto it
 (_cp_) is not handled. So it is not possible to automatically recover
 the log in that case. It should still be possible to recover, most, if
 not all, of a log lost in this way using the technique described in
-_/usr2/misc/logrecovery.txt_
+_/usr2/fs/misc/logrecovery.txt_
 
 Two possible approaches to prevent overwriting by copying (_cp_) onto
 an open log are described in the *Details* collapsible box below.
@@ -384,7 +435,7 @@ process of recopying the log contents. Making the recovery as robust
 as possible is prudent since this is the only chance to accomplish
 this.
 
-.. Update _/usr2/misc/logrecovery.txt_ note.
+.. Update _/usr2/fs/misc/logrecovery.txt_ note.
 
 +
 
@@ -417,7 +468,7 @@ second time after an initial installation. This might happen, for
 example, if `*make{nbsp}install*` were used to reset the _/usr2/fs_
 link. The failure occurred because of a confluence of two issues: (i)
 _git_ was unnecessarily used to determine the version of the FS during
-for the `install` target and (ii) the  version of _git_ in FSL11, and
+the `install` target and (ii) the  version of _git_ in FSL11, and
 probably later versions, will throw an error if the directory is not
 owned by the user. The problem was resolved by removing the use of
 _git_ to determine the FS version for `*make{nbsp}install*`.
