@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020, 2024 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -314,7 +314,7 @@ parse:
       close(idqth);
 
  clean_up4:
-      if(lcl.tlefile[0]==0)
+      if(lcl.tlefile[0]!=0)
 	fclose(fdtle);
  
  clean_up5:
