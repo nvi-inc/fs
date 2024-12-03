@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020-2023 NVI, Inc.
+// Copyright (c) 2020-2024 NVI, Inc.
 //
 // This file is part of the FSL10 Linux distribution.
 // (see http://github.com/nvi-inc/fsl10).
@@ -19,7 +19,7 @@
 //
 
 = Installation Reference
-Version 1.6 - June 2023
+Version 1.7 - December 2024
 
 :sectnums:
 :experimental:
@@ -580,6 +580,10 @@ scripts do not usually have a `name` property. If it is needed, it is
 possible to modify _python_ scripts to accept, and use, a geometry
 parameter. Some FS _python_ based windows can already handle this.
 
+. Login as _oper_.
+
+. Start the FS or client (_fsclient_).
+
 . Adjust the position (and maybe the size) of the window to what you
 want.
 
@@ -593,11 +597,14 @@ want.
 . Paste the string as the value for `geometry` resource for that
 window in the _~/.Xresources_ file.
 
-After changing or adding resources in the _~.Xresources_ file, you
+After changing or adding resources in the _~/.Xresources_ file, you
 will need to load them to make them active. This can done by logging
-out and back in again or loading them in another way, such as using
-the shell alias _rlxr_ that is available by default for _oper_ and
-_prog_. The window will need to be reopened to see the effect.
+out and back in again or loading them in another way. For all windows
+except `login shell`, you can use the shell alias _rlxr_ that is
+available by default for _oper_ and _prog_. The window will need to be
+reopened to see the effect, for example, by restarting the FS or the
+client. To reopen the `login shell` window, it will be necessary to
+logout and back in.
 
 NOTE: Using this method with differently named _.Xresource_ files and
 reloading aliases, it is possible to have customized window layouts
