@@ -126,7 +126,7 @@ if ($#ARGV < 0 &&!defined($opt_h) &&!defined($opt_v)) {
 }
 
 if(defined($opt_v)) {
-    print "[auto_start 0.7]\n";
+    print "[auto_start 0.8]\n";
     exit 0;
 }
 
@@ -159,6 +159,13 @@ can be left empty.
 
 The FS must be running and the STATION environment variable defined
 with the two-letter station code.
+
+You can use the FS SNAP command 'flush' to remove any pending commands
+from the time-list. Beware because that will remove all entries from the
+time-list, not just ones added by this script. You can use the FS SNAP
+command 'ti' to see what commands are in the time-list. Individual
+commands can be removed by issuing the same command with an 'at' sign,
+'@', appended.
 
 The '-e' option can be used to suppress all the commands except the
 'ant_stop' after the schedule. This can be useful if it was necessary
