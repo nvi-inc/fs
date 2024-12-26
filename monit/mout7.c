@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2023 NVI, Inc.
+ * Copyright (c) 2020-2024 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -248,9 +248,9 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
 
     move(4,0);
     if(ifc.lo>=0.0 && krf)
-        printw("BBC    RF     Ts-U  Ts-L");
+        printw("BBC    RF     Ts-L  Ts-U");
     else
-        printw("BBC    IF     Ts-U  Ts-L");
+        printw("BBC    IF     Ts-L  Ts-U");
 
     move(4,9);
     if(ifc.lo>=0.0)
@@ -286,15 +286,15 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
         } else
             printw(" %8s"," ");
 
-        if (all && (def || rec) || !rec && ifc.lo>=0.0 || itpis[ibbc+MAX_DBBC3_BBC]) {
+        if (all && (def || rec) || !rec && ifc.lo>=0.0 || itpis[ibbc             ]) {
             printw(" ");
-            print_tsys(bbc[ibbc].tsys_usb,bbc[ibbc].clipped_usb,reverse);
+            print_tsys(bbc[ibbc].tsys_lsb,bbc[ibbc].clipped_lsb,reverse);
         } else
             printw(" %5s"," ");
 
-        if(all && (def || rec) || !rec && ifc.lo>=0.0 || itpis[ibbc              ]) {
+        if(all && (def || rec) || !rec && ifc.lo>=0.0 || itpis[ibbc+MAX_DBBC3_BBC]) {
             printw(" ");
-            print_tsys(bbc[ibbc].tsys_lsb,bbc[ibbc].clipped_lsb,reverse);
+            print_tsys(bbc[ibbc].tsys_usb,bbc[ibbc].clipped_usb,reverse);
         } else
             printw(" %5s"," ");
     }
