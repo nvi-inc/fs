@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2023, 2025 NVI, Inc.
+ * Copyright (c) 2020-2025 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -503,6 +503,7 @@ typedef struct fscom {
 
   struct dbbc3_tsys_data {
       int iping;
+      int epoch_inserted;
       struct dbbc3_tsys_cycle {
           time_t last;
           int centisec[6];

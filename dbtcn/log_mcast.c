@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2023 NVI, Inc.
+ * Copyright (c) 2020-2024 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -95,12 +95,21 @@ static void log_time( struct dbbc3_tsys_cycle *cycle, char buf[])
 
             log_out(buf, "time/",22,0);
             ptr=gmtime(&cycle->ifc[i].time);
-            sprintf(buf+strlen(buf)," %d, %4d.%03d.%02d:%02d:%02d,",i+1,
-                    ptr->tm_year+1900,
-                    ptr->tm_yday+1,
-                    ptr->tm_hour,
-                    ptr->tm_min,
-                    ptr->tm_sec);
+            if(!shm_addr->dbbc3_tsys_data.epoch_inserted)
+                sprintf(buf+strlen(buf)," %d, %4d.%03d.%02d:%02d:%02d,",i+1,
+                        ptr->tm_year+1900,
+                        ptr->tm_yday+1,
+                        ptr->tm_hour,
+                        ptr->tm_min,
+                        ptr->tm_sec);
+            else
+                sprintf(buf+strlen(buf)," %d, %4d.%03d.%02d:%02d:%02d, %d,",i+1,
+                        ptr->tm_year+1900,
+                        ptr->tm_yday+1,
+                        ptr->tm_hour,
+                        ptr->tm_min,
+                        ptr->tm_sec,
+                        cycle->ifc[i].vdif_epoch);
         }
     }
     log_out(buf, "",0,0);
