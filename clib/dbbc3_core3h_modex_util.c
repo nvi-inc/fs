@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2023 NVI, Inc.
+ * Copyright (c) 2020-2024 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -33,7 +33,7 @@
 #include "../include/fscom.h"         /* shared memory definition */
 #include "../include/shm_addr.h"      /* shared memory pointer */
 
-static char *force_key[ ]=         { "$", "force" };
+static char *force_key[ ]=         { "$", "force","keepsync" };
 static char *disk_key[ ]=         { "disk_record_ok" };
 static char *split_key[ ]=         { "off", "on" };
 static char *input_key[ ]=         { "tvg","vsi1","vsi2","vsi1-2","vsi1-2-3-4","gps" };
