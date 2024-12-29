@@ -12,7 +12,8 @@ Settable parameters:
 state:      'begin' or 'end'. No default, see 'Comments' section for
             the details.
 
-force:      force setup: literal 'force', '$', or null. See comments.
+force:      force setup: literal 'force', 'keepsync', '$', or null.
+            See comments.
 
 okay        override to allow command while recording, literal text:
             'disk_record_ok'
@@ -67,18 +68,20 @@ Comments:
 This command is unusual as a FS command in two ways. First, instead of
 two Forms, Command and Monitor, it has three:
 
-1. Command Form -- This Form, invoked as 'core3h_mde=n,...,force', is
-   similar in function to the Command Form of the commands for other
-   devices. It commands the Core3H board specified by 'n' with the
-   configuration specified by the remaining parameters when 'force' is
-   included as the sixth parameter. The Command Form also updates the
-   FS's model of the device's configuration. The use of the 'force'
+1. Command Form -- This Form, invoked as 'core3h_mde=n,...,force', (or
+   'core3n_mode=,...,keepsync') is similar in function to the Command
+   Form of the commands for other devices. It commands the Core3H
+   board specified by 'n' with the configuration specified by the
+   other parameters when 'force' (or 'keepsync') is included as the
+   sixth parameter. The Command Form also updates the FS's model of
+   the device's configuration. The use of the 'force' (or 'keepsync')
    parameter is unusual for a Command Form; it is used in this case to
    distinguish it from the Checking Form (see below). Any errors
    reported indicate there was a problem configuring the board.
 
-   The 'core3h_mode=end,force' command is also a Command Form. It sets
-   the transmission state for each board.
+   The 'core3h_mode=end,force' (or 'core3h_mode=end,keepsync') command
+   is also a Command Form. It sets the transmission state for each
+   board.
 
 2. Checking Form -- This Form is unique to 'core3h_mode'. Its use is
    similar to the Command Form (see above), but the sixth parameter is
@@ -90,12 +93,13 @@ two Forms, Command and Monitor, it has three:
    printed after the actual configuration so that the command ends
    with an error.
 
-   The 'core3h_mode=end' command, without 'force' is also a Checking
-   Form. It reports any deviations from what is expected for which
-   boards are transmitting data. The transmission states themselves
-   are not reported, but are available in the Monitor Form for the
-   boards (see below). If there were any transmission state errors, a
-   final summary error is produced. Otherwise, no news is good news.
+   The 'core3h_mode=end' command, without 'force' (and 'keepsync') is
+   also a Checking Form. It reports any deviations from what is
+   expected for which boards are transmitting data. The transmission
+   states themselves are not reported, but are available in the
+   Monitor Form for the boards (see below). If there were any
+   transmission state errors, a final summary error is produced.
+   Otherwise, no news is good news.
 
 3. Monitor Form -- This Form is similar in function to the Monitor
    Form of the commands for other devices. It returns the current
@@ -106,7 +110,14 @@ two Forms, Command and Monitor, it has three:
    device.
 
    There is no Monitor Form for 'core3h_mode=end'. The transmission
-   state is reported by the Monitor Form for the boards.
+   state is reported by the Monitor Form for the 'n' boards.
+
+Using 'keepsync' as the sixth parameter changes the 'reset' command
+sent to the Core3H board to 'reset keepsync'. This attempts to
+preserve the sync. However, it may not be reliable. If sync is lost,
+it should be reported when starting data transmission with
+'core3h_mode=end,keepsync' (or 'core3h_mode=end,force'). At the time
+of this release, using 'keepsync' is considered experimental.
 
 The second unusual aspect of 'core3h_mode' is that in
 'core3h_mode=state,...', the 'state' values of 'begin' and 'end' are
@@ -131,10 +142,11 @@ between them. If there are other commands, the results may be
 incorrect, particularly for 'mk5c_mode'/'fb_mode' and 'tpicd'.
 
 Accepting '$' for the sixth parameter for the Monitor Form is to
-support allowing the operator to use 'force' as the argument for a
-setup procedure from 'drudg' to force setup, while making only
-checking the default for schedules. The 'drudg' generated setup
-procedures are called from schedules with no argument, for example:
+support allowing the operator to use 'force' (or 'keepsync') as the
+argument for a setup procedure from 'drudg' to force setup, while
+making just checking the default for schedules. The 'drudg' generated
+setup procedures are called from schedules with no argument, for
+example:
 
     setup01
 
@@ -142,8 +154,9 @@ This only checks the setups of the Core3H boards (and sets up the rest
 of the mode configuration).
 
 Although it is not recommended at this time, the operator can in
-principle use the same procedure with 'force' as its argument to setup
-the Core3H boards (and the rest of the mode configuration):
+principle use the same procedure with 'force' (or 'keepsync') as its
+argument to setup the Core3H boards (and the rest of the mode
+configuration). For example, with:
 
     setup01=force
 
@@ -151,8 +164,8 @@ The 'force' will be passed to Core3H setup sub-procedure, 'core3h01'
 in this case, which will pass it to the Core3H setup commands. Due to
 the structure of SNAP, if no argument is given, a '$' will appear as
 the value of the 'force' parameter in Core3H setup commands. Hence the
-commands accept '$' in place of the 'force' parameter to preserve the
-checking functionality.
+commands accepts '$' for the 'force' parameter to preserve the
+checking functionality when nothing is specified.
 
 This approach is used to provide a means to configure the Core3H
 boards, while avoiding having a schedule configure them. When they are
@@ -170,7 +183,7 @@ started because the Core3H boards have not been synced. That error
 message can serve as reminder to the operator to sync the boards and
 then execute the above command with 'end,force'.
 
-The 'core3_mode=end' command, with or without 'force', checks the
+The 'core3h_mode=end' command, with or without 'force', checks the
 DBBC3 firmware version for agreement with the FS control files. This
 is intended to be the primary DBBC3 version check for the
 'core3h_mode' command since it is:
