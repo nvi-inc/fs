@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2023 NVI, Inc.
+ * Copyright (c) 2020-2024 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -257,7 +257,8 @@ void dbbc3_core3h_modex(command,itask,ip)
         int force = 0;
         int okay = 0;
         if(NULL != command->argv[1]) {
-            force=0==strcmp("force",command->argv[1]);
+            force=0==strcmp("force",command->argv[1]) ||
+                  0==strcmp("keepsync",command->argv[1]);
             if(!force && 0!=strcmp("$",command->argv[1]) &&
                     0!=strlen(command->argv[1])) {
                 ierr=-304;
@@ -486,6 +487,8 @@ parse:
     strcpy(outbuf,"core3h=");
     strcat(outbuf,board[iboard]);
     strcat(outbuf,",reset");
+    if(2==lcl.force.force)
+      strcat(outbuf," keepsync");
     cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
     out_recs++;
 
