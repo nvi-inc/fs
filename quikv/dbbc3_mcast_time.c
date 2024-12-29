@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021, 2023 NVI, Inc.
+ * Copyright (c) 2020-2021, 2023-2024 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -104,13 +104,15 @@ void dbbc3_mcast_time(command,itask,ip)
 
         strcpy(output,command->name);
         strcat(output,"/");
-        if (!shm_addr->dbbc3_tsys_data.data[iping].ifc[i].time_included)
+        if (!shm_addr->dbbc3_tsys_data.data[iping].ifc[i].time_included
+          && !shm_addr->dbbc3_tsys_data.epoch_inserted)
             sprintf(output+strlen(output),
                     " %d,,, %*ue-9",
                     i+1,
                     digits_d,
                     shm_addr->dbbc3_tsys_data.data[iping].ifc[i].delay);
-        else
+        else if (shm_addr->dbbc3_tsys_data.data[iping].ifc[i].time_included
+          && !shm_addr->dbbc3_tsys_data.epoch_inserted)
             sprintf(output+strlen(output),
                     " %d, %4d.%03d.%02d:%02d:%02d,, %*ue-9, %*d",
                     i+1,
@@ -123,7 +125,28 @@ void dbbc3_mcast_time(command,itask,ip)
                     shm_addr->dbbc3_tsys_data.data[iping].ifc[i].delay,
                     digits_e,
                     shm_addr->dbbc3_tsys_data.data[iping].ifc[i].time_error);
-
+        else if (!shm_addr->dbbc3_tsys_data.data[iping].ifc[i].time_included
+          && shm_addr->dbbc3_tsys_data.epoch_inserted)
+            sprintf(output+strlen(output),
+                    " %d,, %d, %*ue-9",
+                    i+1,
+                    shm_addr->dbbc3_tsys_data.data[iping].ifc[i].vdif_epoch,
+                    digits_d,
+                    shm_addr->dbbc3_tsys_data.data[iping].ifc[i].delay);
+        else
+            sprintf(output+strlen(output),
+                    " %d, %4d.%03d.%02d:%02d:%02d, %d, %*ue-9, %*d",
+                    i+1,
+                    ptr->tm_year+1900,
+                    ptr->tm_yday+1,
+                    ptr->tm_hour,
+                    ptr->tm_min,
+                    ptr->tm_sec,
+                    shm_addr->dbbc3_tsys_data.data[iping].ifc[i].vdif_epoch,
+                    digits_d,
+                    shm_addr->dbbc3_tsys_data.data[iping].ifc[i].delay,
+                    digits_e,
+                    shm_addr->dbbc3_tsys_data.data[iping].ifc[i].time_error);
         cls_snd(&ip[0],output,strlen(output),0,0);
         ip[1]++;
         output[0]=0;
