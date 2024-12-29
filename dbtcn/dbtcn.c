@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2023 NVI, Inc.
+ * Copyright (c) 2020-2024 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -126,12 +126,17 @@ int main(int argc, char *argv[])
 
         if(n<0)
             continue;
-
-        if (unmarshal_dbbc3_ddc_multicast_t(&packet, buf, n) < 0) {
-            logit(NULL,-1,"dn");
-            continue;
+        if(!shm_addr->dbbc3_tsys_data.epoch_inserted) {
+          if (unmarshal_dbbc3_ddc_multicast_t(&packet, buf, n) < 0) {
+              logit(NULL,-1,"dn");
+              continue;
+          }
+        } else {
+          if (unmarshal_dbbc3_ddc_multicast_t_v_126(&packet, buf, n) < 0) {
+              logit(NULL,-1,"dn");
+              continue;
+          }
         }
-
         perform_swaps(&packet);
 
         version_check(&packet);
