@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2023 NVI, Inc.
+ * Copyright (c) 2020-2024 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -301,6 +301,11 @@ send:
             DBBC3_DDCE==shm_addr->equip.rack_type) && 4!=lclm.vsi_input.vsi_input) {
             logitn(NULL,-621,"dr",iboard);
             ierr=-600;
+        } else if(DBBC3_DDCV==shm_addr->equip.rack_type && 126 == shm_addr->dbbc3_ddcv_v) {
+            if(3!=lclm.vsi_input.vsi_input) {
+                logitn(NULL,-635,"dr",iboard);
+                ierr=-600;
+            }
         } else if(DBBC3_DDCV==shm_addr->equip.rack_type && 1!=lclm.vsi_input.vsi_input) {
             logitn(NULL,-622,"dr",iboard);
             ierr=-600;
