@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 NVI, Inc.
+ * Copyright (c) 2023-2024 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -33,12 +33,13 @@ extern struct fscom *shm_addr;
 
 static int time_error = 0;
 
-#define ERROR_COUNT   20
+char *getenv_DBBC3( char *env, int *actual, int *nominal, int *error, int options);
 
 void time_check( struct dbbc3_tsys_cycle *cycle)
 {
     int i, j;
     int time_agrees=1;
+    static int minutes=-1;
 
     for (i=0; i<shm_addr->dbbc3_ddc_ifs;i++)
         if(cycle->ifc[i].time_included) {
@@ -51,13 +52,32 @@ void time_check( struct dbbc3_tsys_cycle *cycle)
             break;
          }
 
+     if(0>minutes) {
+         int actual, error;
+         char *ptr=getenv_DBBC3("FS_DBBC3_MULTICAST_TIME_ERROR_MINUTES",&actual,NULL,&error,1);
+         if(0==error)
+             minutes=actual;
+         else
+             minutes=1;
+     }
      if(time_agrees && time_error) {
          logit(NULL,24,"dn");
          time_error=0;
      } else if (!time_agrees) {
-         time_error=time_error%ERROR_COUNT + 1;
-         if(1==time_error)
+         int report=FALSE;
+         if(!time_error || 0>minutes)
+             report=TRUE;
+         else if(0 < minutes) {
+             int now;
+             rte_ticks(&now);
+             if((now-time_error+99)/(60*100*minutes) > 0) {
+                 report=TRUE;
+             }
+         }
+         if(report) {
              logit(NULL,-24,"dn");
+             rte_ticks(&time_error);
+         }
      }
 
      return;
