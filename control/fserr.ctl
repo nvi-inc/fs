@@ -2648,6 +2648,9 @@ Error decoding dbbcNN/ response, could be a DBBC version mis-match, see error DC
 DK -451
 Class buffer error from command response.
 ""
+DN   30
+DBBC3 multicast: version/personality issue resolved
+""
 DN   24
 DBBC3 multicast: Core3H board times now agree
 ""
