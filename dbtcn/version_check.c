@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, 2023 NVI, Inc.
+ * Copyright (c) 2022, 2023-2024 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -38,7 +38,7 @@ void version_check( dbbc3_ddc_multicast_t *t)
     char test[sizeof(t->version)+1];
     int j;
     int ierr=0;
-    static int old_ierr;
+    static int old_ierr=0;
     static int version_error;
     char *ptr;
     static int minutes=-1;
@@ -112,10 +112,10 @@ void version_check( dbbc3_ddc_multicast_t *t)
         else
             minutes=1;
     }
-    if(0==ierr) {
+    if(0==ierr && 0!=old_ierr) {
        old_ierr=0;
-    } else {
-      if(ierr!=old_ierr)
+       logite(buff,30,"dn");
+    } else if(0!=ierr){
         version_error=0;
       if(0 < minutes)
         version_error=version_error%(minutes*60)+1;
