@@ -104,6 +104,18 @@ char *getenv_DBBC3( char *env, int *actual_p, int *nominal_p, int *error_p, int 
               actual=nominal;
         } else
             actual=nominal;
+    } else if(0==strcmp(env,"FS_DBBC3_MULTICAST_TIME_ERROR_MINUTES")) {
+        nominal=1;
+        if(NULL!=ptr && 0==strcmp(ptr,"0"))
+// maybe someday allow disabling it
+//            actual=0;
+            actual=nominal;
+        else if(NULL!=ptr) {
+            actual=atoi(ptr);
+            if(actual<1 || actual>10)
+              actual=nominal;
+        } else
+            actual=nominal;
     } else if(0==strcmp(env,"FS_DBBC3_BBCNNN_TPI_USB_LSB_SWAP")) {
         TYPICALB1
     } else if(0==strcmp(env,"FS_DBBC3_BBCNNN_GAIN_USB_LSB_SWAP")) {
