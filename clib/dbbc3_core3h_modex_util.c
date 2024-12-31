@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2024 NVI, Inc.
+ * Copyright (c) 2020-2025 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -185,6 +185,7 @@ void dbbc3_core3h_modex_enc(output,count,lclc,lclm,iboard)
 
     int ivalue;
     int crate;
+    int none;
 
     output=output+strlen(output);
 
@@ -193,61 +194,66 @@ void dbbc3_core3h_modex_enc(output,count,lclc,lclm,iboard)
             snprintf(output,2,"%d",iboard);
             break;
         case 2:
-            if((lclc->mask2.state.known && lclc->mask2.mask2 ||
-                lclm->mask4.state.known && lclm->mask4.mask4) &&
-                lclm->none1.state.known && lclm->none1.none1)
-                    strcpy(output,"{");
+            none = lclc->mask2.state.known && lclc->mask2.mask2 &&
+                   (DBBC3_DDCU==shm_addr->equip.rack_type &&
+                     lclm->none1.state.known && lclm->none1.none1 ||
+                      DBBC3_DDCV==shm_addr->equip.rack_type && 126 <= shm_addr->dbbc3_ddcv_v &&
+                       lclm->none0.state.known && lclm->none0.none0 ||
+                      DBBC3_DDCV==shm_addr->equip.rack_type && 126 > shm_addr->dbbc3_ddcv_v ||
+                      DBBC3_DDCE==shm_addr->equip.rack_type);
+            if(none)
+                strcpy(output,"{");
             if(lclc->mask2.state.known && lclc->mask2.mask2) {
                 output=output+strlen(output);
                 strcpy(output,"0x");
                 m5sprintf(output+2,"%x",&lclc->mask2.mask2,&lclc->mask2.state);
             }
+            if(none) {
+                output=output+strlen(output);
+                strcpy(output,"}");
+            }
+
             if((DBBC3_DDCU == shm_addr->equip.rack_type ||
-                DBBC3_DDCE == shm_addr->equip.rack_type) &&
-              lclm->mask4.state.known && lclc->mask2.state.known &&
-              lclm->mask4.mask4 != lclc->mask2.mask2 ||
-              DBBC3_DDCV == shm_addr->equip.rack_type &&
-              lclm->mask4.state.known && lclm->mask4.mask4) {
+                DBBC3_DDCE == shm_addr->equip.rack_type && 126 == shm_addr->dbbc3_ddce_v) &&
+               lclm->mask4.state.known && lclc->mask2.state.known &&
+               lclm->mask4.mask4 != lclc->mask2.mask2 ||
+               (DBBC3_DDCV == shm_addr->equip.rack_type ||
+                DBBC3_DDCE == shm_addr->equip.rack_type && 127 <= shm_addr->dbbc3_ddce_v) &&
+               lclm->mask4.state.known && lclm->mask4.mask4) {
                 output=output+strlen(output);
                 strcpy(output,"[0x");
                 m5sprintf(output+3,"%x",&lclm->mask4.mask4,&lclm->mask4.state);
                 output=output+strlen(output);
                 strcpy(output,"]");
             }
-            if((lclc->mask2.state.known && lclc->mask2.mask2 ||
-                lclm->mask4.state.known && lclm->mask4.mask4) &&
-                lclm->none1.state.known && lclm->none1.none1) {
-                    output=output+strlen(output);
-                    strcpy(output,"}");
-            }
             break;
         case 3:
-            if((lclc->mask1.state.known && lclc->mask1.mask1 ||
-                lclm->mask3.state.known && lclm->mask3.mask3) &&
-                lclm->none0.state.known && lclm->none0.none0)
-                    strcpy(output,"{");
+            none=lclc->mask1.state.known && lclc->mask1.mask1 &&
+                 lclm->none0.state.known && lclm->none0.none0;
+            if(none)
+                strcpy(output,"{");
             if(lclc->mask1.state.known) {
                 output=output+strlen(output);
                 strcpy(output,"0x");
                 m5sprintf(output+2,"%x",&lclc->mask1.mask1,&lclc->mask1.state);
             }
+            if(none) {
+                output=output+strlen(output);
+                strcpy(output,"}");
+            }
+
             if((DBBC3_DDCU == shm_addr->equip.rack_type ||
-                DBBC3_DDCE == shm_addr->equip.rack_type) &&
+                DBBC3_DDCE == shm_addr->equip.rack_type && 126 == shm_addr->dbbc3_ddce_v) &&
               lclm->mask3.state.known && lclc->mask1.state.known &&
               lclm->mask3.mask3 != lclc->mask1.mask1 ||
-              DBBC3_DDCV == shm_addr->equip.rack_type &&
-              lclm->mask3.state.known && lclm->mask3.mask3) {
+               (DBBC3_DDCV == shm_addr->equip.rack_type ||
+                DBBC3_DDCE == shm_addr->equip.rack_type && 127 <= shm_addr->dbbc3_ddce_v) &&
+               lclm->mask3.state.known && lclm->mask3.mask3) {
                 output=output+strlen(output);
                 strcpy(output,"[0x");
                 m5sprintf(output+3,"%x",&lclm->mask3.mask3,&lclm->mask3.state);
                 output=output+strlen(output);
                 strcpy(output,"]");
-            }
-            if((lclc->mask1.state.known && lclc->mask1.mask1 ||
-                lclm->mask3.state.known && lclm->mask3.mask3) &&
-                lclm->none0.state.known && lclm->none0.none0) {
-                    output=output+strlen(output);
-                    strcpy(output,"}");
             }
             break;
         case 4:
@@ -373,6 +379,14 @@ void vsi_bitmask_2_dbbc3_core3h(ptr,lclc,board,masks)
                     lclc->mask2.mask2,
                     lclc->mask2.mask2,
                     lclc->mask2.mask2);
+    else if(2==masks)
+        sprintf(ptr,"core3h=%1.1s,vsi_bitmask 0x%x 0x%x",board,
+                    lclc->mask2.mask2,
+                    lclc->mask1.mask1);
+    else if(-2==masks)
+        sprintf(ptr,"core3h=%1.1s,vsi_bitmask 0x%x 0x%x",board,
+                    lclc->mask1.mask1,
+                    lclc->mask1.mask1);
     else
         sprintf(ptr,"core3h=%1.1s,vsi_bitmask 0x%x",board,lclc->mask1.mask1);
 
@@ -424,7 +438,9 @@ int dbbc3_vdif_frame_params(lclc)
     channels1=bits1[1]+bits1[2]+bits1[3];
     channels2=bits2[1]+bits2[2]+bits2[3];
 
-    if(bitmask1 && bitmask2 &&
+    if(DBBC3_DDCV==shm_addr->equip.rack_type && 126 <= shm_addr->dbbc3_ddcv_v)
+       channels=channels1+channels2;
+    else if(bitmask1 && bitmask2 &&
        channels1 != channels2)
        return -309;
     else if(channels1)
@@ -433,7 +449,7 @@ int dbbc3_vdif_frame_params(lclc)
        channels=channels2;
 
     switch (channels) { /* trap zero in caller */
-        case 0: case 1: case 2: case 4: case 8: case 16:
+        case 0: case 1: case 2: case 4: case 8: case 16: case 32:
             break;
         default:
             return -310;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2024 NVI, Inc.
+ * Copyright (c) 2020-2025 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -70,7 +70,9 @@ static void add_check_queries( out_recs, out_class, board, all)
         cls_snd(out_class, str, strlen(str) , 0, 0);
         ++*out_recs;
 
-        if(DBBC3_DDCV!=shm_addr->equip.rack_type) {
+        if(DBBC3_DDCV!=shm_addr->equip.rack_type ||
+           DBBC3_DDCV==shm_addr->equip.rack_type && 126 <= shm_addr->dbbc3_ddcv_v) {
+            /* DDC_V <v126 wired internally to no output, no need to check */
             strcpy(str,"core3h=");
             strcat(str,board);
             strcat(str,",destination 1");
@@ -406,13 +408,13 @@ parse:
         }
 
     if(lcl.mask2.state.known && lcl.mask2.mask2) {
-        if(DBBC3_DDCU!=shm_addr->equip.rack_type) {
+        if(DBBC3_DDCE==shm_addr->equip.rack_type ||
+           DBBC3_DDCV==shm_addr->equip.rack_type && 126 > shm_addr->dbbc3_ddcv_v) {
             ierr=-302;
             goto error;
         }
         if(8 == shm_addr->dbbc3_ddc_bbcs_per_if ||
-                (12 == shm_addr->dbbc3_ddc_bbcs_per_if &&
-                 lcl.mask2.mask2 & 0xFFFF0000)) {
+                12 == shm_addr->dbbc3_ddc_bbcs_per_if && lcl.mask2.mask2 & 0xFFFF0000) {
             ierr=-303;
             goto error;
         }
@@ -425,13 +427,14 @@ parse:
         goto error;
     }
 
-    if(DBBC3_DDCU==shm_addr->equip.rack_type) {
+    if(DBBC3_DDCU==shm_addr->equip.rack_type ||
+       DBBC3_DDCV==shm_addr->equip.rack_type && 126 <= shm_addr->dbbc3_ddcv_v) {
         if(!(lcl.mask1.state.known && lcl.mask1.mask1) &&
                 !(lcl.mask2.state.known && lcl.mask2.mask2)) {
             ierr=-311;
             goto error;
         }
-    } else if(DBBC3_DDCV==shm_addr->equip.rack_type ||
+    } else if(DBBC3_DDCV==shm_addr->equip.rack_type && 126 > shm_addr->dbbc3_ddcv_v ||
               DBBC3_DDCE==shm_addr->equip.rack_type) {
         if(!(lcl.mask1.state.known && lcl.mask1.mask1)) {
             ierr=-312;
@@ -468,8 +471,7 @@ parse:
     strcpy(outbuf,"core3h=");
     strcat(outbuf,board[iboard]);
 
-    if(DBBC3_DDCU == shm_addr->equip.rack_type ||
-       DBBC3_DDCE == shm_addr->equip.rack_type)
+    if(DBBC3_DDCU == shm_addr->equip.rack_type)
         strcat(outbuf,",splitmode on");
     else
         strcat(outbuf,",splitmode off");
@@ -478,8 +480,12 @@ parse:
 
     int masks=1;
     if(DBBC3_DDCU == shm_addr->equip.rack_type ||
-       DBBC3_DDCE == shm_addr->equip.rack_type)
+       DBBC3_DDCE == shm_addr->equip.rack_type && 126 >= shm_addr->dbbc3_ddce_v)
         masks=4;
+     else if(DBBC3_DDCE == shm_addr->equip.rack_type && 126 < shm_addr->dbbc3_ddce_v)
+        masks=-2;
+     else if(DBBC3_DDCV==shm_addr->equip.rack_type && 126 <= shm_addr->dbbc3_ddcv_v)
+        masks=2;
     vsi_bitmask_2_dbbc3_core3h(outbuf,&lcl,board[iboard],masks);
     cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
     out_recs++;
