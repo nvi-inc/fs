@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, 2023-2024 NVI, Inc.
+ * Copyright (c) 2022-2025 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -39,7 +39,7 @@ void version_check( dbbc3_ddc_multicast_t *t)
     int j;
     int ierr=0;
     static int old_ierr=0;
-    static int version_error;
+    static int version_error=0;
     char *ptr;
     static int minutes=-1;
 
@@ -113,13 +113,21 @@ void version_check( dbbc3_ddc_multicast_t *t)
             minutes=1;
     }
     if(0==ierr && 0!=old_ierr) {
-       old_ierr=0;
-       logite(buff,30,"dn");
+      old_ierr=0;
+      version_error=0;
+      logite(NULL,30,"dn");
     } else if(0!=ierr){
-        version_error=0;
-      if(0 < minutes)
-        version_error=version_error%(minutes*60)+1;
-      if(0 < minutes && version_error==1) {
+      int report=FALSE;
+      if(ierr!=old_ierr || 0>minutes)
+        report=TRUE;
+      else if (0<minutes) {
+        int now;
+        rte_ticks(&now);
+        if((now-version_error+99)/(60*100*minutes) > 0) {
+          report=TRUE;
+        }
+      }
+      if(report) {
         if(-38!=ierr) {
           int i;
           char prefix[ ]={"DBBC3 multicast version: "};
@@ -130,9 +138,9 @@ void version_check( dbbc3_ddc_multicast_t *t)
             if(' '==t->version[j])
               continue;
             for (i=j;i<sizeof(t->version);i++) {
-               if(0==t->version[i])
-                  break;
-               buff[iout++]=t->version[i];
+              if(0==t->version[i])
+                break;
+              buff[iout++]=t->version[i];
             }
             buff[iout]=0;
             break;
@@ -141,6 +149,7 @@ void version_check( dbbc3_ddc_multicast_t *t)
         }
         logit(NULL,ierr,"dn");
         old_ierr=ierr;
+        rte_ticks(&version_error);
       }
     }
 }
