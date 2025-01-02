@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2023 NVI, Inc.
+ * Copyright (c) 2020-2025 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -66,9 +66,6 @@ ssize_t read_mcast(int sock, char buf[], size_t buf_size, int it[6],
     was_count=was_count_next;
     was_count_next=shm_addr->dbbc3_command_count;
 
-    if(to_try > 0)
-      to_try=to_try%60+1;
-
     /* set time-out */
     if(was_to)
       time_out=100;
@@ -90,11 +87,18 @@ ssize_t read_mcast(int sock, char buf[], size_t buf_size, int it[6],
         was_to=1;
 
         if(!dbbc3_cmd) {
+            /* it only counts as a try and a time-out
+             * if we don't expect an error */
+            if(to_try > 0)
+              to_try=to_try%60+1;
             to_count++;
             if(to_count == 0) {
                 logit(NULL,-20,"dn");
             }
         } else if(data_valid) {
+            /* any time-out when data is valid counts */
+            if(to_try > 0)
+              to_try=to_try%60+1;
             to_count++;
             if(to_count == 0) {
                 logit(NULL,-23,"dn");
@@ -124,6 +128,7 @@ ssize_t read_mcast(int sock, char buf[], size_t buf_size, int it[6],
     }
 
     if(to_try > 0) { /* summary if NOT a time-out */
+        to_try=to_try%60+1;
         if(1 == to_try) {
             if(0 == to_count) {
                 logit(NULL,20,"dn");
