@@ -54,10 +54,15 @@ ssize_t read_mcast(int sock, char buf[], size_t buf_size, int it[6],
     static int to_count = -1;
     static int to_try = 0;
     static int was_to = 0;
+    static int alternating=-1;
     int time_out;
+    int time_out_summary_period=60;
 
     static unsigned was_count_next = 0;
     unsigned was_count;
+
+    if(alternating)
+      time_out_summary_period=30;
 
 /* use the command count before the PREVIOUS select() to decide
  * if there has been DBBC3 activity that could interfere
@@ -71,7 +76,6 @@ ssize_t read_mcast(int sock, char buf[], size_t buf_size, int it[6],
       time_out=100;
     else
       time_out=TIME_OUT;
-    was_to=0;
 
     FD_ZERO(&readfds);
     FD_SET(sock, &readfds);
@@ -84,21 +88,19 @@ ssize_t read_mcast(int sock, char buf[], size_t buf_size, int it[6],
         int dbbc3_cmd=shm_addr->dbbc3_command_active ||
             shm_addr->dbbc3_command_count != was_count;
 
-        was_to=1;
-
-        if(!dbbc3_cmd) {
+        if(!dbbc3_cmd && (!alternating || alternating && was_to)) {
             /* it only counts as a try and a time-out
              * if we don't expect an error */
             if(to_try > 0)
-              to_try=to_try%60+1;
+              to_try=to_try%time_out_summary_period+1;
             to_count++;
             if(to_count == 0) {
                 logit(NULL,-20,"dn");
             }
-        } else if(data_valid) {
+        } else if(data_valid && (!alternating || alternating && was_to)) {
             /* any time-out when data is valid counts */
             if(to_try > 0)
-              to_try=to_try%60+1;
+              to_try=to_try%time_out_summary_period+1;
             to_count++;
             if(to_count == 0) {
                 logit(NULL,-23,"dn");
@@ -109,11 +111,19 @@ ssize_t read_mcast(int sock, char buf[], size_t buf_size, int it[6],
                 to_try=1;
             else {
                 if(1 == to_try) { /* summary if a time-out */
-                    logitn(NULL,-25,"dn",to_count);
+                    if(time_out_summary_period==60)
+                        logitn(NULL,-25,"dn",to_count);
+                    else if(time_out_summary_period==30)
+                        logitn(NULL,-26,"dn",to_count);
+                    else {
+                        logitn(NULL,-27,"dn",time_out_summary_period);
+                        logitn(NULL,-28,"dn",to_count);
+                    }
                     to_count=0;
                 }
             }
         }
+        was_to=1;
         return -1;
     } else if (return_select < 0) { /* error */
         if(old_error != errno)
@@ -124,19 +134,29 @@ ssize_t read_mcast(int sock, char buf[], size_t buf_size, int it[6],
         }
         old_error=errno;
         rte_sleep(100);
+        was_to=0;
         return -1;
     }
 
+    was_to=0;
     if(to_try > 0) { /* summary if NOT a time-out */
-        to_try=to_try%60+1;
+        to_try=to_try%time_out_summary_period+1;
         if(1 == to_try) {
             if(0 == to_count) {
-                logit(NULL,20,"dn");
+                logitn(NULL,20,"dn",time_out_summary_period);
                 to_count=-1;
                 to_try=0;
             } else {
-                logitn(NULL,-25,"dn",to_count);
+                if(time_out_summary_period==60)
+                    logitn(NULL,-25,"dn",to_count);
+                else if(time_out_summary_period==30)
+                    logitn(NULL,-26,"dn",to_count);
+                else {
+                    logitn(NULL,-27,"dn",time_out_summary_period);
+                    logitn(NULL,-28,"dn",to_count);
+                }
                 to_count=0;
+                to_try=0;
             }
         }
     }
