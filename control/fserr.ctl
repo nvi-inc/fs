@@ -2658,7 +2658,7 @@ DN   21
 DBBC3 multicast: error from select() cleared
 ""
 DN   20
-DBBC3 multicast: No time-outs in the last 60 attempts; counting stopped.
+DBBC3 multicast: No time-outs in the last?WW attempts; counting stopped.
 ""
 DN   -1
 DBBC3 multicast: error unpacking, packet too small.
@@ -2701,6 +2701,15 @@ DBBC3 multicast: Core3H boards have different times.
 ""
 DN  -25
 DBBC3 multicast: In the last 60 attempts, there were?WW time-out(s); continuing to count.
+""
+DN  -26
+DBBC3 multicast: In the last 30 attempts, there were?WW time-out(s); continuing to count.
+""
+DN  -27
+DBBC3 multicast: In the last?WW attempts, ...
+""
+DN  -28
+DBBC3 multicast: ... there were?WW time-out(s); continuing to count.
 ""
 DN  -30 Place holder for version string
 
