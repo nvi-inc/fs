@@ -45,6 +45,8 @@ void dbbc3_mcast_time(command,itask,ip)
         goto error;
     }
 
+    int alternating=shm_addr->dbbc3_ignore_alt_mcast_to;
+
     rte_time(it,it+5);
     rte2secs(it,&seconds);
     time_t now = seconds;

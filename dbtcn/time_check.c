@@ -41,6 +41,8 @@ void time_check( struct dbbc3_tsys_cycle *cycle)
     int time_agrees=1;
     static int minutes=-1;
 
+    int alternating=shm_addr->dbbc3_ignore_alt_mcast_to;
+
     for (i=0; i<shm_addr->dbbc3_ddc_ifs;i++)
         if(cycle->ifc[i].time_included) {
             for (j=i+1; j<shm_addr->dbbc3_ddc_ifs;j++)
