@@ -3300,7 +3300,7 @@ DW -302
 Multi-cast time data is stale, more than 20 seconds old.
 ""
 DW -303
-Core3H board ?WWW has a non-zero time offset.
+Core3H board?W has a non-zero time offset.
 ""
 DW -304
 One or more Core3H boards have a non-zero time offset and/or the multicast data is stale, please see messages above.
