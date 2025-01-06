@@ -2898,7 +2898,7 @@ DR -301
 Can't change mode while recording, use disk_record=off first or (dangerous) use 'disk_record_ok' as 'okay' parameter.
 ""
 DR -302
-'mask2' cannot have selected channels unless DDBC3 is DDC_E or DDC_U.
+'mask2' cannot have selected channels unless DDBC3 is DDC_E, DDC_U, or DDC_V/v126
 ""
 DR -303
 Can't specify 'mask2' for more BBCs per IF than set in dbbc3.ctl.
