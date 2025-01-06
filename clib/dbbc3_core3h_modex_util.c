@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2024 NVI, Inc.
+ * Copyright (c) 2020-2025 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -424,7 +424,9 @@ int dbbc3_vdif_frame_params(lclc)
     channels1=bits1[1]+bits1[2]+bits1[3];
     channels2=bits2[1]+bits2[2]+bits2[3];
 
-    if(bitmask1 && bitmask2 &&
+    if(DBBC3_DDCV==shm_addr->equip.rack_type && 126 == shm_addr->dbbc3_ddcv_v)
+       channels=channels1+channels2;
+    else if(bitmask1 && bitmask2 &&
        channels1 != channels2)
        return -309;
     else if(channels1)
@@ -433,7 +435,7 @@ int dbbc3_vdif_frame_params(lclc)
        channels=channels2;
 
     switch (channels) { /* trap zero in caller */
-        case 0: case 1: case 2: case 4: case 8: case 16:
+        case 0: case 1: case 2: case 4: case 8: case 16: case 32:
             break;
         default:
             return -310;
