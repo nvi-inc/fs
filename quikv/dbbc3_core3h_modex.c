@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2024 NVI, Inc.
+ * Copyright (c) 2020-2025 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -406,7 +406,8 @@ parse:
         }
 
     if(lcl.mask2.state.known && lcl.mask2.mask2) {
-        if(DBBC3_DDCU!=shm_addr->equip.rack_type) {
+        if(DBBC3_DDCU!=shm_addr->equip.rack_type &&
+           DBBC3_DDCE!=shm_addr->equip.rack_type) {
             ierr=-302;
             goto error;
         }
