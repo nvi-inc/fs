@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 NVI, Inc.
+ * Copyright (c) 2023-2025 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -38,17 +38,27 @@ char *getenv_DBBC3( char *env, int *actual, int *nominal, int *error, int option
 void time_check( struct dbbc3_tsys_cycle *cycle)
 {
     int i, j;
+    static int alternating=-1;
     int time_agrees=1;
     static int minutes=-1;
 
     for (i=0; i<shm_addr->dbbc3_ddc_ifs;i++)
         if(cycle->ifc[i].time_included) {
             for (j=i+1; j<shm_addr->dbbc3_ddc_ifs;j++)
-                if(cycle->ifc[j].time_included &&
-                        cycle->ifc[i].time!=cycle->ifc[j].time) {
-                     time_agrees=0;
-                     break;
-                }
+                if(cycle->ifc[j].time_included) {
+                    if(!alternating) {
+                        if(cycle->ifc[i].time!=cycle->ifc[j].time) {
+                            time_agrees=0;
+                            break;
+                        }
+                    } else {
+                        if(cycle->ifc[i].time!=cycle->ifc[j].time &&
+                          cycle->ifc[i].time!=cycle->ifc[j].time-1) {
+                            time_agrees=0;
+                            break;
+                        }
+                    }
+               }
             break;
          }
 
