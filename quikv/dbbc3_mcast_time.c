@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021, 2023-2024 NVI, Inc.
+ * Copyright (c) 2020-2021, 2023-2025 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -159,9 +159,17 @@ void dbbc3_mcast_time(command,itask,ip)
         overall_error=1;
     }
     for (i=0;i<shm_addr->dbbc3_ddc_ifs;i++)
-        if(shm_addr->dbbc3_tsys_data.data[iping].ifc[i].time_error!=0) {
-            logitn(NULL,-303,"dw",i+1);
-            overall_error=1;
+        if(!alternating) {
+            if(shm_addr->dbbc3_tsys_data.data[iping].ifc[i].time_error!=0) {
+                logitn(NULL,-303,"dw",i+1);
+                overall_error=1;
+            }
+        } else {
+            if(shm_addr->dbbc3_tsys_data.data[iping].ifc[i].time_error!=0 &&
+               shm_addr->dbbc3_tsys_data.data[iping].ifc[i].time_error!=-1) {
+                logitn(NULL,-303,"dw",i+1);
+                overall_error=1;
+            }
         }
 
     if(overall_error) {
