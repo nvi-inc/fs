@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021, 2023-2024 NVI, Inc.
+ * Copyright (c) 2020-2021, 2023-2025 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -32,6 +32,8 @@
 
 #define MAX_OUT 256
 
+char *getenv_DBBC3( char *env, int *actual, int *nominal, int *error, int options);
+
 void dbbc3_mcast_time(command,itask,ip)
     struct cmd_ds *command;                /* parsed command structure */
     int itask;
@@ -39,6 +41,7 @@ void dbbc3_mcast_time(command,itask,ip)
 {
     int ierr, i, it[6], seconds;
     char output[MAX_OUT];
+    static int alternating=-1;
 
     if(NULL!=command->argv[0]) {
         ierr=-301;
@@ -157,9 +160,17 @@ void dbbc3_mcast_time(command,itask,ip)
         overall_error=1;
     }
     for (i=0;i<shm_addr->dbbc3_ddc_ifs;i++)
-        if(shm_addr->dbbc3_tsys_data.data[iping].ifc[i].time_error!=0) {
-            logitn(NULL,-303,"dw",i+1);
-            overall_error=1;
+        if(!alternating) {
+            if(shm_addr->dbbc3_tsys_data.data[iping].ifc[i].time_error!=0) {
+                logitn(NULL,-303,"dw",i+1);
+                overall_error=1;
+            }
+        } else {
+            if(shm_addr->dbbc3_tsys_data.data[iping].ifc[i].time_error!=0 &&
+               shm_addr->dbbc3_tsys_data.data[iping].ifc[i].time_error!=-1) {
+                logitn(NULL,-303,"dw",i+1);
+                overall_error=1;
+            }
         }
 
     if(overall_error) {
