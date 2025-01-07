@@ -193,7 +193,12 @@ send:
                 logitn(NULL,-611,"dr",iboard);
                 ierr=-600;
             }
-            if(lclc.mask2.mask2) {
+            if(126 == shm_addr->dbbc3_ddcv_v) {
+                if(shm_addr->dbbc3_core3h_modex[iboard-1].mask2.mask2 != lclc.mask2.mask2) {
+                    logitn(NULL,-612,"dr",iboard);
+                    ierr=-600;
+                }
+            } else if(lclc.mask2.mask2) {
                 logitn(NULL,-632,"dr",iboard);
                 ierr=-600;
             }
