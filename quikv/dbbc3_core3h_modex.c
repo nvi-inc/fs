@@ -482,6 +482,8 @@ parse:
     if(DBBC3_DDCU == shm_addr->equip.rack_type ||
        DBBC3_DDCE == shm_addr->equip.rack_type)
         masks=4;
+     else if(DBBC3_DDCV==shm_addr->equip.rack_type && 126 == shm_addr->dbbc3_ddcv_v)
+        masks=2;
     vsi_bitmask_2_dbbc3_core3h(outbuf,&lcl,board[iboard],masks);
     cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
     out_recs++;

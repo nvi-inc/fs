@@ -373,6 +373,10 @@ void vsi_bitmask_2_dbbc3_core3h(ptr,lclc,board,masks)
                     lclc->mask2.mask2,
                     lclc->mask2.mask2,
                     lclc->mask2.mask2);
+    else if(2==masks)
+        sprintf(ptr,"core3h=%1.1s,vsi_bitmask 0x%x 0x%x",board,
+                    lclc->mask2.mask2,
+                    lclc->mask1.mask1);
     else
         sprintf(ptr,"core3h=%1.1s,vsi_bitmask 0x%x",board,lclc->mask1.mask1);
 
