@@ -57,6 +57,8 @@ main(int argc, char *argv[])
     char lettersu[] = "ABCDEFGH";
     int reverse=0;
     int late=20;
+    int pol=0;
+    int pol_default=0;
 
     int i=0;
     int okay=1;
@@ -72,6 +74,17 @@ main(int argc, char *argv[])
                     fprintf(stderr,"Could not decode '-l' parameter as 0-100: '%s'\n",argv[i]);
                 okay=0;
             }
+        } else if(0==strcmp(argv[i],"-z")) {
+            char dumc, polc;
+            char pol_options[ ]= "brl";
+            if(++i >= argc || 1!=sscanf(argv[i],"%c%c",&polc,&dumc) || NULL==strchr(pol_options,polc)) {
+                if (i >= argc)
+                    fprintf(stderr,"Parameter required for '-z'\n");
+                else
+                    fprintf(stderr,"Could not decode '-z' parameter, must be 'b', 'l', or 'r', was: '%s'\n",argv[i]);
+                okay=0;
+            } else
+              pol=pol_default=strchr(pol_options,polc)-pol_options;
         } else if(0==strcmp(argv[i],"-h")) {
             fprintf(stderr,"Usage: %s [-v] [-l n] [-h]\n", argv[0]);
             fprintf(stderr,"Options:\n");
@@ -79,6 +92,8 @@ main(int argc, char *argv[])
             fprintf(stderr," -l n  change late arrival limit from 20\n");
             fprintf(stderr,"    n  0-100 centiseconds; 0=none, 100=all\n");
             fprintf(stderr,"       late packets arrive before 'n'\n");
+            fprintf(stderr," -z c  set default polarization\n");
+            fprintf(stderr,"    c  'b'=both, 'l'=1st, 'r'=2nd\n");
             fprintf(stderr," -h    this help output\n");
             exit(0);
         } else {
@@ -220,7 +235,13 @@ main(int argc, char *argv[])
                 count=-1;
                 all=0;
                 ifc=0;
+                pol=pol_default;
                 dwell=DWELL_SECONDS;
+            } else if ('z' == ch) {
+                static int next_pol[ ] ={ 2, 0, 1};
+                if (pol < 0 || pol >= sizeof(next_pol)/sizeof(int))
+                    pol=1;
+                pol=next_pol[pol];
             } else if ( '?' == ch || '/' == ch) {
                 int irow=0;
                 clear();
@@ -236,6 +257,8 @@ main(int argc, char *argv[])
                 printw("i - toggle RF/IF");
                 move(irow++,0);
                 printw("l - toggle all/rec(def)");
+                move(irow++,0);
+                printw("z - cycle pol. all/L/R");
                 move(irow++,0);
                 printw("0 reset all to defaults");
                 move(irow++,0);
@@ -301,7 +324,8 @@ main(int argc, char *argv[])
                     } else {
                         for (i=0;i<fs->dbbc3_ddc_ifs;i++) {
                             next=++next%fs->dbbc3_ddc_ifs;
-                            if(all || fs->dbbc3_tsys_data.data[iping].ifc[next].lo>=0)
+                            if(all || fs->dbbc3_tsys_data.data[iping].ifc[next].lo>=0 &&
+                                      (pol==0 || pol==fs->dbbc3_tsys_data.data[iping].ifc[next].pol))
                                 break;
                         }
                     }
@@ -309,11 +333,11 @@ main(int argc, char *argv[])
                     for (i=0;i<fs->dbbc3_ddc_ifs;i++) {
                         next=++next%fs->dbbc3_ddc_ifs;
                         if(all || (shm_addr->dbbc3_core3h_modex[next].mask1.state.known &&
-                                 shm_addr->dbbc3_core3h_modex[next].mask1.mask1) ||
-                                (shm_addr->dbbc3_core3h_modex[next].mask2.state.known &&
-                                 shm_addr->dbbc3_core3h_modex[next].mask2.mask2)) {
+                                   shm_addr->dbbc3_core3h_modex[next].mask1.mask1 ||
+                                   shm_addr->dbbc3_core3h_modex[next].mask2.state.known &&
+                                   shm_addr->dbbc3_core3h_modex[next].mask2.mask2) &&
+                                   (pol==0 || pol==fs->dbbc3_tsys_data.data[iping].ifc[next].pol))
                             break;
-                        }
                     }
                 }
             }
