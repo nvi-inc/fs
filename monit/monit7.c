@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2023 NVI, Inc.
+ * Copyright (c) 2020-2023, 2025 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -222,30 +222,31 @@ main(int argc, char *argv[])
                 ifc=0;
                 dwell=DWELL_SECONDS;
             } else if ( '?' == ch || '/' == ch) {
+                int irow=0;
                 clear();
-                move(0,0);
+                move(irow++,0);
                 printw("Single key inputs:");
-                move(1,0);
+                move(irow++,0);
                 printw("a-h - that IF");
-                move(2,0);
+                move(irow++,0);
                 printw("n/p - next/previous IF");
-                move(3,0);
+                move(irow++,0);
                 printw("1-9 - dwell seconds");
-                move(4,0);
+                move(irow++,0);
                 printw("i - toggle RF/IF");
-                move(5,0);
+                move(irow++,0);
                 printw("l - toggle all/rec(def)");
-                move(6,0);
+                move(irow++,0);
                 printw("0 reset all to defaults");
-                move(7,0);
+                move(irow++,0);
                 printw("? or / - help");
-                move(8,0);
+                move(irow++,0);
                 printw("Control-C to exit");
-                move(9,0);
+                move(irow++,0);
                 printw("Any other: resume cycle");
-                move(11,0);
+                move(irow++,0);
                 printw("   Use any key now to");
-                move(12,0);
+                move(irow++,0);
                 printw("       leave help");
                 while(ERR==getch())
                     ;
