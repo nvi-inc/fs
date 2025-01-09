@@ -193,10 +193,12 @@ void dbbc3_core3h_modex_enc(output,count,lclc,lclm,iboard)
             snprintf(output,2,"%d",iboard);
             break;
         case 2:
-            if((lclc->mask2.state.known && lclc->mask2.mask2 ||
-                lclm->mask4.state.known && lclm->mask4.mask4) &&
-                lclm->none1.state.known && lclm->none1.none1)
-                    strcpy(output,"{");
+            if(!(DBBC3_DDCV==shm_addr->equip.rack_type && 126 == shm_addr->dbbc3_ddcv_v)) {
+                if((lclc->mask2.state.known && lclc->mask2.mask2 ||
+                    lclm->mask4.state.known && lclm->mask4.mask4) &&
+                    lclm->none1.state.known && lclm->none1.none1)
+                        strcpy(output,"{");
+            }
             if(lclc->mask2.state.known && lclc->mask2.mask2) {
                 output=output+strlen(output);
                 strcpy(output,"0x");
@@ -214,12 +216,14 @@ void dbbc3_core3h_modex_enc(output,count,lclc,lclm,iboard)
                 output=output+strlen(output);
                 strcpy(output,"]");
             }
-            if((lclc->mask2.state.known && lclc->mask2.mask2 ||
-                lclm->mask4.state.known && lclm->mask4.mask4) &&
-                lclm->none1.state.known && lclm->none1.none1) {
-                    output=output+strlen(output);
-                    strcpy(output,"}");
-            }
+            if(!(DBBC3_DDCV==shm_addr->equip.rack_type && 126 == shm_addr->dbbc3_ddcv_v)) {
+                if((lclc->mask2.state.known && lclc->mask2.mask2 ||
+                    lclm->mask4.state.known && lclm->mask4.mask4) &&
+                    lclm->none1.state.known && lclm->none1.none1) {
+                        output=output+strlen(output);
+                        strcpy(output,"}");
+                }
+             }
             break;
         case 3:
             if((lclc->mask1.state.known && lclc->mask1.mask1 ||
