@@ -54,6 +54,7 @@ ssize_t read_mcast(int sock, char buf[], size_t buf_size, int it[6],
     static int to_count = -1;
     static int to_try = 0;
     static int was_to = 0;
+    static int was_dbbc3_cmd = 0;
     static int alternating=-1;
     int time_out;
     int time_out_summary_period=60;
@@ -88,7 +89,7 @@ ssize_t read_mcast(int sock, char buf[], size_t buf_size, int it[6],
         int dbbc3_cmd=shm_addr->dbbc3_command_active ||
             shm_addr->dbbc3_command_count != was_count;
 
-        if(!dbbc3_cmd && (!alternating || alternating && was_to)) {
+        if(!dbbc3_cmd && (!alternating || alternating && was_to && !was_dbbc3_cmd)) {
             /* it only counts as a try and a time-out
              * if we don't expect an error */
             if(to_try > 0)
@@ -98,7 +99,7 @@ ssize_t read_mcast(int sock, char buf[], size_t buf_size, int it[6],
                 logit(NULL,-20,"dn");
             }
         } else if(data_valid && (!alternating || alternating && was_to)) {
-            /* any time-out when data is valid counts */
+            /* any non-alternating time-out when data is valid counts */
             if(to_try > 0)
               to_try=to_try%time_out_summary_period+1;
             to_count++;
@@ -124,6 +125,7 @@ ssize_t read_mcast(int sock, char buf[], size_t buf_size, int it[6],
             }
         }
         was_to=1;
+        was_dbbc3_cmd=dbbc3_cmd;
         return -1;
     } else if (return_select < 0) { /* error */
         if(old_error != errno)
