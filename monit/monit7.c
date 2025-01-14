@@ -45,7 +45,7 @@ void resize()
 }
 main(int argc, char *argv[])
 {
-    int it[6], iyear, isleep;
+    int it[6], seconds, isleep;
     void m7init();
     void m7out( int next, int iping);
     void die();
@@ -146,8 +146,7 @@ main(int argc, char *argv[])
       init_pair(BLUEI,COLOR_BLACK,COLOR_BLUE);
       init_pair(CYANI,COLOR_WHITE,COLOR_CYAN);
     }
-    int next=-1;
-    int count=-1;
+    int next=0;
     int dwell=DWELL_SECONDS;
     int ifc=0;
     int krf=1;
@@ -156,7 +155,7 @@ main(int argc, char *argv[])
     int is_lb=0;
     int is_inter=0;
     for(;;) {
-        rte_time(it,&iyear);
+        rte_time(it,it+5);
         isleep=100-it[0];
         isleep=isleep>100?100:isleep;
         isleep=isleep<1?100:isleep;
@@ -212,27 +211,20 @@ main(int argc, char *argv[])
             ifc = -1;
             if (NULL != ptr) {
                 ifc=ptr-letters+1;
-                count=-1;
             } else if (NULL != (ptr=strchr(lettersu,ch))) {
                 ifc=ptr-lettersu+1;
-                count=-1;
             } else if ('n' == ch) {
                 ifc=1+(next+1)%fs->dbbc3_ddc_ifs;
-                count=-1;
             } else if ('p' == ch) {
                 ifc=1+(next+fs->dbbc3_ddc_ifs-1)%fs->dbbc3_ddc_ifs;
-                count=-1;
             } else if ('l' == ch) {
                 all=1-all;
-                count=-1;
                 ifc=ifc_before;
             } else if ('i' == ch) {
                 krf=1-krf;
-                count=-1;
                 ifc=ifc_before;
             } else if ('0' == ch) {
                 krf=1;
-                count=-1;
                 all=0;
                 ifc=0;
                 pol=pol_default;
@@ -284,6 +276,8 @@ main(int argc, char *argv[])
         int undef;
         int record;
         int i;
+        int ndisplay=0;
+        int display[MAX_DBBC3_IF];
 
 // logic states
 //
@@ -301,48 +295,55 @@ main(int argc, char *argv[])
 // some defs          cycle recording  Rec  !undef  record !all
 // some defs     all  cycle all        All  !undef  record  all
 //
+
+// what state are we in?
+
         record=FALSE;
         for(i=0;i<fs->dbbc3_ddc_ifs;i++)
             record=record ||
-                        (shm_addr->dbbc3_core3h_modex[i].mask1.state.known &&
-                         shm_addr->dbbc3_core3h_modex[i].mask1.mask1) ||
-                        (shm_addr->dbbc3_core3h_modex[i].mask2.state.known &&
-                         shm_addr->dbbc3_core3h_modex[i].mask2.mask2);
+                shm_addr->dbbc3_core3h_modex[i].mask1.state.known &&
+                shm_addr->dbbc3_core3h_modex[i].mask1.mask1 ||
+                shm_addr->dbbc3_core3h_modex[i].mask2.state.known &&
+                shm_addr->dbbc3_core3h_modex[i].mask2.mask2;
+
         undef=TRUE;
         for(i=0;i<fs->dbbc3_ddc_ifs;i++)
             undef=undef &&
                 fs->dbbc3_tsys_data.data[iping].ifc[i].lo<0;
 
+// what IFs should be displayed?
+
+        if(all || !record && undef) {
+            for(i=0;i<fs->dbbc3_ddc_ifs;i++)
+                display[ndisplay++]=i;
+        } else if (!record) {  // just def
+            for (i=0;i<fs->dbbc3_ddc_ifs;i++) {
+                if(fs->dbbc3_tsys_data.data[iping].ifc[i].lo>=0 &&
+                        (pol==0 || pol==fs->dbbc3_tsys_data.data[iping].ifc[i].pol))
+                    display[ndisplay++]=i;
+            }
+        } else { // just rec
+            for (i=0;i<fs->dbbc3_ddc_ifs;i++) {
+                if((shm_addr->dbbc3_core3h_modex[i].mask1.state.known &&
+                            shm_addr->dbbc3_core3h_modex[i].mask1.mask1 ||
+                            shm_addr->dbbc3_core3h_modex[i].mask2.state.known &&
+                            shm_addr->dbbc3_core3h_modex[i].mask2.mask2) &&
+                        (pol==0 || pol==fs->dbbc3_tsys_data.data[iping].ifc[i].pol))
+                    display[ndisplay++]=i;
+            }
+        }
+        if(0==ndisplay)  // just for safety, probably can't trigger this
+            display[ndisplay++]=0;
+
 /* find next IF to display */
 
         if (0==ifc) {
-            count=++count%dwell;
-            if (0==count) {
-                if(!record) {
-                    if(undef) {
-                        next=++next%fs->dbbc3_ddc_ifs;
-                    } else {
-                        for (i=0;i<fs->dbbc3_ddc_ifs;i++) {
-                            next=++next%fs->dbbc3_ddc_ifs;
-                            if(all || fs->dbbc3_tsys_data.data[iping].ifc[next].lo>=0 &&
-                                      (pol==0 || pol==fs->dbbc3_tsys_data.data[iping].ifc[next].pol))
-                                break;
-                        }
-                    }
-                } else {
-                    for (i=0;i<fs->dbbc3_ddc_ifs;i++) {
-                        next=++next%fs->dbbc3_ddc_ifs;
-                        if(all || (shm_addr->dbbc3_core3h_modex[next].mask1.state.known &&
-                                   shm_addr->dbbc3_core3h_modex[next].mask1.mask1 ||
-                                   shm_addr->dbbc3_core3h_modex[next].mask2.state.known &&
-                                   shm_addr->dbbc3_core3h_modex[next].mask2.mask2) &&
-                                   (pol==0 || pol==fs->dbbc3_tsys_data.data[iping].ifc[next].pol))
-                            break;
-                    }
-                }
-            }
+            rte_time(it,it+5);
+            rte2secs(it,&seconds);
+            next=display[(seconds%(dwell*ndisplay))/dwell];
         } else
             next=ifc-1;
+
 //        if(idebug++>0) {
 //            printf(" iping %d\n",iping);
 //            die();
