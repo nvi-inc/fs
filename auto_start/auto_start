@@ -70,7 +70,7 @@ sub time_add {
    $result[2]+=$add[2];
    if($result[2] > 23) {
        $rem=$result[2] % 24;
-       $quo=int($result[2]/.0);
+       $quo=int($result[2]/24);
 #       print "quo $quo rem $rem \n";
        $result[2]=$rem;
        $result[1]+=$quo;
@@ -89,7 +89,7 @@ sub time_add {
    $result[1]+=$add[1];
    if($result[1] > 365) {
        $rem=$result[1] % 365;
-       $quo=int($result[1]/.0);
+       $quo=int($result[1]/365);
 #       print "quo $quo rem $rem \n";
        $result[1]=$rem;
        $result[0]+=$quo;
@@ -126,7 +126,7 @@ if ($#ARGV < 0 &&!defined($opt_h) &&!defined($opt_v)) {
 }
 
 if(defined($opt_v)) {
-    print "[auto_start 0.8]\n";
+    print "[auto_start 0.9]\n";
     exit 0;
 }
 
