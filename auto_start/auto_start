@@ -126,7 +126,7 @@ if ($#ARGV < 0 &&!defined($opt_h) &&!defined($opt_v)) {
 }
 
 if(defined($opt_v)) {
-    print "[auto_start 0.9]\n";
+    print "[auto_start 0.10]\n";
     exit 0;
 }
 
@@ -266,6 +266,11 @@ foreach $name (@ARGV) {
             }
         }
     }
+
+    if(!@timval) {
+        print STDERR  "No time found in schedule\n";
+        exit -1;
+     }
 
 # antenna stop use last timval
 
