@@ -115,7 +115,7 @@ sub time_add {
 
 require "getopts.pl";
 
-if (!&Getopts("ehv")) {
+if (!&Getopts("ehvBE")) {
   print STDERR "For help, try: '$0 -h'\n";
   exit -1;
 }
@@ -126,7 +126,7 @@ if ($#ARGV < 0 &&!defined($opt_h) &&!defined($opt_v)) {
 }
 
 if(defined($opt_v)) {
-    print "[auto_start 0.10]\n";
+    print "[auto_start 0.11]\n";
     exit 0;
 }
 
@@ -181,7 +181,9 @@ for other timed commands.
 
 Option explanations:
 
+ -B        omit the (Beginning) 'ant_start' command
  -e        only command 'ant_stop' for the end of the schedule
+ -E        omit the (Ending) 'ant_stop' command
  -h        print this help information and stop
  -v        print program version information and stop
 ";
@@ -252,17 +254,19 @@ foreach $name (@ARGV) {
 
 # antenna start
 
-            @timval=@retval;
-            @addval =  ( 0, 0, 0, 2, 0);
-            @retval = time_add(\@timval,\@addval);
-#            print join(' ',@retval), " ret\n";
-            $command = sprintf("%s%04d.%03d.%02d:%02d:%02d","inject_snap ant_start\@",@retval);
-#            print "command $command\n";
-            $result=system($command);
-#            print "result $result\n";
-            if($result !=0 ) {
-                print STDERR  "setting antenna auto-start failed, result: $result\n";
-                exit -1;
+            if(!defined($opt_B)) {
+                @timval=@retval;
+                @addval =  ( 0, 0, 0, 2, 0);
+                @retval = time_add(\@timval,\@addval);
+#                print join(' ',@retval), " ret\n";
+                $command = sprintf("%s%04d.%03d.%02d:%02d:%02d","inject_snap ant_start\@",@retval);
+#                print "command $command\n";
+                $result=system($command);
+#                print "result $result\n";
+                if($result !=0 ) {
+                    print STDERR  "setting antenna auto-start failed, result: $result\n";
+                    exit -1;
+                }
             }
         }
     }
@@ -274,17 +278,19 @@ foreach $name (@ARGV) {
 
 # antenna stop use last timval
 
-#    print "end @timval\n";
-    @addval =  ( 0, 0, 0, 5, 0);
-    @retval = time_add(\@timval,\@addval);
-#    print join(' ',@retval), " ret\n";
-    $command = sprintf("%s%04d.%03d.%02d:%02d:%02d","inject_snap ant_stop\@",@retval);
-#    print "command $command\n";
-    $result=system($command);
-#    print "result $result\n";
-    if($result !=0 ) {
-        print STDERR  "setting antenna auto-stop failed, result: $result\n";
-        exit -1;
+    if(!defined($opt_E)) {
+#        print "end @timval\n";
+        @addval =  ( 0, 0, 0, 5, 0);
+        @retval = time_add(\@timval,\@addval);
+#        print join(' ',@retval), " ret\n";
+        $command = sprintf("%s%04d.%03d.%02d:%02d:%02d","inject_snap ant_stop\@",@retval);
+#        print "command $command\n";
+        $result=system($command);
+#        print "result $result\n";
+        if($result !=0 ) {
+            print STDERR  "setting antenna auto-stop failed, result: $result\n";
+            exit -1;
+        }
     }
 }
 exit 0;
