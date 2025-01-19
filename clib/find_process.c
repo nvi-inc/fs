@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 NVI, Inc.
+ * Copyright (c) 2023, 2025 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -112,7 +112,7 @@ pid_t find_process(const char* name,int *err)
             } else
                 fclose(fp);
         } else if (ENOENT==errno) {
-          continue; /* in case the file disappeared after the directory read */
+            ; /* in case the file disappeared after the directory read */
         } else {
             closedir(dir);
             *err=errno;
