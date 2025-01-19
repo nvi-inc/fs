@@ -126,11 +126,12 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
     int i;
     static time_t disp_time = 0;
     struct tm *ptr;
+    int irow=0;
 
     memcpy(&ifc,&tsys_cycle->ifc[next],sizeof(ifc));
     memcpy(&bbc,tsys_cycle->bbc,sizeof(bbc));
 
-    move(0,0);
+    move(irow++,0);
     printw("IF %c",unit_letters[next]);
     printw(" LO ");
     if(ifc.lo>=0.0) {
@@ -156,7 +157,7 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
     else /* all || !all */
         printw("%4s"," All");
 
-    move(1,0);
+    move(irow++,0);
     printw("Delay");
     buf[0]=0;
     if(UINT_MAX != ifc.delay) {
@@ -171,7 +172,7 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
     else
         print_tsys(ifc.tsys,ifc.clipped,reverse);
 
-    move(2,0);
+    move(irow++,0);
     printw("Time   ");
 
 /* legitimate times start at the first VDIF epoch */
@@ -206,7 +207,7 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
     } else
        printw("%17s"," ");
 
-    move(3,0);
+    move(irow++,0);
 //    printw("Epoch ");
 //    if(ifc.time > 0) {
 //      if(ifc.vdif_epoch >= 0) {
@@ -246,13 +247,13 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
     } else
         printw("%4s"," ");
 
-    move(4,0);
+    move(irow,0);
     if(ifc.lo>=0.0 && krf)
         printw("BBC    RF     Ts-L  Ts-U");
     else
         printw("BBC    IF     Ts-L  Ts-U");
 
-    move(4,9);
+    move(irow++,9);
     if(ifc.lo>=0.0)
         if(ifc.pol==1)
             printw("(R)");
@@ -272,7 +273,7 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
         int ibbc =next*8+i;
         if(i>=8)
             ibbc=next*8+64+i-8;
-        move(5+i,0);
+        move(irow+i,0);
         printw("%03d",ibbc+1);
         if(bbc[ibbc].freq!=UINT_MAX) {
             double freq=bbc[ibbc].freq*1e-6;
