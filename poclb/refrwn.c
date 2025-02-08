@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020, 2025 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -21,7 +21,7 @@
 
    Compute refraction correction given surface weather input.
    Copied from FORTRAN. is refrw_bad.c with TYPOS fixed
-   TYPOS fixed weh 2006 Nov 15 TNX jhfq
+   TYPOS fixed weh 2006 Nov 15 TNX jfhq
 */
 
 #include <math.h>

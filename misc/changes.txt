@@ -7840,7 +7840,7 @@ Version 9.8.1 050902
 061013 weh help/data_check.___
            included that does not work for mark5B
 
-061018 jhfq monit/mout4.c
+061018 jfhq monit/mout4.c
 061018      chekr/ifpchk.c
 061018      clib/lba_ifp_util.c
             bugs fixed
@@ -7876,7 +7876,7 @@ Version 9.9.1 061109
 
 061115 weh poclb/refrwn.c
            poclb/Makefile
-           added refrwn, which is refrw without the TYPOS, thanks JHFQ!
+           added refrwn, which is refrw without the TYPOS, thanks JFHQ!
 
 Version 9.9.2 061115
 
@@ -8736,11 +8736,11 @@ Version 9.10.3 080613
            added from Dave Graham
 
 080820 weh monit/mout5.c
-           fixed array out of bounds according to jhfq
+           fixed array out of bounds according to jfhq
 
 080820 weh monit/m5init.c
            monit/monit5.c
-           fixed typos according to jhfq to fix errors
+           fixed typos according to jfhq to fix errors
 
 080820 weh misc/RAID.txt
            make software RAID clearer
@@ -11706,12 +11706,12 @@ Version 9.11.13 160508
 160906 WEH misc/refresh_secondary.sd156
            misc/refresh_secondary.sd234
            add --recheck to grub-install to update /boot/grub/device.map
-             thanks to DEH and JHFQ
+             thanks to DEH and JFHQ
   
 160906 WEH misc/refresh_spare_usr2.9
            added check to stop if /usr2/ is not mounted
              extract existing UUID for new /dev/md2
-             both thanks to JHFQ!
+             both thanks to JFHQ!
 
 160906 WEH monit/monit3.c
            only show DBBC BBC DDC channel frequencies that are setup
@@ -12127,7 +12127,7 @@ Version 9.11.20-rc3 180501
 Version 9.11.20-rc4 180519
 
 170928 WEH st.default/st-0.0.0/metserver/src/nmea_wind.c
-           was missing, TNX JHFQ
+           was missing, TNX JFHQ
 
 180520 WEH help/mk5b_mode.___
            help/fila10g_mode.d__
