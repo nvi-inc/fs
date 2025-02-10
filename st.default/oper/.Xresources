@@ -89,5 +89,5 @@ helpsh.title:            fs help
 !helpsh*scrollBar:        true
 helpsh*geometry:         80x24+75+75
 ! monit7 (DBBC3 Tsys display, 21 lines)
-monit7*geometry:	24x21-0+155
+monit7*geometry:	24x22-0+155
 monit7.title:		DBBC3 Tsys
