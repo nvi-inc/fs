@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2023 NVI, Inc.
+ * Copyright (c) 2020-2023, 2025 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -163,7 +163,7 @@ int main(int argc, char *argv[])
         int skip_remaining= 1==dbtcn_control.stop_request ||
                  dbtcn_control.continuous == 0 &&
                  (dbtcn_control.data_valid.user_dv ==0 || shm_addr->KHALT !=0 ||
-                  0==strncmp(shm_addr->LSKD2,"none ",5));
+                  0==strncmp(shm_addr->LSKD2,"     ",5));
 
         if (0==tsys_request && skip_remaining) {
             last=0;

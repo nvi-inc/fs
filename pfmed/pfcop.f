@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020, 2023  NVI, Inc.
+* Copyright (c) 2020, 2023, 2025 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -80,7 +80,7 @@ C
 C     PROGRAM STRUCTURE
 C
 C     Check if procedure library exists to be copied.
-      if(lp.eq.'none') then
+      if(lp.eq.'    ') then
 C     No procedure library - message and return.
          write(6,*) 'pfcop: no procedure library active'
          iret = -1

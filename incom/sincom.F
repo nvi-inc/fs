@@ -57,12 +57,12 @@ C
       inext(2)=0
       inext(3)=0
       call fs_set_inext(inext)
-      lprc2 = 'none'
+      lprc2 = '    '
       call char2hol(lprc2,ilprc2,1,MAX_SKD)
       call fs_set_lprc2(ilprc2)
       call char2hol(lprc2,ilprc,1,8)
       call fs_set_lprc(ilprc)
-      lskd2 = 'none'
+      lskd2 = '    '
       call char2hol(lskd2,ilskd2,1,MAX_SKD)
       call fs_set_lskd2(ilskd2)
       call char2hol(lskd2,ilskd,1,8)

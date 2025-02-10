@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, 2023  NVI, Inc.
+ * Copyright (c) 2020, 2023, 2025 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -123,7 +123,7 @@ int indx, stat;
   if ((shm_addr->check.vkmove[indx] && kmove_time) ||
       (shm_addr->check.vkload[indx] && kload_time) ) {
       if(shm_addr->IRDYTP[indx] == 1 && shm_addr->KHALT==0 &&
-          memcmp(shm_addr->LSKD2,"none ",5)!=0)
+          memcmp(shm_addr->LSKD2,"     ",5)!=0)
            icherr[5]=1;
   }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, 2022, 2023 NVI, Inc.
+ * Copyright (c) 2020, 2022, 2023, 2025 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -178,7 +178,7 @@ main()
 #endif
   if(tpicd.continuous==0 && tpicd.tsys_request==0 &&
      ((data_valid[0].user_dv ==0 && data_valid[1].user_dv ==0)||
-      shm_addr->KHALT !=0 || 0==strncmp(shm_addr->LSKD2,"none ",5)))
+      shm_addr->KHALT !=0 || 0==strncmp(shm_addr->LSKD2,"     ",5)))
     goto loop;
 
   if(tpicd.cycle<=0)
