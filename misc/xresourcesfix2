@@ -140,6 +140,6 @@ probably be removed.
 }
 if ($none || $extra) {
     print STDERR "\nFor comparison, you can examine the default versions in
-'/usr2/fs/st.default/(oper|prog)/.Xresoures' as appropriate.
+'/usr2/fs/st.default/(oper|prog)/.Xresources' as appropriate.
 ";
 }
