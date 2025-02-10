@@ -1,0 +1,103 @@
+#!/usr/bin/perl
+
+if ($#ARGV < 0) {
+    print "Usage: $0 file
+
+Updates monit7 geometry height by adding one line in an
+Xresources file (nominally '.Xresources').
+
+This script should be run in the directory with the file, usually the user's
+home directory.
+
+The original file is renamed as a backup by adding a '.bak' extension.
+The backup file must not already exist.
+";
+    exit -1;
+}
+
+if  ($#ARGV < 0 || $#ARGV >0) {
+    print "incorrect number of arguments\n";
+    print "Try '$0' for more information.\n";
+    exit -1;
+}
+
+# get the file names
+
+$out=$ARGV[0];
+if (!-e $out) {
+    die "Can't find '$out', giving up.\n";
+}
+
+$bak = $out . ".bak";
+if (-e $bak) {
+    die "Backup-file '$bak' already exists, giving up.\n";
+}
+
+# rename the original
+
+if(!rename ($out,$bak)) {
+    print "Renaming '$out' to '$bak' failed: $!\n";
+}
+
+if(!open(BAK,$bak)) {
+    print "Failed to open '$bak': $!\n";
+    if(!rename($bak,$out)) {
+        print "In the process of trying to restore order after the error,\n";
+        print "I was unable to rename '$bak' to '$out': $!\n";
+        print "Please fix whatever the problem is and rename it yourself.\n";
+    } else {
+        print "In order to help restore order after the error,\n";
+        print "I renamed '$bak' to '$out' for you.\n";
+    }
+}
+
+if(!open(OUT,">" . $out)) {
+    print "Failed to open '$out': $!\n";
+    if((!close(BAK)) || (!rename($bak,$out))) {
+        print "In the process of trying to restore order after the error,\n";
+        print "I was unable to rename '$bak' to '$out': $!\n";
+        print "Please fix whatever the problem is and rename it yourself.\n";
+    } else {
+        print "In order to help restore order after the error,\n";
+        print "I renamed '$bak' to '$out' for you.\n";
+    }
+}
+
+$count{"monit7*geometry"} = 0;
+
+# okay now process the file
+
+while(<BAK>) {
+    if (/^(monit7\*geometry:.*\d+x)(\d+)(.*)$/) {
+        $out=$2+1;
+        $_ = "$1$out$3\n";
+        ++$count{"monit7*geometry"};
+    }
+    print OUT;
+}
+
+foreach $key (sort keys %count) {
+    if($count{$key} == 0) {
+        print STDERR "WARNING: $key not found\n";
+        $none=1;
+    } elsif($count{$key} > 1) {
+        print STDERR "ERROR: $key found more than once.\n";
+        $extra=1
+    }
+}
+if ($none || $extra) {
+    print "\n";
+    }
+if ($none) {
+    print STDERR "Some resources were missing. If you are okay with that, that is fine.\n";
+}
+if ($extra) {
+    print STDERR "There may be other resources for that window that are defined multiple
+times. All extra definitions should probably be removed.
+";
+}
+if ($none || $extra) {
+    print STDERR "\nFor comparison, you can examine the default versions in
+'/usr2/fs/st.default/(oper|prog)/.Xresources' as appropriate.
+";
+}
