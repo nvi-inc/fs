@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2024 NVI, Inc.
+ * Copyright (c) 2020-2025 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -208,30 +208,18 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
        printw("%17s"," ");
 
     move(irow++,0);
-//    printw("Epoch ");
-//    if(ifc.time > 0) {
-//      if(ifc.vdif_epoch >= 0) {
-//        buf[0]=0;
-//        int2str(buf,ifc.vdif_epoch,-2,0);
-//        printw("%2s",buf);
-//      } else
-//        printw("%2s","--");
-//    } else
-//      printw("%2s"," ");
-
-    printw("Arrival ");
+    printw("Epoch ");
     if(ifc.time > 0) {
-      if(tsys_cycle->hsecs < late)
-        standout();
-      buf[0]=0;
-      int2str(buf,tsys_cycle->hsecs,-2,0);
-      printw("%2s",buf);
-      if(tsys_cycle->hsecs < late)
-        standend();
+      if(ifc.vdif_epoch >= 0) {
+        buf[0]=0;
+        int2str(buf,ifc.vdif_epoch,-3,0);
+        printw("%3s",buf);
+      } else
+        printw("%3s","---");
     } else
-      printw("%2s"," ");
+      printw("%3s","  ");
 
-    printw(" DBBC3-FS ");
+    printw("  DBBC3-FS ");
     if(ifc.time> 0) {
         if (!ifc.time_included)
             printw("------");
@@ -246,6 +234,19 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
         }
     } else
         printw("%4s"," ");
+
+    move(irow++,0);
+    printw("Arrival");
+    if(ifc.time > 0) {
+      if(tsys_cycle->hsecs < late)
+        standout();
+      buf[0]=0;
+      int2str(buf,tsys_cycle->hsecs,-4,0);
+      printw("%4s",buf);
+      if(tsys_cycle->hsecs < late)
+        standend();
+    } else
+      printw("%4s"," ");
 
     move(irow,0);
     if(ifc.lo>=0.0 && krf)
