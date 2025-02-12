@@ -153,8 +153,8 @@ C     Move second name if present.
             write(lui,'(a)') 'Spaces are not allow in library names'
             return
           endif
-          if (nch2.gt.8) then
-            write(lui,9100)
+          if (nch2.gt.len(lnam2)) then
+            write(lui,9100) len(lnam2)
             return
            end if
           lnam2 = ib(ic2+1:ic2+nch2)

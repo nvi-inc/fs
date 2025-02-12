@@ -413,7 +413,11 @@ C     Parse first name for procedure library.
             write(lui,'(a)') 'Spaces are not allow in library names'
             return
           endif
-          lpf= ' '
+          if (nch1-(ix+2)+1.gt.MAX_SKD) then
+            write(lui,9100) MAX_SKD
+9100        format(" library names must be",i3," characters or less")
+            return
+          end if
           lpf = lnam1(ix+2:nch1)
         else
           lpf = lproc
