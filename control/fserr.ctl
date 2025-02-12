@@ -1475,6 +1475,12 @@ Log file name too long, ?W characters maximum.
 BO -263
 Cannot change schedules while recording, use disk_record=off to stop.
 ""
+BO -264
+Spaces not allowed in procedure library name.
+""
+BO -265
+Spaces not allowed in schedule name.
+""
 BO -295
 Error initiliazing rdbca, internal error ?WWW
 ""

@@ -595,6 +595,12 @@ C  User requested schedule name, format response and log it.
           ich = 1+iscn_ch(ibuf,1,nchar,'=')
           ic4 = iscn_ch(ibuf,ich,nchar,',')
           if (ic4.eq.0) ic4 = nchar + 1
+          ic2 = iscn_ch(ibuf,ich,ic4-1,' ')
+          if(ic2.ne.0) then
+             call logit7ci(0,0,0,1,-265,'bo',0)
+             call rn_put('pfmed')
+             goto 600
+          endif
           if(ic4-1-ich+1.gt.MAX_SKD) then
              call logit7ci(0,0,0,1,-261,'bo',MAX_SKD)
              call rn_put('pfmed')
@@ -1082,6 +1088,11 @@ C
              ipinsnp(2)=ipinsnp(2)+1
           endif
         else
+          ic2 = iscn_ch(ibuf,ich,nchar,' ')
+          if(ic2.ne.0) then
+             call logit7ci(0,0,0,1,-264,'bo',0)
+             goto 600
+          endif
           ic2 = iscn_ch(ibuf,ich,nchar,',')
           if (ic2.eq.0) ic2 = nchar+1
           if(ic2-1-ich+1.gt.MAX_SKD) then

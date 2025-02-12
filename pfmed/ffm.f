@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020, 2023  NVI, Inc.
+* Copyright (c) 2020, 2023, 2025  NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -130,6 +130,11 @@ C     Move first name to buffer with initialized prefix.
           if ((nch1.gt.4).and.(ib(ic1+nch1-3:ic1+nch1).eq.'.prc')) then
             nch1 = nch1-4
           end if
+          ics=index(ib(ic1:ic1+nch1),' ')
+          if(ics.ne.0) then
+            write(lui,'(a)') 'Spaces are not allow in library names'
+            return
+          endif
           if (nch1.gt.len(lproc)) then
             write(lui,9100) len(lproc)
 9100        format(" library names must be",i3," characters or less")
@@ -143,6 +148,11 @@ C     Move second name if present.
           if ((nch2.gt.4).and.(ib(ic2+nch2-3:ic2+nch2).eq.'.prc')) then
             nch2 = nch2-4
           end if
+          ics=index(ib(ic2:ic2+nch2),' ')
+          if(ics.ne.0) then
+            write(lui,'(a)') 'Spaces are not allow in library names'
+            return
+          endif
           if (nch2.gt.8) then
             write(lui,9100)
             return
