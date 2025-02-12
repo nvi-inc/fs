@@ -1236,7 +1236,7 @@ BO -156
 Error decoding line # ?WWW in ANTENNA.CTL
 ""
 BO -157
-Can't change procedure library while PFMED is running.
+Can't change schedule procedure library while PFMED is running.
 ""
 BO -158
 Can't open STATION as schedule procedure library.
@@ -1467,10 +1467,10 @@ BO -260
 Procedure library name too long, ?W characters maximum.
 ""
 BO -261
-Schedule file name too long, ?W characters maximum.
+Schedule name too long, ?W characters maximum.
 ""
 BO -262
-Log file name too long, ?W characters maximum.
+Log name too long, ?W characters maximum.
 ""
 BO -263
 Cannot change schedules while recording, use disk_record=off to stop.
