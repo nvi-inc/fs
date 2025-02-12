@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, 2023  NVI, Inc.
+ * Copyright (c) 2020, 2023, 2025  NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -186,7 +186,8 @@ int execute_line (line)
 
   if (!command)
     {
-      fprintf (stdout, "%s: No such command for Pfmed.\n", word);
+      if(strlen(word)>0)
+        fprintf (stdout, "%s: No such command for Pfmed.\n", word);
       return (-1);
     }
 
