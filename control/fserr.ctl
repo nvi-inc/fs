@@ -3303,7 +3303,13 @@ DW -303
 Core3H board?W has a non-zero time offset.
 ""
 DW -304
-One or more Core3H boards have a non-zero time offset and/or the multicast data is stale, please see messages above.
+One or more Core3H boards have a time offset problem and/or the multicast data is stale, please see messages above.
+""
+DW -305
+Core3H board?W has a time offset different from 0 and -1 (with alternating multicast time-outs).
+""
+DW -306
+No Core3H board has a zero time offset (with alternating multicast time-outs).
 ""
 ER -902
 Unable to find ":" in S2 error decode response.
