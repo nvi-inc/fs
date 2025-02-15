@@ -155,6 +155,8 @@ void dbbc3_mcast_time(command,itask,ip)
         output[0]=0;
     }
     int overall_error = 0;
+    int some_alternating_is_zero = 0;
+    int alternating_error = 0;
     if(seconds - shm_addr->dbbc3_tsys_data.data[iping].last > 20) {
         logit(NULL,-302,"dw");
         overall_error=1;
@@ -168,10 +170,16 @@ void dbbc3_mcast_time(command,itask,ip)
         } else {
             if(shm_addr->dbbc3_tsys_data.data[iping].ifc[i].time_error!=0 &&
                shm_addr->dbbc3_tsys_data.data[iping].ifc[i].time_error!=-1) {
-                logitn(NULL,-303,"dw",i+1);
+                logitn(NULL,-305,"dw",i+1);
+                alternating_error=1;
                 overall_error=1;
-            }
+            } else if(shm_addr->dbbc3_tsys_data.data[iping].ifc[i].time_error==0)
+                some_alternating_is_zero = 1;
         }
+    if(alternating && !alternating_error && !some_alternating_is_zero) {
+        logit(NULL,-306,"dw");
+        overall_error=1;
+    }
 
     if(overall_error) {
         ip[2]=-304;
