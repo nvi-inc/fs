@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020-2021, 2023 NVI, Inc.
+* Copyright (c) 2020-2021, 2023, 2025 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -78,22 +78,10 @@ c
       endif
 c
       call hol2char(ibuf,ic1,ic2,bbcs)
-      call fs_get_rack(rack)
-      call fs_get_rack_type(rack_type)
-      if(bbcs.eq.'nominal') then
-        if(rack.eq.DBBC3.and.
-     &     rack_type.eq.DBBC3_DDCU) then
-            dbbc3_ddc_bbcs_per_if=16
-        else if(rack.eq.DBBC3.and.
-     &     rack_type.eq.DBBC3_DDCV) then
-            dbbc3_ddc_bbcs_per_if=8
-        else if(rack.eq.DBBC3.and.
-     &     rack_type.eq.DBBC3_DDCE) then
-            dbbc3_ddc_bbcs_per_if=8
-        else
-            dbbc3_ddc_bbcs_per_if=0
-        endif
-      else
+c
+c process nominal later to use verion number
+c
+      if(bbcs.ne.'nominal') then
         dbbc3_ddc_bbcs_per_if = ias2b(ibuf,ic1,ic2-ic1+1)
         if (dbbc3_ddc_bbcs_per_if.ne.8.and.
      &       dbbc3_ddc_bbcs_per_if.ne.12.and.
@@ -116,7 +104,6 @@ c
          goto 990
       endif
 c
-      call fs_set_dbbc3_ddc_bbcs_per_if(dbbc3_ddc_bbcs_per_if)
       call fs_set_dbbc3_ddc_ifs(dbbc3_ddc_ifs)
 c
 c DBBC3 DDCE firmware version
@@ -425,6 +412,30 @@ c
      &            dbbc3_ignore_alt_mcast_to)
       call fs_set_dbbc3_ignore_all_mcast_to(
      &            dbbc3_ignore_all_mcast_to)
+c
+c now handle nominal
+c
+      call fs_get_rack(rack)
+      call fs_get_rack_type(rack_type)
+      if(bbcs.eq.'nominal') then
+        if(rack.eq.DBBC3.and.
+     &     rack_type.eq.DBBC3_DDCU) then
+            dbbc3_ddc_bbcs_per_if=16
+        else if(rack.eq.DBBC3.and.
+     &     rack_type.eq.DBBC3_DDCV.and.
+     &     dbbc3_ddcv_v.gt.125) then
+            dbbc3_ddc_bbcs_per_if=16
+        else if(rack.eq.DBBC3.and.
+     &     rack_type.eq.DBBC3_DDCV) then
+            dbbc3_ddc_bbcs_per_if=8
+        else if(rack.eq.DBBC3.and.
+     &     rack_type.eq.DBBC3_DDCE) then
+            dbbc3_ddc_bbcs_per_if=8
+        else
+            dbbc3_ddc_bbcs_per_if=0
+        endif
+      endif
+      call fs_set_dbbc3_ddc_bbcs_per_if(dbbc3_ddc_bbcs_per_if)
 c
 c DBBC3 mcast delay
 c
