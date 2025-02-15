@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020-2023 NVI, Inc.
+// Copyright (c) 2020-2023, 2025  NVI, Inc.
 //
 // This file is part of VLBI Field System
 // (see http://github.com/nvi-inc/fs).
@@ -21,7 +21,7 @@
 :doctype: book
 
 = FS 10.2 Update Notes
-Version 1.0.3 - July 2024
+Version 1.0.4 - February 2025
 
 :sectnums:
 :stem: latexmath
@@ -343,6 +343,15 @@ memory is reallocated.
 The remaining steps are to be performed by _oper_.
 
 === Update control files
+
+. Update the comments for rack types in your _equip.ctl_ file.
+
++
+
+Strictly speaking, this is optional, but not updating may cause
+confusion later if you have a DBBC3, or get one, since there is an
+additional DBBC3 rack type now. You can use the example/default file
+in _/usr2/fs/st.default/control/equip.ctl_ for comparison.
 
 . Update the _dbbc3.ctl_ control file.
 

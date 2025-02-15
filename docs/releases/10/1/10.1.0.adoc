@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020-2023 NVI, Inc.
+// Copyright (c) 2020-2023, 2025 NVI, Inc.
 //
 // This file is part of VLBI Field System
 // (see http://github.com/nvi-inc/fs).
@@ -22,7 +22,7 @@
 
 = FS 10.1.0 Update Notes
 E. Himwich, J. Quick, J. Gipson, D. Horsley
-Version 7.0 - October 2023
+Version 7.1 - February 2025
 
 //:hide-uri-scheme:
 :sectnums:
@@ -458,6 +458,21 @@ should allowing running the FS if you don't have a DBBC3. If you have
 a DBBC3, you should customize the contents in the <<dbbc3config,FS
 DBBC3 Configuration>> step below.
 
+. Update the comments for rack types in your _equip.ctl_ file.
+
++
+
+Strictly speaking, this is optional, but not updating may cause
+confusion later if you have a DBBC3, or get one, since the racks types
+for DBBC3s have changed. You can use the example/default file in
+_/usr2/fs/st.default/control/equip.ctl_ for comparison.
+
++
+
+IMPORTANT: If you have a DBBC3, you _will_ need to update your rack
+type, but this is covered below in the <<dbbc3config,FS DBBC3
+Configuration>> step.
+
 . Install the new (default) _erchk_ control file:
 
   cd /usr2/control
@@ -580,8 +595,10 @@ the FlexBuff.
 DBBC3, you should make the configuration changes described in the
 <<dbbc3_ops.adoc#_configuring_the_fs_for_use_with_a_dbbc3,Configuring
 the FS for use with a DBBC3>> section of the <<dbbc3_ops.adoc#,FS
-DBBC3 Operations Manual>>. If you expect to get a DBBC3, these changes
-can be deferred until then.
+DBBC3 Operations Manual>>. You may have already made some of these
+changes, but you should verify them all, particularly setting the
+correct rack type. If don't have a DBBC3, but expect to get one, these
+changes can be deferred until then.
 
 . Cleanup _.rxg_ file comments:
 
@@ -774,6 +791,9 @@ provided now. The updated support is described in the
 
 [%collapsible]
 ====
+
+* New DBBC3 rack types `dbbc_ddc_u` and `dbbc3_ddc_v` replace `dbbc3`
+in _equip.ctl_.
 
 * A separate _dbbc3.ctl_ control file
 
