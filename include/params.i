@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020, 2022, 2023 NVI, Inc.
+* Copyright (c) 2020, 2022, 2023, 2025 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -207,3 +207,10 @@ C
 
       integer MAX_SKD
       parameter (MAX_SKD=18)
+c
+      character*(*) ignore_alternating_multicast_timeouts
+      parameter (ignore_alternating_multicast_timeouts=
+     & 'ignore_alternating_multicast_timeouts')
+      character*(*) ignore_all_multicast_timeouts
+      parameter (ignore_all_multicast_timeouts=
+     & 'ignore_all_multicast_timeouts')
