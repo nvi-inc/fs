@@ -554,4 +554,7 @@ typedef struct fscom {
 
   struct onoff_cmd onoff;
 
+  int dbbc3_ignore_alt_mcast_to;
+  int dbbc3_ignore_all_mcast_to;
+
 } Fscom;

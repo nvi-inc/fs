@@ -34,6 +34,7 @@ c
       logical kmove
       integer*2 line1(16),line2(2),line3(13)
       integer iline
+      character*128 field
 c
       include '../include/fscom.i'
 c                 1    2    3    4    5    6    7    8    9   10
@@ -49,7 +50,10 @@ c     &         2hf ,2hfi,2hle /
       line2(1)=1
       call char2hol("dbbc3.ctl at end of file",line3(2),1,24)
       line3(1)=24
-
+c
+      dbbc3_ignore_alt_mcast_to=0
+      dbbc3_ignore_all_mcast_to=0
+c
       call fmpopen(idcb,name,ierr,'r',idum)
       if (ierr.lt.0) then
         call logit7ci(0,0,0,1,-185,'bo',ierr)
@@ -144,6 +148,57 @@ C
          goto 990
       endif
 c
+      call fs_get_rack(rack)
+      call fs_get_rack_type(rack_type)
+      if(rack.ne.DBBC3.or.rack_type.ne.DBBC3_DDCE) then
+        goto 200
+      endif
+c
+      call gtfld(ibuf,ifc,ilen,ic1,ic2)
+      if (ic1.eq.0) then
+        goto 200
+      endif
+C
+      call hol2char(ibuf,ic1,ic2,field)
+      if(field.eq.ignore_alternating_multicast_timeouts) then
+        dbbc3_ignore_alt_mcast_to=1
+      else if(field.eq.ignore_all_multicast_timeouts) then
+        dbbc3_ignore_all_mcast_to=1
+      else
+         call logit7ci(0,0,0,1,-186,'bo',iline)
+         goto 990
+      endif
+c
+      call gtfld(ibuf,ifc,ilen,ic1,ic2)
+      if (ic1.eq.0) then
+        goto 200
+      endif
+C
+      call hol2char(ibuf,ic1,ic2,field)
+      if(field.eq.ignore_alternating_multicast_timeouts) then
+        if(dbbc3_ignore_alt_mcast_to.eq.1) then
+          call logit7ci(0,0,0,1,-186,'bo',iline)
+          goto 990
+        endif
+        dbbc3_ignore_alt_mcast_to=1
+      else if(field.eq.ignore_all_multicast_timeouts) then
+        if(dbbc3_ignore_all_mcast_to.eq.1) then
+          call logit7ci(0,0,0,1,-186,'bo',iline)
+          goto 990
+        endif
+        dbbc3_ignore_all_mcast_to=1
+      else
+         call logit7ci(0,0,0,1,-186,'bo',iline)
+         goto 990
+      endif
+c
+      if(dbbc3_ignore_alt_mcast_to.eq.1 .and.
+     &   dbbc3_ignore_all_mcast_to.eq.1) then
+        call logit7ci(0,0,0,1,-186,'bo',iline)
+        goto 990
+      endif
+c
+200   continue
       dbbc3_ddce_v =idbbcv
       dbbc3_ddce_vs= dbbcv
       dbbc3_ddce_vc=idbbcvc
@@ -192,6 +247,58 @@ C
          call logit7ci(0,0,0,1,-186,'bo',iline)
          goto 990
       endif
+c
+      call fs_get_rack(rack)
+      call fs_get_rack_type(rack_type)
+      if(rack.ne.DBBC3.or.rack_type.ne.DBBC3_DDCU) then
+        goto 300
+      endif
+c
+      call gtfld(ibuf,ifc,ilen,ic1,ic2)
+      if (ic1.eq.0) then
+        goto 300
+      endif
+C
+      call hol2char(ibuf,ic1,ic2,field)
+      if(field.eq.ignore_alternating_multicast_timeouts) then
+        dbbc3_ignore_alt_mcast_to=1
+      else if(field.eq.ignore_all_multicast_timeouts) then
+        dbbc3_ignore_all_mcast_to=1
+      else
+         call logit7ci(0,0,0,1,-186,'bo',iline)
+         goto 990
+      endif
+c
+      call gtfld(ibuf,ifc,ilen,ic1,ic2)
+      if (ic1.eq.0) then
+        goto 300
+      endif
+C
+      call hol2char(ibuf,ic1,ic2,field)
+      if(field.eq.ignore_alternating_multicast_timeouts) then
+        if(dbbc3_ignore_alt_mcast_to.eq.1) then
+          call logit7ci(0,0,0,1,-186,'bo',iline)
+          goto 990
+        endif
+        dbbc3_ignore_alt_mcast_to=1
+      else if(field.eq.ignore_all_multicast_timeouts) then
+        if(dbbc3_ignore_all_mcast_to.eq.1) then
+          call logit7ci(0,0,0,1,-186,'bo',iline)
+          goto 990
+        endif
+        dbbc3_ignore_all_mcast_to=1
+      else
+         call logit7ci(0,0,0,1,-186,'bo',iline)
+         goto 990
+      endif
+c
+      if(dbbc3_ignore_alt_mcast_to.eq.1 .and.
+     &   dbbc3_ignore_all_mcast_to.eq.1) then
+        call logit7ci(0,0,0,1,-186,'bo',iline)
+        goto 990
+      endif
+c
+300   continue
 c
       dbbc3_ddcu_v =idbbcv
       dbbc3_ddcu_vs= dbbcv
@@ -242,6 +349,58 @@ C
          goto 990
       endif
 c
+      call fs_get_rack(rack)
+      call fs_get_rack_type(rack_type)
+      if(rack.ne.DBBC3.or.rack_type.ne.DBBC3_DDCV) then
+        goto 400
+      endif
+c
+      call gtfld(ibuf,ifc,ilen,ic1,ic2)
+      if (ic1.eq.0) then
+        goto 400
+      endif
+C
+      call hol2char(ibuf,ic1,ic2,field)
+      if(field.eq.ignore_alternating_multicast_timeouts) then
+        dbbc3_ignore_alt_mcast_to=1
+      else if(field.eq.ignore_all_multicast_timeouts) then
+        dbbc3_ignore_all_mcast_to=1
+      else
+         call logit7ci(0,0,0,1,-186,'bo',iline)
+         goto 990
+      endif
+c
+      call gtfld(ibuf,ifc,ilen,ic1,ic2)
+      if (ic1.eq.0) then
+        goto 400
+      endif
+C
+      call hol2char(ibuf,ic1,ic2,field)
+      if(field.eq.ignore_alternating_multicast_timeouts) then
+        if(dbbc3_ignore_alt_mcast_to.eq.1) then
+          call logit7ci(0,0,0,1,-186,'bo',iline)
+          goto 990
+        endif
+        dbbc3_ignore_alt_mcast_to=1
+      else if(field.eq.ignore_all_multicast_timeouts) then
+        if(dbbc3_ignore_all_mcast_to.eq.1) then
+          call logit7ci(0,0,0,1,-186,'bo',iline)
+          goto 990
+        endif
+        dbbc3_ignore_all_mcast_to=1
+      else
+         call logit7ci(0,0,0,1,-186,'bo',iline)
+         goto 990
+      endif
+c
+      if(dbbc3_ignore_alt_mcast_to.eq.1 .and.
+     &   dbbc3_ignore_all_mcast_to.eq.1) then
+        call logit7ci(0,0,0,1,-186,'bo',iline)
+        goto 990
+      endif
+c
+400   continue
+c
       dbbc3_ddcv_v =idbbcv
       dbbc3_ddcv_vs= dbbcv
       dbbc3_ddcv_vc=idbbcvc
@@ -272,6 +431,11 @@ c
         endif
       endif
       call fs_set_dbbc3_ddc_bbcs_per_if(dbbc3_ddc_bbcs_per_if)
+
+      call fs_set_dbbc3_ignore_alt_mcast_to(
+     &            dbbc3_ignore_alt_mcast_to)
+      call fs_set_dbbc3_ignore_all_mcast_to(
+     &            dbbc3_ignore_all_mcast_to)
 c
 c DBBC3 mcast delay
 c

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021, 2023 NVI, Inc.
+ * Copyright (c) 2020-2021, 2023, 2025 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -3070,4 +3070,28 @@ void fs_get_dbbc3_ddce_vc__(dbbc3_ddce_vc)
 	int *dbbc3_ddce_vc;
 	{
           *dbbc3_ddce_vc = shm_addr->dbbc3_ddce_vc;
+	}
+
+void fs_set_dbbc3_ignore_alt_mcast_to__(dbbc3_ignore_alt_mcast_to)
+	int *dbbc3_ignore_alt_mcast_to;
+	{
+          shm_addr->dbbc3_ignore_alt_mcast_to = *dbbc3_ignore_alt_mcast_to;
+        }
+
+void fs_get_dbbc3_ignore_alt_mcast_to__(dbbc3_ignore_alt_mcast_to)
+	int *dbbc3_ignore_alt_mcast_to;
+	{
+          *dbbc3_ignore_alt_mcast_to = shm_addr->dbbc3_ignore_alt_mcast_to;
+	}
+
+void fs_set_dbbc3_ignore_all_mcast_to__(dbbc3_ignore_all_mcast_to)
+	int *dbbc3_ignore_all_mcast_to;
+	{
+          shm_addr->dbbc3_ignore_all_mcast_to = *dbbc3_ignore_all_mcast_to;
+        }
+
+void fs_get_dbbc3_ignore_all_mcast_to__(dbbc3_ignore_all_mcast_to)
+	int *dbbc3_ignore_all_mcast_to;
+	{
+          *dbbc3_ignore_all_mcast_to = shm_addr->dbbc3_ignore_all_mcast_to;
 	}
