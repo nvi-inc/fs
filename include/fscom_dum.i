@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020, 2023 NVI, Inc.
+* Copyright (c) 2020, 2023, 2025 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -66,7 +66,8 @@ c
      $  dbbc3_cont_cal_mode,
      $  dbbc3_ddcv_v, dbbc3_ddcv_vc,
      $  dbbc3_mcdelay, dbbc3_iscboard, dbbc3_clockr,
-     $  dbbc3_ddce_v, dbbc3_ddce_vc
+     $  dbbc3_ddce_v, dbbc3_ddce_vc,
+     $  dbbc3_ignore_alt_mcast_to, dbbc3_ignore_all_mcast_to
 
       INTEGER*2 ILEXPER(4), ILLOG(4), ILNEWPR(4), ILNEWSK(4),
      . ILPRC(4), ILSKD(4), ILSTP(4), INEXT(3), LFEET_FS(3,2), lgen(2,2),
@@ -123,6 +124,7 @@ c
      $ dbbc3_ddcv_v, dbbc3_ddcv_vc,
      $ dbbc3_mcdelay, dbbc3_iscboard, dbbc3_clockr,
      $ dbbc3_ddce_v, dbbc3_ddce_vc,
+     $ dbbc3_ignore_alt_mcast_to, dbbc3_ignore_all_mcast_to,
 c
      . ILEXPER, ILLOG, ILNEWPR, ILNEWSK,
      . ILPRC, ILSKD, ILSTP, INEXT, LFEET_FS, lgen, lnaant, lsorna, 

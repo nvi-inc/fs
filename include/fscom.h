@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2024 NVI, Inc.
+ * Copyright (c) 2020-2025 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -551,5 +551,8 @@ typedef struct fscom {
       time_t arrival;
     } data[2];
   } rdbe_tsys_data1[MAX_RDBE];
+
+  int dbbc3_ignore_alt_mcast_to;
+  int dbbc3_ignore_all_mcast_to;
 
 } Fscom;
