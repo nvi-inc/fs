@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, 2022, 2023 NVI, Inc.
+ * Copyright (c) 2020, 2022, 2023, 2025 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -222,12 +222,15 @@ int doinit()
 	  shm_addr->rdbe_active[i]=1;
 	}
     }
-    char *disable=getenv("FS_RDBE_MC_DISABLE");
-    if (!disable || strcmp(disable,"1")) {
-      char rdtcn[6];
-      int ip[5];
-      sprintf(rdtcn,"rdtc%1.1s",me+4);
-      skd_run(rdtcn,'n',ip);
+
+    if(shm_addr->equip.rack==RDBE) {
+      char *disable=getenv("FS_RDBE_MC_DISABLE");
+      if (!disable || strcmp(disable,"1")) {
+        char rdtcn[6];
+        int ip[5];
+        sprintf(rdtcn,"rdtc%1.1s",me+4);
+        skd_run(rdtcn,'n',ip);
+      }
     }
 
     if(time_out <200)
