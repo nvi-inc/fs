@@ -55,13 +55,13 @@ ssize_t read_mcast(int sock, char buf[], size_t buf_size, int it[6],
     static int to_try = 0;
     static int was_to = 0;
     static int was_dbbc3_cmd = 0;
-    static int alternating=-1;
     int time_out;
     int time_out_summary_period=60;
 
     static unsigned was_count_next = 0;
     unsigned was_count;
 
+    int alternating=shm_addr->dbbc3_ignore_alt_mcast_to;
     if(alternating)
       time_out_summary_period=30;
 

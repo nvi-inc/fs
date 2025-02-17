@@ -41,12 +41,13 @@ void dbbc3_mcast_time(command,itask,ip)
 {
     int ierr, i, it[6], seconds;
     char output[MAX_OUT];
-    static int alternating=-1;
 
     if(NULL!=command->argv[0]) {
         ierr=-301;
         goto error;
     }
+
+    int alternating=shm_addr->dbbc3_ignore_alt_mcast_to;
 
     rte_time(it,it+5);
     rte2secs(it,&seconds);
