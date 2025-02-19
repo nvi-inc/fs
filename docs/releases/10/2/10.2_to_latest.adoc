@@ -21,7 +21,7 @@
 :doctype: book
 
 = FS 10.2 to Latest Commit Update Notes
-Version 1.4 - November 2024
+Version 1.5 - April 2025
 
 :sectnums:
 :stem: latexmath
@@ -53,7 +53,7 @@ notes were completed. However, that may not be complete. _Let the user
 beware._
 
 This document is up to date with the
-`941fb6c1afdfc99dd8fc52f184479487876afc0c` (`941fb6c1`) commit. Due to
+`0fd7297690a7e13395665b350b432dd2322c21fc` (`0fd72976`) commit. Due to
 small increments, such as updating this document, that may not be the
 literal last commit, but the differences should be small unless you
 happen to `pull` between a significant change and this document being
@@ -83,7 +83,7 @@ then as _prog_ execute:
 
  cd /usr2/fs-git
  git fetch
- git checkout -q 941fb6c1
+ git checkout -q 0fd72976
 
 . If you are using FSL8, or otherwise unable to use _git_:
 
@@ -109,17 +109,17 @@ that:
 
 * For the __tag__ in the `*wget*` and `*tar*` commands, use the short
 SHA for the commit. For example, for commit under discussion here,
-`941fb6c1afdfc99dd8fc52f184479487876afc0c`, use `941fb6c1`.
+`0fd7297690a7e13395665b350b432dd2322c21fc`, use `0fd72976`.
 
 * After extracting the archive, change the name of the output
 directory to use the latest feature release and the short SHA of the
-commit, like _fs-10.2.0-40-g941fb6c1_ (note the _g_ before the short
+commit, like _fs-10.2.0-66-0fd72976_ (note the _g_ before the short
 SHA), which will then be used in the following `*cd*` command. For
 example (kbd:[Tab] completion is your friend for the long SHA):
 
  cd /usr2
- mv fs-941fb6c1afdfc99dd8fc52f184479487876afc0c fs-10.2.0-40-g941fb6c1
- cd /usr2/fs-10.2.0-40-g941fb6c1
+ mv fs-0fd7297690a7e13395665b350b432dd2322c21fc fs-10.2.0-66-g0fd72976
+ cd /usr2/fs-10.2.0-66-g0fd72976
 
 * You will end the "`installing from an archive`" with the step
 setting the link for __/usr2/fs__ by running *`make install`*.
@@ -137,10 +137,43 @@ No output from the last command indicates a successful _make_.
 
 === Update your station code.
 
-This step is not needed at this time.
-
 Except if noted otherwise, these steps should all be performed as
-_prog_.
+_prog_. Click on the *Details* toggle in each item for the needed
+steps.
+
+. If your station code depends on `none` indicating that no schedule
+and/or no schedule procedure file are in use, you need to make
+changes. Most stations, possibly all, won't need to make any changes.
+
++
+[%collapsible]
+====
+
+There are two situations in which local code will need to be updated:
+
+[disc]
+
+* If it compares the shared memory variables `LSKD2` and `LPRC2` (or
+`LSKD` or `LPRC`) to `none` to determine that no schedule or schedule
+procedure library is active, the comparison(s) will need to be changed
+to use spaces.
+
+* If it filters the log (or display) output to determine if no
+schedule or schedule procedure library is active, it will need to be
+changed to accept a null field (i.e., empty, not even spaces), instead
+of `none` in the `schedule/` and `proc/` output.
+
+====
+
+=== Make the station software
+
+The layout of some variables in shared memory has changed. Even if you
+have not updated your station code, you should re-_make_ it to be
+safe. If _/usr2/st/Makefile_ is set-up in the standard way, you can do
+this with (as _prog_):
+
+ cd /usr2/st
+ make rmdoto rmexe all
 
 === Reboot
 
@@ -150,27 +183,55 @@ IMPORTANT: This will make sure shared memory is reallocated.
 
 === Additional steps
 
-Except if noted otherwise, these steps should all be performed as
-_oper_.
+Except if noted otherwise, these should all be performed as _oper_.
+Click on the *Details* toggle in each item for the needed steps.
+
+. If your SNAP procedures use the `if=schedule:none...` command to
+test for no schedule being active, you need to make changes. Most
+stations, possibly all, won't need to make any changes.
+
++
+[%collapsible]
+====
+
+If the `if=schedule:none...` command is used to determine that no
+schedule is active, the `:none` will need to be removed and the `true`
+and `false` commands swapped. Additionally, embedded spaces are no
+longer supported and a second colon, `:`, is now considered part of the
+schedule name.
+
+====
+
+. For DBBC(2) and DBBC3 stations, make sure that the AGC is restored
+after scans for legacy calibration.
+
++
+[%collapsible]
+====
+
+Add the following to `postob` in the `station` procedure library:
+
+ if=cont_cal,,ifagc
+ if=cont_cal,,if=ddc\,bbc_gain=all\\\,agc
+
+====
 
 . Optionally, update the comments in your _.rxg_ files to correctly
 show the correct maximum number of T~cal~ table entries allowed.
 
 +
+[%collapsible]
+====
 
 A script, _/usr2/fs/misc/rxgfix4_, has been provided for this. If the
-original version of the affected comments have been preserved, the
+original version of the affected comments have been preserved, they
 will be updated to the new form. Only the comments immediately before
 the active T~cal~ entries will be updated.
 
-.. Execute:
+Execute:
 
-   cd /usr2/control/rxg_files
-   /usr2/fs/misc/rxgfix4 *.rxg
-
-+
-
-+
+ cd /usr2/control/rxg_files
+ /usr2/fs/misc/rxgfix4 *.rxg
 
 If the script stops because there are existing _.bak_ files, you can
 delete them, if it is safe to do so,  by adding the `-d` option (see
@@ -178,18 +239,79 @@ delete them, if it is safe to do so,  by adding the `-d` option (see
 _before_ the files to be updated. If it is not safe to delete them,
 you could, for example, rename them to end in _.bak2_ with
 `*rename{nbsp}'s/.bak$/.bak2/'{nbsp}++*++.rxg.bak*` first. The
-_rename_, command, by default, will not overwrite existing files, but
+_rename_ command, by default, will not overwrite existing files, but
 you might want to check that your new ending is not already in use for
 some _.rxg_ backup files to avoid possibly mixing different
 "`generations`" of backups.
 
-+
-
-+
 
 NOTE: If you don't have the (_perl_ based) _rename_ command, you can
 install it on FSL__x__ systems as _root_ with
 `*apt-get{nbsp}install{nbsp}rename*`.
+
+====
+
+. Optionally, add the new day-of-year aliases. _dj_ and _lj_, to your
+shells.
+
++
+[%collapsible]
+====
+
+Execute the commands for the shells that you use:
+
+[disc]
+
+* _bash_ -- which is the default login shell for FSL10 and FSL11 (and
+possibly later):
+
+ cd ~
+ tail -2 /usr2/fs/st.default/oper/.bash_aliases >>.bask_aliases
+
+* _tcsh_ -- which is the default login shell for FSL8 and FSL9:
+
+ cd ~
+ tail -2 /usr2/fs/st.default/oper/.cshrc >>.cshrc
+
+You will need to exit any active shell (including possibly logging out
+and back and in again) to make the aliases active.
+
+You may also wish to make these changes for _prog_ (and any AUID
+accounts).
+
+====
+
+. Optionally, install the  _fsy_ utility for use with the display
+server to conditionally start the client if the FS is already running.
+
++
+[%collapsible]
+====
+
+To install this script, execute:
+
+  cp /usr2/fs/misc/fsy cd ~oper/bin
+
+If you are using a remote connection and would like to open a new
+window to run the FS (or client) in, comment out the "`normal`" `if`
+clause and uncomment the command for a new window. In either case, if
+you use AUID accounts, you must promote to _oper_ before running the
+script.
+
+====
+
+. Optionally, update the `check_ntp` SNAP procedure for the new,
+simpler, standard.
+
++
+[%collapsible]
+====
+
+The updated _/usr2/fs/misc/ntp.txt_ file describes the new form and
+how to install the needed scripts, all in sections 6a and 6e. Please
+use those directions as a guide if you want to update.
+
+====
 
 == Changes since 10.2.0
 
@@ -220,6 +342,37 @@ have nested collapsible boxes inside them if there are many sub-items.
 
 === FS changes
 
+. Fix bug in the `terminate` command (closing
+https://github.com/nvi-inc/fs/issues/226[#226]).
+
++
+[%collapsible]
+====
+
+Sometimes the `terminate` command would incorrectly not, in fact,
+terminate the FS when using the display server. Instead it would give
+an `un{nbsp}{nbsp}{nbsp}{nbsp}2` (and ultimately a `bo{nbsp}-176`)
+error. This happened when the FS was checking to make sure _autoftp_
+and _fs.prompt_ weren't active. Workarounds were:
+
+[disc]
+
+* Trying `terminate` again. More than one try may have been needed.
+
+* Using `terminate=force`. That should have worked in all cases
+(except _pfmed_ being active), but would defeat the check for
+_autoftp_ and _fs.prompt_ being active. So it had to be used with
+care.
+
+This bug was triggered by a process file disappearing from _/proc/_
+after it was found in the directory and before it was opened for
+reading to see if it was for an instance of _autoftp_ or _fs.prompt_.
+There was usually only a very small time window in which this could
+happen. The code was aware of this case, but there was a bug in how it
+was handled.
+
+====
+
 . Fix bug in the display server shim for _xterm_ on FSL11, restoring
 use of _autoftp_ (closing
 https://github.com/nvi-inc/fs/issues/218[#218]).
@@ -232,7 +385,7 @@ The conversion to _python3_ for FSL11 (_bullseye_) missed
 _fsserver/shims/xterm_. As a result, it was not possible on FSL11
 systems to use _autoftp_ (or `sy=xterm ...`, which should be avoided
 anyway). The simple fix for this was to make separate _python2_ and
-_python3_ versions as we done for other _python_ scripts in FS _10.2_.
+_python3_ versions, like the other _python_ scripts in FS _10.2_.
 This bug only occurred for FSL11 systems.
 
 ====
@@ -258,6 +411,121 @@ finding this, reporting it, and providing the fix.
 
 ====
 
+. Add missing restoration of AGC in DBBC3 `postob` for legacy
+calibration (closing https://github.com/nvi-inc/fs/issues/231[#231]).
+
++
+[%collapsible]
+====
+
+For legacy calibration, it is necessary to hold the gains fixed during
+a scan so that sampled TPI values can be related to the most recent
+T~sys~ measurement. At the end of the scan, the gains should be
+released to seek an appropriate level for the next scan. For the
+DBBC(2), this is done by the next mode setup. However for the DBBC3,
+`setup_proc` keyword in _skedf.ctl_ is normally used to suppress the
+setup procedure for most scans. Instead, the gains can be released in
+`postob`.
+
+To accomplish this, the following was added to the example `postob`
+for DBBC3:
+
+ if=cont_cal,,ifagc
+ if=cont_cal,,if=ddc\,bbc_gain=all\\\,agc
+
+The same addition was also made for DDBC(2) since it is benign and the
+`setup_proc` keyword might be used.
+
+The updated example files in _/usr2/fs/st.default/proc/_ are
+_d3fbstation.prc_, _dstation.prc, dfbstation.prc,_ and
+_d5cstation.prc_.
+
+Thanks to Christian Plötz (Wettzell) for pointing out that this was
+missing and Beppe Maccaferri (Medicina) for confirming the fix.
+
+====
+
+. Fix bug in reporting time from DBBC3 multicast (closing
+https://github.com/nvi-inc/fs/issues/224[#224]).
+
++
+[%collapsible]
+====
+
+This was a mostly cosmetic (but pretty unsightly) bug that occurred in
+certain situations. For DDC_V firmware, which does not have multicast
+time, it caused spurious times to be displayed. While for non-DDC_V
+(DDC_E/DDC_U) firmware, which does have time available, it caused the
+time to be suppressed. This was due to an error in FS initialization
+in 10.2.0. The two situations where the bug occurred were:
+
+[disc]
+
+*  When using only DDC_V firmware, the first time the FS was run after
+rebooting.
+
+*  When switching between DDC_V firmware and a non-DDC_V firmware
+(DDC_E/DDC_U), in either direction, the first time the FS was run
+after the change in _equip.ctl_.
+
+This bug did not occur if only non-DDC_V firmware was used.
+
+There was a fairly simple workaround for this bug. It was to terminate
+and restart the FS before using it, after:
+
+[disc]
+
+*  A reboot, when only using DDC_V firmware
+
+*  Changing _equip.ctl_, when switching between DDC_V firmware and a
+non-DDC_V firmware (DDC_E/DDC_U), in either direction.
+
+Thanks to J. Quick (HartRAO) for reporting this bug.
+
+====
+
+. Stop attempting to receive RDBE multicast messages when the selected
+rack type is not `rdbe` (closing
+https://github.com/nvi-inc/fs/issues/225[#225]).
+
++
+[%collapsible]
+====
+
+When the selected rack type is not `rdbe` it doesn't make sense to
+process multicast messages from RDBEs. Before, this was only disabled
+if no RDBEs were defined in the _rdbc<x>.ctl_ control files. Doing
+that was necessary to avoid error messages if the RDBEs were not
+transmitting multicast for some reason. However, having to remove the
+definitions when RDBEs were not in use makes it cumbersome to switch
+between RDBEs and other rack types. Additionally, not having the RDBEs
+defined disables any access to RDBEs, specifically with the `rdbe=`
+and `rdbe__x__=` low-level device communication commands.
+Traditionally for flexibility, the FS has allowed low-level
+communication with devices that were not selected.
+
+Thanks to Javi González-García (Yebes) for reporting this oversight.
+
+====
+
+. Move the `onoff` command's testing for valid LOs for RDBE detectors
+to when the _onoff_ program is started.
+
++
+[%collapsible]
+====
+
+Previously when using RDBE detectors with _onoff_, the LOs being valid
+was only tested for when setting up _onoff_ (`onoff=...`) for `all`
+detectors. It was not tested for other detector selections. It is only
+necessary that the LOs  be valid when _onoff_ is started (`onoff`) and
+all selected detectors should be checked. That is also the time when
+the LO and other channel information is collected. This supports
+changing the configuration of the channels after _onoff_ is setup,
+which is consistent with how other racks are handled.
+
+====
+
 . Fix bug in the reporting of the `MA -104` error that caused an
 extraneous `(  -4)` to be displayed in the error message.
 
@@ -272,30 +540,140 @@ a value of `-4` instead of, the correct value, `0`.
 
 ====
 
-. Update comments in _.rxg_ files for the current maximum number of
-T~cal~ table entries (closing
-https://github.com/nvi-inc/fs/issues/211[#211]).
+. Issue warning if only one processor is in use (closing
+https://github.com/nvi-inc/fs/issues/178[#178] and
+https://github.com/nvi-inc/fs/issues/228[#228]).
 
 +
 [%collapsible]
 ====
 
-The comments in the example _.rxg_ files
-(_/usr2/fs/st.default/control/rxg_files/*.rxg_) had not kept up with
-the expansion of the size of the T~cal~ table, first from `400`
-entries to `600` and then `1200`. The files have now been updated.
+The display server requires at least two processors (cores) to operate
+properly. The issue occurs in server termination. Occasionally,
+termination occurs normally even when there is only one processor.
 
-A script, _/usr2/fs/misc/rxgfix4_, has been provided for optional use
-to update the working _.rxg_ files at station. If the original version
-of the comments, with `400`, have been preserved, they will be updated
-to the new form. Only the comments immediately before the active
-T~cal~ entries will be updated. Lines that list `100` and `600` as the
-maximum will also be updated. The former was apparently the size in
-some preliminary versions before the first official release ((_9.6.9_,
-September 2003, commit `7c26ea900dee19b01958e5c4ad846b89d64638c5`)
-that supported _.rxg_ files. The latter was never provided as an
-example, but is covered just in case. See
-`*/usr2/fs/misc/rxgfix4{nbsp}-h*` for the details.
+Typically this problem only occurs if the FS is being run in a virtual
+machine with only one processor. Virtual machines can usually be
+reconfigured to have more processors.
+
+It should be possible to make it work with one processor, but that
+hasn't been implemented yet. Until then, if there is only one
+processor available, warning messages (with hints about what to do)
+are printed at FS startup and when restarting fails because apparently
+a previous instance of the server failed to terminate.
+
+Thanks to Christian Plötz (Wettzell), Uwe Bach (Effelsberg) and Javi
+González-García (Yebes) for reporting this issue. Thanks to David
+Horsley (Hobart) for diagnosing the cause when it was first reported
+(issue https://github.com/nvi-inc/fs/issues/178[#178]).
+
+====
+
+. Add detector device `none` to the `fivept` and `onoff` commands for
+exercising/testing an antenna without a signal chain.
+
++
+[%collapsible]
+====
+
+Normally, the `fivept` and `onoff` commands are used to collect
+pointing and antenna sensitivity data, respectively. This requires
+some sort of signal chain and detector device. The latter is usually
+in the back-end rack. If no detector is available, or doesn't produce
+useful radiometry data, it is now possible to exercise/test the
+antenna with `acquire` by using device `none` in the `fivept` and
+`onoff` setup commands. In this case, there will be no detector
+interaction.
+
+Sample procedure library file _st.default/proc/point_no_det.prc_ and
+control file _st.default/control/ctlpo_no_det.ctl_ are provided as
+examples for using `none` as detector. They are mentioned in the
+`help` pages for `fivept` and `onoff` as a reminder.
+
+====
+
+. Add _rdbemsg_ emails to experiment log as comments (closing
+https://github.com/nvi-inc/fs/issues/213[#213]).
+
++
+[%collapsible]
+====
+
+Including the emails in the log avoids having to enter comments from the
+email messages a second time to get them into the log.
+
+When originally written (by Jason Soohoo, Haystack Observatory), the
+program that became _rdbemsg_ did not run on FS computers and could
+not easily add comments to the log. Due to on oversight when the
+program was ported to FS computers, adding the email message to the
+log, as _msg_ does, was not added. This has been corrected for both
+the _python2_ and _python3_ versions of _rdbemsg_.
+
+Thanks to the staff at KPGO for reporting this issue.
+
+====
+
+. Add `-p` option to _popen_ for streamlined log output.
++
+[%collapsible]
+====
+
+The _popen_ program is used to log the output of Linux programs. A
+`-p` option was added to replace the `+#popen#+` string at the start
+of log entries with `/` (the logging system inserts the `/`). This
+makes the log entries look like the output of internal FS commands.
+Its use is not necessary and is not recommended in most circumstances.
+However, it does look better, particularly for replacements of
+internal FS commands line `wx`. Information on using the _popen_
+program can be found from `*help=sy*`.
+
+Thanks to J. Quick (HartRAO) for conceiving, and providing an
+implementation, of this change,
+
+====
+
+. Restore `-b` startup option as `-C` (closing
+https://github.com/nvi-inc/fs/issues/216[#216]).
+
++
+[%collapsible]
+====
+
+The removal of the `-b` option in FS _10.2.0_ was a bit too hasty. The
+long form of the option was `--background`, which suggested that it
+was the inverse of `--foreground`. This was not the case. With the
+server enabled, it started the FS without a client. This might be
+convenient to use for starting the FS from a script or otherwise
+without the log being displayed on the terminal. A pitfall of using it
+is that there is no feedback about the whether the FS started
+correctly or had a start-up error and aborted. As a result, this
+option must be used with caution.
+
+To make it clearer that it does not start the client, the short option
+was changed to `-C` (_not_ client) and the long option to
+`--no-client`. The help output now includes a warning about the lack
+of feedback for startup errors.
+
+Thanks to Christian Kristukat (AGGO) for reporting the loss of
+functionality when the `-b` option was removed. Thanks to Beppe
+Maccaferri (Medicina) for pointing out the possible pitfall.
+
+====
+
+. Comment out all lines in example _mdlpo.ctl_ and _parpo.ctl_ files
+(closing https://github.com/nvi-inc/fs/issues/214[#214]).
+
++
+[%collapsible]
+====
+
+This prevents these example files being used accidentally with values
+that are incorrect for a new installation. Instead, the pointing
+analysis programs and/or _antcn_ (while reading the default
+_mdlpo.ctl_) will fail until the files have been setup with (hopefully
+reasonable) values for the antenna. While this may make the first time
+use for a new antenna a little painful, it is better than having
+incorrect values being used.
 
 ====
 
@@ -341,7 +719,7 @@ with the original name (regardless of what was already in it), not the
 recovered log file. The recovery process doesn't know what the new (if
 there is one) log file's name is, but will print a message warning
 about this possibility, which can occur whenever the recovery file's
-name includes _recovered_. In retrospect, this may not seem so
+name includes _recovered_. Will all this in mind, this may not be so
 unintuitive after all.
 
 +
@@ -423,6 +801,7 @@ may be headed to extinction.
 ======
 
 =====
+
 .. Make recovery more robust.
 
 +
@@ -439,8 +818,10 @@ this.
 
 +
 
-The note has been updated for more modern systems and to include more
-specific steps.
+This note provides an alternate recovery process that may be helpful
+if the automatic process isn't sufficent. It has been updated to also
+cover more modern systems and to include more specific steps. This
+approach was originally suggested by Pablo de Vicente (Yebes).
 
 .. Make miscellaneous improvements:
 
@@ -467,7 +848,7 @@ normally occur, it could if the `*make{nbsp}install*` was executed a
 second time after an initial installation. This might happen, for
 example, if `*make{nbsp}install*` were used to reset the _/usr2/fs_
 link. The failure occurred because of a confluence of two issues: (i)
-_git_ was unnecessarily used to determine the version of the FS during
+_git_ was unnecessarily used to determine the version of the FS with
 the `install` target and (ii) the  version of _git_ in FSL11, and
 probably later versions, will throw an error if the directory is not
 owned by the user. The problem was resolved by removing the use of
@@ -488,71 +869,6 @@ will be reported and the _make_ will be aborted.
 
 ====
 
-. Add _rdbemsg_ emails to experiment log as comments (closing
-https://github.com/nvi-inc/fs/issues/213[#213]).
-
-+
-[%collapsible]
-====
-
-Including the emails in the log avoids having to enter comments from the
-email messages a second time to get them into the log.
-
-When originally written, the program that became _rdbemsg_ did not run
-on FS computers and could not easily add comments to the log. Due to
-on oversight when the program was ported to FS computers, adding the
-email message to the log, as _msg_ does, was not added. This has been
-corrected for both the _python2_ and _python3_ versions of _rdbemsg_.
-
-Thanks to the staff at KPGO for reporting this issue.
-
-====
-
-. Restore `-b` startup option (closing
-https://github.com/nvi-inc/fs/issues/216[#216]).
-
-+
-[%collapsible]
-====
-
-The removal of the `-b` option in FS _10.2.0_ was a bit too hasty. The
-long form of the option was `--background`, which suggested that it
-was the inverse of `--foreground`. This was not the case. With the
-server enabled, it started the FS without a client. This might be
-convenient to use for starting the FS from a script or otherwise
-without the log being displayed on the terminal. A pitfall of using it
-is that there is no feedback about the whether the FS started
-correctly or had a start-up error and aborted. As a result, this
-option must be used with caution.
-
-To make it clearer that it does not start the client, the short option
-was changed to `-C` (_not_ client) and the long option to
-`--no-client`. The help output now includes a warning about the lack
-of feedback for startup errors.
-
-Thanks to Christian Kristukat (AGGO) for reporting the loss of
-functionality when the `-b` option was removed. Thanks to Beppe
-Maccaferri (Medicina) for pointing out the possible pitfall.
-
-====
-
-. Comment out all lines in example _mdlpo.ctl_ and _parpo.ctl_ files
-(closing https://github.com/nvi-inc/fs/issues/214[#214]).
-
-+
-[%collapsible]
-====
-
-This prevents these example files being used accidentally with values
-that are incorrect for a new installation. Instead, the pointing
-analysis programs and/or _antcn_ (while reading the default
-_mdlpo.ctl_) will fail until the files have been setup with reasonable
-values for the antenna. While this may make the first time use for a
-new antenna a little painful, it is better than having incorrect
-values being used.
-
-====
-
 . Prevent _root_ from running the FS.
 
 +
@@ -569,6 +885,193 @@ included for consistency. Off-line utilities, including _pfmed_, can
 still be run by _root_, but this is not recommended and should be
 avoided. It may lead to problems. However, it would not be inherently
 dangerous.
+
+====
+
+. Create shell aliases for _date_ and _ls_ command output with
+day-of-year and 24-hour time display.
+
++
+[%collapsible]
+====
+
+Two new shell aliases were added:
+
+[disc]
+
+* _dj_ -- Display the current date/time (down to the seconds) in the
+same format as used by FS logs as well as some additional date
+information. This might be useful if the day-of-year and/or 24-hour
+time are not readily visible elsewhere. Example output:
+
+ Mon 2025.104.13:44:54 UTC (Apr 14)
+
+
+* _lj_ -- Display an _ls -l_ listing with the date/time field (down to
+the seconds) in the same format as used by FS logs. This is intended
+to help associate logs with the day-of-year they were used when
+troubleshooting. It can be combined with other _ls_ flags. For
+example, the _-t_ flag can used and the output piped to _less_ to show
+the logs, newest first, one page at a time:
+
+ cd /usr2/log
+ lj -t | less
+
+====
+
+. Add _fsy_ utility for conditionally running _fsclient_ if the FS is
+already active.
+
++
+[%collapsible]
+====
+
+This utility can be found in _misc/fsy_. It can installed in
+_~oper/bin_. It will check to see if the client can be run (i.e. FS is
+running and display server is enabled). If not, it will start the FS.
+It can be useful for systems using the display server to start the FS
+if it is not already running or the client if it is. There is some
+risk associated with this since you will not get obvious feedback if
+the FS is not running and you expect it to be. However, you may prefer
+to not have to enter a separate command to run the FS if attempting to
+start the client (_fslcient_) first fails.
+
+The script includes commented out commands that you can use instead if
+you prefer to open a new window to run the FS or client in. This may
+be useful for some remote connections.
+
+CAUTION: For systems with AUID accounts, it is necessary to promote
+_oper_ before running the script.
+
+Thanks to Chevo Terrazas (MGO) for pointing out the overall usefulness
+of this script, which was originally only provided as a site-specific
+ad hoc tool.
+
+====
+
+. Add utilities to simplify the `check_ntp` SNAP procedure.
+
++
+[%collapsible]
+====
+
+New scripts, _grep_ntpq_, _cname_ntpq_ip_, and _redact_ntpq_ip_ were
+added to simplify (i.e., make more readable and easier to maintain)
+the `check_ntp` SNAP procedure.  The updated _/usr2/fs/misc/ntp.txt_
+file describes the new form and how to install the new scripts, all in
+sections 6a and 6e.
+
+====
+
+. Remove using `none` as the displayed _name_ when no schedule or no
+schedule procedure library is in use (closing
+https://github.com/nvi-inc/fs/issues/222[#222]).
+
++
+[%collapsible]
+====
+
+Previously when no schedule and schedule procedure library was in use,
+`none` was displayed as the _name_ in the  output of the `schedule`
+and `proc` commands, respectively. Also, in _pfmed_'s preamble, the
+`current{nbsp}FS{nbsp}schedule{nbsp}procedure{nbsp}library` was shown
+as `none`. This came about because the FS used `none` internally when
+there was no active file. This was inconsistent and could be confusing
+because `none` was also an allowed name for schedules and schedule
+procedure libraries. This was corrected by making the following
+changes:
+
+.. A string of spaces is now used internally to indicate no file is
+use.
+
+.. The `schedule` and `proc` commands now display the _name_ as a null
+field (i.e., empty, not even spaces) when no schedule or schedule
+procedure library, respectively, is in use.
+
+.. Spaces are no longer allowed in these names. Actually, they weren't
+before, but this only became apparent when the low-level RTE-A
+emulation file routines truncated the name at the first space and
+attempted to use a file with the shorter name. That might lead to a
+difficult to understand error message if the file didn't exist or
+unexpected behavior if it did. This is now trapped at the highest
+level and an appropriate error message is given.
+
+.. The `if=schedule:...` command was updated to no longer use `none`
+as the schedule name to test if no schedule is active. The use of
+embedded spaces in the schedule name are no longer supported. If a
+second colon, `:`, is used, it will now be interpreted as part of the
+name. See `*help=if*` for more information on the `if` command.
+
+.. _pfmed_ was updated to agree with the changes above. This included
+making the `current{nbsp}FS{nbsp}schedule{nbsp}procedure{nbsp}library`
+in the preamble display `no{nbsp}library{nbsp}is{nbsp}selected` when
+there is none.
+
+.. Some other small incidental improvements were made to _pfmed_:
+
+... Empty input at the main prompt no longer prints an obscure error
+message before re-prompting.
+
+... The check of the length of a second library name in `pf__xx__,...`
+commands is now correct. It was still eight characters.
+
+... The length of the optional `_library_` in the
+`st,...[::__library__],...` command is now checked. It wasn't before.
+
+.. Additionally, a few error messages for _boss_ were fixed to refer
+to schedules and schedule procedure libraries more consistently.
+
+The consequences of these changes for existing FS installations is
+fairly limited. It seems unlikely they will affect anyone, but to be
+complete, they are listed here:
+
+.. If any station software compares the shared memory variables
+`LSKD2` and `LPRC2` (or `LSKD` or `LPRC`) to `none` to determine that
+no schedule or schedule procedure library is active, the comparison(s)
+will need to be changed to use spaces.
+
+.. If any station software filters the log (or display) output to
+determine if no schedule or schedule procedure library is active, it
+will need to be changed to accept a null field (i.e., empty, not even
+spaces), instead of `none` in the `schedule/` and `proc/` output.
+
+.. If any station uses the `if=schedule:none...` command to determine
+that no schedule is active, they will need to remove `:none` from the
+command and swap the `true` and `false` commands. No embedded spaces
+are allowed, and a second colon, `:`, is now considered part of the
+schedule name.
+
+The positive outcome of all this is that the schedule and schedule
+procedure library names are now handled consistently. The use of
+`none` is not recommended for either since that may be confusing, but
+the behavior will now be clearer and predictable.
+
+====
+
+. Update comments in _.rxg_ files for the current maximum number of
+T~cal~ table entries (closing
+https://github.com/nvi-inc/fs/issues/211[#211]).
+
++
+[%collapsible]
+====
+
+The comments in the example _.rxg_ files
+(_/usr2/fs/st.default/control/rxg_files/*.rxg_) had not kept up with
+the expansion of the size of the T~cal~ table, first from `400`
+entries to `600` and then `1200`. The files have now been updated.
+
+A script, _/usr2/fs/misc/rxgfix4_, has been provided for optional use
+to update the working _.rxg_ files at station. If the original version
+of the comments, with `400`, have been preserved, they will be updated
+to the new form. Only the comments immediately before the active
+T~cal~ entries will be updated. Lines that list `100` and `600` as the
+maximum will also be updated. The former was apparently the size in
+some preliminary versions before the first official release (_9.6.9_,
+September 2003, commit `7c26ea900dee19b01958e5c4ad846b89d64638c5`)
+that supported _.rxg_ files. The latter was never provided as an
+example, but is covered just in case. See
+`*/usr2/fs/misc/rxgfix4{nbsp}-h*` for the details.
 
 ====
 
@@ -596,6 +1099,18 @@ specified in the _help/lvdt.*_ files. It was replaced with the word.
 +
 [%collapsible]
 ====
+
+.. Add a sub-step to update the comments for rack types in _equip.ctl_
+in the FS _10.1_ and FS 10.2 updates notes. Updating the comments is
+strictly speaking optional, but not doing so could lead to confusion
+later since the available DBBC3 rack types were changed in both of
+those updates. The previous omission of these sub-steps  was an
+oversight.
+
++
+
+Thanks to J. Gonzalez (Yebes) for pointing out that these sub-steps
+were missing.
 
 .. Add examples for non-breaking spaces and hyphens to the Font
 Conventions.
