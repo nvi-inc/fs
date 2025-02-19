@@ -1544,6 +1544,9 @@ No default for IF command condition.
 BO -315
 Unknown condition in IF command.
 ""
+BO -316
+Spaces are not allowed in the schedule name for IF command condition.
+""
 BO -390
 setup procedure name must be 12 characters or less.
 ""

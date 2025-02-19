@@ -63,16 +63,13 @@ they match, the condition is true. For example:
 
 executes "yes" if the schedule name starts with "r1".  If ":" or
 ":string" is omitted, the command is true iff any schedule is
-executing.  Trailing spaces in "string" are ignored unless they are
-followed by a colon (which is discarded).  If no schedule is executing
-(schedule=) all of the follow lines will all execute "no":
+executing.  Trailing spaces in "string" are ignored. No leading or
+embedded spaces are allowed in "string".  If no schedule is executing
+(schedule=), all the follow lines will execute "no":
 
   if=schedule,yes,no
-  if=schedule:none,no,yes
-  if=schedule=:none    :,no,yes
-
-Please note that if a schedule named "none" is executing
-(schedule=none), the above commands will also all execute "no".
+  if=schedule:,yes,no
+  if=schedule:name,yes,no
 
 It is necessary to use backslash ("\") to "escape" any commas (",")
 and at-signs ("@") within the "true-command" and "false-command".  For

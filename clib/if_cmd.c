@@ -260,12 +260,14 @@ int if_cmd(ibuf,nchar)
 
     ptr=strtok(ptr_cond,":");
     if(NULL!=ptr)
-      ptr2=strtok(NULL,":");
+      ptr2=strtok(NULL,"");
     if(NULL==ptr || NULL==ptr2)
       if(!strncmp(shm_addr->LSKD2,"     ",5))
 	strcpy(ibuf,ptr_false);
       else
 	strcpy(ibuf,ptr_true);
+    else if(index(ptr2,' '))
+      return -4;  /* no spaces in schedule name */
     else
       if(!strncmp(shm_addr->LSKD2,ptr2,strlen(ptr2)))
 	strcpy(ibuf,ptr_true);
