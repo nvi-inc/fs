@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2023 NVI, Inc.
+ * Copyright (c) 2020-2025 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -17,7 +17,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-/* initialization for "C" shared memory area */
 
 #include <stdlib.h>
 #include <string.h>
@@ -31,13 +30,13 @@
 #include "../include/fscom.h"
 #include "../include/shm_addr.h"
 
-char *getenv_DBBC3( char *env, int *actual, int *nominal, int *error, int options);
+/* initialization for "C" shared memory area */
+/* initialized items that can be set before control files are read */
+/* see cshm_init2() for items after the control files are read */
 
 void cshm_init()
 {
   int i,j,k;
-  static int time_included = -1;
-  char *ptr;
 
   for (i=0; i< 32; i++)
     shm_addr->vform.codes[i]=-1;
@@ -558,32 +557,6 @@ void cshm_init()
       m5state_init(&shm_addr->dbbc3_core3h_modex[i].start.state);
   }
 
-  if(0>time_included) {
-      int actual, error;
-      ptr=getenv_DBBC3("FS_DBBC3_MULTICAST_CORE3H_TIME_INCLUDED",&actual,NULL,&error,1);
-      if(0==error)
-          time_included=actual;
-      else
-          time_included=0;
-  }
-
-  shm_addr->dbbc3_tsys_data.iping=0;
-  for(i=0;i<2;i++) {
-      shm_addr->dbbc3_tsys_data.data[i].last=0;
-      for(j=0;j<MAX_DBBC3_IF;j++) {
-          shm_addr->dbbc3_tsys_data.data[i].ifc[j].lo=-1.0;
-          shm_addr->dbbc3_tsys_data.data[i].ifc[j].delay=UINT_MAX;
-          shm_addr->dbbc3_tsys_data.data[i].ifc[j].time_included=time_included;
-          shm_addr->dbbc3_tsys_data.data[i].ifc[j].time_error=-1000000;
-          shm_addr->dbbc3_tsys_data.data[i].ifc[j].vdif_epoch= -1;
-          shm_addr->dbbc3_tsys_data.data[i].ifc[j].time = 0;
-      }
-      for(j=0;j<MAX_DBBC3_BBC;j++) {
-          shm_addr->dbbc3_tsys_data.data[i].bbc[j].freq=UINT_MAX;
-          shm_addr->dbbc3_tsys_data.data[i].bbc[j].tsys_lsb=-9e20;
-          shm_addr->dbbc3_tsys_data.data[i].bbc[j].tsys_usb=-9e20;
-      }
-  }
   shm_addr->dbbc3_command_count=0;
   shm_addr->dbbc3_command_active=0;
 
