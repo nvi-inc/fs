@@ -7734,7 +7734,7 @@ TC -102
 cycle period has no default.
 ""
 TC -201
-Continuous parameter must be "no" or "yes" (or "stop" or "tsys").
+Continuous parameter must be "no" or "yes" (or: "stop", "tsys", "reset, "force", "display_on", "display_off").
 ""
 TC -202
 Cycle period must be a non-negative integer.
@@ -7750,6 +7750,9 @@ Continuous cal Tsys only available for DBBC DDC.
 ""
 TC -304
 'tpicd=reset' is only available for DBBC3.
+""
+TC -305
+'tpicd=force' is only available for DBBC3.
 ""
 TE   -9
 Video converter frequency has not been set

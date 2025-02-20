@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, 2022, 2023 NVI, Inc.
+ * Copyright (c) 2020, 2022, 2023, 2025 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -137,6 +137,12 @@ int ip[5];                           /* ipc parameters */
 	  cls_snd(&shm_addr->iclbox,0,0,0,val);
 	  ip[0]=ip[1]=ip[2]=0;
 	  return;
+	} else if(0==strcmp(command->argv[0],"force")){
+	  if(DBBC3!=shm_addr->equip.rack) {
+	    ierr=-305;
+	    goto error;
+	  }
+          goto Start;
 	}
       }
 /* if we get this far it is a set-up command so parse it */
