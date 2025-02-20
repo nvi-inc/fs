@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020, 2021, 2023 NVI, Inc.
+* Copyright (c) 2020, 2021, 2023, 2025 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -1207,6 +1207,9 @@ C **** TACD line
       call fs_set_tacd_hostpc(hostpc_fs)
       call fs_set_tacd_port(port)
       call fmpclose(idcb,ierr)
+C
+      call fc_cshm_init2
+C
       goto 995
 C
 C  This is the error return section
