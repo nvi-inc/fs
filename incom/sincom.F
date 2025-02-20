@@ -1207,6 +1207,9 @@ C **** TACD line
       call fs_set_tacd_hostpc(hostpc_fs)
       call fs_set_tacd_port(port)
       call fmpclose(idcb,ierr)
+C
+      call fc_cshm_init2
+C
       goto 995
 C
 C  This is the error return section
