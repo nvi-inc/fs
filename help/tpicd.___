@@ -5,6 +5,7 @@
                         tpicd=stop
                         tpicd=tsys
                         tpicd=reset
+                        tpicd=force
                         tpicd=display_on
                         tpicd=display_off
                         tpicd=?
@@ -65,6 +66,12 @@ The form 'tpicd=reset' can only be used with a DBBC3 and only if
 continuous cal is selected. If averaging has been selected, this form
 will force a reset of the detector averages. This is useful, e.g., if
 RFI had caused the averages to be skewed.
+
+The form 'tpicd=force' can only be used with a DBBC3. It will force
+logging of non-Tsys multicast data even if no channels are selected or
+continuous cal is not selected. This is useful for recording non-Tsys
+multicast (typically time) data without a full setup for Tsys.
+The 'cont' and 'interval' values must be set appropriately first.
 
 For DBBC3s, this command controls the 'dbtcn' daemon, which collects and
 process multicast data. The details of that functional is described more
