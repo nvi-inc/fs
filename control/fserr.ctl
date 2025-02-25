@@ -6092,6 +6092,9 @@ Detector device must be one of the allowed detectors for your equipment or u5 or
 QZ -207
 Wait time must be 1-1200
 ""
+QZ -208
+Beamwidth must be a real number.
+""
 QZ -213
 Detector device not one of ia/b/c/d, or bbc1 ... bbc14.
 ""
@@ -6124,6 +6127,9 @@ The VC specified for FIVPT was not setup.
 ""
 QZ -304
 Parameters were not successfully set up for FIVPT.
+""
+QZ -308
+Beamwidth parameter only allowed for device 'none'.
 ""
 Q* -101
 No default for LO channel
