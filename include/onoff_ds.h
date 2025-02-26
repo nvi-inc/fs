@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020, 2025 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -19,6 +19,31 @@
  */
 /* header file for onoff data structures */
 
+struct onoff_cmd_old {
+  int rep;              /* repetitions, number */
+  int intp;             /* integration period, seconds */
+  float cutoff;         /* angle to switch to el instead of az offs, degrees */
+  float step;           /* step size in FWHMs */
+  int wait;             /* wait time for on to off transition */
+  float ssize;           /* source size, radians */
+  char proc[33];        /* procedure for first points */
+  struct onoff_devices_old {
+    char lwhat[4];      /* device ID */
+    char pol;           /* polarization */
+    int ifchain;        /* which IF */
+    float flux;         /* source flux */
+    float corr;         /* source structure correction */
+    double center;      /* detector center frequency */
+    float fwhm;         /* full width half maximum (degrees) */
+    float tcal;        /* cal temperature */
+    float dpfu;         /* degrees per flux unit (gain) */
+    float gain;        /* gain curve, maximum=1.0 */
+  } devices[MAX_ONOFF_DET];
+  int itpis[MAX_ONOFF_DET];        /* control array for which devices */
+  float fwhm;        /* FWHM for detector with the widest beam */
+  int stop_request;     /* stop request issued? */
+  int setup;            /* have we been set-up */
+};
 struct onoff_cmd {
   int rep;              /* repetitions, number */
   int intp;             /* integration period, seconds */
@@ -43,5 +68,6 @@ struct onoff_cmd {
   float fwhm;        /* FWHM for detector with the widest beam */
   int stop_request;     /* stop request issued? */
   int setup;            /* have we been set-up */
+  int none_detector;
 };
 

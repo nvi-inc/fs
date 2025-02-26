@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, 2022, 2023 NVI, Inc.
+ * Copyright (c) 2020, 2022, 2023, 2025 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -95,7 +95,7 @@ main()
   memcpy(&onoff,&shm_addr->onoff,sizeof(onoff));
   ierr=0;
 
-  if(shm_addr->equip.rack==RDBE) { /* remove inactive RDBEs */
+  if(shm_addr->equip.rack==RDBE && !onoff.none_detector) { /* remove inactive RDBEs */
     int some=0;
     int removed[MAX_RDBE];
     for (i=0;i<MAX_RDBE;i++)
@@ -124,7 +124,6 @@ main()
     }
   }
 
-
   count=0;
   for(j=0;j<MAX_ONOFF_DET;j++)
     if(onoff.itpis[j]!=0)
@@ -132,48 +131,50 @@ main()
   snprintf(buff,sizeof(buff)," Starting run with %d detectors selected",count);
   logit(buff,0,NULL);
 
-  use_cal=FALSE;
-  station_det=FALSE;
-  rack_det=FALSE;
-  cont0=shm_addr->equip.rack==DBBC  &&
-	      (shm_addr->equip.rack_type == DBBC_DDC ||
-	       shm_addr->equip.rack_type == DBBC_DDC_FILA10G)
-    && shm_addr->dbbc_cont_cal.mode == 1;
-  cont0=cont0 ||
-    shm_addr->equip.rack==DBBC3 && shm_addr->dbbc3_cont_cal.mode == 1;
-  cont0=cont0 || shm_addr->equip.rack==RDBE;
-  for(j=0;j<MAX_ONOFF_DET;j++) {
-    if(onoff.itpis[j]!=0) {
-      use_cal=use_cal ||onoff.devices[j].tcal>0.0;
-      if(j<MAX_GLOBAL_DET) {
-	rack_det=TRUE;
-	cont[j]=cont0;
-      } else {
-	station_det=TRUE;
-	cont[j]=0;
-      }
-      source_type[j]='x';
-      for(i=0;i<MAX_FLUX;i++){
-	if(shm_addr->flux[i].name[0]==0)
-	  break;
-	if(strcmp(lsorna,shm_addr->flux[i].name)==0
-	   && onoff.devices[j].center >= shm_addr->flux[i].fmin
-	   && onoff.devices[j].center <= shm_addr->flux[i].fmax) {
-	  source_type[j]=shm_addr->flux[i].type;
-	  break;
-	}
+  if (!onoff.none_detector) {
+    use_cal=FALSE;
+    station_det=FALSE;
+    rack_det=FALSE;
+    cont0=shm_addr->equip.rack==DBBC  &&
+      (shm_addr->equip.rack_type == DBBC_DDC ||
+       shm_addr->equip.rack_type == DBBC_DDC_FILA10G)
+      && shm_addr->dbbc_cont_cal.mode == 1;
+    cont0=cont0 ||
+      shm_addr->equip.rack==DBBC3 && shm_addr->dbbc3_cont_cal.mode == 1;
+    cont0=cont0 || shm_addr->equip.rack==RDBE;
+    for(j=0;j<MAX_ONOFF_DET;j++) {
+      if(onoff.itpis[j]!=0) {
+        use_cal=use_cal ||onoff.devices[j].tcal>0.0;
+        if(j<MAX_GLOBAL_DET) {
+          rack_det=TRUE;
+          cont[j]=cont0;
+        } else {
+          station_det=TRUE;
+          cont[j]=0;
+        }
+        source_type[j]='x';
+        for(i=0;i<MAX_FLUX;i++){
+          if(shm_addr->flux[i].name[0]==0)
+            break;
+          if(strcmp(lsorna,shm_addr->flux[i].name)==0
+              && onoff.devices[j].center >= shm_addr->flux[i].fmin
+              && onoff.devices[j].center <= shm_addr->flux[i].fmax) {
+            source_type[j]=shm_addr->flux[i].type;
+            break;
+          }
+        }
       }
     }
-  }
-  if(cont0) {
-    use_cal=FALSE;
-    if(!rack_det)
-      cont0=FALSE;
-  }
+    if(cont0) {
+      use_cal=FALSE;
+      if(!rack_det)
+        cont0=FALSE;
+    }
 
-  if(cont0) {
-    snprintf(buff,sizeof(buff)," Using continuous cal, all integrations include both cal on and off data");
-    logit(buff,0,NULL);
+    if(cont0) {
+      snprintf(buff,sizeof(buff)," Using continuous cal, all integrations include both cal on and off data");
+      logit(buff,0,NULL);
+    }
   }
   snprintf(buff,sizeof(buff)," Maximum allotted time to reach an on or off source position is %d seconds",
            shm_addr->onoff.wait);
@@ -203,37 +204,38 @@ main()
   rte_time(it,it+5);
   rut=it[3]*3600.0+it[2]*60.0+it[1]+((double)it[0])/100.;
 
-  if(shm_addr->equip.rack==VLBA||shm_addr->equip.rack==VLBA4) {
-    logit(" Locking gains",0,NULL);
-    kagc=TRUE;
-    if(agc(onoff.itpis,0,&ierr))
-      goto error_recover;
-  } else if(shm_addr->equip.rack==DBBC &&
-	      (shm_addr->equip.rack_type == DBBC_DDC ||
-	       shm_addr->equip.rack_type == DBBC_DDC_FILA10G)) {
-    logit(" Locking gains",0,NULL);
-    kagc=TRUE;
-    if(agc_dbbc(onoff.itpis,0,&ierr))
-      goto error_recover;
-  } else if(shm_addr->equip.rack==DBBC &&
-	      (shm_addr->equip.rack_type == DBBC_PFB ||
-	       shm_addr->equip.rack_type == DBBC_PFB_FILA10G)) {
-    logit(" Locking gains",0,NULL);
-    kagc=TRUE;
-    if(agc_dbbc_pfb(onoff.itpis,0,&ierr))
-      goto error_recover;
-  } else if(shm_addr->equip.rack==DBBC) {
-    logit(" Locking gains",0,NULL);
-    kagc=TRUE;
-    if(agc_dbbc(onoff.itpis,0,&ierr))
-      goto error_recover;
-  } else if(shm_addr->equip.rack==DBBC3) {
-    logit(" Locking gains",0,NULL);
-    kagc=TRUE;
-    if(agc_dbbc3(onoff.itpis,0,&ierr))
-      goto error_recover;
+  if (!onoff.none_detector) {
+    if(shm_addr->equip.rack==VLBA||shm_addr->equip.rack==VLBA4) {
+      logit(" Locking gains",0,NULL);
+      kagc=TRUE;
+      if(agc(onoff.itpis,0,&ierr))
+        goto error_recover;
+    } else if(shm_addr->equip.rack==DBBC &&
+        (shm_addr->equip.rack_type == DBBC_DDC ||
+         shm_addr->equip.rack_type == DBBC_DDC_FILA10G)) {
+      logit(" Locking gains",0,NULL);
+      kagc=TRUE;
+      if(agc_dbbc(onoff.itpis,0,&ierr))
+        goto error_recover;
+    } else if(shm_addr->equip.rack==DBBC &&
+        (shm_addr->equip.rack_type == DBBC_PFB ||
+         shm_addr->equip.rack_type == DBBC_PFB_FILA10G)) {
+      logit(" Locking gains",0,NULL);
+      kagc=TRUE;
+      if(agc_dbbc_pfb(onoff.itpis,0,&ierr))
+        goto error_recover;
+    } else if(shm_addr->equip.rack==DBBC) {
+      logit(" Locking gains",0,NULL);
+      kagc=TRUE;
+      if(agc_dbbc(onoff.itpis,0,&ierr))
+        goto error_recover;
+    } else if(shm_addr->equip.rack==DBBC3) {
+      logit(" Locking gains",0,NULL);
+      kagc=TRUE;
+      if(agc_dbbc3(onoff.itpis,0,&ierr))
+        goto error_recover;
+    }
   }
-
   if(local(&az,&el,"azel",&ierr))
     goto error_recover;
 
@@ -250,48 +252,68 @@ main()
     }
 
   sprintf(buff2,
- "    De      Center  TCal    Flux    DPFU     Gain    Product   LO     T  FWHM");
+      "    De      Center  TCal    Flux    DPFU     Gain    Product   LO     T  FWHM");
   logit_nd(buff2,0,NULL);
 
-  for(i=0;i<MAX_ONOFF_DET;i++) {
-    if(onoff.itpis[i]!=0) {
-      /*      sprintf(buff,
-	      "APR %-10.10s %5.1f %4.1f %.4s %d %c %9.2lf ",
-	      shm_addr->lsorna,az,el,
-	      onoff.devices[i].lwhat,
-	      onoff.devices[i].ifchain,
-	      onoff.devices[i].pol,
-	      onoff.devices[i].center); */
-      
-      sprintf(buff,
-	      "APR %-4.4s %9.2lf ",
-	      onoff.devices[i].lwhat,onoff.devices[i].center);
-      jr2as(onoff.devices[i].tcal,buff,-5,3,sizeof(buff));
-      strcat(buff," ");
-      jr2as(onoff.devices[i].flux,buff,-7,2,sizeof(buff));
-      strcat(buff," ");
-      jr2as(onoff.devices[i].dpfu,buff,-9,6,sizeof(buff));
-      strcat(buff," ");
-      jr2as(onoff.devices[i].gain,buff,-7,5,sizeof(buff));
-      strcat(buff," ");
-     jr2as(onoff.devices[i].dpfu*onoff.devices[i].gain,buff,-9,6,sizeof(buff));
+  if (onoff.none_detector) {
+        sprintf(buff,
+            "APR %-4.4s %9.2lf ",
+            "none",0.0);
+        jr2as(0.0,buff,-5,3,sizeof(buff));
+        strcat(buff," ");
+        jr2as(0.0,buff,-7,2,sizeof(buff));
+        strcat(buff," ");
+        jr2as(0.0,buff,-9,6,sizeof(buff));
+        strcat(buff," ");
+        jr2as(0.0,buff,-7,5,sizeof(buff));
+        strcat(buff," ");
+        jr2as(0.0,buff,-9,6,sizeof(buff));
 
-     ifchain=onoff.devices[i].ifchain;
-     if(1 <= ifchain && ifchain <=MAX_LO)
-       sprintf(buff+strlen(buff)," %8.2f %c %.5f",
-	       shm_addr->lo.lo[onoff.devices[i].ifchain-1],
-	       source_type[i],
-	       onoff.devices[i].fwhm*RAD2DEG);
-     else if(MAX_LO+1 <= ifchain && ifchain <= MAX_LO+6)
-       sprintf(buff+strlen(buff)," %8.2f %c %.5f",
-	       shm_addr->user_device.lo[onoff.devices[i].ifchain-(1+MAX_LO)],
-	       source_type[i],
-	       onoff.devices[i].fwhm*RAD2DEG);
-     else
-       sprintf(buff+strlen(buff)," %8.2f %c %.5f",
-	       0.0,'x',0.0);
+        sprintf(buff+strlen(buff)," %8.2f %c %.5f",
+            0.0,'x',onoff.fwhm*RAD2DEG);
 
-      logit_nd(buff,0,NULL);
+        logit_nd(buff,0,NULL);
+  } else {
+    for(i=0;i<MAX_ONOFF_DET;i++) {
+      if(onoff.itpis[i]!=0) {
+        /*      sprintf(buff,
+                "APR %-10.10s %5.1f %4.1f %.4s %d %c %9.2lf ",
+                shm_addr->lsorna,az,el,
+                onoff.devices[i].lwhat,
+                onoff.devices[i].ifchain,
+                onoff.devices[i].pol,
+                onoff.devices[i].center); */
+
+        sprintf(buff,
+            "APR %-4.4s %9.2lf ",
+            onoff.devices[i].lwhat,onoff.devices[i].center);
+        jr2as(onoff.devices[i].tcal,buff,-5,3,sizeof(buff));
+        strcat(buff," ");
+        jr2as(onoff.devices[i].flux,buff,-7,2,sizeof(buff));
+        strcat(buff," ");
+        jr2as(onoff.devices[i].dpfu,buff,-9,6,sizeof(buff));
+        strcat(buff," ");
+        jr2as(onoff.devices[i].gain,buff,-7,5,sizeof(buff));
+        strcat(buff," ");
+        jr2as(onoff.devices[i].dpfu*onoff.devices[i].gain,buff,-9,6,sizeof(buff));
+
+        ifchain=onoff.devices[i].ifchain;
+        if(1 <= ifchain && ifchain <=MAX_LO)
+          sprintf(buff+strlen(buff)," %8.2f %c %.5f",
+              shm_addr->lo.lo[onoff.devices[i].ifchain-1],
+              source_type[i],
+              onoff.devices[i].fwhm*RAD2DEG);
+        else if(MAX_LO+1 <= ifchain && ifchain <= MAX_LO+6)
+          sprintf(buff+strlen(buff)," %8.2f %c %.5f",
+              shm_addr->user_device.lo[onoff.devices[i].ifchain-(1+MAX_LO)],
+              source_type[i],
+              onoff.devices[i].fwhm*RAD2DEG);
+        else
+          sprintf(buff+strlen(buff)," %8.2f %c %.5f",
+              0.0,'x',0.0);
+
+        logit_nd(buff,0,NULL);
+      }
     }
   }
 
@@ -314,7 +336,7 @@ main()
     scmds(buff);
   }
 
-  if(use_cal)
+  if(use_cal && !onoff.none_detector)
     scmds("caloffnf");
 
   savoff(&xoff,&yoff,&azoff,&eloff,&haoff,&decoff);
@@ -376,19 +398,28 @@ main()
       logit(buff,0,NULL);
     }
 
-    if(cont0)
+    if(onoff.none_detector)
+      snprintf(buff,sizeof(buff)," Simulating %d second(s) of taking data", onoff.intp);
+    else if(cont0)
       snprintf(buff,sizeof(buff)," Integrating for %d second(s)", onoff.intp);
     else
       snprintf(buff,sizeof(buff)," Integrating for %d second(s): cal off",
                onoff.intp);
     logit(buff,0,NULL);
-    if(get_samples(cont,ip,&onoff.itpis,onoff.intp,rut,&sample,&sampl2,&ierr))
-      goto error_recover;
-    wcounts("ONSO",0.0,0.0,&onoff,&sample);
-    inc_accum(&onoff.itpis,&ons,&sample);
-    if(cont0) {
-      wcounts("ONSC",0.0,0.0,&onoff,&sampl2);
-      inc_accum(&onoff.itpis,&onscal,&sampl2);
+
+    if (!onoff.none_detector) {
+      if(get_samples(cont,ip,&onoff.itpis,onoff.intp,rut,&sample,&sampl2,&ierr))
+        goto error_recover;
+      wcounts("ONSO",0.0,0.0,&onoff,&sample);
+      inc_accum(&onoff.itpis,&ons,&sample);
+      if(cont0) {
+        wcounts("ONSC",0.0,0.0,&onoff,&sampl2);
+        inc_accum(&onoff.itpis,&onscal,&sampl2);
+      }
+    } else {
+      ierr=none_detector_counts(buff,sizeof(buff),rut,"ONSO",onoff.intp,0.0,0.0);
+      if(ierr!=0)
+        goto error_recover;
     }
 
     if(onoff.proc[0]!=0 && i==0) {
@@ -399,12 +430,12 @@ main()
       scmds(buff);
     }
 
-    if(use_cal) {
+    if(use_cal && !onoff.none_detector) {
       scmds("calonnf");
       snprintf(buff,sizeof(buff)," Integrating for %d second(s): cal on", onoff.intp);
       logit(buff,0,NULL);
       if(get_samples(cont,ip,&onoff.itpis,onoff.intp,rut,&sample,&sampl2,&ierr))
-	goto error_recover;
+        goto error_recover;
       wcounts("ONSC",0.0,0.0,&onoff,&sample);
       inc_accum(&onoff.itpis,&onscal,&sample);
     }
@@ -418,31 +449,41 @@ main()
 	     shm_addr->onoff.wait,&ierr))
       goto error_recover;
 
-    if(use_cal) {
+    if(use_cal && !onoff.none_detector) {
       snprintf(buff,sizeof(buff)," Integrating for %d second(s): cal on", onoff.intp);
       logit(buff,0,NULL);
       if(get_samples(cont,ip,&onoff.itpis,onoff.intp,rut,&sample,&sampl2,&ierr))
-	goto error_recover;
+        goto error_recover;
       wcounts("OFFC",isgn*astep,isgn*estep,&onoff,&sample);
       inc_accum(&onoff.itpis,&ofscal,&sample);
 
       scmds("caloffnf");
     }
 
-    if(cont0)
+    if(onoff.none_detector)
+      snprintf(buff,sizeof(buff)," Simulating %d second(s) of taking data", onoff.intp);
+    else if(cont0)
       snprintf(buff,sizeof(buff)," Integrating for %d second(s)", onoff.intp);
     else
       snprintf(buff,sizeof(buff)," Integrating for %d second(s): cal off",
                onoff.intp);
     logit(buff,0,NULL);
-    if(get_samples(cont,ip,&onoff.itpis,onoff.intp,rut,&sample,&sampl2,&ierr))
-      goto error_recover;
-    if(cont0) {
-      wcounts("OFFC",isgn*astep,isgn*estep,&onoff,&sampl2);
-      inc_accum(&onoff.itpis,&ofscal,&sampl2);
+
+    if (!onoff.none_detector) {
+      if(get_samples(cont,ip,&onoff.itpis,onoff.intp,rut,&sample,&sampl2,&ierr))
+        goto error_recover;
+      if(cont0) {
+        wcounts("OFFC",isgn*astep,isgn*estep,&onoff,&sampl2);
+        inc_accum(&onoff.itpis,&ofscal,&sampl2);
+      }
+      wcounts("OFFS",isgn*astep,isgn*estep,&onoff,&sample);
+      inc_accum(&onoff.itpis,&ofs,&sample);
+    } else {
+      ierr=none_detector_counts(buff,sizeof(buff),rut,"OFFS",onoff.intp,
+          isgn*astep,isgn*estep);
+      if(ierr!=0)
+        goto error_recover;
     }
-    wcounts("OFFS",isgn*astep,isgn*estep,&onoff,&sample);
-    inc_accum(&onoff.itpis,&ofs,&sample);
 
     if(onoff.proc[0]!=0 && i==0) {
       snprintf(buff,sizeof(buff),
@@ -452,14 +493,15 @@ main()
       scmds(buff);
     }
 
-    if(i==0) {
-      if(tzero(cont,ip,&onoff,rut,&sample,&ierr)) {
-	goto error_recover;
+    if (!onoff.none_detector) {
+      if(i==0) {
+        if(tzero(cont,ip,&onoff,rut,&sample,&ierr)) {
+          goto error_recover;
+        }
+        wcounts("ZERO",isgn*astep,isgn*estep,&onoff,&sample);
+        inc_accum(&onoff.itpis,&zero,&sample);
       }
-      wcounts("ZERO",isgn*astep,isgn*estep,&onoff,&sample);
-      inc_accum(&onoff.itpis,&zero,&sample);
     }
-
   }
 
   /*last point onsource */
@@ -469,22 +511,31 @@ main()
   else
     koff=FALSE;
 
-  if(cont0)
+  if(onoff.none_detector)
+      snprintf(buff,sizeof(buff)," Simulating %d second(s) of taking data", onoff.intp);
+  else if(cont0)
     snprintf(buff,sizeof(buff)," Integrating for %d second(s)", onoff.intp);
   else
     snprintf(buff,sizeof(buff)," Integrating for %d second(s): cal off",
              onoff.intp);
   logit(buff,0,NULL);
-  if(get_samples(cont,ip,&onoff.itpis,onoff.intp,rut,&sample,&sampl2,&ierr))
-    goto error_recover;
-  wcounts("ONSO",0.0,0.0,&onoff,&sample);
-  inc_accum(&onoff.itpis,&ons,&sample);
-  if(cont0) {
-    wcounts("ONSC",0.0,0.0,&onoff,&sampl2);
-    inc_accum(&onoff.itpis,&onscal,&sampl2);
+
+  if (!onoff.none_detector) {
+    if(get_samples(cont,ip,&onoff.itpis,onoff.intp,rut,&sample,&sampl2,&ierr))
+      goto error_recover;
+    wcounts("ONSO",0.0,0.0,&onoff,&sample);
+    inc_accum(&onoff.itpis,&ons,&sample);
+    if(cont0) {
+      wcounts("ONSC",0.0,0.0,&onoff,&sampl2);
+      inc_accum(&onoff.itpis,&onscal,&sampl2);
+    }
+  } else {
+    ierr=none_detector_counts(buff,sizeof(buff),rut,"ONSO",onoff.intp,0.0,0.0);
+    if(ierr!=0)
+      goto error_recover;
   }
   
-  if(use_cal) {
+  if(use_cal && !onoff.none_detector) {
     scmds("calonnf");
     snprintf(buff,sizeof(buff)," Integrating for %d second(s): cal on",
              onoff.intp);
@@ -612,113 +663,163 @@ main()
   }
 
   ip2[2]=0;
-  if(kagc)
-    if(shm_addr->equip.rack==VLBA||shm_addr->equip.rack==VLBA4) {
-      logit(" Unlocking gains",0,NULL);
-      if(agc(onoff.itpis,1,&ierr2)) {
-	ip2[0]=0;
-	ip2[1]=0;
-	ip2[2]=ierr2;
-	ip2[4]=0;
-	memcpy(ip2+3,"nf",2);
+  if (!onoff.none_detector) {
+    if(kagc)
+      if(shm_addr->equip.rack==VLBA||shm_addr->equip.rack==VLBA4) {
+        logit(" Unlocking gains",0,NULL);
+        if(agc(onoff.itpis,1,&ierr2)) {
+          ip2[0]=0;
+          ip2[1]=0;
+          ip2[2]=ierr2;
+          ip2[4]=0;
+          memcpy(ip2+3,"nf",2);
+        }
+      } else if(shm_addr->equip.rack==DBBC &&
+          (shm_addr->equip.rack_type == DBBC_DDC ||
+           shm_addr->equip.rack_type == DBBC_DDC_FILA10G)) {
+        logit(" Unlocking gains",0,NULL);
+        if(agc_dbbc(onoff.itpis,1,&ierr2)) {
+          ip2[0]=0;
+          ip2[1]=0;
+          ip2[2]=ierr2;
+          ip2[4]=0;
+          memcpy(ip2+3,"nf",2);
+        }
+      } else if(shm_addr->equip.rack==DBBC &&
+          (shm_addr->equip.rack_type == DBBC_PFB ||
+           shm_addr->equip.rack_type == DBBC_PFB_FILA10G)) {
+        logit(" Unlocking gains",0,NULL);
+        if(agc_dbbc_pfb(onoff.itpis,1,&ierr2)) {
+          ip2[0]=0;
+          ip2[1]=0;
+          ip2[2]=ierr2;
+          ip2[4]=0;
+          memcpy(ip2+3,"nf",2);
+        }
+      } else if(shm_addr->equip.rack==DBBC3) {
+        logit(" Unlocking gains",0,NULL);
+        if(agc_dbbc3(onoff.itpis,1,&ierr2)) {
+          ip2[0]=0;
+          ip2[1]=0;
+          ip2[2]=ierr2;
+          ip2[4]=0;
+          memcpy(ip2+3,"nf",2);
+        }
       }
-    } else if(shm_addr->equip.rack==DBBC &&
-	      (shm_addr->equip.rack_type == DBBC_DDC ||
-	       shm_addr->equip.rack_type == DBBC_DDC_FILA10G)) {
-      logit(" Unlocking gains",0,NULL);
-      if(agc_dbbc(onoff.itpis,1,&ierr2)) {
-	ip2[0]=0;
-	ip2[1]=0;
-	ip2[2]=ierr2;
-	ip2[4]=0;
-	memcpy(ip2+3,"nf",2);
-      }
-    } else if(shm_addr->equip.rack==DBBC &&
-	      (shm_addr->equip.rack_type == DBBC_PFB ||
-	       shm_addr->equip.rack_type == DBBC_PFB_FILA10G)) {
-      logit(" Unlocking gains",0,NULL);
-      if(agc_dbbc_pfb(onoff.itpis,1,&ierr2)) {
-	ip2[0]=0;
-	ip2[1]=0;
-	ip2[2]=ierr2;
-	ip2[4]=0;
-	memcpy(ip2+3,"nf",2);
-      }
-    } else if(shm_addr->equip.rack==DBBC3) {
-      logit(" Unlocking gains",0,NULL);
-      if(agc_dbbc3(onoff.itpis,1,&ierr2)) {
-	ip2[0]=0;
-	ip2[1]=0;
-	ip2[2]=ierr2;
-	ip2[4]=0;
-	memcpy(ip2+3,"nf",2);
-      }
-    }
+  }
 
   if(kresult) {
-    for (i=0;i<MAX_ONOFF_DET;i++)
-      if(onoff.itpis[i]!=0) {
-	sprintf(buff,
-		"SIG %-10.10s %5.5s %4.4s %-4.4s %1.1s %1.1s %9.9s ",
-		" "," "," ",
-		onoff.devices[i].lwhat,
-		" ",
-		" ",
-		" ");
-	jr2as(gcmp_sig[i],buff,-6,4,sizeof(buff));
-	strcat(buff," ");
-	jr2as(tsys_sig[i],buff,-5,2,sizeof(buff));
-	strcat(buff," ");
-	jr2as(sefd_sig[i],buff,-6,1,sizeof(buff));
-	strcat(buff," ");
-	jr2as(tclj_sig[i],buff,-7,3,sizeof(buff));
-	strcat(buff," ");
-	/*
-	jr2as(tclk_sig[i],buff,-5,3,sizeof(buff));
-	strcat(buff," ");
-	*/
-	jr2as(calr_sig[i],buff,-5,2,sizeof(buff));
-	logit_nd(buff,0,NULL);
-      }
+    if (onoff.none_detector) {
+      sprintf(buff,
+          "SIG %-10.10s %5.5s %4.4s %-4.4s %1.1s %1.1s %9.9s ",
+          " "," "," ",
+          "none",
+          " ",
+          " ",
+          " ");
+      jr2as(0.0,buff,-6,4,sizeof(buff));
+      strcat(buff," ");
+      jr2as(0.0,buff,-5,2,sizeof(buff));
+      strcat(buff," ");
+      jr2as(0.0,buff,-6,1,sizeof(buff));
+      strcat(buff," ");
+      jr2as(0.0,buff,-7,3,sizeof(buff));
+      strcat(buff," ");
+      /*
+         jr2as(tclk_sig[i],buff,-5,3,sizeof(buff));
+         strcat(buff," ");
+       */
+      jr2as(0.0,buff,-5,2,sizeof(buff));
+      logit_nd(buff,0,NULL);
+    } else {
+      for (i=0;i<MAX_ONOFF_DET;i++)
+        if(onoff.itpis[i]!=0) {
+          sprintf(buff,
+              "SIG %-10.10s %5.5s %4.4s %-4.4s %1.1s %1.1s %9.9s ",
+              " "," "," ",
+              onoff.devices[i].lwhat,
+              " ",
+              " ",
+              " ");
+          jr2as(gcmp_sig[i],buff,-6,4,sizeof(buff));
+          strcat(buff," ");
+          jr2as(tsys_sig[i],buff,-5,2,sizeof(buff));
+          strcat(buff," ");
+          jr2as(sefd_sig[i],buff,-6,1,sizeof(buff));
+          strcat(buff," ");
+          jr2as(tclj_sig[i],buff,-7,3,sizeof(buff));
+          strcat(buff," ");
+          /*
+             jr2as(tclk_sig[i],buff,-5,3,sizeof(buff));
+             strcat(buff," ");
+           */
+          jr2as(calr_sig[i],buff,-5,2,sizeof(buff));
+          logit_nd(buff,0,NULL);
+        }
+    }
 
     sprintf(buff2,
- "    source       Az   El  De   I P   Center   Comp   Tsys  SEFD  Tcal(j) Tcal(r)");
+        "    source       Az   El  De   I P   Center   Comp   Tsys  SEFD  Tcal(j) Tcal(r)");
     logit(buff2,0,NULL);
 
-    for (i=0;i<MAX_ONOFF_DET;i++)
-      if(onoff.itpis[i]!=0) {
-	sprintf(buff,
-		"VAL %-10.10s %5.1f %4.1f %-4.4s %d %c %9.2lf ",
-		shm_addr->lsorna,az,el,
-		onoff.devices[i].lwhat,
-		onoff.devices[i].ifchain,
-		onoff.devices[i].pol,
-		onoff.devices[i].center);
-	jr2as(gcmp[i],buff,-6,4,sizeof(buff));
-	strcat(buff," ");
-	jr2as(tsys[i],buff,-5,2,sizeof(buff));
-	strcat(buff," ");
-	jr2as(sefd[i],buff,-6,1,sizeof(buff));
-	strcat(buff," ");
-	jr2as(tclj[i],buff,-7,3,sizeof(buff));
-	strcat(buff," ");
-	/*
-	jr2as(tclk[i],buff,-5,3,sizeof(buff));
-	strcat(buff," ");
-	*/
-	jr2as(calr[i],buff,-5,2,sizeof(buff));
-	logit(buff,0,NULL);
-	if(onoff.devices[i].corr>=1.2) {
-          char buff3[120];
-          if(0==strncmp("  ",onoff.devices[i].lwhat+2,2))
-            snprintf(buff3,sizeof(buff3),"WARNING: Source structure correction greater than 20%% for detector %-2.2s",
-                    onoff.devices[i].lwhat);
-          else
-            snprintf(buff3,sizeof(buff3),"WARNING: Source structure correction greater than 20%% for detector %-4.4s",
-                    onoff.devices[i].lwhat);
-          logite(buff3,7,"nf");
-	}
-      }
+    if (onoff.none_detector) {
+      sprintf(buff,
+          "VAL %-10.10s %5.1f %4.1f %-4.4s %d %c %9.2lf ",
+          shm_addr->lsorna,az,el,
+          "none",
+          0,
+          '-',
+          0.0);
+      jr2as(0.0,buff,-6,4,sizeof(buff));
+      strcat(buff," ");
+      jr2as(0.0,buff,-5,2,sizeof(buff));
+      strcat(buff," ");
+      jr2as(0.0,buff,-6,1,sizeof(buff));
+      strcat(buff," ");
+      jr2as(0.0,buff,-7,3,sizeof(buff));
+      strcat(buff," ");
+      /*
+         jr2as(tclk[i],buff,-5,3,sizeof(buff));
+         strcat(buff," ");
+       */
+      jr2as(0.0,buff,-5,2,sizeof(buff));
+      logit(buff,0,NULL);
+    } else {
+      for (i=0;i<MAX_ONOFF_DET;i++)
+        if(onoff.itpis[i]!=0) {
+          sprintf(buff,
+              "VAL %-10.10s %5.1f %4.1f %-4.4s %d %c %9.2lf ",
+              shm_addr->lsorna,az,el,
+              onoff.devices[i].lwhat,
+              onoff.devices[i].ifchain,
+              onoff.devices[i].pol,
+              onoff.devices[i].center);
+          jr2as(gcmp[i],buff,-6,4,sizeof(buff));
+          strcat(buff," ");
+          jr2as(tsys[i],buff,-5,2,sizeof(buff));
+          strcat(buff," ");
+          jr2as(sefd[i],buff,-6,1,sizeof(buff));
+          strcat(buff," ");
+          jr2as(tclj[i],buff,-7,3,sizeof(buff));
+          strcat(buff," ");
+          /*
+             jr2as(tclk[i],buff,-5,3,sizeof(buff));
+             strcat(buff," ");
+           */
+          jr2as(calr[i],buff,-5,2,sizeof(buff));
+          logit(buff,0,NULL);
+          if(onoff.devices[i].corr>=1.2) {
+            char buff3[120];
+            if(0==strncmp("  ",onoff.devices[i].lwhat+2,2))
+              snprintf(buff3,sizeof(buff3),"WARNING: Source structure correction greater than 20%% for detector %-2.2s",
+                  onoff.devices[i].lwhat);
+            else
+              snprintf(buff3,sizeof(buff3),"WARNING: Source structure correction greater than 20%% for detector %-4.4s",
+                  onoff.devices[i].lwhat);
+            logite(buff3,7,"nf");
+          }
+        }
+    }
     logit(buff2,0,NULL);
   }
 
@@ -752,6 +853,7 @@ main()
     memcpy(ip+3,"nf",2);
     logit(NULL,ip[2],ip+3);
   }
+
   nsem_put("onoff");
 
   goto loop;

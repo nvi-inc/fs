@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2023 NVI, Inc.
+ * Copyright (c) 2020-2023, 2025 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -273,7 +273,7 @@ typedef struct fscom {
         int tpigain[ MAX_GLOBAL_DET];
         int iapdflg;
         int k4rec_mode_stat; /* should be moved after k4rec_mode next chance */
-        struct onoff_cmd onoff;
+        struct onoff_cmd_old onoff_old;
         struct rxgain_ds rxgain[MAX_RXGAIN];
   int iswif3_fs[4];
   int ipcalif3;
@@ -550,5 +550,7 @@ typedef struct fscom {
       time_t arrival;
     } data[2];
   } rdbe_tsys_data1[MAX_RDBE];
+
+  struct onoff_cmd onoff;
 
 } Fscom;

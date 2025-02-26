@@ -5126,6 +5126,12 @@ Wait must be 1-1200.
 Q1 -207
 Unknown detector.
 ""
+Q1 -208
+FWHM be greater than 0.0 degrees.
+""
+Q1 -209
+Nothing allowed after FWHM.
+""
 Q1 -301
 Un-supported VC detector.
 ""

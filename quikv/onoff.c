@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021, 2023 NVI, Inc.
+ * Copyright (c) 2020-2021, 2023, 2025 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -75,12 +75,14 @@ int ip[5];                           /* ipc parameters */
 	for (i=0;i<MAX_ONOFF_DET;i++) {
 	  set= set ||(shm_addr->onoff.itpis[i]!=0);
 	}
-	if(!set) {
+	if(!set && !shm_addr->onoff.none_detector) {
 	  ierr=-304;
 	  goto error;
 	}
 	memcpy(&lcl,&shm_addr->onoff,sizeof(lcl));
-	if(shm_addr->equip.rack==MK3||shm_addr->equip.rack==MK4||shm_addr->equip.rack==LBA4) {
+	if(lcl.none_detector)
+         lcl.ssize=0;
+	else if(shm_addr->equip.rack==MK3||shm_addr->equip.rack==MK4||shm_addr->equip.rack==LBA4) {
 	  float vcf,vcbw,extbw;
 	  lcl.fwhm=-1.0;
 	  for (i=0;i<14;i++)

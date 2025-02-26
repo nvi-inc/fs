@@ -275,6 +275,7 @@ void cshm_init()
   shm_addr->onoff.wait=120;
   
   shm_addr->onoff.proc[0]=0;
+  shm_addr->onoff.none_detector = 0;
 
   for (i=0;i<MAX_RXGAIN;i++)
     shm_addr->rxgain[i].type=0;
