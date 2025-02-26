@@ -451,11 +451,17 @@ int ip[5];                           /* ipc parameters */
 	  int ifch, ichan, irdbe, ifchain;
 	  for(i=0;i<MAX_RDBE_DET;i++) {
 	    irdbe=i/(MAX_RDBE_IF*MAX_RDBE_CH);
-	    ifch=(i%(MAX_RDBE_IF*MAX_RDBE_CH))/MAX_RDBE_CH;
-	    ifchain=irdbe*MAX_RDBE_IF+ifch+1;
-	    ichan=(i%(MAX_RDBE_IF*MAX_RDBE_CH))%MAX_RDBE_CH;
-	    lcl.devices[i].ifchain=ifchain;
-	    lcl.devices[i].center=shm_addr->lo.lo[ifchain-1]+1024-32*ichan;
+	    if(shm_addr->rdbe_active[irdbe]) {
+	      ifch=(i%(MAX_RDBE_IF*MAX_RDBE_CH))/MAX_RDBE_CH;
+	      ifchain=irdbe*MAX_RDBE_IF+ifch+1;
+	      if(shm_addr->lo.lo[ifchain-1]<0) {
+		ierr=-310;
+		goto error;
+	      }
+	      ichan=(i%(MAX_RDBE_IF*MAX_RDBE_CH))%MAX_RDBE_CH;
+	      lcl.devices[i].ifchain=ifchain;
+	      lcl.devices[i].center=shm_addr->lo.lo[ifchain-1]+1024-32*ichan;
+	    }
 	  }
 	} else if(shm_addr->equip.rack==DBBC3) {
 	  for (i=0;i<MAX_DBBC3_BBC*2;i++) {

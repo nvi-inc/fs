@@ -5156,6 +5156,9 @@ Unknown IF filter.
 Q1 -309
 Unknown IF filter or unsupported IF filter for PFB BBC.
 ""
+Q1 -310
+LO frequency not set.
+""
 Q2 -201
 Satellite name longer than 24 characters.
 ""

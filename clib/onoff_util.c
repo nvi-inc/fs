@@ -613,16 +613,13 @@ char *ptr;
 	if(strcmp(ptr,"all")==0) {
 	  char buf[80];
 	  for(i=0;i<MAX_RDBE;i++)
-	    if(shm_addr->rdbe_active[i]) {
-	      for(j=0;j<MAX_RDBE_IF;j++)
-		if(shm_addr->lo.lo[j+i*MAX_RDBE_IF]>=0)
-		  for(k=1;k<MAX_RDBE_CH;k++) {
-		    idet=i*MAX_RDBE_CH*MAX_RDBE_IF+j*MAX_RDBE_CH+k;
-		    lcl->itpis[idet]=1;
-		    sprintf(buf,"%.2d%c%.1d",k,chanv[i+1],j);
-		    memcpy(lcl->devices[idet].lwhat,buf,4);
-		  }
-	    }
+	    for(j=0;j<MAX_RDBE_IF;j++)
+	      for(k=1;k<MAX_RDBE_CH;k++) {
+		idet=i*MAX_RDBE_CH*MAX_RDBE_IF+j*MAX_RDBE_CH+k;
+		lcl->itpis[idet]=1;
+		sprintf(buf,"%.2d%c%.1d",k,chanv[i+1],j);
+		memcpy(lcl->devices[idet].lwhat,buf,4);
+	      }
 	  goto done;
 	}
 	iscan=sscanf(ptr,"%2d%c%1d",&ichan,&crdbe,&ifc);
