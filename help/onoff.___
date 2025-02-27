@@ -98,7 +98,17 @@ and the "SIG" results are logged, but not displayed.
 
 The current command antenna position including offsets is assumed to
 be 'onsource.'
- 
+
+If 'none' is used as the 'devices', the antenna will be moved, but no
+data taken. This can useful for exercising an antenna when there is no
+rack available. The usual rack setup is not required. A "fake" antenna
+beam-width is specified with the 'mfwhm' parameter. This interacts
+with the 'step' parameter to determine how far the antenna is moved.
+An example procedure library file,
+'/usr2/fs/st.default/proc/point_no_det.prc', and an example control
+file, 'st.default/control/ctlpo_no_det.ctl', are provided for using
+this feature with 'acquire'.
+
 It is recommended that nothing else be done, e.g., running a schedule,
 while this command is executing. Since this command may run for an
 extended period of time, a mechanism has been supplied for aborting:

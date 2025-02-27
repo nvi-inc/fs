@@ -83,7 +83,11 @@ If 'dev' is 'none', the antenna will be moved, but no data taken.
 This can useful for exercising an antenna when there is no rack
 available. The usual rack setup is not required. A "fake" antenna
 beam-width is specified with the 'beam' parameter. This interacts with
-the 'step' parameter to determine how far the antenna is moved.
+the 'stp' parameter to determine how far the antenna is moved. An
+example procedure library file,
+'/usr2/fs/st.default/proc/point_no_det.prc', and an example control
+file, 'st.default/control/ctlpo_no_det.ctl', are provided for using
+this feature with 'acquire'.
 
 For standard detectors the monitor-only parameters 'beam', 'cal',
 'flux', and 'chain' are determined from the '.rxg' file, 'flux.ctl'
