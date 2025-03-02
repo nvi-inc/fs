@@ -1,0 +1,33 @@
+#!/bin/bash
+#
+# Copyright (c) 2025 NVI, Inc.
+#
+# This file is part of VLBI Field System
+# (see http://github.com/nvi-inc/fs).
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+#
+
+if [ ! -e /usr2/fs/bin/lognm ]; then
+  echo "Can't find lognm program, is the FS loaded?"
+  exit 1
+fi
+#normal local or not opening a new window for remote
+#for AUID: after promoting to oper
+if ! fsclient; then
+  fs
+fi
+#to open a new window with a remote connection
+#for AUID: after promoting to oper
+#xterm -name login_sh -e 'if ! fsclient; then fs;fi;bash' &
