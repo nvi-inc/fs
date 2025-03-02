@@ -1,4 +1,4 @@
-File: /usr2/fs/misc/ntp.txt                  Version: 0.6  Date: 230308
+File: /usr2/fs/misc/ntp.txt                  Version: 0.7  Date: 250302
 
 			 NTP recommendations
 
@@ -123,7 +123,7 @@ restrict -6 default ignore
 
    You check the options that 'ntpd' was started with using the command:
 
-     ps aux | grep ntpd     
+     ps aux | grep ntpd
 
 
 6. 'check_ntp' SNAP procedure
@@ -132,16 +132,20 @@ restrict -6 default ignore
        library:
 
 sy=popen 'uptime 2>&1' -n uptime &
-sy=popen 'ntpq -p 2>&1|grep -v "^[- x#]" 2>&1' -n ntpq &
+sy=popen 'ntpq -p 2>&1 | grep_ntpq 2>&1 ' -n ntpq &
 
-       The 'grep' command selects only the servers marked as '*'
-       (peer) and '+' (candidates), which are generally the highest
-       quality servers. You can get information on more servers by
-       removing '-', '#' and 'x' from the pattern. You can eliminate
-       the entire 'grep' command (starting with "|", up to, but not
-       removing, the following "'"), but that will include servers
-       that can't be reached or are specified 'noselect'; that may be
-       useful.
+       The 'grep_ntpq' script can be found in '/usr2/fs/misc'. It
+       should be installed, as 'oper' with:
+
+         cd ~/bin
+         cp /usr2/fs/misc/grep_ntpq .
+
+       This script removes servers marked with 'x', '#', and ' ',
+       which are usually not useful.  You can get information on more
+       servers by removing 'x' and/or '#' from the pattern inside
+       'grep_ntp'.  Removing servers marked with ' ' (space) is not
+       recommended since those typically can't be reached or are
+       specified 'noselect'.
 
        'popen' is available in all FS versions starting with
        9.11.9. See 'help=sy' for details on its use.
@@ -192,14 +196,14 @@ sy=popen 'ntpq -p 2>&1|grep -v "^[- x#]" 2>&1' -n ntpq &
        device is not listed in DNS, this is the only way to avoid
        referring to it by its IP address.
 
-   6e. If your site IT polices require that you protect IP addresses
-       and FQDNs from being publicly disseminated, you will need to be
-       careful of what the 'check_ntp" procedure puts in the log.  The
-       logs are often uploaded to public data servers.
+   6e. If your site IT polices require that you protect your lcoal IP
+       addresses and FQDNs from being publicly disseminated, you will
+       need to be careful of what the 'check_ntp" procedure puts in
+       the log.  The logs are often uploaded to public data servers.
 
-       To avoid putting FQDNs in the log, you should set up an alias
-       for each NTP server as described in (6d) above.  That will also
-       make the ''ntpq -p' output easier to read.
+       To avoid putting server FQDNs in the log, you should set up an
+       alias for each NTP server as described in (6d) above.  That
+       will also make the 'ntpq -p' output easier to read.
 
        (Always using an '/etc/hosts' alias for devices in FS commands
        and control files and 'ntp.conf' is an easy way to avoid having
@@ -207,20 +211,38 @@ sy=popen 'ntpq -p 2>&1|grep -v "^[- x#]" 2>&1' -n ntpq &
        it easier to update a device's IP address or FQDN.  It only
        needs to be updated in one place, '/etc/hosts'.)
 
-       To avoid putting any IP addresses in the log with 'check_ntp',
-       you can add the following two additional pipeline stages before
-       the closing single quite (') in the 'ntpq -p' command in
-       'check_ntp' (see 6a):
+       To make the output even easier to read and to avoid putting any
+       IP addresses in the log with 'check_ntp', you can add the
+       following two additional pipeline stages before the closing
+       single quite (') in the 'ntpq -p' command in 'check_ntp' (see
+       6a):
 
-|sed -E "s/^(.)([0-9].{14})(.*)$/\1REDACTED       \3/" 2>&1|sed -E "s/^(.{17})([0-9].{14})(.*)/\1REDACTED       \3/" 2>&1
+| cname_ntpq_ip 2>&1 | redact_ntpq_ip 2>&1
 
        The above is one line and must be inserted literally starting
        with the leading pipe character (|) and ending with the numeral
-       one (1), 121 characters total.  This will replace any 'refid'
-       with 'REDACTED' if it is a network device.  It will also
-       replace any server IP address with 'REDACTED'. The latter may
-       happen if it does not have an alias in '/etc/hosts'.
+       one (1), 42 characters total.
 
+       The first script will replace any 'refid' with its canonical
+       name from '/etc/hosts', if it is a network device and appears
+       there.  The canonical name in that file (the first field after
+       the IP address) should be an alias rather than the FDQN in
+       order to have the intended effect.  This is similar to how
+       local and remote servers should be handled.  You can add any
+       servers that appear as 'refid' as well.
+
+       The second script will replace any remaining server or 'refid'
+       IP address with 'REDACTED'.  That may happen if the address
+       does not have an entry in '/etc/hosts'.  This is an extra layer
+       of protection in case that happens due to an oversight,
+       possibly due to a change.
+
+       The 'cname_ntpq_ip' and 'redact_ntpq_ip' scripts can be found
+       in '/usr2/fs/misc'.  They should be installed, as 'oper' with:
+
+         cd ~/bin
+         cp /usr2/fs/misc/cname_ntpq_ip .
+         cp /usr2/fs/misc/redact_ntpq_ip .
 
 7. Make sure NTP is synced before operations are started.
 
