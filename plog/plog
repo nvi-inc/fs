@@ -125,6 +125,15 @@ variable to that login, for example:
 
 If the variable is not set, the first BKG login is used.
 
+If you have more than one login for BKG in your ".netrc" file, you can
+select which one to use by setting the PLOG_BKG_LOGIN environment
+variable to that login, for example:
+
+    setenv PLOG_BKG_LOGIN mybkguser ${blue}#tcsh${normal}
+    export PLOG_BKG_LOGIN=mybkguser ${blue}#bash${normal}
+
+If the variable is not set, the first BKG login is used.
+
 If your curl supports the "--netrc-file" option (see "man curl") , you can
 change the directory for ".netrc" by setting the NETRC_DIR environment
 variable.  E.g. add the following to your login script
@@ -250,9 +259,13 @@ pftp() {
     URL="$1"; shift
     local F=($@) #Turn into an array so IFS is used in expansion
     local IFS=","
+<<<<<<< Updated upstream
     local G="{${F[*]}}"
     local IFS=" " #Then don't take commas out when expanding
     eval $DRY curl $SSL_REQUIRED $PLOG_BKG_LOGIN -n $CURL_NETRC_FILE_OPTION -T '$G' "ftp://$URL/"
+=======
+    eval $DRY curl -v $SSL_REQUIRED $PLOG_BKG_LOGIN -n $CURL_NETRC_FILE_OPTION -T "{${F[*]}}" "ftp://$URL/"
+>>>>>>> Stashed changes
 }
 
 pscp() {
@@ -507,9 +520,15 @@ main () {
                 DRY=echo
                 ;;
             c)
+<<<<<<< Updated upstream
                 NEW_CENTER=$(echo "$OPTARG" | tr '[:lower:]' '[:upper:]')
                 if [[ ! $CTRS =~ $NEW_CENTER ]]; then
                     fatal "Unknown data center '$NEW_CENTER'"
+=======
+                OPTARG=$(echo "$OPTARG" | tr '[:lower:]' '[:upper:]')
+                if [[ ! $CTRS =~ $OPTARG ]]; then
+                    fatal "Unknown data center '$OPTARG'"
+>>>>>>> Stashed changes
                 fi
                 CENTERS_OVER="$CENTERS_OVER $NEW_CENTER"
                 ;;
@@ -546,6 +565,8 @@ main () {
         esac
     done
     shift $(($OPTIND - 1))
+
+    DATA_CENTERS=$(echo "$DATA_CENTERS" | tr '[:lower:]' '[:upper:]')
 
 # Conflict check
     if [[ -n "$COMPRESS" && -z "$BOTH" ]]; then
