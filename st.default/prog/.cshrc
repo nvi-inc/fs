@@ -25,3 +25,5 @@ a psall 'ps aux | egrep -v "^bin|^root"'
 a xterm '\xterm -name `hostname`'
 set noclobber
 cd .
+a dj    'date -u +"%a %Y.%j.%T %Z (%b %e)"'
+a lj    'ls -l --time-style=+"%Y.%j.%H:%M:%S"'
