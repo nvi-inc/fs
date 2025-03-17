@@ -66,6 +66,8 @@ min15@!,15m
 "pcal
 enddef
 define  postob        00000000000
+if=cont_cal,,ifagc
+if=cont_cal,,if=ddc\,bbc_gain=all\\\,agc
 enddef
 define  ifman         00000000000
 if=ifa,ifa=*\,man\,*\,*

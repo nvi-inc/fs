@@ -188,6 +188,8 @@ wx
 clock
 mcast_time
 define  postob        00000000000x
+if=cont_cal,,ifagc
+if=cont_cal,,if=ddc\,bbc_gain=all\\\,agc
 enddef
 define  preob         00000000000x
 if=cont_cal,tpicd=tsys,!*
