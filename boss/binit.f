@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020, 2023  NVI, Inc.
+* Copyright (c) 2020, 2023, 2025 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -40,6 +40,7 @@ C
       integer lseg(2)                   !  segment name (obsolete)
       integer*4 icloprx
 C
+      character*256 display_server_envar
 C
 C     1. First initialize values from RMPAR parameters.
 C     IP(1) = LU for terminal input and messages
@@ -459,6 +460,11 @@ c
       call put_buf_ch(icloprx,'initi','  ','  ')
       iclopr=icloprx
       call fs_set_iclopr(iclopr)
+C
+      call getenv('FS_DISPLAY_SERVER', display_server_envar)
+      if (display_server_envar .ne. "off") then
+        call check_nprocs
+      endif
 C
       return
       end

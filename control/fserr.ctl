@@ -1052,6 +1052,18 @@ First core3h argument must be an integer 1 through the number of IFs in dbbc3.ct
 BD -401
 error retrieving class
 ""
+BO  996
+If you are using a virtual machine, increase the number of processors.
+""
+BO  995
+This will interfere with restarting the FS.
+""
+BO  994
+The number of processors configured is?W.
+""
+BO  993
+Only 1 processor is available. A minimum of 2 is required for the FS server.
+""
 BO  250
 Internal warning: opnpf.f lprcl too small, needs length of?WW, okay this time
 ""

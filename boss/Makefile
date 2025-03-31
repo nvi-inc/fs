@@ -8,7 +8,7 @@ OBJECTS = boss.o binit.o bwork.o cants.o fshelp.o\
 getcm.o getts.o lists.o newpf.o newpr.o \
 newsk.o opnpf.o putts.o rdtib.o rdtma.o \
 spars.o stat.o newlg.o ldrivev.o ldrivem.o ldriveall.o lhead.o\
-follow_link.o log_env_dbbc3.o
+follow_link.o log_env_dbbc3.o check_nprocs.o
 
 LDLIBS += $(FLIBS)
 

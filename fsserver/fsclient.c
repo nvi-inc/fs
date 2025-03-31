@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, 2023-2024 NVI, Inc.
+ * Copyright (c) 2020, 2023-2025 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -35,6 +35,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #include <wordexp.h>
+#include <sys/sysinfo.h>
 
 #include <nng/nng.h>
 #include <nng/protocol/pubsub0/sub.h>
@@ -433,7 +434,17 @@ void fetch_state(void) {
 	}
 
 	if ((rv = nng_dial(server_cmd_sock, server_cmd_url, NULL, 0)) != 0) {
-                fprintf(stderr,"If you restarted the FS, fsserver may have needed more time to cleanup. Try again.\n");
+		int avail=get_nprocs();
+		if(avail<2) {
+			int conf=get_nprocs_conf();
+			fprintf(stderr, "Only 1 processor is available. A minimum of 2 is required for the FS server.\n");
+			fprintf(stderr, "The number of processors configured is %d.\n", conf);
+			fprintf(stderr, "If you are using a virtual machine, increase the number of processors.\n");
+			fprintf(stderr, "Using 'killall -9 fsserver' may be a workaround.\n");
+		} else {
+			fprintf(stderr,"If you quickly restarted the FS, the server may have needed more time to exit.\n");
+			fprintf(stderr,"Try again.\n");
+		}
 		fatal("unable to connect to server", nng_strerror(rv));
 	}
 
