@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020, 2023  NVI, Inc.
+* Copyright (c) 2020, 2023, 2025 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -40,6 +40,7 @@ C
 C   LOCAL VARIABLES 
 C
       include '../include/boz.i'
+      include '../include/dpi.i'
 C
 C        NCHAR  - number of characters in buffer
 C        ICH    - character counter 
@@ -185,7 +186,9 @@ C
       if (cjchar(iprm,1).ne.'*'.and.cjchar(iprm,1).ne.',') then
          call fs_get_rack(rack)
          call fs_get_rack_type(rack_type)
-         if (DBBC .eq. rack.and.
+         if(0.eq.ichcm_ch(iprm,1,'none')) then
+           idum=ichmv_ch(ldev,1,'none')
+         else if (DBBC .eq. rack.and.
      &        (DBBC_PFB.eq.rack_type.or.DBBC_PFB_FILA10G.eq.rack_type)
      &        ) then
             idum=ichmv(ldev(1),1,ibuf,ic1,inumb)
@@ -271,10 +274,29 @@ C
       if(cjchar(parm,1).eq.'*') iwait = IWTFP
       if(cjchar(parm,1).ne.','.and.cjchar(parm,1).ne.'*')
      .   iwait = iparm(1)
-      if(iwait.ge.1.and.iwait.le.1200) goto 300
+      if(iwait.ge.1.and.iwait.le.1200) goto 280
         ierr = -207 
         goto 990
 C           Illegal value entered
+C
+ 280  continue
+      call gtprm(ibuf,ich,nchar,2,parm,ierr)
+      if(0.ne.ichcm_ch(iprm,1,'none').and.
+     & cjchar(parm,1).ne.',') then
+       ierr=-308
+       goto 990
+      endif
+      if(cjchar(parm,1).ne.',') goto 282
+        bm = 0.15*DEG2RAD
+        goto 300
+282   if(cjchar(parm,1).ne.'*') goto 285
+        bm = bmfp_fs
+        goto 300
+285   if(ierr.eq.0) goto 287
+        ierr = -208
+        goto 990
+287   bm = parm * DEG2RAD
+      ierr = 0
 C
 C  3.0  Set common variables to their new values
 C
@@ -286,6 +308,7 @@ C
       intpfp = intp
       stepfp = step
       iwtfp = iwait
+      if(0.eq.ichcm_ch(ldevfp,1,'none')) bmfp_fs=bm
       goto 990
 C
 C  4.0  Schedule FIVPT to start working
@@ -298,6 +321,11 @@ C
       goto 990
 C
 400   continue
+
+      if(0.eq.ichcm_ch(ldevfp,1,'none')) then
+        ichain=0
+        goto 410
+      endif
       if(cjchar(ldevfp,1).eq.'u') then
          if(cjchar(ldevfp,2).eq.'5') then
             ichain=5
@@ -461,6 +489,15 @@ CC  above is MAX_VLBA_BBC
 C
 C  Now check the cal and freq values.
 410   continue
+      if(0.eq.ichcm_ch(ldevfp,1,'none')) then
+        calfp = 0.0
+        fxfp_fs = 0
+        ssizfp = 0
+        ichfp_fs = ichain
+c    bmfp_fs already set
+        goto 504
+      endif
+c
       call fc_rte_time(it,it(6))
       epoch=it(6)+it(5)/366.
       call fc_get_tcal_fwhm(ldevfp,cal,bm,epoch,fx,corr,ssize,ierr)

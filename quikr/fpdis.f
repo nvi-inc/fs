@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020, 2023  NVI, Inc.
+* Copyright (c) 2020, 2023, 2025  NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -72,10 +72,10 @@ C
       nch = mcoma(ibuf,nch) 
       nch = nch + ib2as(iwtfp,ibuf,nch,ocp100004)
       nch = mcoma(ibuf,nch) 
-      nch = nch + ir2as(calfp,ibuf,nch,6,1) 
-      nch = mcoma(ibuf,nch) 
       nch = nch + ir2as(bmfp_fs*180./RPI,ibuf,nch,8,4)
       nch = mcoma(ibuf,nch) 
+      nch = nch + ir2as(calfp,ibuf,nch,6,1)
+      nch = mcoma(ibuf,nch)
       nch = nch + ir2as(fxfp_fs,ibuf,nch,10,2)
       nch = mcoma(ibuf,nch) 
       nch = nch + ir2as(sngl(ssizfp*RAD2DEG),ibuf,nch,6,4)

@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020, 2022 NVI, Inc.
+* Copyright (c) 2020, 2022, 2025 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -116,7 +116,9 @@ C
 C
 C lock gain if a bbc
 C
-      if(ichcm_ch(ldevfp,1,'u').ne.0) then
+      if(0.eq.ichcm_ch(ldevfp,1,'none')) then
+         continue
+      else if(ichcm_ch(ldevfp,1,'u').ne.0) then
          call fs_get_rack(rack)
          call fs_get_rack_type(rack_type)
          if(VLBA.eq.rack.or.VLBA4.eq.rack) then
@@ -315,8 +317,17 @@ C
 C 
       npar=3
       if (abs(nptsfp).ge.5) npar=5
-      call fit2(off,temp,tim,ltpar,eltpar,abs(nptsfp),npar,tol,ftry,
-     +     fgaus,ltrchi,ierr)
+      if(0.eq.ichcm_ch(ldevfp,1,'none')) then
+         do i=1,npar
+           ltpar(i)=0.0
+           eltpar(i)=0.0
+         enddo
+         ltrchi=0.0
+         ierr=0
+       else
+         call fit2(off,temp,tim,ltpar,eltpar,abs(nptsfp),npar,tol,ftry,
+     +        fgaus,ltrchi,ierr)
+       endif
 C 
       if (abs(nptsfp).lt.5) ltpar(4)=const
       if (abs(nptsfp).lt.5) ltpar(5)=slope
@@ -442,8 +453,17 @@ C
 C 
       npar=3
       if (abs(nptsfp).ge.5) npar=5
-      call fit2(off,temp,tim,lnpar,elnpar,abs(nptsfp),npar,tol,ftry,
-     +     fgaus,lnrchi,ierr)
+      if(0.eq.ichcm_ch(ldevfp,1,'none')) then
+         do i=1,npar
+           lnpar(i)=0.0
+           elnpar(i)=0.0
+         enddo
+         lnrchi=0.0
+         ierr=0
+       else
+         call fit2(off,temp,tim,lnpar,elnpar,abs(nptsfp),npar,tol,ftry,
+     +        fgaus,lnrchi,ierr)
+       endif
 C 
       if (abs(nptsfp).lt.5) lnpar(4)=const
       if (abs(nptsfp).lt.5) lnpar(5)=slope
@@ -542,7 +562,9 @@ C
 C CLEAN UP AND EXIT
 C
 90000 continue
-      if(ichcm_ch(ldevfp,1,'u').ne.0) then
+      if(0.eq.ichcm_ch(ldevfp,1,'none')) then
+         continue
+      else if(ichcm_ch(ldevfp,1,'u').ne.0) then
          if(VLBA.eq.rack.or.VLBA4.eq.rack) then
             call fc_mcbcn_r(ip)
             if(ip(3).lt.0) then

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020, 2025 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -100,7 +100,7 @@ char *ptr;
 
     ierr=0;
     if(ptr==NULL) {
-      if(*count>5) {
+      if(*count>7 && !lcl->none_detector || *count>8 && lcl->none_detector) {
 	*count=-1;
       /*
       for(i=0;i<MAX_ONOFF_DET;i++)
@@ -119,6 +119,7 @@ char *ptr;
 	itpis_save[i]=lcl->itpis[i];
 	lcl->itpis[i]=0;
       }
+      lcl->none_detector=0;
       lcl->setup=FALSE;
       ierr=arg_int(ptr,&lcl->rep,2,TRUE);
       if(ierr==0 && (lcl->rep < 0 || lcl->rep > 100))
@@ -155,9 +156,25 @@ char *ptr;
 	ierr=-200;
       break;
     default:
-      if(*ptr==0) {
+      if(*ptr==0 && 7 == *count) {
 	  ierr=-107;
 	  return ierr;
+      }
+      if(7 == *count && strcmp(ptr,"none")==0) {
+       lcl->none_detector=1;
+       goto done;
+      } else if (lcl->none_detector) {
+        if(9==*count) {
+          ierr=-209;
+          return ierr;
+        }
+        ierr=arg_float(ptr,&lcl->fwhm,0.6,TRUE);
+        if(ierr==0 && lcl->fwhm <= 0.0) {
+	  ierr=-208;
+          return ierr;
+        }
+        lcl->fwhm*=DEG2RAD;
+        goto done;
       }
       for(i=(sizeof(luser)/sizeof(char *))-2;i<sizeof(luser)/sizeof(char *);i++) {
 	if(strcmp(ptr,luser[i])==0) {
@@ -877,11 +894,18 @@ struct onoff_cmd *lcl;
     sprintf(output+strlen(output),"%s",lcl->proc);
     strcat(output,",");
     sprintf(output+strlen(output),"%d",lcl->wait);
-    strcat(output,",");
-    if(lcl->setup) {
-      sprintf(output+strlen(output),"%.4f",lcl->ssize*RAD2DEG);
+    if(lcl->none_detector) {
+      strcat(output,",");
+      strcat(output,"none");
+    } else if(lcl->setup)
+      strcat(output,",");
+    if(lcl->setup||lcl->none_detector) {
       strcat(output,",");
       sprintf(output+strlen(output),"%.4f",lcl->fwhm*RAD2DEG);
+    }
+    if(lcl->setup) {
+      strcat(output,",");
+      sprintf(output+strlen(output),"%.4f",lcl->ssize*RAD2DEG);
     }
     inext=0;
   }

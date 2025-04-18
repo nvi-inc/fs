@@ -1,9 +1,12 @@
                     onoff - on-off radiometry
 
             Syntax:     onoff=rep,intp,cutoff,step,proc,wait,devices
+                        onoff=rep,intp,cutoff,step,proc,wait,none,mfwhm
 
-            Response:   onoff/rep,intp,cutoff,step,proc,wait,ssize,mfwhm
-                        onoff/device,if,pol,fwhm,center,flux,dpfu,gain,product
+            Response:   onoff/rep,intp,cutoff,step,proc,wait,,mfwhm,ssize
+                        onoff/device,if,pol,fwhm,center,flux,corr,dpfu,gain,product
+
+                        onoff/rep,intp,cutoff,step,proc,wait,none,mfwhm,ssize
 
 
 Settable parameters:
@@ -14,7 +17,7 @@ Settable parameters:
           cutoff    Elevation above which to step in elevation rather
                     than azimuth, in degrees, default 75.
 
-          ste       Distance off source for off source and calibration
+          step      Distance off source for off source and calibration
                     points, in multiples of a beamwidth. Default is 3.0.
 
           proc      Snap procedure base name. See comments. No default.
@@ -40,13 +43,20 @@ Settable parameters:
                     detectors u5 and u6 are supported if the station
                     has them implemented.
 
-Monitor-only parameters:
-          ssize     source size, degrees
+          none      Literal 'none' to select no devices (detectors).
+                    This can be used to allow exercising the antenna
+                    without detectors. See comments.
 
           mfwhm     maximum full-width-half-maximum of all selected
-                    devices, degrees
+                    devices, degrees. Only settable if 'none' is used.
+                    Default is 0.6 degrees. If 'none' is not used,
+                    displayed only after commanding 'onoff'.
 
-          device    selected device's mnemonic 
+Monitor-only parameters:
+          device    selected device's mnemonic
+
+All remaining monitoring-only are only available after commanding 'onoff'.
+          ssize     source size, degrees.
 
           if        IF chain for device, 1-3 for Mark III/IV/5 and LBA4,
                     a-d for VLBA/4/5 and DBBC
@@ -88,7 +98,17 @@ and the "SIG" results are logged, but not displayed.
 
 The current command antenna position including offsets is assumed to
 be 'onsource.'
- 
+
+If 'none' is used as the 'devices', the antenna will be moved, but no
+data taken. This can useful for exercising an antenna when there is no
+rack available. The usual rack setup is not required. A "fake" antenna
+beam-width is specified with the 'mfwhm' parameter. This interacts
+with the 'step' parameter to determine how far the antenna is moved.
+An example procedure library file,
+'/usr2/fs/st.default/proc/point_no_det.prc', and an example control
+file, 'st.default/control/ctlpo_no_det.ctl', are provided for using
+this feature with 'acquire'.
+
 It is recommended that nothing else be done, e.g., running a schedule,
 while this command is executing. Since this command may run for an
 extended period of time, a mechanism has been supplied for aborting:
@@ -148,6 +168,9 @@ not use these procedures, but it is still recommended that they be
 available. This will prevent 'onoff' from hanging if continuous cal is
 accidentally not enabled.  If 'onoff' hang does hang in this
 situation, it can be restarted again with:
+q
+q
+q
 
           sy=rte_go onoff & 
 

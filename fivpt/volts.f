@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020, 2022, 2023 NVI, Inc.
+* Copyright (c) 2020, 2022, 2023, 2025 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -87,6 +87,25 @@ C  0. INITIALIZE
 C
 C       WHICH DEVICE?
 C 
+      if(0.eq.ichcm_ch(ldevfp,1,'none')) then
+        tpia=0
+        sig=0
+        tpia=0
+        sig2=0
+        call susp(1,101)
+        call fc_rte_time(iti,idum)
+        timt=float(iti(2))+float(iti(3))*60.0+
+     +       float(iti(4))*3600.0
+        if (timt.lt.dble(rut)) timt=timt+86400.0d0
+        tima=timt+(intp+1)*0.5
+        do i=1,intp
+          call susp(1,101)
+          if (kbreak('fivpt')) goto 80040
+        enddo
+        ierr=0
+        return
+      endif
+c
       kst=ichcm_ch(ldevfp,1,'u').eq.0
       if(kst) then
          id=-1

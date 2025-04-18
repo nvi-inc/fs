@@ -1,8 +1,8 @@
 	       fivept - five or more point source scan
 
-            Syntax:   fivept=axis,rep,pts,stp,intp,dev,wait
+            Syntax:   fivept=axis,rep,pts,stp,intp,dev,wait,beam
 
-          Response:   fivept/axis,rep,pts,stp,intp,dev,wait,cal,beam,flux,chain
+          Response:   fivept/axis,rep,pts,stp,intp,dev,wait,beam,cal,flux,chain
 
 
 Settable parameters:
@@ -42,47 +42,32 @@ Settable parameters:
                     01a0 for RDBE, and 001u for DBBC3.
                     Station dependent detectors u5 and u6 may be
                     available.
+                    'none' is allowed; see Comments.
 
           wait      seconds to wait for onsource for each point, 1-1200
                     seconds allowed, default 120.
 
+          beam      The full width half maximum beam size in degrees.
+                    This is only settable if 'dev' is 'none'. In that
+                    case, it is a "fake" antennna beamwidth in
+                    degrees.
+
+                    For all other 'dev' devices, this is a
+                    monitor-only parameter. See comments.
+
 Display-only parameters:
           cal      Calibration noise source temperature in degrees K.
-                   For standard detectors this is determined from the
-                   .rxg file cal temperature table interpolated using
-                   information from the lo command plus the vcnn and
-                   patch (Mark III/IV and LBA4) or bbcnn (VLBA/4 and DBBC)
-                   command for the specified device. For station
-                   defined detectors u5 and u6 the value are determined
-                   from the user_device=u5,... and user_device=u6,...
-                   commands respectively.
+                   The value is '0' for detector 'none'. See comments,
 
-          beam     The full width half maximum beam size degrees. For
-                   standard detectors this is determined from the .rxg
-                   file cal temperature table interpolated using
-                   information from the lo command and the vcnn and
-                   patch (Mark III/IV and LBA4) or bbcnn (VLBA/4 and DBBC)
-                   command for the specified device.  For station
-                   defined detectors u5 and u6 the values are determined
-                   from the user_device=u5,... and user_device=u6,...
-                   commands respectively.
+          flux     The apparent flux of the source. The value
+                   is '0' for detector 'none'. See comments.
 
-          flux     The apparent flux of the source. For standard
-                   detectors this is determined from the flux.ctl
-                   file cal using information from the lo command and
-                   the vcnn and patch (Mark III/IV and LBA4) or bbcnn
-                   (VLBA/4 and DBBC) command for the specified device.
-                   For station defined detectors u5 and u6 the value are
-                   determined from the user_device=u5,... and
-                   user_device=u6,... commands respectively.
+          chain    The IF chain, 1-8, that the detector is on.
+                   Station specific detectors u5 and u6 are on chains
+                   '5' and '6'. The value is '0' for detector 'none'.
+                   See comments
 
-          chain    The IF chain, 1-6, that the detector is on. Chains 5
-                   and 6 are for station specific detectors u5 and u6.
-                   Mark III/IV and LBA4 racks use IFs 1-3. For VLBA/4
-                   and DBBC racks IFs 1-4 correspond to IFs a-d.
- 
-Comments: 
-
+Comments:
 The parameters should be setup with a fivept= command. A scan is
 started by issuing a simple fivept command (i.e. with no parameters),
 this will determine the current values of the display only parameters
@@ -93,6 +78,22 @@ manual in Volume 2.
 The scan is performed about the current commanded position.  Any
 offsets that are in use are included. If the scan is successful the
 total offsets for the selected axis type are updated.
+
+If 'dev' is 'none', the antenna will be moved, but no data taken.
+This can useful for exercising an antenna when there is no rack
+available. The usual rack setup is not required. A "fake" antenna
+beam-width is specified with the 'beam' parameter. This interacts with
+the 'stp' parameter to determine how far the antenna is moved. An
+example procedure library file,
+'/usr2/fs/st.default/proc/point_no_det.prc', and an example control
+file, 'st.default/control/ctlpo_no_det.ctl', are provided for using
+this feature with 'acquire'.
+
+For standard detectors the monitor-only parameters 'beam', 'cal',
+'flux', and 'chain' are determined from the '.rxg' file, 'flux.ctl'
+file, and the LO and rack configuration. For station defined detectors
+u5 and u6 the frequency (and 'chain') information comes from the
+'user_device=u5,...' and 'user_device=u6,...' commands respectively.
 
 It is recommended that nothing else be done, e.g., running a schedule,
 while this command is executing. Since this command may run for an

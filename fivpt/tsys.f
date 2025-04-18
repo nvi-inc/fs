@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020, 2022, 2023 NVI, Inc.
+* Copyright (c) 2020, 2022, 2023, 2025 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -51,11 +51,37 @@ C
       integer*2 lwho
       character*5 name
       logical kst, kzero
+      integer iti(5)
+      double precision timt
+      logical kbreak
       data icmnd/ 2H#9,2H3%,2H__/,iques/2H??/,idolr/2H$$/
       data isav/2h#9,2H3=,0,0,0,0,2H__,0,0,0/
       data izero/2H#9,2H3=,2H00,2H00,2H3f,2H3f,2H__,0,0,0/
       data nin/-20/,lwho/2hfp/,name/'fivpt'/
 C
+      if(0.eq.ichcm_ch(ldevfp,1,'none')) then
+        temps=0
+        sigts=0
+        call susp(1,101)
+        call fc_rte_time(iti,idum)
+        timt=float(iti(2))+float(iti(3))*60.0+
+     +       float(iti(4))*3600.0
+        if (timt.lt.dble(rut)) timt=timt+86400.0d0
+        tima=timt+(intp+1)*0.5
+        tpia=0
+        vbase=0
+        vslope=1
+        do i=1,intp
+          call susp(1,101)
+          if (kbreak('fivpt')) then
+             ierr=1
+             return
+          endif
+        enddo
+        ierr=0
+        return
+      endif
+c
       kst=ichcm_ch(ldevfp,1,'u').eq.0
       if(kst) then
          call fs_get_user_device_zero(user_device_zero)
