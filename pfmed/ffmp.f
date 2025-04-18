@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020, 2023  NVI, Inc.
+* Copyright (c) 2020, 2023, 2025  NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -408,7 +408,16 @@ C     Parse first name for procedure library.
           ix = ix + 1
         end do
         if (ix.lt.nch1) then
-          lpf= ' '
+          ics=index(lnam1(ix+2:nch1),' ')
+          if(ics.ne.0) then
+            write(lui,'(a)') 'Spaces are not allow in library names'
+            return
+          endif
+          if (nch1-(ix+2)+1.gt.MAX_SKD) then
+            write(lui,9100) MAX_SKD
+9100        format(" library names must be",i3," characters or less")
+            return
+          end if
           lpf = lnam1(ix+2:nch1)
         else
           lpf = lproc

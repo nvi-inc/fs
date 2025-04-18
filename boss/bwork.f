@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020, 2023 NVI, Inc.
+* Copyright (c) 2020, 2023, 2025 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -243,7 +243,7 @@ C
         if (ichcm_ch(lsor,1,'::').eq.0) then
           call logit4_ch('*end of schedule',lsor,lprocn)
           kskblk = .true.
-          lskd2 = 'none'
+          lskd2 = '    '
           call char2hol(lskd2,ilskd2,1,MAX_SKD)
           call fs_set_lskd2(ilskd2)
           call char2hol(lskd2,ilskd,1,8)
@@ -595,6 +595,12 @@ C  User requested schedule name, format response and log it.
           ich = 1+iscn_ch(ibuf,1,nchar,'=')
           ic4 = iscn_ch(ibuf,ich,nchar,',')
           if (ic4.eq.0) ic4 = nchar + 1
+          ic2 = iscn_ch(ibuf,ich,ic4-1,' ')
+          if(ic2.ne.0) then
+             call logit7ci(0,0,0,1,-265,'bo',0)
+             call rn_put('pfmed')
+             goto 600
+          endif
           if(ic4-1-ich+1.gt.MAX_SKD) then
              call logit7ci(0,0,0,1,-261,'bo',MAX_SKD)
              call rn_put('pfmed')
@@ -636,7 +642,7 @@ C  if the scehdule file name is blank don't try to open it.
           if(cnamef.eq.' ') then
              call fmpclose(idcbsk,ierr)
              kskblk = .true.
-             lskd2 = 'none'
+             lskd2 = '    '
              call char2hol(lskd2,ilskd2,1,MAX_SKD)
              call fs_set_lskd2(ilskd2)
              call char2hol(lskd2,ilskd,1,8)
@@ -681,7 +687,7 @@ C  a valid schedule or all is set to zero.
                 ipinsnp(5)=0
              endif
              kskblk = .true.
-             lskd2 = 'none'
+             lskd2 = '    '
              call char2hol(lskd2,ilskd2,1,MAX_SKD)
              call fs_set_lskd2(ilskd2)
              call char2hol(lskd2,ilskd,1,8)
@@ -694,7 +700,7 @@ C  a valid schedule or all is set to zero.
           call newsk(ibuf,ich,nchar,idcbsk,iblen,ierr,icurln,ilstln)
           if (ierr.ne.0) then
              kskblk = .true.
-             lskd2 = 'none'
+             lskd2 = '    '
              call char2hol(lskd2,ilskd2,1,MAX_SKD)
              call fs_set_lskd2(ilskd2)
              call char2hol(lskd2,ilskd,1,8)
@@ -709,9 +715,9 @@ C  a valid schedule or all is set to zero.
 c    
           call fs_get_lprc2(ilprc2)
           call hol2char(ilprc2,1,MAX_SKD,lprc2)
-          if(lprc2.ne.'none'.and.lprc2.ne.' ') then
+          if(lprc2.ne.'    '.and.lprc2.ne.' ') then
               call fmpclose(idcbp1,ierr)
-              lprc2='none'
+              lprc2='    '
               call char2hol(lprc2,ilprc2,1,MAX_SKD)
               call fs_set_lprc2(ilprc2)
               call char2hol(lprc2,ilprc,1,8)
@@ -752,7 +758,7 @@ c
                  ipinsnp(5)=ierr
                  endif
             endif
-            lprc2='none'
+            lprc2='    '
             call char2hol(lprc2,ilprc2,1,MAX_SKD)
             call fs_set_lprc2(ilprc2)
             call char2hol(lprc2,ilprc,1,8)
@@ -1053,7 +1059,7 @@ C
           irnprc = rn_take('pfmed',1)
           if (irnprc.eq.0) then
             call fmpclose(idcbp1,ierr)
-            lprc2='none'
+            lprc2='    '
             call char2hol(lprc2,ilprc2,1,MAX_SKD)
             call fs_set_lprc2(ilprc2)
             call char2hol(lprc2,ilprc,1,8)
@@ -1082,6 +1088,11 @@ C
              ipinsnp(2)=ipinsnp(2)+1
           endif
         else
+          ic2 = iscn_ch(ibuf,ich,nchar,' ')
+          if(ic2.ne.0) then
+             call logit7ci(0,0,0,1,-264,'bo',0)
+             goto 600
+          endif
           ic2 = iscn_ch(ibuf,ich,nchar,',')
           if (ic2.eq.0) ic2 = nchar+1
           if(ic2-1-ich+1.gt.MAX_SKD) then
@@ -1117,7 +1128,7 @@ C check for write access/existence
 C                   Cancel procs from the old library
 C                   not doing it when the new proc is the same is questionable
               call fmpclose(idcbp1,ierr)
-              lprc2='none'
+              lprc2='    '
               call char2hol(lprc2,ilprc2,1,MAX_SKD)
               call fs_set_lprc2(ilprc2)
               call char2hol(lprc2,ilprc,1,8)
@@ -1132,7 +1143,7 @@ C                   not doing it when the new proc is the same is questionable
      &                   ierr,'n')
               if (ierr.ne.0) then
                 call logit7ci(0,0,0,1,-133,'bo',ierr)
-                lprc2 = 'none'
+                lprc2 = '    '
                 call char2hol(lprc2,ilprc2,1,MAX_SKD)
                 call fs_set_lprc2(ilprc2)
                 call char2hol(lprc2,ilprc,1,8)
@@ -1155,7 +1166,7 @@ C
         nchar=min0(ireg(2),iblen*2)
         call fs_get_lskd2(ilskd2)
         call hol2char(ilskd2,1,MAX_SKD,lskd2)
-        if (lskd2.eq.'none') then
+        if (lskd2.eq.'    ') then
           call putcon_ch('no schedule currently active')
           if(iwait.ne.0) then
           idum=ichmv_ch(ibuf,1,'no schedule currently active')-1
@@ -1171,7 +1182,7 @@ C
       else if (mbranch.eq.17) then
         call fs_get_lskd2(ilskd2)
         call hol2char(ilskd2,1,MAX_SKD,lskd2)
-        if (lskd2.eq.'none') then
+        if (lskd2.eq.'    ') then
           call putcon_ch('no schedule currently active')
           if(iwait.ne.0) then
           idum=ichmv_ch(ibuf,1,'no schedule currently active')-1

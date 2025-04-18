@@ -1236,7 +1236,7 @@ BO -156
 Error decoding line # ?WWW in ANTENNA.CTL
 ""
 BO -157
-Can't change procedure library while PFMED is running.
+Can't change schedule procedure library while PFMED is running.
 ""
 BO -158
 Can't open STATION as schedule procedure library.
@@ -1467,13 +1467,19 @@ BO -260
 Procedure library name too long, ?W characters maximum.
 ""
 BO -261
-Schedule file name too long, ?W characters maximum.
+Schedule name too long, ?W characters maximum.
 ""
 BO -262
-Log file name too long, ?W characters maximum.
+Log name too long, ?W characters maximum.
 ""
 BO -263
 Cannot change schedules while recording, use disk_record=off to stop.
+""
+BO -264
+Spaces not allowed in procedure library name.
+""
+BO -265
+Spaces not allowed in schedule name.
 ""
 BO -295
 Error initiliazing rdbca, internal error ?WWW
@@ -1537,6 +1543,9 @@ No default for IF command condition.
 ""
 BO -315
 Unknown condition in IF command.
+""
+BO -316
+Spaces are not allowed in the schedule name for IF command condition.
 ""
 BO -390
 setup procedure name must be 12 characters or less.

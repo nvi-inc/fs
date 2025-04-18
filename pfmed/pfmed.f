@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020, 2023  NVI, Inc.
+* Copyright (c) 2020, 2023, 2025 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -142,7 +142,7 @@ C
 1103      format(a)
           goto 990
         end if
-        lprc2='none'
+        lprc2='    '
         call char2hol(lprc2,ilprc2,1,MAX_SKD)
         call fs_set_lprc2(ilprc2)
         call char2hol(lprc2,ilprc,1,8)
@@ -170,13 +170,19 @@ C FOLLOWING VARIABLES WERE LOCKED & MAY BE GRABBED ONCE AND SET LATER AT END
       call fs_get_lnewpr2(ilnewpr2)
       call hol2char(ilnewpr2,1,MAX_SKD,lnewpr2)
       lproc = lprc2
-      if(lproc.eq.'none') lproc=lstp2
+      if(lproc.eq.'    ') lproc=lstp2
 C
 C  Print messages about current procedure libraries
 C
       nch=trimlen(lprc2)
-      write(lui,2102)
-     & 'current FS schedule procedure library:     '// lprc2(1:nch)
+      if(nch.ne.0) then
+        write(lui,2102)
+     &   'current FS schedule procedure library:     '// lprc2(1:nch)
+      else
+        write(lui,2102)
+     &   'current FS schedule procedure library:     '//
+     &   'no library is selected'
+      endif
 2102  format(a)
       if (kboss_pf) then
         nch=trimlen(lstp2)

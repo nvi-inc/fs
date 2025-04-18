@@ -7,19 +7,35 @@
 
 Settable parameters:
 
-          name      name of procedure file to open. If no directory path
-                    is specified, /usr2/proc is assumed. If no extension
-                    is specified, .prc is assumed. This procedure
-                    library is opened as the "schedule" library,
-                    and all procedure names are read.
+          name      name of procedure library to open.  The file for
+                    the library must be in '/usr2/proc/' and end with
+                    a '.prc' extension.  The maximum length of 'name'
+                    is 18 characters.  Spaces are not allowed.  The
+                    library is opened as the "schedule" library, and
+                    all procedure names are read.  If 'name' is null,
+                    i.e., empty, any open schedule library is closed.
+
+                    If no schedule library is open, the 'name' in the
+                    response is null.
 
 Monitor-only parameters: none
 
 Comments:
+Unlike the schedule 'name' in the 'schedule=...' command, if the
+procedure library 'name' in this command can't be opened, an already
+open one will stay open.
+
+You can specify a name of an actual library as 'none'. However, this
+can be confusing.
+
 When a new procedure library is opened, any time-scheduled procedures
 from the previous "schedule" procedure library are canceled.  See
-section 8.0 of the SNAP Language manual for details. Refer to the
-pfmed manual for information on editing procedure libraries.
+section 8.0 of the SNAP Language manual for details.
+
+There is an interlock that causes a 'proc=...' command to be rejected
+if 'pfmed' is running.  The problem can be rectified by exiting
+'pfmed'.  Refer to the 'pfmed' manual for information on editing
+procedure libraries.
 
 Please see the comments section of the 'help' page for the 'schedule'
 command for information on how the "schedule" and "station" procedures

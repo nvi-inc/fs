@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, 2023  NVI, Inc.
+ * Copyright (c) 2020, 2023, 2025 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -109,7 +109,7 @@ main()
       printf("new %d acquired %d LSKD2 '%s' lskd '%s'\n",
 	     new,acquired,shm_addr->LSKD2,lskd);
 #endif
-      if(new && !acquired && memcmp(shm_addr->LSKD2,"none ",5)!=0 &&
+      if(new && !acquired && memcmp(shm_addr->LSKD2,"     ",5)!=0 &&
 	 memcmp(shm_addr->LSKD2,lskd,MAX_SKD)==0)
 	logit(NULL,-1,"fl");
       
