@@ -21,7 +21,7 @@
 :doctype: book
 
 = FS 10.2 to Latest Commit Update Notes
-Version 1.5 - April 2025
+Version 1.6 - April 2025
 
 :sectnums:
 :stem: latexmath
@@ -258,17 +258,18 @@ shells.
 [%collapsible]
 ====
 
-Execute the commands for the shells that you use:
+Execute the commands for all the shells that you use, typically just
+your login shell:
 
 [disc]
 
-* _bash_ -- which is the default login shell for FSL10 and FSL11 (and
+* _bash_ -- The default login shell for FSL10 and FSL11 (and
 possibly later):
 
  cd ~
  tail -2 /usr2/fs/st.default/oper/.bash_aliases >>.bask_aliases
 
-* _tcsh_ -- which is the default login shell for FSL8 and FSL9:
+* _tcsh_ -- The default login shell for FSL8 and FSL9:
 
  cd ~
  tail -2 /usr2/fs/st.default/oper/.cshrc >>.cshrc
