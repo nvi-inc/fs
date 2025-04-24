@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, 2022, 2024 NVI, Inc.
+ * Copyright (c) 2020, 2022, 2024, 2025 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -56,12 +56,12 @@ void wcounts(label,azoff,eloff,onoff,accum)
 
     if(
        (rack==RDBE && ((onoff->intp==1 &&strlen(buff)>64)
-		       ||(onoff->intp!=1 &&strlen(buff)>55))) ||
+         ||(onoff->intp!=1 &&strlen(buff)>55))) ||
        (dbbc2_pfb && 
         ((onoff->intp==1 &&strlen(buff)>68)
             ||(onoff->intp!=1 &&strlen(buff)>59))) ||
        ((onoff->intp==1 &&strlen(buff)>70)
-		       ||(onoff->intp!=1 &&strlen(buff)>61))
+         ||(onoff->intp!=1 &&strlen(buff)>61))
     ){
       logit_nd(buff,0,NULL);
       buff[0]=0;
@@ -69,14 +69,14 @@ void wcounts(label,azoff,eloff,onoff,accum)
     
     if(strlen(buff)==0) {
       strcpy(buff,label);
-	strcat(buff," ");
-	sprintf(buff+strlen(buff),"%7.1lf %9.5lf %9.5lf",
-		accum->stm,azoff*RAD2DEG,eloff*RAD2DEG);
+        strcat(buff," ");
+        sprintf(buff+strlen(buff),"%7.1lf %9.5lf %9.5lf",
+          accum->stm,azoff*RAD2DEG,eloff*RAD2DEG);
       /*      if(kfirst) {
-	strcat(buff," ");
-	sprintf(buff+strlen(buff),"%7.1lf %9.5lf %9.5lf",
-		accum->stm,azoff*RAD2DEG,eloff*RAD2DEG);
-	kfirst=FALSE;
+        strcat(buff," ");
+        sprintf(buff+strlen(buff),"%7.1lf %9.5lf %9.5lf",
+          accum->stm,azoff*RAD2DEG,eloff*RAD2DEG);
+        kfirst=FALSE;
       }
       */
     }
@@ -87,28 +87,27 @@ void wcounts(label,azoff,eloff,onoff,accum)
     strcat(buff," ");
     if(onoff->intp==1) {
       if(rack==RDBE) {
-	dble2str(buff,       accum->avg[i],-11,0);
-      printf(" buf '%s;\n",buff);
-      buff[strlen(buff)-1]=0;
+        dble2str(buff,       accum->avg[i],-11,0);
+        buff[strlen(buff)-1]=0;
       } else if(dbbc2_pfb) {
-	dble2str(buff,       accum->avg[i],-8,3);
+        dble2str(buff,       accum->avg[i],-8,3);
       } else {
-	flt2str(buff,(float) accum->avg[i],-7,0);
-      buff[strlen(buff)-1]=0;
+        flt2str(buff,(float) accum->avg[i],-7,0);
+        buff[strlen(buff)-1]=0;
       }
     } else {
       if(rack==RDBE) {
-	dble2str(buff,       accum->avg[i],-11,1);
-	strcat(buff," ");
-	dble2str(buff,       accum->sig[i],-11,1);
+        dble2str(buff,       accum->avg[i],-11,1);
+        strcat(buff," ");
+        dble2str(buff,       accum->sig[i],-11,1);
       } else if(dbbc2_pfb) {
-	dble2str(buff,       accum->avg[i],-9,4);
-	strcat(buff," ");
-	dble2str(buff,       accum->sig[i],-9,4);
+        dble2str(buff,       accum->avg[i],-9,4);
+        strcat(buff," ");
+        dble2str(buff,       accum->sig[i],-9,4);
       } else {
-	flt2str(buff,(float) accum->avg[i],-8,1);
-	strcat(buff," ");
-	flt2str(buff,(float) accum->sig[i],-8,1);
+        flt2str(buff,(float) accum->avg[i],-8,1);
+        strcat(buff," ");
+        flt2str(buff,(float) accum->sig[i],-8,1);
       }
     }
   }
