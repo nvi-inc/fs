@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, 2022, 2023 NVI, Inc.
+ * Copyright (c) 2020, 2022, 2023, 2025 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-/* Receiver/client multicast Datagram example. */
+
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
@@ -139,20 +139,13 @@ static unsigned long long xbe64toh(unsigned long long big_endian)
   } else
     return big_endian;
 }
-struct sockaddr_in localSock;
-struct ip_mreq group;
-int sd;
-int datalen;
-char databuf[sizeof(struct mcast)];
-
-static char who[ ]="cn";
-static char what[ ]="ad";
-static char me[]="rdtcn" ; /* My name */ 
-static char letter;
-static  int irdbe;
- 
-int main(int argc, char *argv[])
+int r1dbe(char me[5], char who[2], char letter, int irdbe)
 {
+  struct sockaddr_in localSock;
+  struct ip_mreq group;
+  int sd;
+  int datalen;
+  char databuf[sizeof(struct mcast)];
 
   struct rdbe_tsys_cycle local;
   struct rdbe_tsys_cycle1 local1;
@@ -175,22 +168,9 @@ int main(int argc, char *argv[])
   double lo[MAX_LO];
   char epoch[14];
 
-  setup_ids();    /* attach to the shared memory */
-  rte_prior(FS_PRIOR);
   int it[6];
   int seconds;
 
-  if(argc >= 2) {
-    memcpy(me+3,argv[1],2);
-    memcpy(who,argv[1],2);
-    if(argv[1][1]!='n')
-      memcpy(what,argv[1],2);
-    letter=me[4];
-  }
-  putpname(me);
-
-  skd_wait(me,ip,(unsigned) 0);
-  
 /* Create a datagram socket on which to receive. */
 sd = socket(AF_INET, SOCK_DGRAM, 0);
 if(sd < 0)
@@ -220,26 +200,9 @@ exit(1);
 memset((char *) &localSock, 0, sizeof(localSock));
 localSock.sin_family = AF_INET;
 
- {
-   int i;
-   char lets[]="abcdefghijklm";
-   int octet,dum;
-   irdbe=-1;
-   for(i=0;i<MAX_RDBE;i++)
-     if(me[4]==lets[i]) {
-       if(0!=shm_addr->rdbehost[i][0]) {
-	 sprintf(multicast_addr,"239.0.2.%d",(i+1)*10);
-	 localSock.sin_port = htons(20020+i+1);
+	 sprintf(multicast_addr,"239.0.2.%d",(irdbe+1)*10);
+	 localSock.sin_port = htons(20020+irdbe+1);
 	 irdbe=i;
-	 break;
-       }
-     }
-   if(irdbe<0) {
-     printf(" no rdbe found %s\n",me);
-     exit(-1);
-   }
-   //   printf("%s addr %s  port %d\n",me,multicast_addr,ntohs(localSock.sin_port));
- }
 
  //1 localSock.sin_addr.s_addr = INADDR_ANY;
  localSock.sin_addr.s_addr = htonl(INADDR_ANY);
