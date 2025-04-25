@@ -7955,6 +7955,12 @@ rdt?W: Error from select(), see above message for details.
 RZ   -2
 rdt?W: multicast may not be running, no message received
 ""
+RZ   -3
+rdt?W: internal error: RDBE multicast receiver didn't find device.
+""
+RZ   -4
+rdt?W: internal error: RDBE multicast receiver doesn't support non-RDBE racks
+""
 SC   29
 setcl: DBBC3 multicast time now okay.
 ""
