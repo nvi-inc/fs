@@ -1,5 +1,6 @@
 LIBS = ../poclb/poclb.a ../clib/clib.a ../poclb/poclb.a ../rtelb/rtelb.a -lm
-OBJECTS = rdtcn.o r1dbe.o FFT.o rdbe_freqz.o rt_nonfinite.o rtGetInf.o rtGetNaN.o
+OBJECTS = rdtcn.o r1dbe.o r2dbe.o FFT.o rdbe_freqz.o rt_nonfinite.o rtGetInf.o\
+					rtGetNaN.o
 
 ../bin/rdtcn: $(OBJECTS) $(LIBS)
 

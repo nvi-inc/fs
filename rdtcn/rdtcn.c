@@ -77,6 +77,8 @@ int main(int argc, char *argv[])
 
     if(shm_addr->equip.rack == RDBE && shm_addr->equip.rack_type == RDBE)
       r1dbe(me, who, letter, irdbe);
+    else if(shm_addr->equip.rack == RDBE && shm_addr->equip.rack_type == R2DBE)
+      r2dbe(me, who, letter, irdbe);
     else
       logita(NULL,-4,"rz",who);
   }
