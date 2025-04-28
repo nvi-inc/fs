@@ -151,7 +151,6 @@ int r1dbe(char me[5], char who[2], char letter, int irdbe)
   struct rdbe_tsys_cycle1 local1;
   unsigned int tpi[MAX_RDBE_CH*MAX_RDBE_IF][2];
   int iping;
-  char multicast_addr[129];
   int ip[5];
   char secho[512];
   char buf[512], *start, slen;
@@ -200,9 +199,7 @@ exit(1);
 memset((char *) &localSock, 0, sizeof(localSock));
 localSock.sin_family = AF_INET;
 
-	 sprintf(multicast_addr,"239.0.2.%d",(irdbe+1)*10);
-	 localSock.sin_port = htons(20020+irdbe+1);
-	 irdbe=i;
+localSock.sin_port = htons(shm_addr->rdbad[irdbe].mcast_port);
 
  //1 localSock.sin_addr.s_addr = INADDR_ANY;
  localSock.sin_addr.s_addr = htonl(INADDR_ANY);
@@ -219,7 +216,8 @@ exit(1);
 /* interface. Note that this IP_ADD_MEMBERSHIP option must be */
 /* called for each local interface over which the multicast */
 /* datagrams are to be received. */
-group.imr_multiaddr.s_addr = inet_addr(multicast_addr);
+group.imr_multiaddr.s_addr = inet_addr(shm_addr->rdbad[irdbe].mcast_addr);
+
 //group.imr_multiaddr.s_addr = inet_addr("239.0.4.20");
 //group.imr_interface.s_addr = inet_addr("203.106.93.94");
 //1 group.imr_interface.s_addr = inet_addr("192.168.1.21");

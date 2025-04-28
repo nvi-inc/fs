@@ -7062,10 +7062,16 @@ RA   -1
 rdbc.: error opening rdb?W.ctl
 ""
 RA   -2
-rdbc.: error pushing back on rdb?W.ctl
+rdbc.: error pushing back on rdb?W.ctl, see above "un" error
 ""
 RA   -3
-rdbc.: first non-comment line in rdb?W.ctl did not contain three tokens
+rdbc.: first non-comment line in rdb?W.ctl must have three or six tokens
+""
+RA   -4
+rdbc.: unknown RDBE for rdb?W.ctl
+""
+RA   -5
+rdbc.: error reading non-comment line in rdb?W.ctl, see above "un" error
 ""
 RA  -11
 rdb?W: error opening socket

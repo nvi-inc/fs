@@ -567,4 +567,13 @@ typedef struct fscom {
 
   struct rdbe_chan_sel_en_cmd rdbe_chan_sel_en[MAX_RDBE+1];
 
+  struct rdbab {
+      char host[129];
+      int port;
+      int time_out;
+      char mcast_addr[129];
+      int mcast_port;
+      char mcast_if[16];
+  } rdbad[MAX_RDBE];
+
 } Fscom;
