@@ -170,7 +170,7 @@ int main(int argc, char * argv[])
     }
     ip[2] = result;
     memcpy(ip+3,"ra",2);
-    if(result<-3||0<result)
+    if(result<-5||0<result)
       memcpy(ip+4,who,2);
     else if (0!=result)
       memcpy(ip+4,what,2);
@@ -189,43 +189,83 @@ int doinit()
     FILE *fp;   /* general purpose file pointer */
     char check;
     int error;
+    char mcast_addr[129];
+    int mcast_port;
+    char mcast_if[16];
+    int i;
+    char lets[]="abcdefghijklm";
+    char *p;
+#define MAX_BUFF 258
+    char buff[MAX_BUFF];
 
     if ( (fp = fopen(control_file,"r")) == NULL) {
 #ifdef DEBUG
-        printf("cannot open RDBE address file %s\n",control_file);
+      printf("cannot open RDBE address file %s\n",control_file);
 #endif
-        return 0 ;
+      return 0 ;
     }
 
     check=fgetc(fp);
     while(check == '*' && check != EOF) {
       check=fgetc(fp);
       while(check != '\n' && check != EOF)
-	check=fgetc(fp);
+        check=fgetc(fp);
       if(check != EOF) 
-	check=fgetc(fp);
+        check=fgetc(fp);
     }
     if (check == EOF)
       /* ended in comment */      
       return 0;
-    else if(ungetc(check, fp)==EOF)
+    else if(ungetc(check, fp)==EOF) {
+      logita(NULL,errno,"un",who);
       return -2;
-   
-    if ( fscanf(fp,"%80s %d %d",host,&port, &time_out)!=3) /* read a line */
+    }
+
+    int irdbe=-1;
+    for(i=0;i<MAX_RDBE;i++)
+      if(me[4]==lets[i]) {
+        irdbe=i;
+        break;
+      }
+    if(irdbe<0)
+      return -4;
+
+    if( NULL == fgets(buff,MAX_BUFF,fp)) {
+      logita(NULL,errno,"un",who);
+      return -5;
+    }
+
+    int ic=sscanf(buff,"%80s %d %d %128s %d %15s\n",
+        host,&port, &time_out,&mcast_addr,&mcast_port,&mcast_if);
+    if(6==ic) {
+      p=memccpy(shm_addr->rdbad[irdbe].host,host, 0, sizeof(shm_addr->rdbad[irdbe].host));
+      if(NULL==p)
+        shm_addr->rdbad[irdbe].host[sizeof(shm_addr->rdbad[irdbe].host)-1]=0;
+      shm_addr->rdbad[irdbe].port=port;
+      shm_addr->rdbad[irdbe].time_out=time_out;
+
+      p=memccpy(shm_addr->rdbad[irdbe].mcast_addr,mcast_addr,0,
+          sizeof(shm_addr->rdbad[irdbe].mcast_addr));
+      if(NULL==p)
+        shm_addr->rdbad[irdbe].mcast_addr[sizeof(shm_addr->rdbad[irdbe].mcast_addr)-1]=0;
+
+      shm_addr->rdbad[irdbe].mcast_port=mcast_port;
+
+      p=memccpy(shm_addr->rdbad[irdbe].mcast_if,mcast_if,0,
+          sizeof(shm_addr->rdbad[irdbe].mcast_if));
+      if(NULL==p)
+        shm_addr->rdbad[irdbe].mcast_if[sizeof(shm_addr->rdbad[irdbe].mcast_if)-1]=0;
+    } else if (3==ic)
+      mcast_addr[0]=0;
+    else
       return -3;
 
-    else {
-      int i;
-      char lets[]="abcdefghijklm";
-      for(i=0;i<MAX_RDBE;i++)
-	if(me[4]==lets[i]) {
-	  strcpy(shm_addr->rdbehost[i],host);
-	  shm_addr->rdbe_units[i]=1;
-	  shm_addr->rdbe_active[i]=1;
-	}
-    }
+    strcpy(shm_addr->rdbehost[irdbe],host);
+    shm_addr->rdbe_units[irdbe]=1;
+    shm_addr->rdbe_active[irdbe]=1;
+
     char *disable=getenv("FS_RDBE_MC_DISABLE");
-    if (!disable || strcmp(disable,"1")) {
+    if ((!disable || strcmp(disable,"1")) && mcast_addr[0]!=0) {
       char rdtcn[6];
       int ip[5];
       sprintf(rdtcn,"rdtc%1.1s",me+4);

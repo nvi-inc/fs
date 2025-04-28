@@ -1,9 +1,11 @@
 *rdbca.ctl example file
-* RDBE-A must be configured with multi-cast 239.0.2.10:20021
-*
-* line 1: host(IP address or name) port(5000) time-out(centiseconds)
-* using an IP address avoids name server and potential network problems
+* line 1:
+* host(IP address or name) port(5000) time-out(centiseconds) mcast_addr mcast_port mcast_interface
+* For host, it is recommended to use an alias from /etc/hosts to avoid
+*  potential nameserver problems and hide IP/FQDN.
+* Use only the first three tokens for no multicast
 * example: remote host uses a long time-out
-*   127.0.0.1 5000  500
+* rdbea      5000 500 239.0.2.10 20021 eth0
 * example: local host uses a short time-out
-*   127.0.0.1 5000 100
+* rdbea      5000 100 239.0.2.10 20021 eth0
+  rdbea      5000 500 239.0.2.10 20021 eth0
