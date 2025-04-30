@@ -163,7 +163,7 @@ C
       else if (cjchar(parm,1).eq.','.and.kd) then
         ep = -1
       else if (cjchar(parm,1).eq.',') then
-        ep = 1950.0              !  the default is 1950 for positions
+        ep = 2000.0              !  the default is 2000 for positions
       else
         ep = das2b(ibuf,ic1,ich-ic1-1,ierr)
         if (ierr.ne.0) then

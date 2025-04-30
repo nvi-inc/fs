@@ -268,12 +268,12 @@ C Initialize ps label file to new.
       inew=1
 C Initialize newpage for labels.
       inewpage=0
-! Initialize cpaper_Size to "default Defualt"
+! Initialize cpaper_Size to "default Default"
       cpaper_size="DD"
 C Initialize the $PROC section location
       ksked_proc=.false.
 C Initialize default epoch for source positions
-      cepoch = '1950'
+      cepoch = '2000'
 C Codes for passes and bandwidths
 c Initialize no. entries in lband (freqs.ftni)
       NBAND= 2
