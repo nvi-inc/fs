@@ -25,12 +25,16 @@
 #include "../include/fs_types.h"
 #include "../include/fscom.h"
 
+#include "packet_r2dbe.h"
+#include "packet_r2dbe_unpack.h"
+
 extern struct fscom *shm_addr;
 
 int r2dbe(char me[5], char who[2], char letter, int irdbe)
 {
-    char buf[33960];
+    char buf[sizeof(r2dbe_multicast_t)];
     int ip[5];
+    r2dbe_multicast_t packet = {};
 
     int error_no;
     int sock = open_mcast(shm_addr->rdbad[irdbe].mcast_addr,
@@ -49,6 +53,13 @@ int r2dbe(char me[5], char who[2], char letter, int irdbe)
       printf(" me '%5s' n %d\n",me, n);
       if(n<0)
         continue;
+
+      if (unmarshal_r2dbe_multicast_t(&packet, buf, n) < 0) {
+        logit(NULL,-1,"xx");
+        continue;
+      }
+      printf(" time '%32s' mu0 %f sigma %f pps rf gps %f\n",
+          packet.read_time,packet.mu0,packet.sigma0,packet.pps_offset,packet.gps_offset);
     }
 
 idle:

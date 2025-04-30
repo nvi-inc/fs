@@ -1,0 +1,27 @@
+#include <stdint.h>
+
+typedef struct {
+  char read_time[32];
+  uint16_t pkt_size;
+  uint16_t epoch_ref;
+  uint32_t epoch_sec;
+  char tsys_header[20];
+  uint32_t tsys0_on[64];
+  uint32_t tsys0_off[64];
+  uint32_t tsys1_on[64];
+  uint32_t tsys1_off[64];
+  char pcal_header[20];
+  uint16_t pcal_ifx;
+  uint16_t pad1[3];
+  double pcal_freq;
+  int32_t pcal_sin[4096];
+  int32_t pcal_cos[4096];
+  char raw_header[20];
+  uint16_t pad2[2];
+  double mu0;
+  double sigma0;
+  double mu1;
+  double sigma1;
+  double pps_offset;
+  double gps_offset;
+} r2dbe_multicast_t;
