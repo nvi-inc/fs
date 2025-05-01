@@ -50,7 +50,9 @@ int r2dbe(char me[5], char who[2], char letter, int irdbe)
     for (;;) {
       ssize_t n = read_mcast(sock,buf,sizeof(buf));
 
+#ifdef WEH
       printf(" me '%5s' n %d\n",me, n);
+#endif
       if(n<0)
         continue;
 
@@ -58,8 +60,22 @@ int r2dbe(char me[5], char who[2], char letter, int irdbe)
         logit(NULL,-1,"xx");
         continue;
       }
-      printf(" time '%32s' mu0 %f sigma %f pps rf gps %f\n",
-          packet.read_time,packet.mu0,packet.sigma0,packet.pps_offset,packet.gps_offset);
+#ifdef WEH
+      printf(" time '%32s'\n",packet.read_time);
+      printf(" pkt_size %u epoch %u seconds %d\n",
+          packet.pkt_size,packet.epoch_ref,packet.epoch_sec);
+      printf("  mu0 %g sigma0 %g\n",
+          packet.mu0,packet.sigma0);
+      printf("  mu1 %g sigma1 %g\n",
+          packet.mu1,packet.sigma1);
+      printf("  pps %g gps %g\n",
+          packet.pps_offset,packet.gps_offset);
+
+      printf(" pcal_ifx %d\n",packet.pcal_ifx);
+      printf(" pcal_freq %g\n",packet.pcal_freq);
+#endif
+      calc_ts(&packet);
+      calc_pc(&packet);
     }
 
 idle:
