@@ -31,7 +31,7 @@
 
 extern struct fscom *shm_addr;
 
-void calc_ts( r2dbe_multicast_t *t)
+void calc_ts( r2dbe_multicast_t *t, struct rdbe_tsys_cycle *cycle)
 {
     unsigned int on, off;
     int i;
@@ -45,6 +45,9 @@ void calc_ts( r2dbe_multicast_t *t)
 
         diff=on-off;
         tsys= (tcal/diff)*0.5*(on+off);
+ 
+        if(i==17)
+          cycle->tsys[MAX_RDBE_CH][0]=tsys;
 
 #ifdef WEH
         printf(" if0 channel %d on %8u off %8u tsys %f\n",
@@ -58,6 +61,9 @@ void calc_ts( r2dbe_multicast_t *t)
 
         diff=on-off;
         tsys= (tcal/diff)*0.5*(on+off);
+
+        if(i==17)
+          cycle->tsys[MAX_RDBE_CH][1]=tsys;
 
 #ifdef WEH
         printf(" if1 channel %d on %8u off %8u tsys %f\n",
