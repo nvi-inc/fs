@@ -32,7 +32,7 @@
 
 extern struct fscom *shm_addr;
 
-void calc_pc( r2dbe_multicast_t *t)
+void calc_pc( r2dbe_multicast_t *t, struct rdbe_tsys_cycle *cycle)
 {
     int i;
     double x[4096],y[4096],amp[4096],phs[4096];
@@ -50,10 +50,31 @@ void calc_pc( r2dbe_multicast_t *t)
       phs[i]=atan2(y[i],x[i])*180/M_PI;
     }
 #ifdef WEH
+    i=590;
+        printf(" ifx %d i %d pcal_sin %d pcal_cos %d amp %g phs %g\n",
+            t->pcal_ifx,i,t->pcal_sin[i],t->pcal_cos[i],amp[i],phs[i]);
+#endif
+    cycle->pcaloff=2600000;
+//    int ibin=fmod(cycle->pcaloff+590*1e6+16e6/32e6+1e-12,(double) MAX_R2DBE_CH);
+    double tpi_on,tpi_off;
+    if(t->pcal_ifx==0) {
+      tpi_on=t->tsys0_on[17];
+      tpi_off=t->tsys0_off[17];
+    } else {
+      tpi_on=t->tsys1_on[17];
+      tpi_off=t->tsys1_off[17];
+    }
+    int itone=545;
+    amp[545]*=1.25e2/sqrt(tpi_on+tpi_off);
+    cycle->pcal_amp[30]=amp[545];
+    cycle->pcal_phase[30]=phs[545];
+    cycle->pcal_ifx=t->pcal_ifx;
+#ifdef WEH
     printf(" pcal_ifx %d\n",t->pcal_ifx);
     for (i=0;i<4096;i++) {
         printf(" i %d pcal_sin %d pcal_cos %d amp %g phs %g\n",
             i,t->pcal_sin[i],t->pcal_cos[i],amp[i],phs[i]);
     }
+    fi
 #endif
 }

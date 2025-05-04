@@ -7952,6 +7952,9 @@ No signal from bar code reader.
 RW   -2
 Successive readings from bar code reader differ.
 ""
+RZ   21
+rdt?W: multicast error from select() cleared
+""
 RZ    2
 rdt?W: receiving multicast messages again
 ""
@@ -7966,6 +7969,39 @@ rdt?W: internal error: RDBE multicast receiver didn't find device.
 ""
 RZ   -4
 rdt?W: internal error: RDBE multicast receiver doesn't support non-RDBE racks
+""
+RZ  -20
+rdt?W: multicast time-out
+""
+RZ  -21
+rdt?W: multicast error from select(), see above 'un' error
+""
+RZ  -22
+rdt?W: multicast error from recvfrom(), see above 'un' error
+""
+RZ  -31
+rdt?W: error unpacking multicast, packet too small
+""
+RZ  -41
+rdt?w multicast: opening datagram socket, see above 'un' error
+""
+RZ  -42
+rdt?w multicast: setting SO_REUSEADDR, see above 'un' error
+""
+RZ  -43
+rdt?w multicast: binding datagram socket (wrong port?), see above 'un' error
+""
+RZ  -44
+rdt?w multicast: adding multicast group (wrong address?), see above 'un' error
+""
+RZ  -46
+rdt?w multicast: interface name too long to get address
+""
+RZ  -47
+rdt?w multicast: opening socket to get interface address, see above 'un' error
+""
+RZ  -48
+rdt?w multicast: retrieving interface address from socket (wrong interface?), see above 'un' error
 ""
 SC   29
 setcl: DBBC3 multicast time now okay.

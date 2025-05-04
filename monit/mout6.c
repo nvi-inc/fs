@@ -129,6 +129,8 @@ mout6()
   }
 
   for(i=0;i<MAX_RDBE;i++) {
+    if(fs->equip.rack_type==R2DBE)
+      local1[i].arrival++;
     tm = gmtime(&local1[i].arrival);
     strftime(dot_should[i],sizeof(dot_should[i]),"%Y%j%H%M%S",tm);
 
@@ -153,7 +155,8 @@ mout6()
     it[0]=it[1]=it[2]=it[3]=it[4]=it[5]=0;
     sscanf(local[i].epoch,"%4d%3d%2d%2d%2d",it+5,it+4,it+3,it+2,it+1);
     rte2secs(it,&int_seconds);
-    seconds=int_seconds+1;
+    if(fs->equip.rack_type==RDBE)
+      seconds=int_seconds+1;
     tm = gmtime(&seconds);
     strftime(dot_display,sizeof(dot_display),"%Y.%j.%H:%M:%S", tm);
     printw("%17s",dot_display);

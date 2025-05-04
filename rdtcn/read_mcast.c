@@ -33,7 +33,8 @@
 #define TIME_OUT        145
 #define ERROR_PERIOD   2000
 
-ssize_t read_mcast(int sock, char buf[], size_t buf_size)
+ssize_t read_mcast(int sock, char buf[], size_t buf_size,
+         struct rdbe_tsys_cycle1 *cycle1, char who[2])
 {
     ssize_t n;
     struct sockaddr_in from;
@@ -45,6 +46,8 @@ ssize_t read_mcast(int sock, char buf[], size_t buf_size)
     static int old_error = 0;
     int return_select;
     int time_out;
+    int it[6];
+    int seconds;
 
     /* set time-out */
     time_out=TIME_OUT;
@@ -57,14 +60,15 @@ ssize_t read_mcast(int sock, char buf[], size_t buf_size)
     /* Check if data available */
     return_select = select(sock + 1, &readfds, NULL, NULL, &to);
     if(return_select == 0) {  /* time-out */
-      logit(NULL,-20,"xx");
+      logita(NULL,-20,"rz",who);
       return -1;
     } else if (return_select < 0) { /* error */
       if(old_error != errno)
           mcast_error = 0;
       mcast_error=mcast_error%(ERROR_PERIOD/100) + 1;
       if(1==mcast_error) {
-          logitn(NULL,-21,"xx",errno);
+          logit(NULL,errno,"un");
+          logita(NULL,-21,"rz",who);
       }
       old_error=errno;
       rte_sleep(100);
@@ -74,15 +78,20 @@ ssize_t read_mcast(int sock, char buf[], size_t buf_size)
     if(mcast_error) {
         mcast_error=0;
         old_error = 0;
-        logit(NULL,21,"xx");
+        logit(NULL,21,"rz");
     }
 
     if ((n = recvfrom(sock, buf, buf_size, 0,
         (struct sockaddr *)&from, &len)) < 0) {
-        logitn(NULL,-22,"xx",errno);
+        logit(NULL,errno,"un");
+        logita(NULL,-22,"rz",who);
         rte_sleep(100);
         return -1;
     }
+
+    rte_time(it,it+5);
+    rte2secs(it,&seconds);
+    cycle1->arrival=seconds;
 
     return n;
 }

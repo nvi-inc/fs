@@ -20,6 +20,7 @@
 
 #include <stdio.h>
 #include <sys/types.h>
+#include <errno.h>
 
 #include "../include/params.h"
 #include "../include/fs_types.h"
@@ -34,6 +35,8 @@ int r2dbe(char me[5], char who[2], char letter, int irdbe)
 {
     char buf[sizeof(r2dbe_multicast_t)];
     int ip[5];
+    struct rdbe_tsys_cycle cycle;
+    struct rdbe_tsys_cycle1 cycle1;
     r2dbe_multicast_t packet = {};
 
     int error_no;
@@ -43,12 +46,13 @@ int r2dbe(char me[5], char who[2], char letter, int irdbe)
             &error_no);
 
     if(0>sock) {
-        logitn(NULL,-10+sock,"xx",error_no);
+        logit(NULL,errno,"un");
+        logita(NULL,-40+sock,"rz",who);
         goto idle;
     }
 
     for (;;) {
-      ssize_t n = read_mcast(sock,buf,sizeof(buf));
+      ssize_t n = read_mcast(sock,buf,sizeof(buf),&cycle1,who);
 
 #ifdef WEH
       printf(" me '%5s' n %d\n",me, n);
@@ -57,7 +61,7 @@ int r2dbe(char me[5], char who[2], char letter, int irdbe)
         continue;
 
       if (unmarshal_r2dbe_multicast_t(&packet, buf, n) < 0) {
-        logit(NULL,-1,"xx");
+        logit(NULL,-31,"rz");
         continue;
       }
 #ifdef WEH
@@ -74,9 +78,11 @@ int r2dbe(char me[5], char who[2], char letter, int irdbe)
       printf(" pcal_ifx %d\n",packet.pcal_ifx);
       printf(" pcal_freq %g\n",packet.pcal_freq);
 #endif
-      calc_ts(&packet);
-      calc_pc(&packet);
-    }
+      calc_ts(&packet,&cycle);
+      calc_pc(&packet,&cycle);
+      update_shm(&packet,&cycle,&cycle1,irdbe);
+
+     }
 
 idle:
     for (;;)
