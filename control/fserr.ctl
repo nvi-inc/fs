@@ -3833,6 +3833,18 @@ GPIB/232 (EOFL) serial buffer overflow detected by converter, ?W
 IB -544
 GPIB/232 (EFRM) serial data framing error detected by converter, ?W
 ""
+IB -601
+Failed to open communication with network device, ?W
+""
+IB -602
+Failed to send command to network device
+""
+IB -603
+Failed to read from network device
+""
+IB -604
+Blank command provided to network device
+""
 IF -301
 Error can't open ifatt.ctl.
 ""
