@@ -1,0 +1,110 @@
+#!/usr/bin/perl
+
+# 1.0 Initialize
+
+require "getopts.pl";
+
+&Getopts("vh");
+
+if ($#ARGV < 0 &&!defined($opt_h) &&!defined($opt_v)) {
+    print STDERR "Try: 'holog_tsys -h'\n";
+    exit -1;
+}
+
+if(defined($opt_v)) {
+    print "[holog_tsys 0.1]\n";
+    exit -1;
+}
+
+if (defined($opt_h)) {
+    print "Usage: holog_tsys input output
+Synopsis: extracts 'holog' Tsys data from a FS log
+
+This script extracts 'holog' program Tsys data from FS log 'input' to produced
+a space delimited 'output' file of data, one line per 'holog' data point. A
+list of the detector devices with their positions in the output lines is
+printed to 'stdout'.
+
+The detector devices and their order in the log at each 'holog' point must be
+the same. Changes are not detected and probably lead to inconsistent results.
+
+The data points are delimited by log entries that match 'p=.*_', e.g.,
+
+  maskp=+0.000_+0.000
+
+Bad values (starting with a dollar sign, '\$') are replaced with '-9999'.
+
+Arguments:
+  input  - FS log file to process, must exist:
+  output - Output file, must not exist:
+
+Option:
+ -v print program version information and stop
+ -h print this help information and stop
+";
+    exit -1;
+}
+
+# 2.0 extract data
+
+my ($file,$out)= @ARGV;
+
+#print "args '$file''$out'\n";
+
+if(not defined $out) {
+    die "Two arguments are required, giving up.\n";
+}
+
+open(FILE,$file) || do {
+    print STDERR "Can't open input $file: '$file', giving up.\n";
+    exit -1;
+};
+
+if (-e $out) {
+    die "Output file '$out' already exists, giving up.\n";
+}
+
+open(OUT,'>',$out) || do {
+    print STDERR "Can't open output '$file', giving up.$!\n";
+    exit -1;
+};
+
+$count = 0;
+$start = 1;
+while (<FILE>) {
+    $count++;
+    if($start) {
+        next if !/p=.*_/;
+        $start = 0;
+        @tsys=();
+        @detectors=();
+        $first = 1;
+        next;
+    }
+    if(/p=.*_/) {
+        $first=0;
+        print OUT join(" ",@tsys),"\n" if @tsys;
+        @tsys=();
+        next;
+    }
+    next if !/\/tsys\//i;
+    chomp;
+    $line = $_;
+    $line =~ s/^.*tsys\///;
+    $line =~ s///;
+    @fields=split(/,/,$line);
+
+    while(@fields) {
+        $det=shift(@fields);
+        die "Missing value for '$det' on line $count.\n" if !@fields;
+        $value=shift(@fields);
+        $value=-9999 if substr($value,0,1) eq '$';
+        push @tsys, $value;
+        push @detectors, $det if $first;
+    }
+    next;
+}
+print OUT join(" ",@tsys),"\n" if @tsys;
+for $i (0 .. $#detectors) {
+    print $i+1," $detectors[$i]\n";
+}
