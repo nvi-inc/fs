@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 #
-# Copyright (c) 2020-2023 NVI, Inc.
+# Copyright (c) 2020-2023, 2025 NVI, Inc.
 #
 # This file is part of VLBI Field System
 # (see http://github.com/nvi-inc/fs).
@@ -689,21 +689,21 @@ class msg_tk(tkinter.Tk):
             self.sefdAz.set(v[2])
             self.sefdEl.set(v[3])
 
-            if (v[4] == "15a0"):
+            if (v[4][2:] == "a0"):
                 self.sefdA0.set(v[10])
-            elif (v[4] == "15a1"):
+            elif (v[4][2:] == "a1"):
                 self.sefdA1.set(v[10])
-            elif (v[4] == "15b0"):
+            elif (v[4][2:] == "b0"):
                 self.sefdB0.set(v[10])
-            elif (v[4] == "15b1"):
+            elif (v[4][2:] == "b1"):
                 self.sefdB1.set(v[10])
-            elif (v[4] == "15c0"):
+            elif (v[4][2:] == "c0"):
                 self.sefdC0.set(v[10])
-            elif (v[4] == "15c1"):
+            elif (v[4][2:] == "c1"):
                 self.sefdC1.set(v[10])
-            elif (v[4] == "15d0"):
+            elif (v[4][2:] == "d0"):
                 self.sefdD0.set(v[10])
-            elif (v[4] == "15d1"):
+            elif (v[4][2:] == "d1"):
                 self.sefdD1.set(v[10])
 
         #print self._SEFD[1]
