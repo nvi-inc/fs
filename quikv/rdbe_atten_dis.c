@@ -33,7 +33,7 @@
 
 extern char unit_letters[];
 
-void rdbe_atten_dis(command,iwhich,ip,out_class,out_recs,kcom,kmon)
+void rdbe_atten_dis(command,iwhich,ip,out_class,out_recs,kcom,kmon,overall_error)
 struct cmd_ds *command;
 int iwhich;
 int ip[5];
@@ -41,6 +41,7 @@ int *out_class;
 int *out_recs;
 int kcom;
 int kmon;
+int *overall_error;
 {
   int ierr, count, i;
   char output[MAX_OUT];
@@ -114,14 +115,12 @@ int kmon;
             lclm.ifc[i].atten.atten != 63) &&
           lclm.ifc[i].RMS.state.known == 1)  {
         if(shm_addr->rdbe_equip.rms_min > lclm.ifc[i].RMS.RMS){
-          if(0!=ierr)
-            logita(NULL,ierr,"2b",who);
-          ierr=-302-i;
+            logita(NULL,-302-i,"2b",who);
+            *overall_error=1;
         }
         if(shm_addr->rdbe_equip.rms_max < lclm.ifc[i].RMS.RMS) {
-          if(0!=ierr)
-            logita(NULL,ierr,"2b",who);
-          ierr=-304-i;
+            logita(NULL,-304-i,"2b",who);
+            *overall_error=1;
         }
       }
     }
@@ -132,8 +131,7 @@ int kmon;
   for (i=0;i<5;i++) ip[i]=0;
   cls_snd(out_class,output,strlen(output),0,0);
   (*out_recs)++;
-  if(ierr==0)
-    return;
+  return;
 
 error2:
   ip[0]=0;

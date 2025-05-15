@@ -50,6 +50,7 @@ int ip[5];                           /* ipc parameters */
   int some=FALSE;
   char *prdbe,*str,rdbe;
   int irdbe, kmon=0, kcom=0;
+  int overall_error=0;
 
   void skd_run(), skd_par();      /* program scheduling utilities */
 
@@ -80,7 +81,7 @@ int ip[5];                           /* ipc parameters */
   } else if (command->argv[1]==NULL) /* special cases */
     if (*command->argv[0]=='?') {
       kcom=1;
-      rdbe_atten_dis(command,irdbe,ip,&rtn_class,&rtn_recs,kcom,kmon);
+      rdbe_atten_dis(command,irdbe,ip,&rtn_class,&rtn_recs,kcom,kmon,&overall_error);
       ip[0]=rtn_class;
       ip[1]=rtn_recs;
       return;
@@ -106,7 +107,7 @@ int ip[5];                           /* ipc parameters */
   if (command->argv[1]!=NULL && *command->argv[1]=='?'
       && command->argv[2] == NULL) {
     kcom=1;
-    rdbe_atten_dis(command,irdbe,ip,&rtn_class,&rtn_recs,kcom,kmon);
+    rdbe_atten_dis(command,irdbe,ip,&rtn_class,&rtn_recs,kcom,kmon,&overall_error);
     ip[0]=rtn_class;
     ip[1]=rtn_recs;
     return;
@@ -191,7 +192,7 @@ rdbcn:
           ip[0]=ip[1]=0;
         }
       } else
-        rdbe_atten_dis(command,iwhich,ip,&rtn_class,&rtn_recs,kcom,kmon);
+        rdbe_atten_dis(command,iwhich,ip,&rtn_class,&rtn_recs,kcom,kmon,&overall_error);
       if(irdbe !=0)
         continue;
 
@@ -210,6 +211,10 @@ rdbcn:
   ip[0]=rtn_class;
   ip[1]=rtn_recs;
 
+  if(!overall_error)
+    return;
+  ip[2]=-300;
+  memcpy(ip+3,"2b",2);
   return;
 
 error:
