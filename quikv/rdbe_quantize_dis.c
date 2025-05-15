@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 NVI, Inc.
+ * Copyright (c) 2024, 2025 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -124,7 +124,7 @@ int chans;
           }
         }
         if1ptr=ptr+1;
-        for(from_ptr=if1ptr,to_ptr=if0ptr ;*from_ptr!=NULL; from_ptr++,to_ptr++)
+        for(from_ptr=if1ptr,to_ptr=if0ptr ;*from_ptr!=0; from_ptr++,to_ptr++)
           *to_ptr=*from_ptr;
         *to_ptr=*from_ptr;
         if(0!=rdbe_2_rdbe_quantize(inbuf,&lclm,ip,i+1)) {
