@@ -14,6 +14,9 @@ Error decoding attenuator value, must be auto, 0, 0.5, 1.0, ..., 31.0,31.5.
 2B -203
 Error decoding target RMS value, must be between 0.0 and 128.0, inclusive.
 ""
+2B -300
+One or more RMS values were too high or too low, see above error message(s).
+""
 2B -301
 No RDBEs active, see active_rdbes command.
 ""
