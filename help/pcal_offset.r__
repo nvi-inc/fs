@@ -1,9 +1,9 @@
-		   pc_offset -  Set Phase-cal offset (RDBE racks)
+		   pcal_offset -  Set Phase-cal offset (RDBE racks)
 
-            Syntax:     pc_offset=<offset>
-                        pc_offset=<rdbe>,<offset>
+            Syntax:     pcal_offset=<offset>
+                        pcal_offset=<rdbe>,<offset>
 
-            Response:   pc_offset(<rdbe>)/<offset>
+            Response:   pcal_offset(<rdbe>)/<offset>
 
 
 Settable parameters:
@@ -28,20 +28,20 @@ parenthesizes appended to the command name.  Active RDBEs are defined
 by the 'active_rdbes' command.  At start-up all configured RDBEs are
 considered active.
 
-To query all active devices use 'pc_offset'.  To query a single
-device, use 'pc_offset=<rdbe>'.  To command a single device there must
-be at least two commas (possibly intermingled with other parameter
-data, as appropriate) after the <rdbe> parameter.  Any supplied <rdbe>
-parameter that does not match a possible RDBE is assumed to be an
-<offset> parameter for an all active devices command.
+To query all active devices use 'pcal_offset'.  To query a single
+device, use 'pcal_offset=<rdbe>'.  To command a single device there
+must be at least two commas (possibly intermingled with other
+parameter data, as appropriate) after the <rdbe> parameter.  Any
+supplied <rdbe> parameter that does not match a possible RDBE is
+assumed to be an <offset> parameter for an all active devices command.
 
 The default <offset> is implied by the 'frequency' and 'spacing'
 values of the 'lo' command for the first IF (0) of the RDBE. If all
 RDBEs are commanded with the default in one command, the values for
 each active RDBE are determined from that RDBE's first IF (0).
 
-For R2DBEs, which are Nyquist Zone 1 (NZ1) devices, the default
-<offset> is calculated as:
+For R2DBEs, which are treated as Nyquist Zone 1 (NZ1) devices, the
+default <offset> is calculated as:
 
      <offset>=1e6*(<pcspace>-mod(<freq>,<pcspace>))
 
@@ -54,13 +54,8 @@ command for first IF of the relevant RDBE:
      C     c0
      D     d0
 
-This command is not implemented yet for first generation RDBEs, which
-are Nyquist Zone 2 (NZ2) devices sampling at 1024 MHz. When it is, the
-default <offset> will be  calculated as:
+For first generation RDBEs, which are treated as Nyquist Zone 2 (NZ2)
+devices sampling at 1024 MHz, the default <offset> will be calculated
+as:
 
      <offset>=1e6*mod(<freq>+1024,<pcspace>)
-
-The R2DBEs respond to a query with a value 16 times the commanded
-value, apparently only to single precision. The FS divides the
-response by 16 and rounds it using single precision. This gives a
-sensible monitor value in typical cases.
