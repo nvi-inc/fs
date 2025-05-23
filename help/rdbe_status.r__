@@ -13,6 +13,16 @@ Settable parameters:
 Monitor-only parameters:
 
         <status>   Hex bit value.
+
+                   For R2DBE:
+                    Bit  Meaning
+                     0  System Ready
+                     6  Transmitting valid data
+                     7  Transmitting data marked invalid
+                     8  FPGA state: 0 -- FPGA not loaded; 1 -- FPGA loaded
+                    11  Boot done
+
+                   For the first generation RDBE:
                     Bit  Meaning
                      0  System Ready
                      1  Error message
