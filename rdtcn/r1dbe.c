@@ -272,16 +272,9 @@ while (1) {
     }
     continue;
   } else if(iretsel == 0) {
-    int now_raw;
-    rte_rawt(&now_raw);
-    if(shm_addr->rdbe_sync[irdbe]==0 ||
-       shm_addr-> rdbe_sync[irdbe]+4500< now_raw) {/* wait 45 seconds after a
-						      sync */
       multicast_error=multicast_error%5 + 1;
-      if(1==multicast_error) {
-	logita(NULL,-2,"rz",who);
-      }
-    }
+      if(1==multicast_error)
+	        logita(NULL,-2,"rz",who);
     continue;
   }
   if(multicast_error) {
