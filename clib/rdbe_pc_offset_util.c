@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 NVI, Inc.
+ * Copyright (c) 2024, 2025 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -81,7 +81,7 @@ void rdbe_pc_offset_enc(output,count,lclc)
 
   switch (*count) {
     case 1:
-      m5sprintf(output,"%f",&lclc->offset.offset,&lclc->offset.state);
+      m5sprintf(output,"%g",&lclc->offset.offset,&lclc->offset.state);
       break;
     default:
       *count=-1;
@@ -152,8 +152,6 @@ rdbe_2_rdbe_pc_offset(ptr_in,lclc,ip) /* return values:
             ierr=-500-count;
             goto error2;
           }
-          if(shm_addr->equip.rack_type != RDBE)
-            lclc->offset.offset/=16;
           break;
         default:
           goto done;
