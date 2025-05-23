@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 NVI, Inc.
+ * Copyright (c) 2024, 2025 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -51,7 +51,7 @@ int irdbe;
         if(shm_addr->equip.rack_type == RDBE)
           sprintf(output,"%.9e",lclm->offset.offset);
         else
-          sprintf(output,"%.4e",lclm->offset.offset);
+          sprintf(output,"%.6e",lclm->offset.offset);
       }
       break;
     default:
