@@ -35,7 +35,6 @@ extern int ip[5];           /* parameters for fs communications */
 extern int synch;
 extern int rack, rack_type;
 extern int iRDBE;
-extern int RDBE_set_ticks;
 extern WINDOW   * maindisp;  /* main display WINDOW data structure pointer */
 
 void rte2secs();
@@ -62,8 +61,6 @@ int *vdif_epoch;
         int fstime32;
 
 	if(synch) {
-          int i;
-
           synch=0;
           mvwaddstr( maindisp, 4, 10+11,
                      "                                           ");
@@ -80,7 +77,7 @@ int *vdif_epoch;
 	  out_recs=0;
 	  out_class=0;
 	  
-	  str="dbe_personality=pfbg:PFBG_3_0.bin;\n";
+	  str="dbe_sync=;\n";
 	  cls_snd(&out_class, str, strlen(str) , 0, 0);
 	  out_recs++;
 	     
@@ -107,11 +104,6 @@ int *vdif_epoch;
 	    exit(0);
 	  }
 
-	  wstandout(maindisp);
-	  mvwaddstr( maindisp, 4, 21, "Waiting for RDBE ");
-	  leaveok ( maindisp, FALSE); /* leave cursor in place */
-	  wrefresh ( maindisp );
-	  
 	  nsem_take("fsctl",0);
 	  rte_rawt(&start_raw);
 	  shm_addr->rdbe_sync[iRDBE-1]=start_raw;
@@ -138,75 +130,6 @@ int *vdif_epoch;
 	    }
 	  if(ip[1]!=0)
 	    cls_clr(ip[0]);
-	  rte_rawt(&now_raw);
-	  if(now_raw < start_raw+501) {
-	    unsigned sleep=501-(now_raw-start_raw);
-	    rte_sleep(sleep);
-	  }
-	  for(i=0;i<8;i++) {  /*wait for 40 more seconds before continuing */
-	    mvwaddstr( maindisp, 4,17+21+i, digits[i]);
-	    leaveok ( maindisp, FALSE); /* leave cursor in place */
-	    wrefresh ( maindisp );
-	    rte_sleep(500); 
-	  }
-	  mvwaddstr( maindisp, 4,17+21+i,digits[i]);
-	  leaveok ( maindisp, FALSE); /* leave cursor in place */
-	  wrefresh ( maindisp );
-	  rte_sleep(25); 
-	  wstandend(maindisp);
-
-	  out_recs=0;
-	  out_class=0;
-
-	  str="dbe_runfile=/home/roach/personalities/conf/PFBG_3_0.conf;\n";
-	  cls_snd(&out_class, str, strlen(str) , 0, 0);
-	  out_recs++;
-	     
-	  ip[0]=1;
-	  ip[1]=out_class;
-	  ip[2]=out_recs;
-	  
-	  if(1==iRDBE) {
-	    name="rdbca";
-	    logit("rdbe-A conf command sent.",0,NULL);
-	  } else if(2==iRDBE) {
-	    name="rdbcb";
-	    logit("rdbe-B conf command sent.",0,NULL);
-	  } else if(3==iRDBE) {
-	    name="rdbcc";
-	    logit("rdbe-C conf command sent.",0,NULL);
-	  } else if(4==iRDBE) {
-	    name="rdbcd";
-	    logit("rdbe-D conf command sent.",0,NULL);
-	  } else {
-	    endwin();
-	    fprintf(stderr,"Internal error in getRDBEtime, no RDBE selected\n");
-	    rte_sleep(SLEEP_TIME);
-	    exit(0);
-	  }
-	  nsem_take("fsctl",0);
-	  while(skd_run_to(name,'w',ip,120)==1) {
-	    if (nsem_test("fs   ") != 1) {
-	      endwin();
-	      fprintf(stderr,"Field System not running - fmset aborting\n");
-	      exit(0);
-	    }
-	    name=NULL;
-	  }
-	  skd_par(ip);
-	  nsem_put("fsctl");
-	  if(ip[2] != 0)
-	    {
-	      endwin();
-	      fprintf(stderr,"Error %d from rdbc%d\n",ip[2],iRDBE);
-	      logita(NULL,ip[2],ip+3,ip+4);
-	      rte_sleep(SLEEP_TIME);
-	      exit(0);
-	    }
-	  if(ip[1]!=0)
-	    cls_clr(ip[0]);
-
-          rte_ticks(&RDBE_set_ticks);
 	}
 
 
