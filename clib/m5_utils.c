@@ -249,6 +249,8 @@ struct m5state *state;
       sprintf(ptr,format,(char *)value);
     else if(strcmp(format,"%f")==0)
       sprintf(ptr,format,*((float *)value));
+    else if(strcmp(format,"%g")==0)
+      sprintf(ptr,format,*((float *)value));
     else if(strcmp(format,"%d")==0)
       sprintf(ptr,format,*((int *)value));
     else if(strcmp(format,"%d")==0)
