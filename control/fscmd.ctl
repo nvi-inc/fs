@@ -593,7 +593,7 @@ active_rdbes qkr 12100 01 FFFFFFFFFFFF
 atten        qkr 12200 01 2000FFFFFFFF
 data_send    qkr 12300 01 2000FFFFFFFF
 channels     qkr 12400 01 2000FFFFFFFF
-pc_offset    qkr 12500 01 2000FFFFFFFF
+pcal_offset  qkr 12500 01 2000FFFFFFFF
 quantize     qkr 12600 01 2000FFFFFFFF
 bstate       qkr 12700 01 2000FFFFFFFF
 dot2gps      qkr 12800 01 2000FFFFFFFF
