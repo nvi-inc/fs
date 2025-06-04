@@ -30,15 +30,19 @@ HilightColor   Black PaleGreen3
 
 #! PagerBackColor		#5c54c0 [deleted]
 #! An FvwmPager config to emulate builtin pager would be as follows:
-# *FvwmPagerBack SlateGrey
-# *FvwmPagerFore Black
-# *FvwmPagerFont none
-# *FvwmPagerHilight SlateBlue4
-# *FvwmPagerGeometry <xsize> <ysize>
-# *FvwmPagerSmallFont -*-times-medium-r-*-*-*-80-*-*-*-*-*-*
-# *FvwmPagerDeskTopScale 32
+#PAGER_START
+# For no pager, comment out the line below to #PAGER_END
+# You may also like to change DeskTopSize 3x3 to 1x1 below
+*FvwmPagerBack SlateGrey
+*FvwmPagerFore Black
+*FvwmPagerFont none
+*FvwmPagerHilight SlateBlue4
+*FvwmPagerGeometry <xsize> <ysize>
+*FvwmPagerSmallFont -*-times-medium-r-*-*-*-80-*-*-*-*-*-*
+*FvwmPagerDeskTopScale 32
 # #! Now start pager
-# Module FvwmPager 0 0
+Module FvwmPager 0 0
+#PAGER_END
 #! PagerForeColor		orchid [deleted]
 #! An FvwmPager config to emulate builtin pager would be as follows:
 # *FvwmPagerBack SlateGrey
@@ -197,7 +201,10 @@ Style "*" NoPPosition
 # Set up the virtual desktop and pager
 
 #set the desk top size in units of physical screen size
+#If you disable the Pager, you may want to change DeskTopSize to 1x1
+#See #PAGER_START above
 DeskTopSize 3x3
+#DeskTopSize 1x1
 
 # and the reduction scale used for the panner/pager
 #!DeskTopScale 36 (new command=*FvwmPagerDeskTopScale <scale>)
