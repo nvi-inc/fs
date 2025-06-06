@@ -26,7 +26,22 @@ if [ -d "$HOME/bin" ] ; then
 fi
 
 export EDITOR=vim
-export LESS=-XR
+#
+export LESS=-nR
+# 'n' is suppress line numbers,
+#     which speeds things up a lot when going to the bottom of a large file
+# 'R' is color escape sequences in 'raw' form,
+#     particularly for git
+#
+# other LESS options to consider making the default:
+# 'X' is no initialization/de-initialization,
+#     keeps output visible after end (you could 'cat' the file instead)
+# 'F' is quit if one screen,
+#     you might like if you use 'X' so you don't have to quit
+#
+# All of them:
+#export LESS=-nRXF
+#
 
 if [ "$AUID_PROMOTE_ACCOUNT" = "oper" ]; then
     oper_account
