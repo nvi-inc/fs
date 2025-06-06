@@ -1511,15 +1511,6 @@ This error has not occurred yet, so its state can't be changed (trying to turn '
 BO -304
 This error has not occurred yet, so its state can't be changed (trying to turn 'on').
 ""
-BO -305
-TNX=... command cannot be executed from a procedure.
-""
-BO -306
-TNX=... command cannot be executed from time-list.
-""
-BO -307
-TNX=... command cannot be executed from the schedule.
-""
 BO -308
 Internal error in help command.
 ""
