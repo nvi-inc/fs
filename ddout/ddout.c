@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2022 NVI, Inc.
+ * Copyright (c) 2020-2022, 2025 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -187,7 +187,7 @@ Messenger:
 	      ptr->on=1;
 	      break;
 	    } else {
-	      sprintf(buf2,"tnx/more than one %2.2s,%d occurred, use 'tnx=%2.2s,%d,on,#num' to select from list below",ptr->ch,ix,ptr->ch,ix);
+	      sprintf(buf2,"tnx/more than one %2.2s,%d occurred, use 'tnx=%2.2s,%d,on,#num' to select from list below, or use num=-1 for all",ptr->ch,ix,ptr->ch,ix);
 	      logitf(buf2);
 	      for(ptr=first;ptr!=NULL;ptr=ptr->next) {
 		if(ptr->num == ix && memcmp(ptr->ch,buf,2)==0) {
@@ -236,7 +236,7 @@ Messenger:
 	      ptr->on=0;
 	      break;
 	    } else {
-	      sprintf(buf2,"tnx/more than one %2.2s,%d, exists, use 'tnx=%2.2s,%d,off,#num' to select from list below",ptr->ch,ix,ptr->ch,ix);
+	      sprintf(buf2,"tnx/more than one %2.2s,%d, exists, use 'tnx=%2.2s,%d,off,#num' to select from list below, or use num=-1 for all",ptr->ch,ix,ptr->ch,ix);
 	      logitf(buf2);
 	      for(ptr=first;ptr!=NULL;ptr=ptr->next) {
 		if(ptr->num == ix && memcmp(ptr->ch,buf,2)==0) {
