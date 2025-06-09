@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2023 NVI, Inc.
+ * Copyright (c) 2025 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -31,10 +31,13 @@
 
 extern struct fscom *shm_addr;
 
-void update_shm( r2dbe_multicast_t *t, struct rdbe_tsys_cycle *cycle,
-      struct rdbe_tsys_cycle1 *cycle1, int irdbe)
+void update_shm( r2dbe_multicast_t *t, struct r2dbe_tsys_cycle *cycle,
+       int irdbe)
 {
+  int i, j;
   int iping;
+  struct rdbe_tsys_cycle r1dbe_cycle;
+  struct rdbe_tsys_cycle1 r1dbe_cycle1;
 
   memcpy(cycle->epoch,t->read_time,sizeof(cycle->epoch));
   cycle->epoch[sizeof(cycle->epoch)-1]=0;
@@ -55,11 +58,9 @@ void update_shm( r2dbe_multicast_t *t, struct rdbe_tsys_cycle *cycle,
  cycle->dot2gps=t->gps_offset;
  cycle->dot2pps=t->pps_offset;
  cycle->pcal_ifx=t->pcal_ifx;
- cycle->raw_ifx=t->pcal_ifx;
- if(0==cycle->pcal_ifx)
-    cycle->sigma=t->sigma0;
- else
-    cycle->sigma=t->sigma1;
+
+ cycle->sigma[0]=t->sigma0;
+ cycle->sigma[1]=t->sigma1;
 #ifdef WEH
  printf(" epoch_ref %d epoch_vdif %d\n",t->epoch_ref,cycle->epoch_vdif);
  printf(" gps: cycle %g t %g\n",cycle->dot2gps,t->gps_offset);
@@ -68,12 +69,53 @@ void update_shm( r2dbe_multicast_t *t, struct rdbe_tsys_cycle *cycle,
 printf("updating shared memory irdbe=%d\n",irdbe);
 #endif
 
+ int channel1=MAX_R2DBE_CH;
+ for(i=0;i<MAX_R2DBE_CH;i++)
+   for (j=0;j<MAX_R2DBE_IF;j++) {
+   if(shm_addr->rdbe_channels[irdbe+1].ifc[j].channels.channels[i]>=0 &&
+      shm_addr->rdbe_channels[irdbe+1].ifc[j].channels.channels[i]<channel1)
+     channel1=shm_addr->rdbe_channels[irdbe+1].ifc[j].channels.channels[i];
+   }
+ int tone0=pcal_tone0_r2dbe(channel1-1,cycle->pcal_offset,cycle->pcal_spacing);
+ cycle->tone0=tone0;
+
+  iping=1-shm_addr->r2dbe_tsys_data[irdbe].iping;
+  if(iping!=0)
+    iping=1;
+  memcpy(&shm_addr->r2dbe_tsys_data[irdbe].data[iping],cycle,
+         sizeof(struct r2dbe_tsys_cycle));
+  shm_addr->r2dbe_tsys_data[irdbe].iping=iping;
+
+  memcpy(r1dbe_cycle.epoch,cycle->epoch,sizeof(r1dbe_cycle.epoch));
+  r1dbe_cycle.epoch_vdif=cycle->epoch_vdif;
+
+ if(tone0 >=0 )
+   for (i=0;i<512;i++) {
+     r1dbe_cycle.pcal_amp[i]=cycle->pcal_amp[i+tone0];
+     r1dbe_cycle.pcal_phase[i]=cycle->pcal_phase[i+tone0];
+   }
+
+ r1dbe_cycle.pcal_ifx=cycle->pcal_ifx;;
+ if(0==cycle->pcal_ifx)
+    r1dbe_cycle.sigma=t->sigma0;
+ else
+    r1dbe_cycle.sigma=t->sigma1;
+ r1dbe_cycle.raw_ifx=cycle->pcal_ifx;
+
+ r1dbe_cycle.dot2gps=cycle->dot2gps;
+ r1dbe_cycle.dot2pps=cycle->dot2pps;
+
+ r1dbe_cycle.pcaloff=cycle->pcal_offset;
+ r1dbe_cycle.pcal_spacing=cycle->pcal_spacing;
+
+ r1dbe_cycle1.arrival=cycle->arrival;
+
   iping=1-shm_addr->rdbe_tsys_data[irdbe].iping;
   if(iping!=0)
     iping=1;
-  memcpy(&shm_addr->rdbe_tsys_data[irdbe].data[iping],cycle,
+  memcpy(&shm_addr->rdbe_tsys_data[irdbe].data[iping],&r1dbe_cycle,
          sizeof(struct rdbe_tsys_cycle));
-  memcpy(&shm_addr->rdbe_tsys_data1[irdbe].data[iping],cycle1,
+  memcpy(&shm_addr->rdbe_tsys_data1[irdbe].data[iping],&r1dbe_cycle1,
          sizeof(struct rdbe_tsys_cycle1));
   shm_addr->rdbe_tsys_data[irdbe].iping=iping;
 

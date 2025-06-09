@@ -35,8 +35,7 @@ int r2dbe(char me[5], char who[2], char letter, int irdbe)
 {
     char buf[sizeof(r2dbe_multicast_t)];
     int ip[5];
-    struct rdbe_tsys_cycle cycle;
-    struct rdbe_tsys_cycle1 cycle1;
+    struct r2dbe_tsys_cycle cycle;
     r2dbe_multicast_t packet = {};
 
     int error_no;
@@ -52,7 +51,7 @@ int r2dbe(char me[5], char who[2], char letter, int irdbe)
     }
 
     for (;;) {
-      ssize_t n = read_mcast(sock,buf,sizeof(buf),&cycle1,who);
+      ssize_t n = read_mcast(sock,buf,sizeof(buf),&cycle,who);
 
 #ifdef WEH
       printf(" me '%5s' n %d\n",me, n);
@@ -81,10 +80,10 @@ int r2dbe(char me[5], char who[2], char letter, int irdbe)
       for (i=0;i<8;i++)
          printf(" i %d, ibc0 %f ibc1 %f\n",i,packet.ibc0[i],packet.ibc1[i]);
 #endif
-      calc_ts(&packet,&cycle);
-      calc_pc(&packet,&cycle);
-      update_shm(&packet,&cycle,&cycle1,irdbe);
-
+//      calc_ts(&packet,&cycle);
+      calc_pc(&packet,&cycle,irdbe);
+      update_shm(&packet,&cycle,irdbe);
+      log_mcast(&packet,&cycle,letter,irdbe);
      }
 
 idle:

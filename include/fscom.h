@@ -576,4 +576,23 @@ typedef struct fscom {
       char mcast_if[16];
   } rdbad[MAX_RDBE];
 
+  struct r2dbe_tsys_data {
+    struct r2dbe_tsys_cycle {;
+      char epoch[14];
+      int epoch_vdif;
+      float tsys[MAX_R2DBE_CH+2][MAX_R2DBE_IF];
+      float pcal_amp[MAX_R2DBE_CH*32];
+      float pcal_phase[MAX_R2DBE_CH*32];
+      float pcal_offset;
+      float pcal_spacing;
+      int pcal_ifx;
+      int tone0;
+      float sigma[MAX_R2DBE_IF];
+      double dot2gps;
+      double dot2pps;
+      time_t arrival;
+    } data[2];
+    int iping;
+  } r2dbe_tsys_data[MAX_RDBE];
+
 } Fscom;

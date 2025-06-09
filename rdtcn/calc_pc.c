@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2023 NVI, Inc.
+ * Copyright (c) 2025 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -32,49 +32,73 @@
 
 extern struct fscom *shm_addr;
 
-void calc_pc( r2dbe_multicast_t *t, struct rdbe_tsys_cycle *cycle)
+void calc_pc( r2dbe_multicast_t *t, struct r2dbe_tsys_cycle *cycle, int irdbe)
 {
-    int i;
-    double x[4096],y[4096],amp[4096],phs[4096];
-    double xt,yt, theta, cost,sint;
-    for (i=0;i<4096;i++) {
-      theta=-2*M_PI*t->pcal_freq*(i%8)/4096e6;
-      cost=cos(theta);
-      sint=sin(theta);
-      x[i]=t->pcal_cos[i]*cost-t->pcal_sin[i]*sint;
-      y[i]=t->pcal_sin[i]*cost+t->pcal_cos[i]*sint;
+  int i;
+  double x[4096],y[4096];
+  double xt,yt, theta, cost,sint;
+  double pcal_offset,pcal_spacing;
+
+  pcal_spacing=-1;
+  for (i=0;i<MAX_R2DBE_IF;i++) {
+    int ifchain=irdbe*MAX_R2DBE_IF+i+1;
+    if(pcal_spacing  < 0.1
+        && shm_addr->lo.lo[ifchain-1] >= 0.0
+        && shm_addr->lo.spacing[ifchain-1] > 0 ) {
+      pcal_spacing=shm_addr->lo.spacing[ifchain-1]*1e6;
+    } /* take the first valid value */
+  }
+
+  cycle->pcal_ifx=t->pcal_ifx;
+  if(shm_addr->rdbe_pc_offset[irdbe+1].offset.state.known &&
+      shm_addr->rdbe_pc_offset[irdbe+1].offset.offset >0.0 &&
+      pcal_spacing > 0)
+    pcal_offset=shm_addr->rdbe_pc_offset[irdbe+1].offset.offset;
+  else
+    pcal_offset=-1;
+  cycle->pcal_offset=pcal_offset;
+  cycle->pcal_spacing=pcal_spacing;
+
+  for (i=0;i<4096;i++) {
+    theta=-2*M_PI*pcal_offset*(i%8)/4096e6;
+    cost=cos(theta);
+    sint=sin(theta);
+    x[i]=t->pcal_cos[i]*cost-t->pcal_sin[i]*sint;
+    y[i]=t->pcal_sin[i]*cost+t->pcal_cos[i]*sint;
+  }
+  FFT(1,12,&x,&y);
+  for (i=0;i<MAX_R2DBE_CH*32;i++) {
+    if(shm_addr->rdbe_equip.pcal_amp[0]=='r'||
+        shm_addr->rdbe_equip.pcal_amp[0]=='n'||
+        shm_addr->rdbe_equip.pcal_amp[0]=='c')
+      cycle->pcal_amp[i]=1e-7*sqrt(pow(x[i],2.0)+pow(y[i],2.0));
+
+    if(shm_addr->rdbe_equip.pcal_amp[0]=='n'||
+        shm_addr->rdbe_equip.pcal_amp[0]=='c') {
+      int ibin; /* find channel of tone, critical cases round up */
+      ibin=fmod((pcal_offset+i*1e6+16e6)/32e6+1e-12,(double)MAX_R2DBE_CH);
+      /* Brian determined 1.25e-5 empirically, independent of RMS level */
+      if(t->pcal_ifx!=1)
+        cycle->pcal_amp[i]*=1.25e2/
+          sqrt((double) t->tsys0_on[ibin]+(double)t->tsys0_off[ibin]);
+      else
+        cycle->pcal_amp[i]*=1.25e2/
+          sqrt((double) t->tsys1_on[ibin]+(double)t->tsys1_off[ibin]);
     }
-    FFT(1,12,&x,&y);
-    for (i=0;i<4096;i++) {
-	    amp[i]=1e-7*sqrt(pow(x[i],2.0)+pow(y[i],2.0));
-      phs[i]=atan2(y[i],x[i])*180/M_PI;
+    if(shm_addr->rdbe_equip.pcal_amp[0]=='c') {
+      float freq;
+      /* correct for 32 Mhz channel roll-off so reported value agrees
+         with correlator, roll-off from Russ */
+      freq=fmod(pcal_offset+i*1e6+16e6,32e6)-16e6;
+      cycle->pcal_amp[i]*=rdbe_freqz(freq);
     }
+    cycle->pcal_phase[i]=atan2(y[i],x[i])*180/M_PI;
+  }
 #ifdef WEH
-    i=590;
-        printf(" ifx %d i %d pcal_sin %d pcal_cos %d amp %g phs %g\n",
-            t->pcal_ifx,i,t->pcal_sin[i],t->pcal_cos[i],amp[i],phs[i]);
-#endif
-    cycle->pcaloff=2600000;
-//    int ibin=fmod(cycle->pcaloff+590*1e6+16e6/32e6+1e-12,(double) MAX_R2DBE_CH);
-    double tpi_on,tpi_off;
-    if(t->pcal_ifx==0) {
-      tpi_on=t->tsys0_on[17];
-      tpi_off=t->tsys0_off[17];
-    } else {
-      tpi_on=t->tsys1_on[17];
-      tpi_off=t->tsys1_off[17];
-    }
-    int itone=545;
-    amp[545]*=1.25e2/sqrt(tpi_on+tpi_off);
-    cycle->pcal_amp[30]=amp[545];
-    cycle->pcal_phase[30]=phs[545];
-    cycle->pcal_ifx=t->pcal_ifx;
-#ifdef WEH
-    printf(" pcal_ifx %d\n",t->pcal_ifx);
-    for (i=0;i<4096;i++) {
-        printf(" i %d pcal_sin %d pcal_cos %d amp %g phs %g\n",
-            i,t->pcal_sin[i],t->pcal_cos[i],amp[i],phs[i]);
-    }
-    fi
+  printf(" pcal_ifx %d offset %f spacing %f\\n",t->pcal_ifx,pcal_offset,pcal_spacing);
+  for (i=535;i<541;i++) {
+    printf(" i %4d amp %10.4f phs %10.4f\n",
+        i,cycle->pcal_amp[i],cycle->pcal_phase[i]);
+  }
 #endif
 }
