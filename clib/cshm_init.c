@@ -600,6 +600,9 @@ void cshm_init()
       m5state_init(&shm_addr->rdbe_personality[i].file.state);
   }
 
+  for (i=0;i<MAX_RDBE;i++)
+    shm_addr->rdbe_tsys_data[i].iping=-1;
+
   return;
 }
 

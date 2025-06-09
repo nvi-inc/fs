@@ -34,7 +34,7 @@
 #define ERROR_PERIOD   2000
 
 ssize_t read_mcast(int sock, char buf[], size_t buf_size,
-         struct rdbe_tsys_cycle1 *cycle1, char who[2])
+         struct r2dbe_tsys_cycle *cycle, char who[2])
 {
     ssize_t n;
     struct sockaddr_in from;
@@ -91,7 +91,7 @@ ssize_t read_mcast(int sock, char buf[], size_t buf_size,
 
     rte_time(it,it+5);
     rte2secs(it,&seconds);
-    cycle1->arrival=seconds;
+    cycle->arrival=seconds;
 
     return n;
 }
