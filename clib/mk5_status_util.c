@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020, 2025 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -34,31 +34,7 @@
 
 extern char* m5trim(char*);
 
-/* Note: I wouldn't have mind a ".h" file with error code #define's in */
-
-/*
- * The original '5B' errors should be a guideline of what is typical eg.
- * -301 is when you are sent a parameter as you surmised, but you should add
- *  a 5H -301 to match
- *
- *  [16/01/15 10:38:55] Jonathan Quick: Then the -500 errors codes document
- *  things that went wrong whilst enacting the command, so most of yours
- *  belong in that range ... the <n> there is just the nth possible error so
- *  its -501,-502,... for as many distinct errors as you need.
- *
- *  [16/01/15 10:39:38] Jonathan Quick: and the -40x document when the
- *  internal FS class message passing mechanism lets you down
- *
- *  [16/01/15 10:42:46] Jonathan Quick: The -9<n>x appear to be marking
- *  errors in parsing the <n>th underlying command (to the Mark5) so -90x
- *  for the 'status?' and then -91x for the 'error?' say
- */
-#define ECLASS          (-401) /* "error retrieving class" */
-#define ENREPLY         (-501) /* "wrong number of replies" */
-#define ENOREPLY_STATUS (-900) /* "query response not received" for "status?" query */
-#define ESTATUSWORD     (-901) /* "error decoding status word" */
-#define ENOREPLY_ERROR  (-910) /* "query response not received" for "error?" query */
-#define ESTRDUP_ERROR   (-912) /* "strdup failed" */
+#include "../include/mk5_status.h"    /* error codes */
 
 /* Little helper to set error return.
  * 'modnm' MUST be a NTBS of at least 2 characters long */
