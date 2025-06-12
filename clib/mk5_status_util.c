@@ -162,7 +162,7 @@ int mk5_status_get_status(int* ip, unsigned int* statusword) {
      */
     if( (question=strchr(buf, '?'))==NULL ||
         (colon=strchr(question+1, ':'))==NULL ) {
-            return mk5_status_set_error_rtn(ip, ENOREPLY_STATUS, "5h");
+            return mk5_status_set_error_rtn(ip, EFORMAT_STATUS, "5h");
     }
     /* characters following ":" should be a hex number
      * so after stopping the conversion we should be looking at:
@@ -200,7 +200,7 @@ int mk5_status_get_error(int* ip, char* buf, const size_t bufsz) {
         if( (question=strchr(tmp, '?'))==NULL ||
             (colon=strchr(question+1, ':'))==NULL ||
             (semicolon=strchr(colon+1, ';'))==NULL ) {
-                ierr = mk5_status_set_error_rtn(ip, ENOREPLY_ERROR, "5h");
+                ierr = mk5_status_set_error_rtn(ip, EFORMAT_ERROR, "5h");
         } else {
                 *semicolon = '\0';
 
