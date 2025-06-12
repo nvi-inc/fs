@@ -65,7 +65,7 @@ int mk5_status(command, itask, ip)
 {
     int                nch;
     int               ierr, out_class = 0;  /* out_class init to 0 means "get next available" */
-    char               buf[ 256 ];
+    char               buf[ 512 ];   /* could be bigger, but this could also cause class clogging */
     unsigned int       statusword, nmsg = 0;
     const unsigned int maxmsg_per_iter = 11; /* Send only a limited amount of messages per invocation
                                                to prevent clogging (locking) up the message queue */
