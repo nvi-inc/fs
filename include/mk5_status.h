@@ -41,7 +41,7 @@
 #define EPARM           (-301) /* "command does not accept parameters" */
 #define ECLASS          (-401) /* "error retrieving class" */
 #define ENREPLY         (-501) /* "wrong number of replies" */
-#define ENOREPLY_STATUS (-900) /* "query response not received" for "status?" query */
+#define EFORMAT_STATUS  (-900) /* "query response bad format" for "status?" query */
 #define ESTATUSWORD     (-901) /* "error decoding status word" */
-#define ENOREPLY_ERROR  (-910) /* "query response not received" for "error?" query */
+#define EFORMAT_ERROR   (-910) /* "query response bad format" for "error?" query */
 #define ESTRDUP_ERROR   (-912) /* "strdup failed" */
