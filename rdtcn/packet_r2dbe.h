@@ -24,4 +24,6 @@ typedef struct {
   double sigma1;
   double pps_offset;
   double gps_offset;
+  double ibc0[64];
+  double ibc1[64];
 } r2dbe_multicast_t;

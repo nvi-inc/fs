@@ -114,5 +114,16 @@ ssize_t unmarshal_r2dbe_multicast_t(r2dbe_multicast_t *t, uint8_t *data,
   ret = unmarshal_double(&t->gps_offset, p, n);
   p += ret;
   n -= ret;
+  for (i = 0; i < 64; i++) {
+    ret = unmarshal_double(&t->ibc0[i], p, n);
+    p += ret;
+    n -= ret;
+  }
+  for (i = 0; i < 64; i++) {
+    ret = unmarshal_double(&t->ibc1[i], p, n);
+    p += ret;
+    n -= ret;
+  }
+
   return (p - data);
 }
