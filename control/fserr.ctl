@@ -656,6 +656,9 @@ background Mark 5 error(s) detected - see below
 5H -303
 more Mark 5 error messages are pending
 ""
+5H -304
+more Mark 5 error messages may be pending
+""
 5H -401
 error retrieving class in mk5cn_exec
 ""
@@ -663,13 +666,13 @@ error retrieving class in mk5cn_exec
 unexpected number of replies (expected 1) from mk5cn
 ""
 5H -900
-status? query response not received
+status? query response has the wrong format (if very long, it was truncated)
 ""
 5H -901
 error decoding status word: overflow or not hex number or too big
 ""
 5H -910
-error? query response not received
+error? query response has the wrong format (if very long, it was truncated)
 ""
 5H -912
 strdup failed initializing get_error
