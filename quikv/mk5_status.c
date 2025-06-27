@@ -79,7 +79,7 @@ int mk5_status(command, itask, ip)
     while( 1 ) {
         /* Step 1: send "status?" query and get the status word */
         if( (ierr=mk5_status_get_status(ip, &statusword))<0 )
-            return ierr;
+            break;
 
         /* Format + send reply to this query */
         nch = snprintf(buf, sizeof(buf)-1, "%s/status,0x%08X%s", command->name,
