@@ -195,26 +195,32 @@ int mk5_status_get_error(int* ip, char* buf, const size_t bufsz) {
      * we're only interested in the bit between ":" and ";"
      */
     if( ierr==0 ) {
-        char *question, *colon, *semicolon;
+        char *question, *colon, *semicolon, *nl;
 
         if( (question=strchr(tmp, '?'))==NULL ||
             (colon=strchr(question+1, ':'))==NULL ||
             (semicolon=strchr(colon+1, ';'))==NULL ) {
                 ierr = mk5_status_set_error_rtn(ip, EFORMAT_ERROR, "5h");
-        } else {
-                *semicolon = '\0';
-
-                /* Trim leading/trailing whitespace */
-                colon = m5trim(colon+1);
-
-                /* replace ':'s by ',' (and remove surrounding whitespace) */
-                mk5_status_replace_colons(colon);
-
-                strcpy(buf, colon);
         }
+        if( semicolon!=NULL )
+            *semicolon = '\0';
+        else if ( (nl=strrchr(tmp, '\n'))!=NULL )
+            *nl = '\0';
+
+        if( colon!=NULL ) {
+            /* Trim leading/trailing whitespace */
+            colon = m5trim(colon+1);
+
+            /* replace ':'s by ',' (and remove surrounding whitespace) */
+            mk5_status_replace_colons(colon);
+
+            strcpy(buf, colon);
+        } else
+            strcpy(buf, tmp);
     }
     if( tmp )
         free( tmp );
+
     /* Make sure that ip[2] has exactly the same value as ierr
      * (there is a code path which sets ierr but not ip[2]) */
     return ip[ 2 ] = ierr;

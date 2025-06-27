@@ -64,7 +64,8 @@ int mk5_status(command, itask, ip)
     int ip[5];                           /* ipc parameters */
 {
     int                nch;
-    int               ierr, out_class = 0;  /* out_class init to 0 means "get next available" */
+    int                ierr = 0; /* no error unless one occurs */
+    int                out_class = 0;  /* out_class init to 0 means "get next available" */
     char               buf[ 512 ];   /* could be bigger, but this could also cause class clogging */
     unsigned int       statusword, nmsg = 0;
     const unsigned int maxmsg_per_iter = 11; /* Send only a limited amount of messages per invocation
@@ -97,12 +98,14 @@ int mk5_status(command, itask, ip)
 
         /* Retrieve the error - let the code write it after the prefix */
         nch = sprintf(buf, "%s/error,",command->name);
-        if( (ierr=mk5_status_get_error(ip, buf+nch, sizeof(buf)-nch-1))<0 )
-            return ierr;
-
-        /* Send this message to the callert */
-        cls_snd(&out_class, buf, strlen(buf), 0, 0);
-        nmsg++;
+        ierr=mk5_status_get_error(ip, buf+nch, sizeof(buf)-nch-1);
+        if( ierr == 0 || ierr == EFORMAT_ERROR ) {
+            /* Send this message to the caller */
+            cls_snd(&out_class, buf, strlen(buf), 0, 0);
+            nmsg++;
+        }
+        if( ierr != 0 )
+            break;
     }
     /* If we are returning more than just the status, then we did find and
      * log errors, so we inform that something bad has happened */
@@ -112,12 +115,15 @@ int mk5_status(command, itask, ip)
     /* Check if the error bit is still set because if so, we need to inform
      *  the system there's more to come */
     if( (statusword&0x0002)==0x02 ) {
+        if(ierr == 0 )
             logit(NULL, -303, "5h");
+        else
+            logit(NULL, -304, "5h");
     }
     /* Inform the caller about the number of messages and under which class
      * (== message ID) we sent them back */
     ip[ 0 ] = out_class;
     ip[ 1 ] = (int)nmsg;
-    ip[ 2 ] = 0;
+    ip[ 2 ] = ierr;
     return ip[ 2 ];
 }
