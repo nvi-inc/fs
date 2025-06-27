@@ -656,6 +656,9 @@ background Mark 5 error(s) detected - see below
 5H -303
 more Mark 5 error messages are pending
 ""
+5H -304
+more Mark 5 error messages may be pending
+""
 5H -401
 error retrieving class in mk5cn_exec
 ""
