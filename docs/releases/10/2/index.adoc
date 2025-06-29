@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020, 2022, 2023 NVI, Inc.
+// Copyright (c) 2020, 2022, 2023, 2025 NVI, Inc.
 //
 // This file is part of the FSL10 Linux distribution.
 // (see http://github.com/nvi-inc/fsl10).
@@ -19,11 +19,13 @@
 //
 
 = Index of fs/releases/10/2/
-Version 2.6 - August 2023
+Version 2.7 - June 2025
 
 == Current documents
 
-<<10.2.adoc#,FS 10.2 Update Notes>> (latest release)
+<<10.2.adoc#,FS 10.2 Update Notes>> (latest release, for upgrading from 10.1)
+
+<<10.2.1.adoc#,FS 10.2.1 Update Notes>> (latest patch, for upgrading from 10.2.0)
 
 <<10.2_to_latest.adoc#,FS 10.2 to the Latest Commit Update Notes>>
 

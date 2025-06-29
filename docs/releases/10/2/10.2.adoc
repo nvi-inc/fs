@@ -21,7 +21,7 @@
 :doctype: book
 
 = FS 10.2 Update Notes
-Version 1.0.4 - February 2025
+Version 1.0.5 - June 2025
 
 :sectnums:
 :stem: latexmath
@@ -34,6 +34,8 @@ Version 1.0.4 - February 2025
 :sectnums!:
 == Document revision history
 
+* 1.0.5 -- June 2025 -- Move to patch 10.2.1
+* 1.0.4 -- February 2025 -- Add advice to update comments in _equip.ctl_
 * 1.0.3 -- July 2024 -- Fix typos
 * 1.0.2 -- February 2024 -- Fix _govert_ option `-u` description
 * 1.0.1 -- January 2024 -- Fix typo in _curl_/_wget_ verbose option in _fesh_
@@ -43,7 +45,7 @@ Version 1.0.4 - February 2025
 == Introduction
 
 This document covers the steps needed to update from FS _10.1_ to
-_10.2_ (latest patch is _10.2.0_) and the changes in the new version.
+_10.2_ (latest patch is _10.2.1_) and the changes in the new version.
 Installing the new version (see the <<Upgrading from 10.1>> section
 below) should be simpler than the update to _10.1_ for most users. An
 appendix, <<Transferring an existing FS installation to FSL11>>,
@@ -147,7 +149,7 @@ then as _prog_ execute:
 
  cd /usr2/fs-git
  git fetch
- git checkout -q 10.2.0
+ git checkout -q 10.2.1
 
 . If you are using FSL8 or are otherwise unable, or prefer not, to use
 _git_ (you will probably need to be _root_):
@@ -167,7 +169,7 @@ __/usr2/fs__ link. Please note that:
 * For FSL8, or if you are otherwise unable to connect to _github_, you
 will need the *TIP* in the `*wget*` step.
 
-* For the __tag__ use `10.2.0`.
+* For the __tag__ use `10.2.1`.
 
 * You should return to the steps in this document after completing the
 step setting the link for __/usr2/fs__ by running *`make install`*.

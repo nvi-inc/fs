@@ -1,0 +1,295 @@
+//
+// Copyright (c) 2025 NVI, Inc.
+//
+// This file is part of VLBI Field System
+// (see http://github.com/nvi-inc/fs).
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <http://www.gnu.org/licenses/>.
+//
+
+:doctype: book
+
+= FS 10.2.1 Update Notes
+Version 0.2 - June 2025
+
+:sectnums:
+:stem: latexmath
+:sectnumlevels: 4
+:experimental:
+
+:toc:
+
+== Introduction
+
+The document covers updating from the FS _10.2.0_ feature release to
+the _10.2.1_ patch. This patch release fixes five bugs:
+
+[disc]
+
+* A crash that could be caused by a very long recorder `error?` query
+  response in the `mk5_status` (and `fb_status`) command. This seemed
+  to be a fairly rare situation. Only one crash has been reported
+  (just recently) in the more than two years this command has existed.
+
+* A bug in the `terminate` command that caused the FS to not terminate
+  due to a race condition when (typically) a non-FS process exited.
+  This was typically a fairly benign bug, but could be frustrating
+  because it would be necessary to try the `terminate` command more
+  than once, possibly a few times, in order to terminate.
+
+* A bug that prevented use of _autoftp_ on FSl11 (Debian _Bullseye_)
+  and other systems that require FS _python3_ support.
+
+* A bug in the `satellite` command that caused it to fail after many
+  uses in the same run of the FS.
+
+* A cosmetic bug in the handling of DBBC3 multicast time when using
+  DDC_V firmware the first time after the FS computer was rebooted and
+  when switching between DDC_V and non-DDC_V (DDC_E/DDC_U) firmware.
+
+These bugs and the fixes are discussed in detail in the
+<<FS changes>> subsection below.
+
+== Upgrading from 10.2.0 to 10.2.1
+
+To install this update, your current FS version must be FS _10.2.0_
+(see the <<10.1.adoc#,FS 10.2 Update Notes>> document). If you
+already installed the patch release, _10.2.1_, when you installed _10.2_,
+there is nothing more to do; the steps in this document can be skipped.
+
+=== Fetch and make the patched version
+
+. Update the FS
+
++
+
+There are two options:
+
++
+
+.. If you are using FSL9, FSL10, or another system that supports
+connections to _github_, then as _prog_ execute:
+
+
+ cd /usr2/fs-git
+ git fetch --tags -q origin 10.2
+ git checkout -q 10.2.1
+ make clean rmdoto rmexe all >& /dev/null
+ make -s
+
++
+
+No output from the last command indicates a successful _make_.
+
+.. If you are using FSL8, or otherwise unable to use _git_ or connect
+to _github_:
+
++
+
++
+
+Please follow all the steps in the
+<<../../misc/release_model.adoc#_installing_from_an_archive,Installing
+from an archive>> subsection in the
+<<../../misc/release_model.adoc#,Release Model>> document. Please note
+that:
+
+* For FSL8, or if you are otherwise unable to connect to _github_, you
+will need the *TIP* in the `*wget*` step.
+
+* Use __10.2.1__ as the value for __tag__.
+
+* Be sure to set the link for __/usr2/fs__ by running `make
+install`, where that is an option.
+
+== Changes since 10.2.0
+
+There are separate sub-sections with summaries of changes in the FS
+and _drudg_.
+
+Clickable links such as
+https://github.com/nvi-inc/fs/issues/36[#36] connect to specific issues
+reported at https://github.com/nvi-inc/fs/issues.
+
+=== FS changes
+
+. Fix bug in `mk5_status` (and `fb_status`) command when handling long
+recorder `error?` query responses (closing
+https://github.com/nvi-inc/fs/issues/234[#234]).
+
++
+[%collapsible]
+====
+
+In the `mk5_status` (and `fb_status`) command, if an `error?` query
+response was too long to fit in the buffer (`256` characters), the
+basic checks on its format could generate an error. If so, the class
+number that had been allocated to return previous `status?` (and
+possibly other  `error?`) responses would not be passed back to the
+caller to be processed, leaving the class number in limbo (a class
+number leak). After about 35+ of these errors there would be no class
+numbers left and the FS would crash.
+
+Additionally, the `error?` response was not reported to the caller
+preventing it from being displayed for relatively easy identification
+of the underlying recorder error.
+
+The cause of the problem was actually more general in nature. Any
+error in the process of getting the `error?` response (or in the
+process of getting a `status?` response after the first), could also
+cause a class number leak.
+
+In addition to fixing these two class number leaks, some other small
+improvements were made:
+
+[disc]
+
+* The buffer size was increased `1024` characters.
+
+* The error message for an incorrectly formatted `status?` and
+  `error?` response was revised to say that it was a format error and
+  that it could have been due to truncation. Previously, it just said
+  there was no reply, which is a different case.
+
+* The available response when a formatting error is detected is
+  returned to the caller for display.
+
+* The error number codes of the `mk5_status` command were moved to an
+  `include` header to make them accessible in more than one file of
+  code without duplicating them. This was helpful for returning the
+  available response where there was a formatting error.
+
+* If the command ends with a processing error so that it is not known
+  whether there are remaining recorder errors to process, the error
+  report says there _may_ be errors yet to process, instead of that
+  there _are_.
+
+Thanks to Jon Quick (HartRAO) for reporting this bug and testing the
+fix.
+
+====
+
+. Fix bug in the `terminate` command (closing
+https://github.com/nvi-inc/fs/issues/226[#226]).
+
++
+[%collapsible]
+====
+
+Sometimes the `terminate` command would incorrectly not, in fact,
+terminate the FS when using the display server. Instead it would give
+an `un{nbsp}{nbsp}{nbsp}{nbsp}2` (and ultimately a `bo{nbsp}-176`)
+error. This happened when the FS was checking to make sure _autoftp_
+and _fs.prompt_ weren't active. Workarounds were:
+
+[disc]
+
+* Trying `terminate` again. More than one try may have been needed.
+
+* Using `terminate=force`. That should have worked in all cases
+(except _pfmed_ being active), but would defeat the check for
+_autoftp_ and _fs.prompt_ being active. So it had to be used with
+care.
+
+This bug was triggered by a process file disappearing from _/proc/_
+after it was found in the directory and before it was opened for
+reading to see if it was for an instance of _autoftp_ or _fs.prompt_.
+There was usually only a very small time window in which this could
+happen. The code was aware of this case, but there was a bug in how it
+was handled.
+
+====
+
+. Fix bug in the display server shim for _xterm_ on FSL11, restoring
+use of _autoftp_ (closing
+https://github.com/nvi-inc/fs/issues/218[#218]).
+
++
+[%collapsible]
+====
+
+The conversion to _python3_ for FSL11 (_bullseye_) missed
+_fsserver/shims/xterm_. As a result, it was not possible on FSL11
+systems to use _autoftp_ (or `sy=xterm ...`, which should be avoided
+anyway). The simple fix for this was to make separate _python2_ and
+_python3_ versions, like the other _python_ scripts in FS _10.2_.
+This bug only occurred for FSL11 systems (and other systems that use FS
+_python3_ support).
+
+====
+
+. Fix bug in the `satellite=...` command that prevented temporary TLE
+files from being closed (closing
+https://github.com/nvi-inc/fs/issues/220[#220]).
+
++
+[%collapsible]
+====
+
+When cleaning up at the end of processing, `satellite=...` commands
+were not closing the temporary TLE files. As a result, if many of the
+commands were used in a single invocation of the FS, the limit on the
+number of open files could be reached, causing subsequent
+`satellite=...` commands to fail. This situation could happen, e.g.,
+if many of the commands were used sequentially to approximate
+continuous tracking.
+
+Thanks to Jamie McCallum and David Schunck (both at Hobart) for
+finding this, reporting it, and providing the fix.
+
+====
+
+. Fix bug in reporting time from DBBC3 multicast (closing
+https://github.com/nvi-inc/fs/issues/224[#224]).
+
++
+[%collapsible]
+====
+
+This was a mostly cosmetic (but pretty unsightly) bug that occurred in
+certain situations. For DDC_V firmware, which does not have multicast
+time, it caused spurious times to be displayed. While for non-DDC_V
+(DDC_E/DDC_U) firmware, which does have time available, it caused the
+time to be suppressed. This was due to an error in FS initialization
+in 10.2.0. The two situations where the bug occurred were:
+
+[disc]
+
+*  When using only DDC_V firmware, the first time the FS was run after
+rebooting.
+
+*  When switching between DDC_V firmware and a non-DDC_V firmware
+(DDC_E/DDC_U), in either direction, the first time the FS was run
+after the change in _equip.ctl_.
+
+This bug did not occur if only non-DDC_V firmware was used.
+
+There was a fairly simple workaround for this bug. It was to terminate
+and restart the FS before using it, after:
+
+[disc]
+
+*  A reboot, when only using DDC_V firmware
+
+*  Changing _equip.ctl_, when switching between DDC_V firmware and a
+non-DDC_V firmware (DDC_E/DDC_U), in either direction.
+
+Thanks to J. Quick (HartRAO) for reporting this bug.
+
+====
+
+=== drudg changes
+
+There are no _drudg_ changes.
+
