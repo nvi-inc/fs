@@ -1,0 +1,1981 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.17">
+<meta name="author" content="Version 1.7 - July 2025">
+<title>FS 10.2 to Latest Commit Update Notes</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<style>
+/*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
+/* Uncomment the following line when using as a custom stylesheet */
+/* @import "https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700"; */
+html{font-family:sans-serif;-webkit-text-size-adjust:100%}
+a{background:none}
+a:focus{outline:thin dotted}
+a:active,a:hover{outline:0}
+h1{font-size:2em;margin:.67em 0}
+b,strong{font-weight:bold}
+abbr{font-size:.9em}
+abbr[title]{cursor:help;border-bottom:1px dotted #dddddf;text-decoration:none}
+dfn{font-style:italic}
+hr{height:0}
+mark{background:#ff0;color:#000}
+code,kbd,pre,samp{font-family:monospace;font-size:1em}
+pre{white-space:pre-wrap}
+q{quotes:"\201C" "\201D" "\2018" "\2019"}
+small{font-size:80%}
+sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}
+sup{top:-.5em}
+sub{bottom:-.25em}
+img{border:0}
+svg:not(:root){overflow:hidden}
+figure{margin:0}
+audio,video{display:inline-block}
+audio:not([controls]){display:none;height:0}
+fieldset{border:1px solid silver;margin:0 2px;padding:.35em .625em .75em}
+legend{border:0;padding:0}
+button,input,select,textarea{font-family:inherit;font-size:100%;margin:0}
+button,input{line-height:normal}
+button,select{text-transform:none}
+button,html input[type=button],input[type=reset],input[type=submit]{-webkit-appearance:button;cursor:pointer}
+button[disabled],html input[disabled]{cursor:default}
+input[type=checkbox],input[type=radio]{padding:0}
+button::-moz-focus-inner,input::-moz-focus-inner{border:0;padding:0}
+textarea{overflow:auto;vertical-align:top}
+table{border-collapse:collapse;border-spacing:0}
+*,::before,::after{box-sizing:border-box}
+html,body{font-size:100%}
+body{background:#fff;color:rgba(0,0,0,.8);padding:0;margin:0;font-family:"Noto Serif","DejaVu Serif",serif;line-height:1;position:relative;cursor:auto;-moz-tab-size:4;-o-tab-size:4;tab-size:4;word-wrap:anywhere;-moz-osx-font-smoothing:grayscale;-webkit-font-smoothing:antialiased}
+a:hover{cursor:pointer}
+img,object,embed{max-width:100%;height:auto}
+object,embed{height:100%}
+img{-ms-interpolation-mode:bicubic}
+.left{float:left!important}
+.right{float:right!important}
+.text-left{text-align:left!important}
+.text-right{text-align:right!important}
+.text-center{text-align:center!important}
+.text-justify{text-align:justify!important}
+.hide{display:none}
+img,object,svg{display:inline-block;vertical-align:middle}
+textarea{height:auto;min-height:50px}
+select{width:100%}
+.subheader,.admonitionblock td.content>.title,.audioblock>.title,.exampleblock>.title,.imageblock>.title,.listingblock>.title,.literalblock>.title,.stemblock>.title,.openblock>.title,.paragraph>.title,.quoteblock>.title,table.tableblock>.title,.verseblock>.title,.videoblock>.title,.dlist>.title,.olist>.title,.ulist>.title,.qlist>.title,.hdlist>.title{line-height:1.45;color:#7a2518;font-weight:400;margin-top:0;margin-bottom:.25em}
+div,dl,dt,dd,ul,ol,li,h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6,pre,form,p,blockquote,th,td{margin:0;padding:0}
+a{color:#2156a5;text-decoration:underline;line-height:inherit}
+a:hover,a:focus{color:#1d4b8f}
+a img{border:0}
+p{line-height:1.6;margin-bottom:1.25em;text-rendering:optimizeLegibility}
+p aside{font-size:.875em;line-height:1.35;font-style:italic}
+h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{font-family:"Open Sans","DejaVu Sans",sans-serif;font-weight:300;font-style:normal;color:#ba3925;text-rendering:optimizeLegibility;margin-top:1em;margin-bottom:.5em;line-height:1.0125em}
+h1 small,h2 small,h3 small,#toctitle small,.sidebarblock>.content>.title small,h4 small,h5 small,h6 small{font-size:60%;color:#e99b8f;line-height:0}
+h1{font-size:2.125em}
+h2{font-size:1.6875em}
+h3,#toctitle,.sidebarblock>.content>.title{font-size:1.375em}
+h4,h5{font-size:1.125em}
+h6{font-size:1em}
+hr{border:solid #dddddf;border-width:1px 0 0;clear:both;margin:1.25em 0 1.1875em}
+em,i{font-style:italic;line-height:inherit}
+strong,b{font-weight:bold;line-height:inherit}
+small{font-size:60%;line-height:inherit}
+code{font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;font-weight:400;color:rgba(0,0,0,.9)}
+ul,ol,dl{line-height:1.6;margin-bottom:1.25em;list-style-position:outside;font-family:inherit}
+ul,ol{margin-left:1.5em}
+ul li ul,ul li ol{margin-left:1.25em;margin-bottom:0}
+ul.square li ul,ul.circle li ul,ul.disc li ul{list-style:inherit}
+ul.square{list-style-type:square}
+ul.circle{list-style-type:circle}
+ul.disc{list-style-type:disc}
+ol li ul,ol li ol{margin-left:1.25em;margin-bottom:0}
+dl dt{margin-bottom:.3125em;font-weight:bold}
+dl dd{margin-bottom:1.25em}
+blockquote{margin:0 0 1.25em;padding:.5625em 1.25em 0 1.1875em;border-left:1px solid #ddd}
+blockquote,blockquote p{line-height:1.6;color:rgba(0,0,0,.85)}
+@media screen and (min-width:768px){h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{line-height:1.2}
+h1{font-size:2.75em}
+h2{font-size:2.3125em}
+h3,#toctitle,.sidebarblock>.content>.title{font-size:1.6875em}
+h4{font-size:1.4375em}}
+table{background:#fff;margin-bottom:1.25em;border:1px solid #dedede;word-wrap:normal}
+table thead,table tfoot{background:#f7f8f7}
+table thead tr th,table thead tr td,table tfoot tr th,table tfoot tr td{padding:.5em .625em .625em;font-size:inherit;color:rgba(0,0,0,.8);text-align:left}
+table tr th,table tr td{padding:.5625em .625em;font-size:inherit;color:rgba(0,0,0,.8)}
+table tr.even,table tr.alt{background:#f8f8f7}
+table thead tr th,table tfoot tr th,table tbody tr td,table tr td,table tfoot tr td{line-height:1.6}
+h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{line-height:1.2;word-spacing:-.05em}
+h1 strong,h2 strong,h3 strong,#toctitle strong,.sidebarblock>.content>.title strong,h4 strong,h5 strong,h6 strong{font-weight:400}
+.center{margin-left:auto;margin-right:auto}
+.stretch{width:100%}
+.clearfix::before,.clearfix::after,.float-group::before,.float-group::after{content:" ";display:table}
+.clearfix::after,.float-group::after{clear:both}
+:not(pre).nobreak{word-wrap:normal}
+:not(pre).nowrap{white-space:nowrap}
+:not(pre).pre-wrap{white-space:pre-wrap}
+:not(pre):not([class^=L])>code{font-size:.9375em;font-style:normal!important;letter-spacing:0;padding:.1em .5ex;word-spacing:-.15em;background:#f7f7f8;border-radius:4px;line-height:1.45;text-rendering:optimizeSpeed}
+pre{color:rgba(0,0,0,.9);font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;line-height:1.45;text-rendering:optimizeSpeed}
+pre code,pre pre{color:inherit;font-size:inherit;line-height:inherit}
+pre>code{display:block}
+pre.nowrap,pre.nowrap pre{white-space:pre;word-wrap:normal}
+em em{font-style:normal}
+strong strong{font-weight:400}
+.keyseq{color:rgba(51,51,51,.8)}
+kbd{font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;display:inline-block;color:rgba(0,0,0,.8);font-size:.65em;line-height:1.45;background:#f7f7f7;border:1px solid #ccc;border-radius:3px;box-shadow:0 1px 0 rgba(0,0,0,.2),inset 0 0 0 .1em #fff;margin:0 .15em;padding:.2em .5em;vertical-align:middle;position:relative;top:-.1em;white-space:nowrap}
+.keyseq kbd:first-child{margin-left:0}
+.keyseq kbd:last-child{margin-right:0}
+.menuseq,.menuref{color:#000}
+.menuseq b:not(.caret),.menuref{font-weight:inherit}
+.menuseq{word-spacing:-.02em}
+.menuseq b.caret{font-size:1.25em;line-height:.8}
+.menuseq i.caret{font-weight:bold;text-align:center;width:.45em}
+b.button::before,b.button::after{position:relative;top:-1px;font-weight:400}
+b.button::before{content:"[";padding:0 3px 0 2px}
+b.button::after{content:"]";padding:0 2px 0 3px}
+p a>code:hover{color:rgba(0,0,0,.9)}
+#header,#content,#footnotes,#footer{width:100%;margin:0 auto;max-width:62.5em;*zoom:1;position:relative;padding-left:.9375em;padding-right:.9375em}
+#header::before,#header::after,#content::before,#content::after,#footnotes::before,#footnotes::after,#footer::before,#footer::after{content:" ";display:table}
+#header::after,#content::after,#footnotes::after,#footer::after{clear:both}
+#content{margin-top:1.25em}
+#content::before{content:none}
+#header>h1:first-child{color:rgba(0,0,0,.85);margin-top:2.25rem;margin-bottom:0}
+#header>h1:first-child+#toc{margin-top:8px;border-top:1px solid #dddddf}
+#header>h1:only-child,body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
+#header .details{border-bottom:1px solid #dddddf;line-height:1.45;padding-top:.25em;padding-bottom:.25em;padding-left:.25em;color:rgba(0,0,0,.6);display:flex;flex-flow:row wrap}
+#header .details span:first-child{margin-left:-.125em}
+#header .details span.email a{color:rgba(0,0,0,.85)}
+#header .details br{display:none}
+#header .details br+span::before{content:"\00a0\2013\00a0"}
+#header .details br+span.author::before{content:"\00a0\22c5\00a0";color:rgba(0,0,0,.85)}
+#header .details br+span#revremark::before{content:"\00a0|\00a0"}
+#header #revnumber{text-transform:capitalize}
+#header #revnumber::after{content:"\00a0"}
+#content>h1:first-child:not([class]){color:rgba(0,0,0,.85);border-bottom:1px solid #dddddf;padding-bottom:8px;margin-top:0;padding-top:1rem;margin-bottom:1.25rem}
+#toc{border-bottom:1px solid #e7e7e9;padding-bottom:.5em}
+#toc>ul{margin-left:.125em}
+#toc ul.sectlevel0>li>a{font-style:italic}
+#toc ul.sectlevel0 ul.sectlevel1{margin:.5em 0}
+#toc ul{font-family:"Open Sans","DejaVu Sans",sans-serif;list-style-type:none}
+#toc li{line-height:1.3334;margin-top:.3334em}
+#toc a{text-decoration:none}
+#toc a:active{text-decoration:underline}
+#toctitle{color:#7a2518;font-size:1.2em}
+@media screen and (min-width:768px){#toctitle{font-size:1.375em}
+body.toc2{padding-left:15em;padding-right:0}
+#toc.toc2{margin-top:0!important;background:#f8f8f7;position:fixed;width:15em;left:0;top:0;border-right:1px solid #e7e7e9;border-top-width:0!important;border-bottom-width:0!important;z-index:1000;padding:1.25em 1em;height:100%;overflow:auto}
+#toc.toc2 #toctitle{margin-top:0;margin-bottom:.8rem;font-size:1.2em}
+#toc.toc2>ul{font-size:.9em;margin-bottom:0}
+#toc.toc2 ul ul{margin-left:0;padding-left:1em}
+#toc.toc2 ul.sectlevel0 ul.sectlevel1{padding-left:0;margin-top:.5em;margin-bottom:.5em}
+body.toc2.toc-right{padding-left:0;padding-right:15em}
+body.toc2.toc-right #toc.toc2{border-right-width:0;border-left:1px solid #e7e7e9;left:auto;right:0}}
+@media screen and (min-width:1280px){body.toc2{padding-left:20em;padding-right:0}
+#toc.toc2{width:20em}
+#toc.toc2 #toctitle{font-size:1.375em}
+#toc.toc2>ul{font-size:.95em}
+#toc.toc2 ul ul{padding-left:1.25em}
+body.toc2.toc-right{padding-left:0;padding-right:20em}}
+#content #toc{border:1px solid #e0e0dc;margin-bottom:1.25em;padding:1.25em;background:#f8f8f7;border-radius:4px}
+#content #toc>:first-child{margin-top:0}
+#content #toc>:last-child{margin-bottom:0}
+#footer{max-width:none;background:rgba(0,0,0,.8);padding:1.25em}
+#footer-text{color:hsla(0,0%,100%,.8);line-height:1.44}
+#content{margin-bottom:.625em}
+.sect1{padding-bottom:.625em}
+@media screen and (min-width:768px){#content{margin-bottom:1.25em}
+.sect1{padding-bottom:1.25em}}
+.sect1:last-child{padding-bottom:0}
+.sect1+.sect1{border-top:1px solid #e7e7e9}
+#content h1>a.anchor,h2>a.anchor,h3>a.anchor,#toctitle>a.anchor,.sidebarblock>.content>.title>a.anchor,h4>a.anchor,h5>a.anchor,h6>a.anchor{position:absolute;z-index:1001;width:1.5ex;margin-left:-1.5ex;display:block;text-decoration:none!important;visibility:hidden;text-align:center;font-weight:400}
+#content h1>a.anchor::before,h2>a.anchor::before,h3>a.anchor::before,#toctitle>a.anchor::before,.sidebarblock>.content>.title>a.anchor::before,h4>a.anchor::before,h5>a.anchor::before,h6>a.anchor::before{content:"\00A7";font-size:.85em;display:block;padding-top:.1em}
+#content h1:hover>a.anchor,#content h1>a.anchor:hover,h2:hover>a.anchor,h2>a.anchor:hover,h3:hover>a.anchor,#toctitle:hover>a.anchor,.sidebarblock>.content>.title:hover>a.anchor,h3>a.anchor:hover,#toctitle>a.anchor:hover,.sidebarblock>.content>.title>a.anchor:hover,h4:hover>a.anchor,h4>a.anchor:hover,h5:hover>a.anchor,h5>a.anchor:hover,h6:hover>a.anchor,h6>a.anchor:hover{visibility:visible}
+#content h1>a.link,h2>a.link,h3>a.link,#toctitle>a.link,.sidebarblock>.content>.title>a.link,h4>a.link,h5>a.link,h6>a.link{color:#ba3925;text-decoration:none}
+#content h1>a.link:hover,h2>a.link:hover,h3>a.link:hover,#toctitle>a.link:hover,.sidebarblock>.content>.title>a.link:hover,h4>a.link:hover,h5>a.link:hover,h6>a.link:hover{color:#a53221}
+details,.audioblock,.imageblock,.literalblock,.listingblock,.stemblock,.videoblock{margin-bottom:1.25em}
+details{margin-left:1.25rem}
+details>summary{cursor:pointer;display:block;position:relative;line-height:1.6;margin-bottom:.625rem;outline:none;-webkit-tap-highlight-color:transparent}
+details>summary::-webkit-details-marker{display:none}
+details>summary::before{content:"";border:solid transparent;border-left:solid;border-width:.3em 0 .3em .5em;position:absolute;top:.5em;left:-1.25rem;transform:translateX(15%)}
+details[open]>summary::before{border:solid transparent;border-top:solid;border-width:.5em .3em 0;transform:translateY(15%)}
+details>summary::after{content:"";width:1.25rem;height:1em;position:absolute;top:.3em;left:-1.25rem}
+.admonitionblock td.content>.title,.audioblock>.title,.exampleblock>.title,.imageblock>.title,.listingblock>.title,.literalblock>.title,.stemblock>.title,.openblock>.title,.paragraph>.title,.quoteblock>.title,table.tableblock>.title,.verseblock>.title,.videoblock>.title,.dlist>.title,.olist>.title,.ulist>.title,.qlist>.title,.hdlist>.title{text-rendering:optimizeLegibility;text-align:left;font-family:"Noto Serif","DejaVu Serif",serif;font-size:1rem;font-style:italic}
+table.tableblock.fit-content>caption.title{white-space:nowrap;width:0}
+.paragraph.lead>p,#preamble>.sectionbody>[class=paragraph]:first-of-type p{font-size:1.21875em;line-height:1.6;color:rgba(0,0,0,.85)}
+.admonitionblock>table{border-collapse:separate;border:0;background:none;width:100%}
+.admonitionblock>table td.icon{text-align:center;width:80px}
+.admonitionblock>table td.icon img{max-width:none}
+.admonitionblock>table td.icon .title{font-weight:bold;font-family:"Open Sans","DejaVu Sans",sans-serif;text-transform:uppercase}
+.admonitionblock>table td.content{padding-left:1.125em;padding-right:1.25em;border-left:1px solid #dddddf;color:rgba(0,0,0,.6);word-wrap:anywhere}
+.admonitionblock>table td.content>:last-child>:last-child{margin-bottom:0}
+.exampleblock>.content{border:1px solid #e6e6e6;margin-bottom:1.25em;padding:1.25em;background:#fff;border-radius:4px}
+.exampleblock>.content>:first-child{margin-top:0}
+.exampleblock>.content>:last-child{margin-bottom:0}
+.sidebarblock{border:1px solid #dbdbd6;margin-bottom:1.25em;padding:1.25em;background:#f3f3f2;border-radius:4px}
+.sidebarblock>:first-child{margin-top:0}
+.sidebarblock>:last-child{margin-bottom:0}
+.sidebarblock>.content>.title{color:#7a2518;margin-top:0;text-align:center}
+.exampleblock>.content>:last-child>:last-child,.exampleblock>.content .olist>ol>li:last-child>:last-child,.exampleblock>.content .ulist>ul>li:last-child>:last-child,.exampleblock>.content .qlist>ol>li:last-child>:last-child,.sidebarblock>.content>:last-child>:last-child,.sidebarblock>.content .olist>ol>li:last-child>:last-child,.sidebarblock>.content .ulist>ul>li:last-child>:last-child,.sidebarblock>.content .qlist>ol>li:last-child>:last-child{margin-bottom:0}
+.literalblock pre,.listingblock>.content>pre{border-radius:4px;overflow-x:auto;padding:1em;font-size:.8125em}
+@media screen and (min-width:768px){.literalblock pre,.listingblock>.content>pre{font-size:.90625em}}
+@media screen and (min-width:1280px){.literalblock pre,.listingblock>.content>pre{font-size:1em}}
+.literalblock pre,.listingblock>.content>pre:not(.highlight),.listingblock>.content>pre[class=highlight],.listingblock>.content>pre[class^="highlight "]{background:#f7f7f8}
+.literalblock.output pre{color:#f7f7f8;background:rgba(0,0,0,.9)}
+.listingblock>.content{position:relative}
+.listingblock code[data-lang]::before{display:none;content:attr(data-lang);position:absolute;font-size:.75em;top:.425rem;right:.5rem;line-height:1;text-transform:uppercase;color:inherit;opacity:.5}
+.listingblock:hover code[data-lang]::before{display:block}
+.listingblock.terminal pre .command::before{content:attr(data-prompt);padding-right:.5em;color:inherit;opacity:.5}
+.listingblock.terminal pre .command:not([data-prompt])::before{content:"$"}
+.listingblock pre.highlightjs{padding:0}
+.listingblock pre.highlightjs>code{padding:1em;border-radius:4px}
+.listingblock pre.prettyprint{border-width:0}
+.prettyprint{background:#f7f7f8}
+pre.prettyprint .linenums{line-height:1.45;margin-left:2em}
+pre.prettyprint li{background:none;list-style-type:inherit;padding-left:0}
+pre.prettyprint li code[data-lang]::before{opacity:1}
+pre.prettyprint li:not(:first-child) code[data-lang]::before{display:none}
+table.linenotable{border-collapse:separate;border:0;margin-bottom:0;background:none}
+table.linenotable td[class]{color:inherit;vertical-align:top;padding:0;line-height:inherit;white-space:normal}
+table.linenotable td.code{padding-left:.75em}
+table.linenotable td.linenos,pre.pygments .linenos{border-right:1px solid;opacity:.35;padding-right:.5em;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}
+pre.pygments span.linenos{display:inline-block;margin-right:.75em}
+.quoteblock{margin:0 1em 1.25em 1.5em;display:table}
+.quoteblock:not(.excerpt)>.title{margin-left:-1.5em;margin-bottom:.75em}
+.quoteblock blockquote,.quoteblock p{color:rgba(0,0,0,.85);font-size:1.15rem;line-height:1.75;word-spacing:.1em;letter-spacing:0;font-style:italic;text-align:justify}
+.quoteblock blockquote{margin:0;padding:0;border:0}
+.quoteblock blockquote::before{content:"\201c";float:left;font-size:2.75em;font-weight:bold;line-height:.6em;margin-left:-.6em;color:#7a2518;text-shadow:0 1px 2px rgba(0,0,0,.1)}
+.quoteblock blockquote>.paragraph:last-child p{margin-bottom:0}
+.quoteblock .attribution{margin-top:.75em;margin-right:.5ex;text-align:right}
+.verseblock{margin:0 1em 1.25em}
+.verseblock pre{font-family:"Open Sans","DejaVu Sans",sans-serif;font-size:1.15rem;color:rgba(0,0,0,.85);font-weight:300;text-rendering:optimizeLegibility}
+.verseblock pre strong{font-weight:400}
+.verseblock .attribution{margin-top:1.25rem;margin-left:.5ex}
+.quoteblock .attribution,.verseblock .attribution{font-size:.9375em;line-height:1.45;font-style:italic}
+.quoteblock .attribution br,.verseblock .attribution br{display:none}
+.quoteblock .attribution cite,.verseblock .attribution cite{display:block;letter-spacing:-.025em;color:rgba(0,0,0,.6)}
+.quoteblock.abstract blockquote::before,.quoteblock.excerpt blockquote::before,.quoteblock .quoteblock blockquote::before{display:none}
+.quoteblock.abstract blockquote,.quoteblock.abstract p,.quoteblock.excerpt blockquote,.quoteblock.excerpt p,.quoteblock .quoteblock blockquote,.quoteblock .quoteblock p{line-height:1.6;word-spacing:0}
+.quoteblock.abstract{margin:0 1em 1.25em;display:block}
+.quoteblock.abstract>.title{margin:0 0 .375em;font-size:1.15em;text-align:center}
+.quoteblock.excerpt>blockquote,.quoteblock .quoteblock{padding:0 0 .25em 1em;border-left:.25em solid #dddddf}
+.quoteblock.excerpt,.quoteblock .quoteblock{margin-left:0}
+.quoteblock.excerpt blockquote,.quoteblock.excerpt p,.quoteblock .quoteblock blockquote,.quoteblock .quoteblock p{color:inherit;font-size:1.0625rem}
+.quoteblock.excerpt .attribution,.quoteblock .quoteblock .attribution{color:inherit;font-size:.85rem;text-align:left;margin-right:0}
+p.tableblock:last-child{margin-bottom:0}
+td.tableblock>.content{margin-bottom:1.25em;word-wrap:anywhere}
+td.tableblock>.content>:last-child{margin-bottom:-1.25em}
+table.tableblock,th.tableblock,td.tableblock{border:0 solid #dedede}
+table.grid-all>*>tr>*{border-width:1px}
+table.grid-cols>*>tr>*{border-width:0 1px}
+table.grid-rows>*>tr>*{border-width:1px 0}
+table.frame-all{border-width:1px}
+table.frame-ends{border-width:1px 0}
+table.frame-sides{border-width:0 1px}
+table.frame-none>colgroup+*>:first-child>*,table.frame-sides>colgroup+*>:first-child>*{border-top-width:0}
+table.frame-none>:last-child>:last-child>*,table.frame-sides>:last-child>:last-child>*{border-bottom-width:0}
+table.frame-none>*>tr>:first-child,table.frame-ends>*>tr>:first-child{border-left-width:0}
+table.frame-none>*>tr>:last-child,table.frame-ends>*>tr>:last-child{border-right-width:0}
+table.stripes-all>*>tr,table.stripes-odd>*>tr:nth-of-type(odd),table.stripes-even>*>tr:nth-of-type(even),table.stripes-hover>*>tr:hover{background:#f8f8f7}
+th.halign-left,td.halign-left{text-align:left}
+th.halign-right,td.halign-right{text-align:right}
+th.halign-center,td.halign-center{text-align:center}
+th.valign-top,td.valign-top{vertical-align:top}
+th.valign-bottom,td.valign-bottom{vertical-align:bottom}
+th.valign-middle,td.valign-middle{vertical-align:middle}
+table thead th,table tfoot th{font-weight:bold}
+tbody tr th{background:#f7f8f7}
+tbody tr th,tbody tr th p,tfoot tr th,tfoot tr th p{color:rgba(0,0,0,.8);font-weight:bold}
+p.tableblock>code:only-child{background:none;padding:0}
+p.tableblock{font-size:1em}
+ol{margin-left:1.75em}
+ul li ol{margin-left:1.5em}
+dl dd{margin-left:1.125em}
+dl dd:last-child,dl dd:last-child>:last-child{margin-bottom:0}
+li p,ul dd,ol dd,.olist .olist,.ulist .ulist,.ulist .olist,.olist .ulist{margin-bottom:.625em}
+ul.checklist,ul.none,ol.none,ul.no-bullet,ol.no-bullet,ol.unnumbered,ul.unstyled,ol.unstyled{list-style-type:none}
+ul.no-bullet,ol.no-bullet,ol.unnumbered{margin-left:.625em}
+ul.unstyled,ol.unstyled{margin-left:0}
+li>p:empty:only-child::before{content:"";display:inline-block}
+ul.checklist>li>p:first-child{margin-left:-1em}
+ul.checklist>li>p:first-child>.fa-square-o:first-child,ul.checklist>li>p:first-child>.fa-check-square-o:first-child{width:1.25em;font-size:.8em;position:relative;bottom:.125em}
+ul.checklist>li>p:first-child>input[type=checkbox]:first-child{margin-right:.25em}
+ul.inline{display:flex;flex-flow:row wrap;list-style:none;margin:0 0 .625em -1.25em}
+ul.inline>li{margin-left:1.25em}
+.unstyled dl dt{font-weight:400;font-style:normal}
+ol.arabic{list-style-type:decimal}
+ol.decimal{list-style-type:decimal-leading-zero}
+ol.loweralpha{list-style-type:lower-alpha}
+ol.upperalpha{list-style-type:upper-alpha}
+ol.lowerroman{list-style-type:lower-roman}
+ol.upperroman{list-style-type:upper-roman}
+ol.lowergreek{list-style-type:lower-greek}
+.hdlist>table,.colist>table{border:0;background:none}
+.hdlist>table>tbody>tr,.colist>table>tbody>tr{background:none}
+td.hdlist1,td.hdlist2{vertical-align:top;padding:0 .625em}
+td.hdlist1{font-weight:bold;padding-bottom:1.25em}
+td.hdlist2{word-wrap:anywhere}
+.literalblock+.colist,.listingblock+.colist{margin-top:-.5em}
+.colist td:not([class]):first-child{padding:.4em .75em 0;line-height:1;vertical-align:top}
+.colist td:not([class]):first-child img{max-width:none}
+.colist td:not([class]):last-child{padding:.25em 0}
+.thumb,.th{line-height:0;display:inline-block;border:4px solid #fff;box-shadow:0 0 0 1px #ddd}
+.imageblock.left{margin:.25em .625em 1.25em 0}
+.imageblock.right{margin:.25em 0 1.25em .625em}
+.imageblock>.title{margin-bottom:0}
+.imageblock.thumb,.imageblock.th{border-width:6px}
+.imageblock.thumb>.title,.imageblock.th>.title{padding:0 .125em}
+.image.left,.image.right{margin-top:.25em;margin-bottom:.25em;display:inline-block;line-height:0}
+.image.left{margin-right:.625em}
+.image.right{margin-left:.625em}
+a.image{text-decoration:none;display:inline-block}
+a.image object{pointer-events:none}
+sup.footnote,sup.footnoteref{font-size:.875em;position:static;vertical-align:super}
+sup.footnote a,sup.footnoteref a{text-decoration:none}
+sup.footnote a:active,sup.footnoteref a:active{text-decoration:underline}
+#footnotes{padding-top:.75em;padding-bottom:.75em;margin-bottom:.625em}
+#footnotes hr{width:20%;min-width:6.25em;margin:-.25em 0 .75em;border-width:1px 0 0}
+#footnotes .footnote{padding:0 .375em 0 .225em;line-height:1.3334;font-size:.875em;margin-left:1.2em;margin-bottom:.2em}
+#footnotes .footnote a:first-of-type{font-weight:bold;text-decoration:none;margin-left:-1.05em}
+#footnotes .footnote:last-of-type{margin-bottom:0}
+#content #footnotes{margin-top:-.625em;margin-bottom:0;padding:.75em 0}
+div.unbreakable{page-break-inside:avoid}
+.big{font-size:larger}
+.small{font-size:smaller}
+.underline{text-decoration:underline}
+.overline{text-decoration:overline}
+.line-through{text-decoration:line-through}
+.aqua{color:#00bfbf}
+.aqua-background{background:#00fafa}
+.black{color:#000}
+.black-background{background:#000}
+.blue{color:#0000bf}
+.blue-background{background:#0000fa}
+.fuchsia{color:#bf00bf}
+.fuchsia-background{background:#fa00fa}
+.gray{color:#606060}
+.gray-background{background:#7d7d7d}
+.green{color:#006000}
+.green-background{background:#007d00}
+.lime{color:#00bf00}
+.lime-background{background:#00fa00}
+.maroon{color:#600000}
+.maroon-background{background:#7d0000}
+.navy{color:#000060}
+.navy-background{background:#00007d}
+.olive{color:#606000}
+.olive-background{background:#7d7d00}
+.purple{color:#600060}
+.purple-background{background:#7d007d}
+.red{color:#bf0000}
+.red-background{background:#fa0000}
+.silver{color:#909090}
+.silver-background{background:#bcbcbc}
+.teal{color:#006060}
+.teal-background{background:#007d7d}
+.white{color:#bfbfbf}
+.white-background{background:#fafafa}
+.yellow{color:#bfbf00}
+.yellow-background{background:#fafa00}
+span.icon>.fa{cursor:default}
+a span.icon>.fa{cursor:inherit}
+.admonitionblock td.icon [class^="fa icon-"]{font-size:2.5em;text-shadow:1px 1px 2px rgba(0,0,0,.5);cursor:default}
+.admonitionblock td.icon .icon-note::before{content:"\f05a";color:#19407c}
+.admonitionblock td.icon .icon-tip::before{content:"\f0eb";text-shadow:1px 1px 2px rgba(155,155,0,.8);color:#111}
+.admonitionblock td.icon .icon-warning::before{content:"\f071";color:#bf6900}
+.admonitionblock td.icon .icon-caution::before{content:"\f06d";color:#bf3400}
+.admonitionblock td.icon .icon-important::before{content:"\f06a";color:#bf0000}
+.conum[data-value]{display:inline-block;color:#fff!important;background:rgba(0,0,0,.8);border-radius:50%;text-align:center;font-size:.75em;width:1.67em;height:1.67em;line-height:1.67em;font-family:"Open Sans","DejaVu Sans",sans-serif;font-style:normal;font-weight:bold}
+.conum[data-value] *{color:#fff!important}
+.conum[data-value]+b{display:none}
+.conum[data-value]::after{content:attr(data-value)}
+pre .conum[data-value]{position:relative;top:-.125em}
+b.conum *{color:inherit!important}
+.conum:not([data-value]):empty{display:none}
+dt,th.tableblock,td.content,div.footnote{text-rendering:optimizeLegibility}
+h1,h2,p,td.content,span.alt,summary{letter-spacing:-.01em}
+p strong,td.content strong,div.footnote strong{letter-spacing:-.005em}
+p,blockquote,dt,td.content,span.alt,summary{font-size:1.0625rem}
+p{margin-bottom:1.25rem}
+.sidebarblock p,.sidebarblock dt,.sidebarblock td.content,p.tableblock{font-size:1em}
+.exampleblock>.content{background:#fffef7;border-color:#e0e0dc;box-shadow:0 1px 4px #e0e0dc}
+.print-only{display:none!important}
+@page{margin:1.25cm .75cm}
+@media print{*{box-shadow:none!important;text-shadow:none!important}
+html{font-size:80%}
+a{color:inherit!important;text-decoration:underline!important}
+a.bare,a[href^="#"],a[href^="mailto:"]{text-decoration:none!important}
+a[href^="http:"]:not(.bare)::after,a[href^="https:"]:not(.bare)::after{content:"(" attr(href) ")";display:inline-block;font-size:.875em;padding-left:.25em}
+abbr[title]{border-bottom:1px dotted}
+abbr[title]::after{content:" (" attr(title) ")"}
+pre,blockquote,tr,img,object,svg{page-break-inside:avoid}
+thead{display:table-header-group}
+svg{max-width:100%}
+p,blockquote,dt,td.content{font-size:1em;orphans:3;widows:3}
+h2,h3,#toctitle,.sidebarblock>.content>.title{page-break-after:avoid}
+#header,#content,#footnotes,#footer{max-width:none}
+#toc,.sidebarblock,.exampleblock>.content{background:none!important}
+#toc{border-bottom:1px solid #dddddf!important;padding-bottom:0!important}
+body.book #header{text-align:center}
+body.book #header>h1:first-child{border:0!important;margin:2.5em 0 1em}
+body.book #header .details{border:0!important;display:block;padding:0!important}
+body.book #header .details span:first-child{margin-left:0!important}
+body.book #header .details br{display:block}
+body.book #header .details br+span::before{content:none!important}
+body.book #toc{border:0!important;text-align:left!important;padding:0!important;margin:0!important}
+body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-break-before:always}
+.listingblock code[data-lang]::before{display:block}
+#footer{padding:0 .9375em}
+.hide-on-print{display:none!important}
+.print-only{display:block!important}
+.hide-for-print{display:none!important}
+.show-for-print{display:inherit!important}}
+@media amzn-kf8,print{#header>h1:first-child{margin-top:1.25rem}
+.sect1{padding:0!important}
+.sect1+.sect1{border:0}
+#footer{background:none}
+#footer-text{color:rgba(0,0,0,.6);font-size:.9em}}
+@media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}
+</style>
+</head>
+<body class="book">
+<div id="header">
+<h1>FS 10.2 to Latest Commit Update Notes</h1>
+<div class="details">
+<span id="author" class="author">Version 1.7 - July 2025</span><br>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_introduction">1. Introduction</a></li>
+<li><a href="#_upgrading_from_10_2_to_the_latest_commit">2. Upgrading from 10.2 to the latest commit</a>
+<ul class="sectlevel2">
+<li><a href="#_fetch_the_latest_commit">2.1. Fetch the latest commit</a></li>
+<li><a href="#_make_the_fs">2.2. Make the FS</a></li>
+<li><a href="#_update_your_station_code">2.3. Update your station code.</a></li>
+<li><a href="#_make_the_station_software">2.4. Make the station software</a></li>
+<li><a href="#_reboot">2.5. Reboot</a></li>
+<li><a href="#_additional_steps">2.6. Additional steps</a></li>
+</ul>
+</li>
+<li><a href="#_changes_since_10_2_0">3. Changes since 10.2.0</a>
+<ul class="sectlevel2">
+<li><a href="#_fs_changes">3.1. FS changes</a></li>
+<li><a href="#_drudg_changes">3.2. drudg changes</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="_introduction">1. Introduction</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The document covers updating from FS <em>10.2</em> to the <em>latest commit</em> on
+its branch. The latest commit is experimental. We make every effort to
+keep the latest commit usable, but any commit that is not tagged for
+release is not intended for operations. The intended use of this
+document is to collect update information, as it becomes available,
+before the next release.</p>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Important</div>
+</td>
+<td class="content">
+Commits that are not tagged for release may have
+significant issues including: not building, crashing, and
+incompatibilities with operational observation schedule files. Such
+commits are intended for testing only. <em>Let the user beware.</em>
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock caution">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Caution</div>
+</td>
+<td class="content">
+It is expected that those using the latest commit are experts
+and will manage the differences for updating to the next official
+release themselves. No specific documentation will be provided. What
+commit was last updated to will determine what needs to be done. It
+might work to verify that all the steps in the official release update
+notes were completed. However, that may not be complete. <em>Let the user
+beware.</em>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>This document is up to date with the
+<code>6be435f6120bca47231cbf968a4b5b730b7e8f7a</code> (<code>6be435f6</code>) commit. Due to
+small increments, such as updating this document, that may not be the
+literal last commit, but the differences should be small unless you
+happen to <code>pull</code> between a significant change and this document being
+updated.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_upgrading_from_10_2_to_the_latest_commit">2. Upgrading from 10.2 to the latest commit</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>You must have already upgraded to <em>10.2.0</em> according to the
+<a href="10.2.0.html">FS 10.2 Update Notes</a> document before installing
+this update.</p>
+</div>
+<div class="sect2">
+<h3 id="_fetch_the_latest_commit">2.1. Fetch the latest commit</h3>
+<div class="paragraph">
+<p>There are two alternatives:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>If you are using FSL9, FSL10, FSL11, or another system that supports
+connections to <em>github</em> and you are using <em>git</em> (as is recommended)
+then as <em>prog</em> execute:</p>
+<div class="literalblock">
+<div class="content">
+<pre>cd /usr2/fs-git
+git fetch
+git checkout -q 6be435f6</pre>
+</div>
+</div>
+</li>
+<li>
+<p>If you are using FSL8, or otherwise unable to use <em>git</em>:</p>
+<div class="paragraph">
+<p>Please follow the steps, through the step that includes the option to
+set the <em>/usr2/fs</em> link, in the
+<a href="../../misc/release_model.html#_installing_from_an_archive">Installing
+from an archive</a> subsection in the
+<a href="../../misc/release_model.html">Release Model</a> document. Please note
+that:</p>
+</div>
+<div class="ulist disc">
+<ul class="disc">
+<li>
+<p>For FSL8, you will need the <strong>TIP</strong> in the <code><strong>wget</strong></code> step.</p>
+</li>
+<li>
+<p>For the <em>tag</em> in the <code><strong>wget</strong></code> and <code><strong>tar</strong></code> commands, use the short
+SHA for the commit. For example, for commit under discussion here,
+<code>6be435f6120bca47231cbf968a4b5b730b7e8f7a</code>, use <code>6be435f6</code>.</p>
+</li>
+<li>
+<p>After extracting the archive, change the name of the output
+directory to use the latest feature release and the short SHA of the
+commit, like <em>fs-10.2.0-76-g6be435f6</em> (note the <em>g</em> before the short
+SHA), which will then be used in the following <code><strong>cd</strong></code> command. For
+example (<kbd>Tab</kbd> completion is your friend for the long SHA):</p>
+<div class="literalblock">
+<div class="content">
+<pre>cd /usr2
+mv fs-6be435f6120bca47231cbf968a4b5b730b7e8f7a fs-10.2.0-66-g6be435f6
+cd /usr2/fs-10.2.0-76-g6be435f6</pre>
+</div>
+</div>
+</li>
+<li>
+<p>You will end the &#8220;installing from an archive&#8221; with the step
+setting the link for <em>/usr2/fs</em> by running <strong><code>make install</code></strong>.</p>
+</li>
+</ul>
+</div>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_make_the_fs">2.2. Make the FS</h3>
+<div class="paragraph">
+<p>As <em>prog</em>:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>cd /usr2/fs
+make clean rmdoto rmexe all &gt;&amp; /dev/null
+make -s</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>No output from the last command indicates a successful <em>make</em>.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_update_your_station_code">2.3. Update your station code.</h3>
+<div class="paragraph">
+<p>Except if noted otherwise, these steps should all be performed as
+<em>prog</em>. Click on the <strong>Details</strong> toggle in each item for the needed
+steps.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>If your station code depends on <code>none</code> indicating that no schedule
+and/or no schedule procedure file are in use, you need to make
+changes. Most stations, possibly all, won&#8217;t need to make any changes.</p>
+<details>
+<summary class="title">Details</summary>
+<div class="content">
+<div class="paragraph">
+<p>There are two situations in which local code will need to be updated:</p>
+</div>
+<div class="ulist disc">
+<ul class="disc">
+<li>
+<p>If it compares the shared memory variables <code>LSKD2</code> and <code>LPRC2</code> (or
+<code>LSKD</code> or <code>LPRC</code>) to <code>none</code> to determine that no schedule or schedule
+procedure library is active, the comparison(s) will need to be changed
+to use spaces.</p>
+</li>
+<li>
+<p>If it filters the log (or display) output to determine if no
+schedule or schedule procedure library is active, it will need to be
+changed to accept a null field (i.e., empty, not even spaces), instead
+of <code>none</code> in the <code>schedule/</code> and <code>proc/</code> output.</p>
+</li>
+</ul>
+</div>
+</div>
+</details>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_make_the_station_software">2.4. Make the station software</h3>
+<div class="paragraph">
+<p>The layout of some variables in shared memory has changed. Even if you
+have not updated your station code, you should re-<em>make</em> it to be
+safe. If <em>/usr2/st/Makefile</em> is set-up in the standard way, you can do
+this with (as <em>prog</em>):</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>cd /usr2/st
+make rmdoto rmexe all</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_reboot">2.5. Reboot</h3>
+<div class="paragraph">
+<p>This step is not needed at this time.</p>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Important</div>
+</td>
+<td class="content">
+This will make sure shared memory is reallocated.
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_additional_steps">2.6. Additional steps</h3>
+<div class="paragraph">
+<p>Except if noted otherwise, these should all be performed as <em>oper</em>.
+Click on the <strong>Details</strong> toggle in each item for the needed steps.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>If your SNAP procedures use the <code>if=schedule:none&#8230;&#8203;</code> command to
+test for no schedule being active, you need to make changes. Most
+stations, possibly all, won&#8217;t need to make any changes.</p>
+<details>
+<summary class="title">Details</summary>
+<div class="content">
+<div class="paragraph">
+<p>If the <code>if=schedule:none&#8230;&#8203;</code> command is used to determine that no
+schedule is active, the <code>:none</code> will need to be removed and the <code>true</code>
+and <code>false</code> commands swapped. Additionally, embedded spaces are no
+longer supported and a second colon, <code>:</code>, is now considered part of the
+schedule name.</p>
+</div>
+</div>
+</details>
+</li>
+<li>
+<p>For DBBC(2) and DBBC3 stations, make sure that the AGC is restored
+after scans for legacy calibration.</p>
+<details>
+<summary class="title">Details</summary>
+<div class="content">
+<div class="paragraph">
+<p>Add the following to <code>postob</code> in the <code>station</code> procedure library:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>if=cont_cal,,ifagc
+if=cont_cal,,if=ddc\,bbc_gain=all\\\,agc</pre>
+</div>
+</div>
+</div>
+</details>
+</li>
+<li>
+<p>Optionally, update the comments in your <em>.rxg</em> files to correctly
+show the correct maximum number of T<sub>cal</sub> table entries allowed.</p>
+<details>
+<summary class="title">Details</summary>
+<div class="content">
+<div class="paragraph">
+<p>A script, <em>/usr2/fs/misc/rxgfix4</em>, has been provided for this. If the
+original version of the affected comments have been preserved, they
+will be updated to the new form. Only the comments immediately before
+the active T<sub>cal</sub> entries will be updated.</p>
+</div>
+<div class="paragraph">
+<p>Execute:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>cd /usr2/control/rxg_files
+/usr2/fs/misc/rxgfix4 *.rxg</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If the script stops because there are existing <em>.bak</em> files, you can
+delete them, if it is safe to do so,  by adding the <code>-d</code> option (see
+<code><strong>/usr2/fs/misc/rxgfix4&#160;-h</strong></code> for the details) to the command
+<em>before</em> the files to be updated. If it is not safe to delete them,
+you could, for example, rename them to end in <em>.bak2</em> with
+<code><strong>rename&#160;'s/.bak$/.bak2/'&#160;*.rxg.bak</strong></code> first. The
+<em>rename</em> command, by default, will not overwrite existing files, but
+you might want to check that your new ending is not already in use for
+some <em>.rxg</em> backup files to avoid possibly mixing different
+&#8220;generations&#8221; of backups.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+If you don&#8217;t have the (<em>perl</em> based) <em>rename</em> command, you can
+install it on FSL<em>x</em> systems as <em>root</em> with
+<code><strong>apt-get&#160;install&#160;rename</strong></code>.
+</td>
+</tr>
+</table>
+</div>
+</div>
+</details>
+</li>
+<li>
+<p>Optionally, add the new day-of-year aliases. <em>dj</em> and <em>lj</em>, to your
+shells.</p>
+<details>
+<summary class="title">Details</summary>
+<div class="content">
+<div class="paragraph">
+<p>Execute the commands for all the shells that you use, typically just
+your login shell:</p>
+</div>
+<div class="ulist disc">
+<ul class="disc">
+<li>
+<p><em>bash</em>&#8201;&#8212;&#8201;The default login shell for FSL10 and FSL11 (and
+possibly later):</p>
+<div class="literalblock">
+<div class="content">
+<pre>cd ~
+tail -2 /usr2/fs/st.default/oper/.bash_aliases &gt;&gt;.bask_aliases</pre>
+</div>
+</div>
+</li>
+<li>
+<p><em>tcsh</em>&#8201;&#8212;&#8201;The default login shell for FSL8 and FSL9:</p>
+<div class="literalblock">
+<div class="content">
+<pre>cd ~
+tail -2 /usr2/fs/st.default/oper/.cshrc &gt;&gt;.cshrc</pre>
+</div>
+</div>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>You will need to exit any active shell (including possibly logging out
+and back and in again) to make the aliases active.</p>
+</div>
+<div class="paragraph">
+<p>You may also wish to make these changes for <em>prog</em> (and any AUID
+accounts).</p>
+</div>
+</div>
+</details>
+</li>
+<li>
+<p>Optionally, install the  <em>fsy</em> utility for use with the display
+server to conditionally start the client if the FS is already running.</p>
+<details>
+<summary class="title">Details</summary>
+<div class="content">
+<div class="paragraph">
+<p>To install this script, execute:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>cp /usr2/fs/misc/fsy cd ~oper/bin</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If you are using a remote connection and would like to open a new
+window to run the FS (or client) in, comment out the &#8220;normal&#8221; <code>if</code>
+clause and uncomment the command for a new window. In either case, if
+you use AUID accounts, you must promote to <em>oper</em> before running the
+script.</p>
+</div>
+</div>
+</details>
+</li>
+<li>
+<p>Optionally, update the <code>check_ntp</code> SNAP procedure for the new,
+simpler, standard.</p>
+<details>
+<summary class="title">Details</summary>
+<div class="content">
+<div class="paragraph">
+<p>The updated <em>/usr2/fs/misc/ntp.txt</em> file describes the new form and
+how to install the needed scripts, all in sections 6a and 6e. Please
+use those directions as a guide if you want to update.</p>
+</div>
+</div>
+</details>
+</li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_changes_since_10_2_0">3. Changes since 10.2.0</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>There are separate subsections below with summaries of the changes in
+the FS and <em>drudg</em>.</p>
+</div>
+<div class="paragraph">
+<p>Clickable links such as <a href="https://github.com/nvi-inc/fs/issues/36">#36</a>
+connect to specific issues reported at
+<a href="https://github.com/nvi-inc/fs/issues" class="bare">https://github.com/nvi-inc/fs/issues</a>.</p>
+</div>
+<div class="paragraph">
+<p>A complete history of changes can be found using the <code>git log</code> command
+from within the FS <em>git</em> working directory, usually <em>/usr2/fs-git</em>.</p>
+</div>
+<div class="paragraph">
+<p>Each change is listed as a numbered summary typically followed by a
+&#8220;Details&#8221; <em>toggle</em>, like:</p>
+</div>
+<details>
+<summary class="title">Details</summary>
+<div class="content">
+<div class="paragraph">
+<p>Details are shown here.</p>
+</div>
+</div>
+</details>
+<div class="paragraph">
+<p>that can be clicked on to toggle showing (or not showing) a
+collapsible box with the details. In this way, you can view the
+summary as a list and only reveal the details of items that interest
+you. The collapsible box may be omitted if providing further details
+didn&#8217;t seem warranted. The collapsible boxes for the details may also
+have nested collapsible boxes inside them if there are many sub-items.</p>
+</div>
+<div class="sect2">
+<h3 id="_fs_changes">3.1. FS changes</h3>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Fix bug in <code>mk5_status</code> (and <code>fb_status</code>) command when handling long
+recorder <code>error?</code> query responses (closing
+<a href="https://github.com/nvi-inc/fs/issues/234">#234</a>).</p>
+<details>
+<summary class="title">Details</summary>
+<div class="content">
+<div class="paragraph">
+<p>In the <code>mk5_status</code> (and <code>fb_status</code>) command, if an <code>error?</code> query
+response was too long to fit in the buffer (<code>256</code> characters), the
+basic checks on its format could generate an error. If so, the class
+number that had been allocated to return previous <code>status?</code> (and
+possibly other  <code>error?</code>) responses would not be passed back to the
+caller to be processed, leaving the class number in limbo (a class
+number leak). After about 35+ of these errors there would be no class
+numbers left and the FS would crash.</p>
+</div>
+<div class="paragraph">
+<p>Additionally, the <code>error?</code> response was not reported to the caller
+preventing it from being displayed for relatively easy identification
+of the underlying recorder error.</p>
+</div>
+<div class="paragraph">
+<p>The cause of the problem was actually more general in nature. Any
+error in the process of getting the <code>error?</code> response (or in the
+process of getting a <code>status?</code> response after the first), could also
+cause a class number leak.</p>
+</div>
+<div class="paragraph">
+<p>In addition to fixing these two class number leaks, some other small
+improvements were made:</p>
+</div>
+<div class="ulist disc">
+<ul class="disc">
+<li>
+<p>The buffer size was increased <code>1024</code> characters.</p>
+</li>
+<li>
+<p>The error message for an incorrectly formatted <code>status?</code> and
+<code>error?</code> response was revised to say that it was a format error and
+that it could have been due to truncation. Previously, it just said
+there was no reply, which is a different case.</p>
+</li>
+<li>
+<p>The available response when a formatting error is detected is
+returned to the caller for display.</p>
+</li>
+<li>
+<p>The error number codes of the <code>mk5_status</code> command were moved to an
+<code>include</code> header to make them accessible in more than one file of
+code without duplicating them. This was helpful for returning the
+available response where there was a formatting error.</p>
+</li>
+<li>
+<p>If the command ends with a processing error so that it is not known
+whether there are remaining recorder errors to process, the error
+report says there <em>may</em> be errors yet to process, instead of that
+there <em>are</em>.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>This fix was also included in the <em>10.2.1</em> patch release.</p>
+</div>
+<div class="paragraph">
+<p>Thanks to Jon Quick (HartRAO) for reporting this bug and testing the
+fix.</p>
+</div>
+</div>
+</details>
+</li>
+<li>
+<p>Fix bug in the <code>terminate</code> command (closing
+<a href="https://github.com/nvi-inc/fs/issues/226">#226</a>).</p>
+<details>
+<summary class="title">Details</summary>
+<div class="content">
+<div class="paragraph">
+<p>Sometimes the <code>terminate</code> command would incorrectly not, in fact,
+terminate the FS when using the display server. Instead it would give
+an <code>un&#160;&#160;&#160;&#160;2</code> (and ultimately a <code>bo&#160;-176</code>)
+error. This happened when the FS was checking to make sure <em>autoftp</em>
+and <em>fs.prompt</em> weren&#8217;t active. Workarounds were:</p>
+</div>
+<div class="ulist disc">
+<ul class="disc">
+<li>
+<p>Trying <code>terminate</code> again. More than one try may have been needed.</p>
+</li>
+<li>
+<p>Using <code>terminate=force</code>. That should have worked in all cases
+(except <em>pfmed</em> being active), but would defeat the check for
+<em>autoftp</em> and <em>fs.prompt</em> being active. So it had to be used with
+care.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>This bug was triggered by a process file disappearing from <em>/proc/</em>
+after it was found in the directory and before it was opened for
+reading to see if it was for an instance of <em>autoftp</em> or <em>fs.prompt</em>.
+There was usually only a very small time window in which this could
+happen. The code was aware of this case, but there was a bug in how it
+was handled.</p>
+</div>
+<div class="paragraph">
+<p>This fix was also included in the <em>10.2.1</em> patch release.</p>
+</div>
+</div>
+</details>
+</li>
+<li>
+<p>Fix bug in the display server shim for <em>xterm</em> on FSL11, restoring
+use of <em>autoftp</em> (closing
+<a href="https://github.com/nvi-inc/fs/issues/218">#218</a>).</p>
+<details>
+<summary class="title">Details</summary>
+<div class="content">
+<div class="paragraph">
+<p>The conversion to <em>python3</em> for FSL11 (<em>bullseye</em>) missed
+<em>fsserver/shims/xterm</em>. As a result, it was not possible on FSL11
+systems to use <em>autoftp</em> (or <code>sy=xterm &#8230;&#8203;</code>, which should be avoided
+anyway). The simple fix for this was to make separate <em>python2</em> and
+<em>python3</em> versions, like the other <em>python</em> scripts in FS <em>10.2</em>.
+This bug only occurred for FSL11 systems (and other systems that use
+FS <em>python3</em> support).</p>
+</div>
+<div class="paragraph">
+<p>This fix was also included in the <em>10.2.1</em> patch release.</p>
+</div>
+</div>
+</details>
+</li>
+<li>
+<p>Fix bug in the <code>satellite=&#8230;&#8203;</code> command that prevented temporary TLE
+files from being closed (closing
+<a href="https://github.com/nvi-inc/fs/issues/220">#220</a>).</p>
+<details>
+<summary class="title">Details</summary>
+<div class="content">
+<div class="paragraph">
+<p>When cleaning up at the end of processing, <code>satellite=&#8230;&#8203;</code> commands
+were not closing the temporary TLE files. As a result, if many of the
+commands were used in a single invocation of the FS, the limit on the
+number of open files could be reached, causing subsequent
+<code>satellite=&#8230;&#8203;</code> commands to fail. This situation could happen, e.g.,
+if many of the commands were used sequentially to approximate
+continuous tracking.</p>
+</div>
+<div class="paragraph">
+<p>This fix was also included in the <em>10.2.1</em> patch release.</p>
+</div>
+<div class="paragraph">
+<p>Thanks to Jamie McCallum and David Schunck (both at Hobart) for
+finding this, reporting it, and providing the fix.</p>
+</div>
+</div>
+</details>
+</li>
+<li>
+<p>Add missing restoration of AGC in DBBC3 <code>postob</code> for legacy
+calibration (closing <a href="https://github.com/nvi-inc/fs/issues/231">#231</a>).</p>
+<details>
+<summary class="title">Details</summary>
+<div class="content">
+<div class="paragraph">
+<p>For legacy calibration, it is necessary to hold the gains fixed during
+a scan so that sampled TPI values can be related to the most recent
+T<sub>sys</sub> measurement. At the end of the scan, the gains should be
+released to seek an appropriate level for the next scan. For the
+DBBC(2), this is done by the next mode setup. However for the DBBC3,
+<code>setup_proc</code> keyword in <em>skedf.ctl</em> is normally used to suppress the
+setup procedure for most scans. Instead, the gains can be released in
+<code>postob</code>.</p>
+</div>
+<div class="paragraph">
+<p>To accomplish this, the following was added to the example <code>postob</code>
+for DBBC3:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>if=cont_cal,,ifagc
+if=cont_cal,,if=ddc\,bbc_gain=all\\\,agc</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The same addition was also made for DDBC(2) since it is benign and the
+<code>setup_proc</code> keyword might be used.</p>
+</div>
+<div class="paragraph">
+<p>The updated example files in <em>/usr2/fs/st.default/proc/</em> are
+<em>d3fbstation.prc</em>, <em>dstation.prc, dfbstation.prc,</em> and
+<em>d5cstation.prc</em>.</p>
+</div>
+<div class="paragraph">
+<p>Thanks to Christian Plötz (Wettzell) for pointing out that this was
+missing and Beppe Maccaferri (Medicina) for confirming the fix.</p>
+</div>
+</div>
+</details>
+</li>
+<li>
+<p>Fix bug in reporting time from DBBC3 multicast (closing
+<a href="https://github.com/nvi-inc/fs/issues/224">#224</a>).</p>
+<details>
+<summary class="title">Details</summary>
+<div class="content">
+<div class="paragraph">
+<p>This was a mostly cosmetic (but pretty unsightly) bug that occurred in
+certain situations. For DDC_V firmware, which does not have multicast
+time, it caused spurious times to be displayed. While for non-DDC_V
+(DDC_E/DDC_U) firmware, which does have time available, it caused the
+time to be suppressed. This was due to an error in FS initialization
+in <em>10.2.0</em>. The two situations where the bug occurred were:</p>
+</div>
+<div class="ulist disc">
+<ul class="disc">
+<li>
+<p>When using only DDC_V firmware, the first time the FS was run after
+rebooting.</p>
+</li>
+<li>
+<p>When switching between DDC_V firmware and a non-DDC_V firmware
+(DDC_E/DDC_U), in either direction, the first time the FS was run
+after the change in <em>equip.ctl</em>.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>This bug did not occur if only non-DDC_V firmware was used.</p>
+</div>
+<div class="paragraph">
+<p>There was a fairly simple workaround for this bug. It was to terminate
+and restart the FS before using it, after:</p>
+</div>
+<div class="ulist disc">
+<ul class="disc">
+<li>
+<p>A reboot, when only using DDC_V firmware</p>
+</li>
+<li>
+<p>Changing <em>equip.ctl</em>, when switching between DDC_V firmware and a
+non-DDC_V firmware (DDC_E/DDC_U), in either direction.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>This fix was also included in the <em>10.2.1</em> patch release.</p>
+</div>
+<div class="paragraph">
+<p>Thanks to Jon Quick (HartRAO) for reporting this bug.</p>
+</div>
+</div>
+</details>
+</li>
+<li>
+<p>Stop attempting to receive RDBE multicast messages when the selected
+rack type is not <code>rdbe</code> (closing
+<a href="https://github.com/nvi-inc/fs/issues/225">#225</a>).</p>
+<details>
+<summary class="title">Details</summary>
+<div class="content">
+<div class="paragraph">
+<p>When the selected rack type is not <code>rdbe</code> it doesn&#8217;t make sense to
+process multicast messages from RDBEs. Before, this was only disabled
+if no RDBEs were defined in the <em>rdbc&lt;x&gt;.ctl</em> control files. Doing
+that was necessary to avoid error messages if the RDBEs were not
+transmitting multicast for some reason. However, having to remove the
+definitions when RDBEs were not in use makes it cumbersome to switch
+between RDBEs and other rack types. Additionally, not having the RDBEs
+defined disables any access to RDBEs, specifically with the <code>rdbe=</code>
+and <code>rdbe<em>x</em>=</code> low-level device communication commands.
+Traditionally for flexibility, the FS has allowed low-level
+communication with devices that were not selected.</p>
+</div>
+<div class="paragraph">
+<p>Thanks to Javi González-García (Yebes) for reporting this oversight.</p>
+</div>
+</div>
+</details>
+</li>
+<li>
+<p>Move the <code>onoff</code> command&#8217;s testing for valid LOs for RDBE detectors
+to when the <em>onoff</em> program is started.</p>
+<details>
+<summary class="title">Details</summary>
+<div class="content">
+<div class="paragraph">
+<p>Previously when using RDBE detectors with <em>onoff</em>, the LOs being valid
+was only tested for when setting up <em>onoff</em> (<code>onoff=&#8230;&#8203;</code>) for <code>all</code>
+detectors. It was not tested for other detector selections. It is only
+necessary that the LOs  be valid when <em>onoff</em> is started (<code>onoff</code>) and
+all selected detectors should be checked. That is also the time when
+the LO and other channel information is collected. This supports
+changing the configuration of the channels after <em>onoff</em> is setup,
+which is consistent with how other racks are handled.</p>
+</div>
+</div>
+</details>
+</li>
+<li>
+<p>Fix bug in the reporting of the <code>MA -104</code> error that caused an
+extraneous <code>(  -4)</code> to be displayed in the error message.</p>
+<details>
+<summary class="title">Details</summary>
+<div class="content">
+<div class="paragraph">
+<p>The <code>MA -104</code> error is a warning that there may be a 30 second delay
+while a possible serial line error is worked around at the start-up of
+<em>matcn</em>. The value of an argument in the call to report the error had
+a value of <code>-4</code> instead of, the correct value, <code>0</code>.</p>
+</div>
+</div>
+</details>
+</li>
+<li>
+<p>Issue warning if only one processor is in use (closing
+<a href="https://github.com/nvi-inc/fs/issues/178">#178</a> and
+<a href="https://github.com/nvi-inc/fs/issues/228">#228</a>).</p>
+<details>
+<summary class="title">Details</summary>
+<div class="content">
+<div class="paragraph">
+<p>The display server requires at least two processors (cores) to operate
+properly. The issue occurs in server termination. Occasionally,
+termination occurs normally even when there is only one processor.</p>
+</div>
+<div class="paragraph">
+<p>Typically this problem only occurs if the FS is being run in a virtual
+machine with only one processor. Virtual machines can usually be
+reconfigured to have more processors.</p>
+</div>
+<div class="paragraph">
+<p>It should be possible to make it work with one processor, but that
+hasn&#8217;t been implemented yet. Until then, if there is only one
+processor available, warning messages (with hints about what to do)
+are printed at FS startup and when restarting fails because apparently
+a previous instance of the server failed to terminate.</p>
+</div>
+<div class="paragraph">
+<p>Thanks to Christian Plötz (Wettzell), Uwe Bach (Effelsberg) and Javi
+González-García (Yebes) for reporting this issue. Thanks to David
+Horsley (Hobart) for diagnosing the cause when it was first reported
+(issue <a href="https://github.com/nvi-inc/fs/issues/178">#178</a>).</p>
+</div>
+</div>
+</details>
+</li>
+<li>
+<p>Add detector device <code>none</code> to the <code>fivept</code> and <code>onoff</code> commands for
+exercising/testing an antenna without a signal chain.</p>
+<details>
+<summary class="title">Details</summary>
+<div class="content">
+<div class="paragraph">
+<p>Normally, the <code>fivept</code> and <code>onoff</code> commands are used to collect
+pointing and antenna sensitivity data, respectively. This requires
+some sort of signal chain and detector device. The latter is usually
+in the back-end rack. If no detector is available, or doesn&#8217;t produce
+useful radiometry data, it is now possible to exercise/test the
+antenna with <code>acquire</code> by using device <code>none</code> in the <code>fivept</code> and
+<code>onoff</code> setup commands. In this case, there will be no detector
+interaction.</p>
+</div>
+<div class="paragraph">
+<p>Sample procedure library file <em>st.default/proc/point_no_det.prc</em> and
+control file <em>st.default/control/ctlpo_no_det.ctl</em> are provided as
+examples for using <code>none</code> as detector. They are mentioned in the
+<code>help</code> pages for <code>fivept</code> and <code>onoff</code> as a reminder.</p>
+</div>
+</div>
+</details>
+</li>
+<li>
+<p>Add <em>rdbemsg</em> emails to experiment log as comments (closing
+<a href="https://github.com/nvi-inc/fs/issues/213">#213</a>).</p>
+<details>
+<summary class="title">Details</summary>
+<div class="content">
+<div class="paragraph">
+<p>Including the emails in the log avoids having to enter comments from the
+email messages a second time to get them into the log.</p>
+</div>
+<div class="paragraph">
+<p>When originally written (by Jason Soohoo, Haystack Observatory), the
+program that became <em>rdbemsg</em> did not run on FS computers and could
+not easily add comments to the log. Due to on oversight when the
+program was ported to FS computers, adding the email message to the
+log, as <em>msg</em> does, was not added. This has been corrected for both
+the <em>python2</em> and <em>python3</em> versions of <em>rdbemsg</em>.</p>
+</div>
+<div class="paragraph">
+<p>Thanks to the staff at KPGO for reporting this issue.</p>
+</div>
+</div>
+</details>
+</li>
+<li>
+<p>Add <code>-p</code> option to <em>popen</em> for streamlined log output.</p>
+<details>
+<summary class="title">Details</summary>
+<div class="content">
+<div class="paragraph">
+<p>The <em>popen</em> program is used to log the output of Linux programs. A
+<code>-p</code> option was added to replace the <code>#popen#</code> string at the start
+of log entries with <code>/</code> (the logging system inserts the <code>/</code>). This
+makes the log entries look like the output of internal FS commands.
+Its use is not necessary and is not recommended in most circumstances.
+However, it does look better, particularly for replacements of
+internal FS commands line <code>wx</code>. Information on using the <em>popen</em>
+program can be found from <code><strong>help=sy</strong></code>.</p>
+</div>
+<div class="paragraph">
+<p>Thanks to Jon Quick (HartRAO) for conceiving, and providing an
+implementation, of this change,</p>
+</div>
+</div>
+</details>
+</li>
+<li>
+<p>Restore <code>-b</code> startup option as <code>-C</code> (closing
+<a href="https://github.com/nvi-inc/fs/issues/216">#216</a>).</p>
+<details>
+<summary class="title">Details</summary>
+<div class="content">
+<div class="paragraph">
+<p>The removal of the <code>-b</code> option in FS <em>10.2.0</em> was a bit too hasty. The
+long form of the option was <code>--background</code>, which suggested that it
+was the inverse of <code>--foreground</code>. This was not the case. With the
+server enabled, it started the FS without a client. This might be
+convenient to use for starting the FS from a script or otherwise
+without the log being displayed on the terminal. A pitfall of using it
+is that there is no feedback about the whether the FS started
+correctly or had a start-up error and aborted. As a result, this
+option must be used with caution.</p>
+</div>
+<div class="paragraph">
+<p>To make it clearer that it does not start the client, the short option
+was changed to <code>-C</code> (<em>not</em> client) and the long option to
+<code>--no-client</code>. The help output now includes a warning about the lack
+of feedback for startup errors.</p>
+</div>
+<div class="paragraph">
+<p>Thanks to Christian Kristukat (AGGO) for reporting the loss of
+functionality when the <code>-b</code> option was removed. Thanks to Beppe
+Maccaferri (Medicina) for pointing out the possible pitfall.</p>
+</div>
+</div>
+</details>
+</li>
+<li>
+<p>Comment out all lines in example <em>mdlpo.ctl</em> and <em>parpo.ctl</em> files
+(closing <a href="https://github.com/nvi-inc/fs/issues/214">#214</a>).</p>
+<details>
+<summary class="title">Details</summary>
+<div class="content">
+<div class="paragraph">
+<p>This prevents these example files being used accidentally with values
+that are incorrect for a new installation. Instead, the pointing
+analysis programs and/or <em>antcn</em> (while reading the default
+<em>mdlpo.ctl</em>) will fail until the files have been setup with (hopefully
+reasonable) values for the antenna. While this may make the first time
+use for a new antenna a little painful, it is better than having
+incorrect values being used.</p>
+</div>
+</div>
+</details>
+</li>
+<li>
+<p>Improve recovery for loss of an open log file.</p>
+<details>
+<summary class="title">Details</summary>
+<div class="content">
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p>Handle the open log file being replaced by a file that is renamed
+to the open log file&#8217;s name.</p>
+<div class="paragraph">
+<p>Previously automatic lost log file recovery worked if either the log
+file open in the FS have been deleted (<em>rm</em>) or renamed (<em>mv</em>). It did
+not cover the case of a different file being renamed to have the name
+of the open file. That latter most case is now detected by comparing
+the <code>inode</code>s of the open log file and the file with the name of the
+open log. If they don&#8217;t agree they aren&#8217;t the same file. In that case,
+the open log file will be recovered to a file with <em>_recovered</em>
+appended to the original name. If a file with that name already
+exists, the log will instead be recovered to a file with:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre><em>_recovered.&lt;XXXXXX&gt;</em></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>appended at the original name, where <code><em>&lt;XXXXXX&gt;</em></code> is a random string,
+chosen by the kernel, that makes the filename unique, e.g., <em>3fDhIa</em>.</p>
+</div>
+<div class="paragraph">
+<p>There is a consequence of this feature that may not initially appear
+to be intuitive. It occurs if the user was re-opening the original
+file (with <code>log=&#8230;&#8203;</code> or <code>schedule=&#8230;&#8203;</code>) when the <code>inode</code> mismatch was
+discovered. In this case, new log entires will be appended to the file
+with the original name (regardless of what was already in it), not the
+recovered log file. The recovery process doesn&#8217;t know what the new (if
+there is one) log file&#8217;s name is, but will print a message warning
+about this possibility, which can occur whenever the recovery file&#8217;s
+name includes <em>recovered</em>. Will all this in mind, this may not be so
+unintuitive after all.</p>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Warning</div>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>The case of an open log file being overwritten by copying onto it
+(<em>cp</em>) is not handled. So it is not possible to automatically recover
+the log in that case. It should still be possible to recover, most, if
+not all, of a log lost in this way using the technique described in
+<em>/usr2/fs/misc/logrecovery.txt</em></p>
+</div>
+<div class="paragraph">
+<p>Two possible approaches to prevent overwriting by copying (<em>cp</em>) onto
+an open log are described in the <strong>Details</strong> collapsible box below.
+Neither have been implemented at this time.</p>
+</div>
+<details>
+<summary class="title">Details</summary>
+<div class="content">
+<div class="paragraph">
+<p>Two possible solutions to this are:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Use <em>chattr</em> to make the open log file <em>append</em> only.</p>
+<div class="paragraph">
+<p>The approach would be for <em>ddout</em> to use <em>chattr</em> to set <em>attribute</em>
+<code>+a</code> on the log file after opening to make it append only. When the
+log is closed, it would be changed to <code>-a</code> to allow the file to be
+used normally thereafter. It is probably necessary to include
+<code>O_APPEND</code> in the <em>flags</em> for <code>open()</code> calls in <em>ddout</em> in case for
+some reason <code>-a</code> was not applied (probably a crash) when a log was
+closed. To employ this method, it is necessary to give <em>chattr</em> the
+capability to set the append attribute (as <em>root</em>):</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>setcap cap_linux_immutable=eip /usr/bin/chattr</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>There are two minor drawbacks to this approach:</p>
+</div>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p>If an existing log file is owned by a different user (perhaps
+<em>prog</em>), the attributes can&#8217;t be changed.</p>
+</li>
+<li>
+<p>If the attribute is not changed back to <code>-a</code> (perhaps due to a
+crash), the file becomes very difficult to work with (no
+renaming/moving, editing, compressing, etc.) until that is corrected.</p>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>Use mandatory file locking to prevent overwriting of the open log
+file.</p>
+<div class="paragraph">
+<p>In this case, the <em>/usr2</em> partition must be mounted with the <code>mand</code>
+option. <em>ddout</em> would create new logs with a <em>mode</em> including
+<code>S_ISGID</code>. It should set the <em>mode</em> of an existing file that it opens
+to include <code>S_ISGID</code> Then it would need to lock the entire file
+(<code>.l_whence = SEEK_SET</code>; <code>.l_start = 0</code>, <code>.l_len = 0</code>) for reading
+(<code>.l_type = RDLCK</code>). When the log is closed, <em>ddout</em> would clear its
+<code>setgid</code> bit.</p>
+</div>
+<div class="paragraph">
+<p>There are four minor drawbacks to this approach:</p>
+</div>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p>If an existing log file is owned by a different user (perhaps
+<em>prog</em>), the <code>setgid</code> bit can&#8217;t be set/cleared.</p>
+</li>
+<li>
+<p>If the <code>setgid</code> bit is not cleared (perhaps due to a crash), it
+will follow the file, including being compressed or renamed, until
+that is corrected.</p>
+</li>
+<li>
+<p>Mandatory file locking is not considered reliable, but the example
+cases where there may be problems do not seem relevant to this use.</p>
+</li>
+<li>
+<p>Although not deprecated, it seems as though mandatory file locking
+may be headed to extinction.</p>
+</li>
+</ol>
+</div>
+</li>
+</ol>
+</div>
+</div>
+</details>
+</td>
+</tr>
+</table>
+</div>
+</li>
+<li>
+<p>Make recovery more robust.</p>
+<div class="paragraph">
+<p>Previously if errors were detected while determining if the log file
+existed, recovery would be aborted. The code has been restructured to
+not give up for this case or for a problem determining the <code>inode</code>
+values. It now aborts only if an unrecoverable error occurs in the
+process of recopying the log contents. Making the recovery as robust
+as possible is prudent since this is the only chance to accomplish
+this.</p>
+</div>
+</li>
+<li>
+<p>Update <em>/usr2/fs/misc/logrecovery.txt</em> note.</p>
+<div class="paragraph">
+<p>This note provides an alternate recovery process that may be helpful
+if the automatic process isn&#8217;t sufficent. It has been updated to also
+cover more modern systems and to include more specific steps. This
+approach was originally suggested by Pablo de Vicente (Yebes).</p>
+</div>
+</li>
+<li>
+<p>Make miscellaneous improvements:</p>
+<div class="ulist disc">
+<ul class="disc">
+<li>
+<p>Simplify recovery logic</p>
+</li>
+<li>
+<p>Show recovery activity even if a percentage can&#8217;t be shown</p>
+</li>
+<li>
+<p>Make error reports more consistent</p>
+</li>
+<li>
+<p>Report partial recovery even if an error occurred</p>
+</li>
+</ul>
+</div>
+</li>
+</ol>
+</div>
+</div>
+</details>
+</li>
+<li>
+<p>Improve overall <em>Makefile</em> (closing
+<a href="https://github.com/nvi-inc/fs/issues/212">#212</a>).</p>
+<details>
+<summary class="title">Details</summary>
+<div class="content">
+<div class="paragraph">
+<p>In FSL11, the <code><strong>make&#160;install</strong></code> command would fail if the source
+directory was not owned by <em>root</em>. While this situation would not
+normally occur, it could if the <code><strong>make&#160;install</strong></code> was executed a
+second time after an initial installation. This might happen, for
+example, if <code><strong>make&#160;install</strong></code> were used to reset the <em>/usr2/fs</em>
+link. The failure occurred because of a confluence of two issues: (i)
+<em>git</em> was unnecessarily used to determine the version of the FS with
+the <code>install</code> target and (ii) the  version of <em>git</em> in FSL11, and
+probably later versions, will throw an error if the directory is not
+owned by the user. The problem was resolved by removing the use of
+<em>git</em> to determine the FS version for <code><strong>make&#160;install</strong></code>.</p>
+</div>
+<div class="paragraph">
+<p>Thanks to Jon Quick (HartRAO) for reporting this issue.</p>
+</div>
+<div class="paragraph">
+<p>Two further enhancement were made:</p>
+</div>
+<div class="ulist disc">
+<ul class="disc">
+<li>
+<p><code><strong>make&#160;install</strong></code> can only be used by <em>root</em> and <code>install</code> is
+the only <em>make</em> target allowed for <em>root</em>.</p>
+</li>
+<li>
+<p>When installing from an archive, if the source directory name is
+incorrectly formed (missing the tag information), an explanatory error
+will be reported and the <em>make</em> will be aborted.</p>
+</li>
+</ul>
+</div>
+</div>
+</details>
+</li>
+<li>
+<p>Prevent <em>root</em> from running the FS.</p>
+<details>
+<summary class="title">Details</summary>
+<div class="content">
+<div class="paragraph">
+<p>The FS is a user application. It is risky, and a potential security
+issue, to run it as <em>root</em>. In particular, the <code>sy=&#8230;&#8203;</code> command, if
+misused either accidentally or on purpose, could cause serious damage.
+To avoid this, the FS startup program, <em>fs</em>, the server, <em>fsserver</em>,
+and the client program, <em>fsclient</em>, will refuse to run if the user is
+<em>root</em>. This is not strictly necessary for the client, but it was
+included for consistency. Off-line utilities, including <em>pfmed</em>, can
+still be run by <em>root</em>, but this is not recommended and should be
+avoided. It may lead to problems. However, it would not be inherently
+dangerous.</p>
+</div>
+</div>
+</details>
+</li>
+<li>
+<p>Create shell aliases for <em>date</em> and <em>ls</em> command output with
+day-of-year and 24-hour time display.</p>
+<details>
+<summary class="title">Details</summary>
+<div class="content">
+<div class="paragraph">
+<p>Two new shell aliases were added:</p>
+</div>
+<div class="ulist disc">
+<ul class="disc">
+<li>
+<p><em>dj</em>&#8201;&#8212;&#8201;Display the current date/time (down to the seconds) in the
+same format as used by FS logs as well as some additional date
+information. This might be useful if the day-of-year and/or 24-hour
+time are not readily visible elsewhere. Example output:</p>
+<div class="literalblock">
+<div class="content">
+<pre>Mon 2025.104.13:44:54 UTC (Apr 14)</pre>
+</div>
+</div>
+</li>
+<li>
+<p><em>lj</em>&#8201;&#8212;&#8201;Display an <em>ls -l</em> listing with the date/time field (down to
+the seconds) in the same format as used by FS logs. This is intended
+to help associate logs with the day-of-year they were used when
+troubleshooting. It can be combined with other <em>ls</em> flags. For
+example, the <em>-t</em> flag can used and the output piped to <em>less</em> to show
+the logs, newest first, one page at a time:</p>
+<div class="literalblock">
+<div class="content">
+<pre>cd /usr2/log
+lj -t | less</pre>
+</div>
+</div>
+</li>
+</ul>
+</div>
+</div>
+</details>
+</li>
+<li>
+<p>Add <em>fsy</em> utility for conditionally running <em>fsclient</em> if the FS is
+already active.</p>
+<details>
+<summary class="title">Details</summary>
+<div class="content">
+<div class="paragraph">
+<p>This utility can be found in <em>misc/fsy</em>. It can installed in
+<em>~oper/bin</em>. It will check to see if the client can be run (i.e. FS is
+running and display server is enabled). If not, it will start the FS.
+It can be useful for systems using the display server to start the FS
+if it is not already running or the client if it is. There is some
+risk associated with this since you will not get obvious feedback if
+the FS is not running and you expect it to be. However, you may prefer
+to not have to enter a separate command to run the FS if attempting to
+start the client (<em>fslcient</em>) first fails.</p>
+</div>
+<div class="paragraph">
+<p>The script includes commented out commands that you can use instead if
+you prefer to open a new window to run the FS or client in. This may
+be useful for some remote connections.</p>
+</div>
+<div class="admonitionblock caution">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Caution</div>
+</td>
+<td class="content">
+For systems with AUID accounts, it is necessary to promote
+<em>oper</em> before running the script.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Thanks to Chevo Terrazas (MGO) for pointing out the overall usefulness
+of this script, which was originally only provided as a site-specific
+ad hoc tool.</p>
+</div>
+</div>
+</details>
+</li>
+<li>
+<p>Add utilities to simplify the <code>check_ntp</code> SNAP procedure.</p>
+<details>
+<summary class="title">Details</summary>
+<div class="content">
+<div class="paragraph">
+<p>New scripts, <em>grep_ntpq</em>, <em>cname_ntpq_ip</em>, and <em>redact_ntpq_ip</em> were
+added to simplify (i.e., make more readable and easier to maintain)
+the <code>check_ntp</code> SNAP procedure.  The updated <em>/usr2/fs/misc/ntp.txt</em>
+file describes the new form and how to install the new scripts, all in
+sections 6a and 6e.</p>
+</div>
+</div>
+</details>
+</li>
+<li>
+<p>Remove using <code>none</code> as the displayed <em>name</em> when no schedule or no
+schedule procedure library is in use (closing
+<a href="https://github.com/nvi-inc/fs/issues/222">#222</a>).</p>
+<details>
+<summary class="title">Details</summary>
+<div class="content">
+<div class="paragraph">
+<p>Previously when no schedule and schedule procedure library was in use,
+<code>none</code> was displayed as the <em>name</em> in the  output of the <code>schedule</code>
+and <code>proc</code> commands, respectively. Also, in <em>pfmed</em>'s preamble, the
+<code>current&#160;FS&#160;schedule&#160;procedure&#160;library</code> was shown
+as <code>none</code>. This came about because the FS used <code>none</code> internally when
+there was no active file. This was inconsistent and could be confusing
+because <code>none</code> was also an allowed name for schedules and schedule
+procedure libraries. This was corrected by making the following
+changes:</p>
+</div>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p>A string of spaces is now used internally to indicate no file is
+use.</p>
+</li>
+<li>
+<p>The <code>schedule</code> and <code>proc</code> commands now display the <em>name</em> as a null
+field (i.e., empty, not even spaces) when no schedule or schedule
+procedure library, respectively, is in use.</p>
+</li>
+<li>
+<p>Spaces are no longer allowed in these names. Actually, they weren&#8217;t
+before, but this only became apparent when the low-level RTE-A
+emulation file routines truncated the name at the first space and
+attempted to use a file with the shorter name. That might lead to a
+difficult to understand error message if the file didn&#8217;t exist or
+unexpected behavior if it did. This is now trapped at the highest
+level and an appropriate error message is given.</p>
+</li>
+<li>
+<p>The <code>if=schedule:&#8230;&#8203;</code> command was updated to no longer use <code>none</code>
+as the schedule name to test if no schedule is active. The use of
+embedded spaces in the schedule name are no longer supported. If a
+second colon, <code>:</code>, is used, it will now be interpreted as part of the
+name. See <code><strong>help=if</strong></code> for more information on the <code>if</code> command.</p>
+</li>
+<li>
+<p><em>pfmed</em> was updated to agree with the changes above. This included
+making the <code>current&#160;FS&#160;schedule&#160;procedure&#160;library</code>
+in the preamble display <code>no&#160;library&#160;is&#160;selected</code> when
+there is none.</p>
+</li>
+<li>
+<p>Some other small incidental improvements were made to <em>pfmed</em>:</p>
+<div class="olist lowerroman">
+<ol class="lowerroman" type="i">
+<li>
+<p>Empty input at the main prompt no longer prints an obscure error
+message before re-prompting.</p>
+</li>
+<li>
+<p>The check of the length of a second library name in <code>pf<em>xx</em>,&#8230;&#8203;</code>
+commands is now correct. It was still eight characters.</p>
+</li>
+<li>
+<p>The length of the optional <code><em>library</em></code> in the
+<code>st,&#8230;&#8203;[::<em>library</em>],&#8230;&#8203;</code> command is now checked. It wasn&#8217;t before.</p>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>Additionally, a few error messages for <em>boss</em> were fixed to refer
+to schedules and schedule procedure libraries more consistently.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>The consequences of these changes for existing FS installations is
+fairly limited. It seems unlikely they will affect anyone, but to be
+complete, they are listed here:</p>
+</div>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p>If any station software compares the shared memory variables
+<code>LSKD2</code> and <code>LPRC2</code> (or <code>LSKD</code> or <code>LPRC</code>) to <code>none</code> to determine that
+no schedule or schedule procedure library is active, the comparison(s)
+will need to be changed to use spaces.</p>
+</li>
+<li>
+<p>If any station software filters the log (or display) output to
+determine if no schedule or schedule procedure library is active, it
+will need to be changed to accept a null field (i.e., empty, not even
+spaces), instead of <code>none</code> in the <code>schedule/</code> and <code>proc/</code> output.</p>
+</li>
+<li>
+<p>If any station uses the <code>if=schedule:none&#8230;&#8203;</code> command to determine
+that no schedule is active, they will need to remove <code>:none</code> from the
+command and swap the <code>true</code> and <code>false</code> commands. No embedded spaces
+are allowed, and a second colon, <code>:</code>, is now considered part of the
+schedule name.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>The positive outcome of all this is that the schedule and schedule
+procedure library names are now handled consistently. The use of
+<code>none</code> is not recommended for either since that may be confusing, but
+the behavior will now be clearer and predictable.</p>
+</div>
+</div>
+</details>
+</li>
+<li>
+<p>Update comments in <em>.rxg</em> files for the current maximum number of
+T<sub>cal</sub> table entries (closing
+<a href="https://github.com/nvi-inc/fs/issues/211">#211</a>).</p>
+<details>
+<summary class="title">Details</summary>
+<div class="content">
+<div class="paragraph">
+<p>The comments in the example <em>.rxg</em> files
+(<em>/usr2/fs/st.default/control/rxg_files/*.rxg</em>) had not kept up with
+the expansion of the size of the T<sub>cal</sub> table, first from <code>400</code>
+entries to <code>600</code> and then <code>1200</code>. The files have now been updated.</p>
+</div>
+<div class="paragraph">
+<p>A script, <em>/usr2/fs/misc/rxgfix4</em>, has been provided for optional use
+to update the working <em>.rxg</em> files at station. If the original version
+of the comments, with <code>400</code>, have been preserved, they will be updated
+to the new form. Only the comments immediately before the active
+T<sub>cal</sub> entries will be updated. Lines that list <code>100</code> and <code>600</code> as the
+maximum will also be updated. The former was apparently the size in
+some preliminary versions before the first official release (<em>9.6.9</em>,
+September 2003, commit <code>7c26ea900dee19b01958e5c4ad846b89d64638c5</code>)
+that supported <em>.rxg</em> files. The latter was never provided as an
+example, but is covered just in case. See
+<code><strong>/usr2/fs/misc/rxgfix4&#160;-h</strong></code> for the details.</p>
+</div>
+</div>
+</details>
+</li>
+<li>
+<p>Remove bad characters from ASCII files.</p>
+<details>
+<summary class="title">Details</summary>
+<div class="content">
+<div class="paragraph">
+<p>A few ASCII files had non-ASCII characters in them.</p>
+</div>
+<div class="ulist disc">
+<ul class="disc">
+<li>
+<p>There were UTF-8 characters in <em>help/core3h_mode.j__</em> and
+<em>misc/logrecover.txt</em>. They were removed.  They did not display
+properly on non-UTF-8 systems, principally FSL9 and earlier.</p>
+</li>
+<li>
+<p>The extended ASCII character for angstroms (&Aring;) was incorrectly
+specified in the <em>help/lvdt.*</em> files. It was replaced with the word.</p>
+</li>
+</ul>
+</div>
+</div>
+</details>
+</li>
+<li>
+<p>Add patch release <em>10.2.1</em>.</p>
+<details>
+<summary class="title">Details</summary>
+<div class="content">
+<div class="paragraph">
+<p>Please see the <a href="10.2.1.html">FS 10.2.1 Update Notes</a> document for
+the details. All of the changes in that patch release have already
+been merged into the <em>main</em> branch and will be included in the <em>10.3</em>
+release when it becomes available.</p>
+</div>
+</div>
+</details>
+</li>
+<li>
+<p>Improve web documents</p>
+<details>
+<summary class="title">Details</summary>
+<div class="content">
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p>Add a sub-step to update the comments for rack types in <em>equip.ctl</em>
+in the FS <em>10.1</em> and FS 10.2 updates notes. Updating the comments is
+strictly speaking optional, but not doing so could lead to confusion
+later since the available DBBC3 rack types were changed in both of
+those updates. The previous omission of these sub-steps  was an
+oversight.</p>
+<div class="paragraph">
+<p>Thanks to J. Gonzalez (Yebes) for pointing out that these sub-steps
+were missing.</p>
+</div>
+</li>
+<li>
+<p>Add examples for non-breaking spaces and hyphens to the Font
+Conventions.</p>
+</li>
+<li>
+<p>Miscellaneous wording and typographic corrections were made to the
+<em>10.2</em> documents</p>
+</li>
+</ol>
+</div>
+</div>
+</details>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_drudg_changes">3.2. drudg changes</h3>
+<div class="paragraph">
+<p>There are no <em>drudg</em> changes yet.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Last updated 2025-07-01 17:10:51 -0400
+</div>
+</div>
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  messageStyle: "none",
+  tex2jax: {
+    inlineMath: [["\\(", "\\)"]],
+    displayMath: [["\\[", "\\]"]],
+    ignoreClass: "nostem|nolatexmath"
+  },
+  asciimath2jax: {
+    delimiters: [["\\$", "\\$"]],
+    ignoreClass: "nostem|noasciimath"
+  },
+  TeX: { equationNumbers: { autoNumber: "none" } }
+})
+MathJax.Hub.Register.StartupHook("AsciiMath Jax Ready", function () {
+  MathJax.InputJax.AsciiMath.postfilterHooks.Add(function (data, node) {
+    if ((node = data.script.parentNode) && (node = node.parentNode) && node.classList.contains("stemblock")) {
+      data.math.root.display = "block"
+    }
+    return data
+  })
+})
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/MathJax.js?config=TeX-MML-AM_HTMLorMML"></script>
+</body>
+</html>

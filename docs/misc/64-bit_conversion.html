@@ -1,0 +1,1535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.17">
+<meta name="author" content="Version 1.10.0 - December 2023">
+<title>Converting to a 64-bit System</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<style>
+/*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
+/* Uncomment the following line when using as a custom stylesheet */
+/* @import "https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700"; */
+html{font-family:sans-serif;-webkit-text-size-adjust:100%}
+a{background:none}
+a:focus{outline:thin dotted}
+a:active,a:hover{outline:0}
+h1{font-size:2em;margin:.67em 0}
+b,strong{font-weight:bold}
+abbr{font-size:.9em}
+abbr[title]{cursor:help;border-bottom:1px dotted #dddddf;text-decoration:none}
+dfn{font-style:italic}
+hr{height:0}
+mark{background:#ff0;color:#000}
+code,kbd,pre,samp{font-family:monospace;font-size:1em}
+pre{white-space:pre-wrap}
+q{quotes:"\201C" "\201D" "\2018" "\2019"}
+small{font-size:80%}
+sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}
+sup{top:-.5em}
+sub{bottom:-.25em}
+img{border:0}
+svg:not(:root){overflow:hidden}
+figure{margin:0}
+audio,video{display:inline-block}
+audio:not([controls]){display:none;height:0}
+fieldset{border:1px solid silver;margin:0 2px;padding:.35em .625em .75em}
+legend{border:0;padding:0}
+button,input,select,textarea{font-family:inherit;font-size:100%;margin:0}
+button,input{line-height:normal}
+button,select{text-transform:none}
+button,html input[type=button],input[type=reset],input[type=submit]{-webkit-appearance:button;cursor:pointer}
+button[disabled],html input[disabled]{cursor:default}
+input[type=checkbox],input[type=radio]{padding:0}
+button::-moz-focus-inner,input::-moz-focus-inner{border:0;padding:0}
+textarea{overflow:auto;vertical-align:top}
+table{border-collapse:collapse;border-spacing:0}
+*,::before,::after{box-sizing:border-box}
+html,body{font-size:100%}
+body{background:#fff;color:rgba(0,0,0,.8);padding:0;margin:0;font-family:"Noto Serif","DejaVu Serif",serif;line-height:1;position:relative;cursor:auto;-moz-tab-size:4;-o-tab-size:4;tab-size:4;word-wrap:anywhere;-moz-osx-font-smoothing:grayscale;-webkit-font-smoothing:antialiased}
+a:hover{cursor:pointer}
+img,object,embed{max-width:100%;height:auto}
+object,embed{height:100%}
+img{-ms-interpolation-mode:bicubic}
+.left{float:left!important}
+.right{float:right!important}
+.text-left{text-align:left!important}
+.text-right{text-align:right!important}
+.text-center{text-align:center!important}
+.text-justify{text-align:justify!important}
+.hide{display:none}
+img,object,svg{display:inline-block;vertical-align:middle}
+textarea{height:auto;min-height:50px}
+select{width:100%}
+.subheader,.admonitionblock td.content>.title,.audioblock>.title,.exampleblock>.title,.imageblock>.title,.listingblock>.title,.literalblock>.title,.stemblock>.title,.openblock>.title,.paragraph>.title,.quoteblock>.title,table.tableblock>.title,.verseblock>.title,.videoblock>.title,.dlist>.title,.olist>.title,.ulist>.title,.qlist>.title,.hdlist>.title{line-height:1.45;color:#7a2518;font-weight:400;margin-top:0;margin-bottom:.25em}
+div,dl,dt,dd,ul,ol,li,h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6,pre,form,p,blockquote,th,td{margin:0;padding:0}
+a{color:#2156a5;text-decoration:underline;line-height:inherit}
+a:hover,a:focus{color:#1d4b8f}
+a img{border:0}
+p{line-height:1.6;margin-bottom:1.25em;text-rendering:optimizeLegibility}
+p aside{font-size:.875em;line-height:1.35;font-style:italic}
+h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{font-family:"Open Sans","DejaVu Sans",sans-serif;font-weight:300;font-style:normal;color:#ba3925;text-rendering:optimizeLegibility;margin-top:1em;margin-bottom:.5em;line-height:1.0125em}
+h1 small,h2 small,h3 small,#toctitle small,.sidebarblock>.content>.title small,h4 small,h5 small,h6 small{font-size:60%;color:#e99b8f;line-height:0}
+h1{font-size:2.125em}
+h2{font-size:1.6875em}
+h3,#toctitle,.sidebarblock>.content>.title{font-size:1.375em}
+h4,h5{font-size:1.125em}
+h6{font-size:1em}
+hr{border:solid #dddddf;border-width:1px 0 0;clear:both;margin:1.25em 0 1.1875em}
+em,i{font-style:italic;line-height:inherit}
+strong,b{font-weight:bold;line-height:inherit}
+small{font-size:60%;line-height:inherit}
+code{font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;font-weight:400;color:rgba(0,0,0,.9)}
+ul,ol,dl{line-height:1.6;margin-bottom:1.25em;list-style-position:outside;font-family:inherit}
+ul,ol{margin-left:1.5em}
+ul li ul,ul li ol{margin-left:1.25em;margin-bottom:0}
+ul.square li ul,ul.circle li ul,ul.disc li ul{list-style:inherit}
+ul.square{list-style-type:square}
+ul.circle{list-style-type:circle}
+ul.disc{list-style-type:disc}
+ol li ul,ol li ol{margin-left:1.25em;margin-bottom:0}
+dl dt{margin-bottom:.3125em;font-weight:bold}
+dl dd{margin-bottom:1.25em}
+blockquote{margin:0 0 1.25em;padding:.5625em 1.25em 0 1.1875em;border-left:1px solid #ddd}
+blockquote,blockquote p{line-height:1.6;color:rgba(0,0,0,.85)}
+@media screen and (min-width:768px){h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{line-height:1.2}
+h1{font-size:2.75em}
+h2{font-size:2.3125em}
+h3,#toctitle,.sidebarblock>.content>.title{font-size:1.6875em}
+h4{font-size:1.4375em}}
+table{background:#fff;margin-bottom:1.25em;border:1px solid #dedede;word-wrap:normal}
+table thead,table tfoot{background:#f7f8f7}
+table thead tr th,table thead tr td,table tfoot tr th,table tfoot tr td{padding:.5em .625em .625em;font-size:inherit;color:rgba(0,0,0,.8);text-align:left}
+table tr th,table tr td{padding:.5625em .625em;font-size:inherit;color:rgba(0,0,0,.8)}
+table tr.even,table tr.alt{background:#f8f8f7}
+table thead tr th,table tfoot tr th,table tbody tr td,table tr td,table tfoot tr td{line-height:1.6}
+h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{line-height:1.2;word-spacing:-.05em}
+h1 strong,h2 strong,h3 strong,#toctitle strong,.sidebarblock>.content>.title strong,h4 strong,h5 strong,h6 strong{font-weight:400}
+.center{margin-left:auto;margin-right:auto}
+.stretch{width:100%}
+.clearfix::before,.clearfix::after,.float-group::before,.float-group::after{content:" ";display:table}
+.clearfix::after,.float-group::after{clear:both}
+:not(pre).nobreak{word-wrap:normal}
+:not(pre).nowrap{white-space:nowrap}
+:not(pre).pre-wrap{white-space:pre-wrap}
+:not(pre):not([class^=L])>code{font-size:.9375em;font-style:normal!important;letter-spacing:0;padding:.1em .5ex;word-spacing:-.15em;background:#f7f7f8;border-radius:4px;line-height:1.45;text-rendering:optimizeSpeed}
+pre{color:rgba(0,0,0,.9);font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;line-height:1.45;text-rendering:optimizeSpeed}
+pre code,pre pre{color:inherit;font-size:inherit;line-height:inherit}
+pre>code{display:block}
+pre.nowrap,pre.nowrap pre{white-space:pre;word-wrap:normal}
+em em{font-style:normal}
+strong strong{font-weight:400}
+.keyseq{color:rgba(51,51,51,.8)}
+kbd{font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;display:inline-block;color:rgba(0,0,0,.8);font-size:.65em;line-height:1.45;background:#f7f7f7;border:1px solid #ccc;border-radius:3px;box-shadow:0 1px 0 rgba(0,0,0,.2),inset 0 0 0 .1em #fff;margin:0 .15em;padding:.2em .5em;vertical-align:middle;position:relative;top:-.1em;white-space:nowrap}
+.keyseq kbd:first-child{margin-left:0}
+.keyseq kbd:last-child{margin-right:0}
+.menuseq,.menuref{color:#000}
+.menuseq b:not(.caret),.menuref{font-weight:inherit}
+.menuseq{word-spacing:-.02em}
+.menuseq b.caret{font-size:1.25em;line-height:.8}
+.menuseq i.caret{font-weight:bold;text-align:center;width:.45em}
+b.button::before,b.button::after{position:relative;top:-1px;font-weight:400}
+b.button::before{content:"[";padding:0 3px 0 2px}
+b.button::after{content:"]";padding:0 2px 0 3px}
+p a>code:hover{color:rgba(0,0,0,.9)}
+#header,#content,#footnotes,#footer{width:100%;margin:0 auto;max-width:62.5em;*zoom:1;position:relative;padding-left:.9375em;padding-right:.9375em}
+#header::before,#header::after,#content::before,#content::after,#footnotes::before,#footnotes::after,#footer::before,#footer::after{content:" ";display:table}
+#header::after,#content::after,#footnotes::after,#footer::after{clear:both}
+#content{margin-top:1.25em}
+#content::before{content:none}
+#header>h1:first-child{color:rgba(0,0,0,.85);margin-top:2.25rem;margin-bottom:0}
+#header>h1:first-child+#toc{margin-top:8px;border-top:1px solid #dddddf}
+#header>h1:only-child,body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
+#header .details{border-bottom:1px solid #dddddf;line-height:1.45;padding-top:.25em;padding-bottom:.25em;padding-left:.25em;color:rgba(0,0,0,.6);display:flex;flex-flow:row wrap}
+#header .details span:first-child{margin-left:-.125em}
+#header .details span.email a{color:rgba(0,0,0,.85)}
+#header .details br{display:none}
+#header .details br+span::before{content:"\00a0\2013\00a0"}
+#header .details br+span.author::before{content:"\00a0\22c5\00a0";color:rgba(0,0,0,.85)}
+#header .details br+span#revremark::before{content:"\00a0|\00a0"}
+#header #revnumber{text-transform:capitalize}
+#header #revnumber::after{content:"\00a0"}
+#content>h1:first-child:not([class]){color:rgba(0,0,0,.85);border-bottom:1px solid #dddddf;padding-bottom:8px;margin-top:0;padding-top:1rem;margin-bottom:1.25rem}
+#toc{border-bottom:1px solid #e7e7e9;padding-bottom:.5em}
+#toc>ul{margin-left:.125em}
+#toc ul.sectlevel0>li>a{font-style:italic}
+#toc ul.sectlevel0 ul.sectlevel1{margin:.5em 0}
+#toc ul{font-family:"Open Sans","DejaVu Sans",sans-serif;list-style-type:none}
+#toc li{line-height:1.3334;margin-top:.3334em}
+#toc a{text-decoration:none}
+#toc a:active{text-decoration:underline}
+#toctitle{color:#7a2518;font-size:1.2em}
+@media screen and (min-width:768px){#toctitle{font-size:1.375em}
+body.toc2{padding-left:15em;padding-right:0}
+#toc.toc2{margin-top:0!important;background:#f8f8f7;position:fixed;width:15em;left:0;top:0;border-right:1px solid #e7e7e9;border-top-width:0!important;border-bottom-width:0!important;z-index:1000;padding:1.25em 1em;height:100%;overflow:auto}
+#toc.toc2 #toctitle{margin-top:0;margin-bottom:.8rem;font-size:1.2em}
+#toc.toc2>ul{font-size:.9em;margin-bottom:0}
+#toc.toc2 ul ul{margin-left:0;padding-left:1em}
+#toc.toc2 ul.sectlevel0 ul.sectlevel1{padding-left:0;margin-top:.5em;margin-bottom:.5em}
+body.toc2.toc-right{padding-left:0;padding-right:15em}
+body.toc2.toc-right #toc.toc2{border-right-width:0;border-left:1px solid #e7e7e9;left:auto;right:0}}
+@media screen and (min-width:1280px){body.toc2{padding-left:20em;padding-right:0}
+#toc.toc2{width:20em}
+#toc.toc2 #toctitle{font-size:1.375em}
+#toc.toc2>ul{font-size:.95em}
+#toc.toc2 ul ul{padding-left:1.25em}
+body.toc2.toc-right{padding-left:0;padding-right:20em}}
+#content #toc{border:1px solid #e0e0dc;margin-bottom:1.25em;padding:1.25em;background:#f8f8f7;border-radius:4px}
+#content #toc>:first-child{margin-top:0}
+#content #toc>:last-child{margin-bottom:0}
+#footer{max-width:none;background:rgba(0,0,0,.8);padding:1.25em}
+#footer-text{color:hsla(0,0%,100%,.8);line-height:1.44}
+#content{margin-bottom:.625em}
+.sect1{padding-bottom:.625em}
+@media screen and (min-width:768px){#content{margin-bottom:1.25em}
+.sect1{padding-bottom:1.25em}}
+.sect1:last-child{padding-bottom:0}
+.sect1+.sect1{border-top:1px solid #e7e7e9}
+#content h1>a.anchor,h2>a.anchor,h3>a.anchor,#toctitle>a.anchor,.sidebarblock>.content>.title>a.anchor,h4>a.anchor,h5>a.anchor,h6>a.anchor{position:absolute;z-index:1001;width:1.5ex;margin-left:-1.5ex;display:block;text-decoration:none!important;visibility:hidden;text-align:center;font-weight:400}
+#content h1>a.anchor::before,h2>a.anchor::before,h3>a.anchor::before,#toctitle>a.anchor::before,.sidebarblock>.content>.title>a.anchor::before,h4>a.anchor::before,h5>a.anchor::before,h6>a.anchor::before{content:"\00A7";font-size:.85em;display:block;padding-top:.1em}
+#content h1:hover>a.anchor,#content h1>a.anchor:hover,h2:hover>a.anchor,h2>a.anchor:hover,h3:hover>a.anchor,#toctitle:hover>a.anchor,.sidebarblock>.content>.title:hover>a.anchor,h3>a.anchor:hover,#toctitle>a.anchor:hover,.sidebarblock>.content>.title>a.anchor:hover,h4:hover>a.anchor,h4>a.anchor:hover,h5:hover>a.anchor,h5>a.anchor:hover,h6:hover>a.anchor,h6>a.anchor:hover{visibility:visible}
+#content h1>a.link,h2>a.link,h3>a.link,#toctitle>a.link,.sidebarblock>.content>.title>a.link,h4>a.link,h5>a.link,h6>a.link{color:#ba3925;text-decoration:none}
+#content h1>a.link:hover,h2>a.link:hover,h3>a.link:hover,#toctitle>a.link:hover,.sidebarblock>.content>.title>a.link:hover,h4>a.link:hover,h5>a.link:hover,h6>a.link:hover{color:#a53221}
+details,.audioblock,.imageblock,.literalblock,.listingblock,.stemblock,.videoblock{margin-bottom:1.25em}
+details{margin-left:1.25rem}
+details>summary{cursor:pointer;display:block;position:relative;line-height:1.6;margin-bottom:.625rem;outline:none;-webkit-tap-highlight-color:transparent}
+details>summary::-webkit-details-marker{display:none}
+details>summary::before{content:"";border:solid transparent;border-left:solid;border-width:.3em 0 .3em .5em;position:absolute;top:.5em;left:-1.25rem;transform:translateX(15%)}
+details[open]>summary::before{border:solid transparent;border-top:solid;border-width:.5em .3em 0;transform:translateY(15%)}
+details>summary::after{content:"";width:1.25rem;height:1em;position:absolute;top:.3em;left:-1.25rem}
+.admonitionblock td.content>.title,.audioblock>.title,.exampleblock>.title,.imageblock>.title,.listingblock>.title,.literalblock>.title,.stemblock>.title,.openblock>.title,.paragraph>.title,.quoteblock>.title,table.tableblock>.title,.verseblock>.title,.videoblock>.title,.dlist>.title,.olist>.title,.ulist>.title,.qlist>.title,.hdlist>.title{text-rendering:optimizeLegibility;text-align:left;font-family:"Noto Serif","DejaVu Serif",serif;font-size:1rem;font-style:italic}
+table.tableblock.fit-content>caption.title{white-space:nowrap;width:0}
+.paragraph.lead>p,#preamble>.sectionbody>[class=paragraph]:first-of-type p{font-size:1.21875em;line-height:1.6;color:rgba(0,0,0,.85)}
+.admonitionblock>table{border-collapse:separate;border:0;background:none;width:100%}
+.admonitionblock>table td.icon{text-align:center;width:80px}
+.admonitionblock>table td.icon img{max-width:none}
+.admonitionblock>table td.icon .title{font-weight:bold;font-family:"Open Sans","DejaVu Sans",sans-serif;text-transform:uppercase}
+.admonitionblock>table td.content{padding-left:1.125em;padding-right:1.25em;border-left:1px solid #dddddf;color:rgba(0,0,0,.6);word-wrap:anywhere}
+.admonitionblock>table td.content>:last-child>:last-child{margin-bottom:0}
+.exampleblock>.content{border:1px solid #e6e6e6;margin-bottom:1.25em;padding:1.25em;background:#fff;border-radius:4px}
+.exampleblock>.content>:first-child{margin-top:0}
+.exampleblock>.content>:last-child{margin-bottom:0}
+.sidebarblock{border:1px solid #dbdbd6;margin-bottom:1.25em;padding:1.25em;background:#f3f3f2;border-radius:4px}
+.sidebarblock>:first-child{margin-top:0}
+.sidebarblock>:last-child{margin-bottom:0}
+.sidebarblock>.content>.title{color:#7a2518;margin-top:0;text-align:center}
+.exampleblock>.content>:last-child>:last-child,.exampleblock>.content .olist>ol>li:last-child>:last-child,.exampleblock>.content .ulist>ul>li:last-child>:last-child,.exampleblock>.content .qlist>ol>li:last-child>:last-child,.sidebarblock>.content>:last-child>:last-child,.sidebarblock>.content .olist>ol>li:last-child>:last-child,.sidebarblock>.content .ulist>ul>li:last-child>:last-child,.sidebarblock>.content .qlist>ol>li:last-child>:last-child{margin-bottom:0}
+.literalblock pre,.listingblock>.content>pre{border-radius:4px;overflow-x:auto;padding:1em;font-size:.8125em}
+@media screen and (min-width:768px){.literalblock pre,.listingblock>.content>pre{font-size:.90625em}}
+@media screen and (min-width:1280px){.literalblock pre,.listingblock>.content>pre{font-size:1em}}
+.literalblock pre,.listingblock>.content>pre:not(.highlight),.listingblock>.content>pre[class=highlight],.listingblock>.content>pre[class^="highlight "]{background:#f7f7f8}
+.literalblock.output pre{color:#f7f7f8;background:rgba(0,0,0,.9)}
+.listingblock>.content{position:relative}
+.listingblock code[data-lang]::before{display:none;content:attr(data-lang);position:absolute;font-size:.75em;top:.425rem;right:.5rem;line-height:1;text-transform:uppercase;color:inherit;opacity:.5}
+.listingblock:hover code[data-lang]::before{display:block}
+.listingblock.terminal pre .command::before{content:attr(data-prompt);padding-right:.5em;color:inherit;opacity:.5}
+.listingblock.terminal pre .command:not([data-prompt])::before{content:"$"}
+.listingblock pre.highlightjs{padding:0}
+.listingblock pre.highlightjs>code{padding:1em;border-radius:4px}
+.listingblock pre.prettyprint{border-width:0}
+.prettyprint{background:#f7f7f8}
+pre.prettyprint .linenums{line-height:1.45;margin-left:2em}
+pre.prettyprint li{background:none;list-style-type:inherit;padding-left:0}
+pre.prettyprint li code[data-lang]::before{opacity:1}
+pre.prettyprint li:not(:first-child) code[data-lang]::before{display:none}
+table.linenotable{border-collapse:separate;border:0;margin-bottom:0;background:none}
+table.linenotable td[class]{color:inherit;vertical-align:top;padding:0;line-height:inherit;white-space:normal}
+table.linenotable td.code{padding-left:.75em}
+table.linenotable td.linenos,pre.pygments .linenos{border-right:1px solid;opacity:.35;padding-right:.5em;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}
+pre.pygments span.linenos{display:inline-block;margin-right:.75em}
+.quoteblock{margin:0 1em 1.25em 1.5em;display:table}
+.quoteblock:not(.excerpt)>.title{margin-left:-1.5em;margin-bottom:.75em}
+.quoteblock blockquote,.quoteblock p{color:rgba(0,0,0,.85);font-size:1.15rem;line-height:1.75;word-spacing:.1em;letter-spacing:0;font-style:italic;text-align:justify}
+.quoteblock blockquote{margin:0;padding:0;border:0}
+.quoteblock blockquote::before{content:"\201c";float:left;font-size:2.75em;font-weight:bold;line-height:.6em;margin-left:-.6em;color:#7a2518;text-shadow:0 1px 2px rgba(0,0,0,.1)}
+.quoteblock blockquote>.paragraph:last-child p{margin-bottom:0}
+.quoteblock .attribution{margin-top:.75em;margin-right:.5ex;text-align:right}
+.verseblock{margin:0 1em 1.25em}
+.verseblock pre{font-family:"Open Sans","DejaVu Sans",sans-serif;font-size:1.15rem;color:rgba(0,0,0,.85);font-weight:300;text-rendering:optimizeLegibility}
+.verseblock pre strong{font-weight:400}
+.verseblock .attribution{margin-top:1.25rem;margin-left:.5ex}
+.quoteblock .attribution,.verseblock .attribution{font-size:.9375em;line-height:1.45;font-style:italic}
+.quoteblock .attribution br,.verseblock .attribution br{display:none}
+.quoteblock .attribution cite,.verseblock .attribution cite{display:block;letter-spacing:-.025em;color:rgba(0,0,0,.6)}
+.quoteblock.abstract blockquote::before,.quoteblock.excerpt blockquote::before,.quoteblock .quoteblock blockquote::before{display:none}
+.quoteblock.abstract blockquote,.quoteblock.abstract p,.quoteblock.excerpt blockquote,.quoteblock.excerpt p,.quoteblock .quoteblock blockquote,.quoteblock .quoteblock p{line-height:1.6;word-spacing:0}
+.quoteblock.abstract{margin:0 1em 1.25em;display:block}
+.quoteblock.abstract>.title{margin:0 0 .375em;font-size:1.15em;text-align:center}
+.quoteblock.excerpt>blockquote,.quoteblock .quoteblock{padding:0 0 .25em 1em;border-left:.25em solid #dddddf}
+.quoteblock.excerpt,.quoteblock .quoteblock{margin-left:0}
+.quoteblock.excerpt blockquote,.quoteblock.excerpt p,.quoteblock .quoteblock blockquote,.quoteblock .quoteblock p{color:inherit;font-size:1.0625rem}
+.quoteblock.excerpt .attribution,.quoteblock .quoteblock .attribution{color:inherit;font-size:.85rem;text-align:left;margin-right:0}
+p.tableblock:last-child{margin-bottom:0}
+td.tableblock>.content{margin-bottom:1.25em;word-wrap:anywhere}
+td.tableblock>.content>:last-child{margin-bottom:-1.25em}
+table.tableblock,th.tableblock,td.tableblock{border:0 solid #dedede}
+table.grid-all>*>tr>*{border-width:1px}
+table.grid-cols>*>tr>*{border-width:0 1px}
+table.grid-rows>*>tr>*{border-width:1px 0}
+table.frame-all{border-width:1px}
+table.frame-ends{border-width:1px 0}
+table.frame-sides{border-width:0 1px}
+table.frame-none>colgroup+*>:first-child>*,table.frame-sides>colgroup+*>:first-child>*{border-top-width:0}
+table.frame-none>:last-child>:last-child>*,table.frame-sides>:last-child>:last-child>*{border-bottom-width:0}
+table.frame-none>*>tr>:first-child,table.frame-ends>*>tr>:first-child{border-left-width:0}
+table.frame-none>*>tr>:last-child,table.frame-ends>*>tr>:last-child{border-right-width:0}
+table.stripes-all>*>tr,table.stripes-odd>*>tr:nth-of-type(odd),table.stripes-even>*>tr:nth-of-type(even),table.stripes-hover>*>tr:hover{background:#f8f8f7}
+th.halign-left,td.halign-left{text-align:left}
+th.halign-right,td.halign-right{text-align:right}
+th.halign-center,td.halign-center{text-align:center}
+th.valign-top,td.valign-top{vertical-align:top}
+th.valign-bottom,td.valign-bottom{vertical-align:bottom}
+th.valign-middle,td.valign-middle{vertical-align:middle}
+table thead th,table tfoot th{font-weight:bold}
+tbody tr th{background:#f7f8f7}
+tbody tr th,tbody tr th p,tfoot tr th,tfoot tr th p{color:rgba(0,0,0,.8);font-weight:bold}
+p.tableblock>code:only-child{background:none;padding:0}
+p.tableblock{font-size:1em}
+ol{margin-left:1.75em}
+ul li ol{margin-left:1.5em}
+dl dd{margin-left:1.125em}
+dl dd:last-child,dl dd:last-child>:last-child{margin-bottom:0}
+li p,ul dd,ol dd,.olist .olist,.ulist .ulist,.ulist .olist,.olist .ulist{margin-bottom:.625em}
+ul.checklist,ul.none,ol.none,ul.no-bullet,ol.no-bullet,ol.unnumbered,ul.unstyled,ol.unstyled{list-style-type:none}
+ul.no-bullet,ol.no-bullet,ol.unnumbered{margin-left:.625em}
+ul.unstyled,ol.unstyled{margin-left:0}
+li>p:empty:only-child::before{content:"";display:inline-block}
+ul.checklist>li>p:first-child{margin-left:-1em}
+ul.checklist>li>p:first-child>.fa-square-o:first-child,ul.checklist>li>p:first-child>.fa-check-square-o:first-child{width:1.25em;font-size:.8em;position:relative;bottom:.125em}
+ul.checklist>li>p:first-child>input[type=checkbox]:first-child{margin-right:.25em}
+ul.inline{display:flex;flex-flow:row wrap;list-style:none;margin:0 0 .625em -1.25em}
+ul.inline>li{margin-left:1.25em}
+.unstyled dl dt{font-weight:400;font-style:normal}
+ol.arabic{list-style-type:decimal}
+ol.decimal{list-style-type:decimal-leading-zero}
+ol.loweralpha{list-style-type:lower-alpha}
+ol.upperalpha{list-style-type:upper-alpha}
+ol.lowerroman{list-style-type:lower-roman}
+ol.upperroman{list-style-type:upper-roman}
+ol.lowergreek{list-style-type:lower-greek}
+.hdlist>table,.colist>table{border:0;background:none}
+.hdlist>table>tbody>tr,.colist>table>tbody>tr{background:none}
+td.hdlist1,td.hdlist2{vertical-align:top;padding:0 .625em}
+td.hdlist1{font-weight:bold;padding-bottom:1.25em}
+td.hdlist2{word-wrap:anywhere}
+.literalblock+.colist,.listingblock+.colist{margin-top:-.5em}
+.colist td:not([class]):first-child{padding:.4em .75em 0;line-height:1;vertical-align:top}
+.colist td:not([class]):first-child img{max-width:none}
+.colist td:not([class]):last-child{padding:.25em 0}
+.thumb,.th{line-height:0;display:inline-block;border:4px solid #fff;box-shadow:0 0 0 1px #ddd}
+.imageblock.left{margin:.25em .625em 1.25em 0}
+.imageblock.right{margin:.25em 0 1.25em .625em}
+.imageblock>.title{margin-bottom:0}
+.imageblock.thumb,.imageblock.th{border-width:6px}
+.imageblock.thumb>.title,.imageblock.th>.title{padding:0 .125em}
+.image.left,.image.right{margin-top:.25em;margin-bottom:.25em;display:inline-block;line-height:0}
+.image.left{margin-right:.625em}
+.image.right{margin-left:.625em}
+a.image{text-decoration:none;display:inline-block}
+a.image object{pointer-events:none}
+sup.footnote,sup.footnoteref{font-size:.875em;position:static;vertical-align:super}
+sup.footnote a,sup.footnoteref a{text-decoration:none}
+sup.footnote a:active,sup.footnoteref a:active{text-decoration:underline}
+#footnotes{padding-top:.75em;padding-bottom:.75em;margin-bottom:.625em}
+#footnotes hr{width:20%;min-width:6.25em;margin:-.25em 0 .75em;border-width:1px 0 0}
+#footnotes .footnote{padding:0 .375em 0 .225em;line-height:1.3334;font-size:.875em;margin-left:1.2em;margin-bottom:.2em}
+#footnotes .footnote a:first-of-type{font-weight:bold;text-decoration:none;margin-left:-1.05em}
+#footnotes .footnote:last-of-type{margin-bottom:0}
+#content #footnotes{margin-top:-.625em;margin-bottom:0;padding:.75em 0}
+div.unbreakable{page-break-inside:avoid}
+.big{font-size:larger}
+.small{font-size:smaller}
+.underline{text-decoration:underline}
+.overline{text-decoration:overline}
+.line-through{text-decoration:line-through}
+.aqua{color:#00bfbf}
+.aqua-background{background:#00fafa}
+.black{color:#000}
+.black-background{background:#000}
+.blue{color:#0000bf}
+.blue-background{background:#0000fa}
+.fuchsia{color:#bf00bf}
+.fuchsia-background{background:#fa00fa}
+.gray{color:#606060}
+.gray-background{background:#7d7d7d}
+.green{color:#006000}
+.green-background{background:#007d00}
+.lime{color:#00bf00}
+.lime-background{background:#00fa00}
+.maroon{color:#600000}
+.maroon-background{background:#7d0000}
+.navy{color:#000060}
+.navy-background{background:#00007d}
+.olive{color:#606000}
+.olive-background{background:#7d7d00}
+.purple{color:#600060}
+.purple-background{background:#7d007d}
+.red{color:#bf0000}
+.red-background{background:#fa0000}
+.silver{color:#909090}
+.silver-background{background:#bcbcbc}
+.teal{color:#006060}
+.teal-background{background:#007d7d}
+.white{color:#bfbfbf}
+.white-background{background:#fafafa}
+.yellow{color:#bfbf00}
+.yellow-background{background:#fafa00}
+span.icon>.fa{cursor:default}
+a span.icon>.fa{cursor:inherit}
+.admonitionblock td.icon [class^="fa icon-"]{font-size:2.5em;text-shadow:1px 1px 2px rgba(0,0,0,.5);cursor:default}
+.admonitionblock td.icon .icon-note::before{content:"\f05a";color:#19407c}
+.admonitionblock td.icon .icon-tip::before{content:"\f0eb";text-shadow:1px 1px 2px rgba(155,155,0,.8);color:#111}
+.admonitionblock td.icon .icon-warning::before{content:"\f071";color:#bf6900}
+.admonitionblock td.icon .icon-caution::before{content:"\f06d";color:#bf3400}
+.admonitionblock td.icon .icon-important::before{content:"\f06a";color:#bf0000}
+.conum[data-value]{display:inline-block;color:#fff!important;background:rgba(0,0,0,.8);border-radius:50%;text-align:center;font-size:.75em;width:1.67em;height:1.67em;line-height:1.67em;font-family:"Open Sans","DejaVu Sans",sans-serif;font-style:normal;font-weight:bold}
+.conum[data-value] *{color:#fff!important}
+.conum[data-value]+b{display:none}
+.conum[data-value]::after{content:attr(data-value)}
+pre .conum[data-value]{position:relative;top:-.125em}
+b.conum *{color:inherit!important}
+.conum:not([data-value]):empty{display:none}
+dt,th.tableblock,td.content,div.footnote{text-rendering:optimizeLegibility}
+h1,h2,p,td.content,span.alt,summary{letter-spacing:-.01em}
+p strong,td.content strong,div.footnote strong{letter-spacing:-.005em}
+p,blockquote,dt,td.content,span.alt,summary{font-size:1.0625rem}
+p{margin-bottom:1.25rem}
+.sidebarblock p,.sidebarblock dt,.sidebarblock td.content,p.tableblock{font-size:1em}
+.exampleblock>.content{background:#fffef7;border-color:#e0e0dc;box-shadow:0 1px 4px #e0e0dc}
+.print-only{display:none!important}
+@page{margin:1.25cm .75cm}
+@media print{*{box-shadow:none!important;text-shadow:none!important}
+html{font-size:80%}
+a{color:inherit!important;text-decoration:underline!important}
+a.bare,a[href^="#"],a[href^="mailto:"]{text-decoration:none!important}
+a[href^="http:"]:not(.bare)::after,a[href^="https:"]:not(.bare)::after{content:"(" attr(href) ")";display:inline-block;font-size:.875em;padding-left:.25em}
+abbr[title]{border-bottom:1px dotted}
+abbr[title]::after{content:" (" attr(title) ")"}
+pre,blockquote,tr,img,object,svg{page-break-inside:avoid}
+thead{display:table-header-group}
+svg{max-width:100%}
+p,blockquote,dt,td.content{font-size:1em;orphans:3;widows:3}
+h2,h3,#toctitle,.sidebarblock>.content>.title{page-break-after:avoid}
+#header,#content,#footnotes,#footer{max-width:none}
+#toc,.sidebarblock,.exampleblock>.content{background:none!important}
+#toc{border-bottom:1px solid #dddddf!important;padding-bottom:0!important}
+body.book #header{text-align:center}
+body.book #header>h1:first-child{border:0!important;margin:2.5em 0 1em}
+body.book #header .details{border:0!important;display:block;padding:0!important}
+body.book #header .details span:first-child{margin-left:0!important}
+body.book #header .details br{display:block}
+body.book #header .details br+span::before{content:none!important}
+body.book #toc{border:0!important;text-align:left!important;padding:0!important;margin:0!important}
+body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-break-before:always}
+.listingblock code[data-lang]::before{display:block}
+#footer{padding:0 .9375em}
+.hide-on-print{display:none!important}
+.print-only{display:block!important}
+.hide-for-print{display:none!important}
+.show-for-print{display:inherit!important}}
+@media amzn-kf8,print{#header>h1:first-child{margin-top:1.25rem}
+.sect1{padding:0!important}
+.sect1+.sect1{border:0}
+#footer{background:none}
+#footer-text{color:rgba(0,0,0,.6);font-size:.9em}}
+@media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}
+</style>
+</head>
+<body class="article">
+<div id="header">
+<h1>Converting to a 64-bit System</h1>
+<div class="details">
+<span id="author" class="author">Version 1.10.0 - December 2023</span><br>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_document_revision_history">Document revision history</a></li>
+<li><a href="#_introduction">1. Introduction</a></li>
+<li><a href="#_convert_to_using_a_64_bit_system">2. Convert to using a 64-bit system</a>
+<ul class="sectlevel2">
+<li><a href="#_install_a_64_bit_system">2.1. Install a 64-bit system</a></li>
+<li><a href="#_login_as_root_on_the_new_system">2.2. Login as root on the new system</a></li>
+<li><a href="#_rename_default_directories">2.3. Rename default directories</a></li>
+<li><a href="#_create_directory_for_reference_copies">2.4. Create directory for reference copies</a></li>
+<li><a href="#_transfer_files">2.5. Transfer files</a></li>
+<li><a href="#_optional_cleanup">2.6. Optional cleanup</a></li>
+<li><a href="#_customize_files_on_the_new_system">2.7. Customize files on the new system</a></li>
+<li><a href="#_login_as_prog_on_the_new_system">2.8. Login as prog on the new system</a></li>
+<li><a href="#_update_station_programs_for_64_bit">2.9. Update station programs for 64-bit</a></li>
+<li><a href="#_make_local_software">2.10. Make local software</a></li>
+<li><a href="#_reboot">2.11. Reboot</a></li>
+<li><a href="#_login_as_oper_on_the_new_system">2.12. Login as oper on the new system</a></li>
+<li><a href="#_test_the_fs">2.13. Test the FS</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="_document_revision_history">Document revision history</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Click the <strong>Details</strong> toggle below to unhide/hide the history.</p>
+</div>
+<details>
+<summary class="title">Details</summary>
+<div class="content">
+<div class="ulist">
+<ul>
+<li>
+<p>1.10.0&#8201;&#8212;&#8201;Reorganize to put reference copies in their own directory
+first, them make working copies; use <em>rsync</em> instead of <em>scp</em>; minor cleanup</p>
+</li>
+<li>
+<p>1.9.1&#8201;&#8212;&#8201;Add <strong>NOTE</strong> about not renaming <em>/usr2/log</em></p>
+</li>
+<li>
+<p>1.9&#8201;&#8212;&#8201;Remove extraneous <code>log-old</code> from <code>chmod a-w &#8230;&#8203;</code></p>
+</li>
+<li>
+<p>1.8&#8201;&#8212;&#8201;Improve customization of home directories; put Document revision history in a collapsible block</p>
+</li>
+<li>
+<p>1.7&#8201;&#8212;&#8201;Note other formats for <code>st-<em>version</em></code></p>
+</li>
+<li>
+<p>1.6&#8201;&#8212;&#8201;Transfer logs directly to a reference copy</p>
+</li>
+<li>
+<p>1.5&#8201;&#8212;&#8201;Use <em>root</em> on the old system to copy files if possible</p>
+</li>
+<li>
+<p>1.4&#8201;&#8212;&#8201;Add revision history</p>
+</li>
+<li>
+<p>1.3&#8201;&#8212;&#8201;Rewrite to include FSL11 and make useful for more situations</p>
+</li>
+<li>
+<p>1.2&#8201;&#8212;&#8201;Add using ssh-keygen</p>
+</li>
+<li>
+<p>1.1&#8201;&#8212;&#8201;Cleanup</p>
+</li>
+<li>
+<p>1.0&#8201;&#8212;&#8201;Add unlongify TIP</p>
+</li>
+<li>
+<p>0.8&#8201;&#8212;&#8201;Fix typos</p>
+</li>
+<li>
+<p>0.7&#8201;&#8212;&#8201;Font improvements</p>
+</li>
+<li>
+<p>0.6&#8201;&#8212;&#8201;Simplify 64-bit upgrade path</p>
+</li>
+<li>
+<p>0.4&#8201;&#8212;&#8201;Simplify 64-bit upgrade path</p>
+</li>
+<li>
+<p>0.3&#8201;&#8212;&#8201;Initial version</p>
+</li>
+</ul>
+</div>
+</div>
+</details>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_introduction">1. Introduction</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This document covers converting to a 64-bit system architecture from
+an existing FS <em>10.&lt;x&gt;</em> installation on a 32-bit system. It is also
+used as part of the upgrade path to go directly to a 64-bit system
+while upgrading to FS <em>10.0</em>.</p>
+</div>
+<div class="paragraph">
+<p>The approach here can also be used to transfer an existing 64-bit (or
+32-bit) FS installation to a new system without changing OS
+(including architecture) and FS version. For that case, in place of
+the <a href="#_install_a_64_bit_system">Install a 64-bit system</a> step make sure you have the same OS
+(including architecture) and FS version installed on your new system
+as on your existing system and then omit the
+<a href="#_update_station_programs_for_64_bit">Update station programs for 64-bit</a> step.</p>
+</div>
+<div class="paragraph">
+<p>If you are moving to a different OS, you may need to use a different
+FS version and update your station files and software for the new OS
+and FS version. For FSL11, a pointer to the instructions for this are
+included in its installation guide and in the
+<a href="#_install_a_64_bit_system">Install a 64-bit system</a> step below.</p>
+</div>
+<div class="paragraph">
+<p>The process in this document assumes you will be installing to a new
+system. This will allow you to set up the new system without
+disturbing your operational system.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_convert_to_using_a_64_bit_system">2. Convert to using a 64-bit system</h2>
+<div class="sectionbody">
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Important</div>
+</td>
+<td class="content">
+All operations, except where noted, are performed on the
+new system.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Please follow the steps below.</p>
+</div>
+<div class="sect2">
+<h3 id="_install_a_64_bit_system">2.1. Install a 64-bit system</h3>
+<div class="paragraph">
+<p>Install a 64-bit (or 32-bit, but 64-bit is recommended) system on a
+different (hopefully new) computer. We recommend FSL11, which is based
+on Debian <em>Bullseye</em> and tuned for FS use. The FSL11 installation
+guide can be found at <a href="https://nvi-inc.github.io/fsl11/" class="bare">https://nvi-inc.github.io/fsl11/</a>. That process
+installs FS <em>10.2</em>. After that instead of the directions in the
+current document, you should follow the directions in the appendix
+<a href="../releases/10/2/10.2.html#_transferring_an_existing_fs_installation_to_fsl11">Transferring
+an existing FS installation to FSL11</a> of the
+<a href="../releases/10/2/10.2.html">FS 10.2 Update Notes</a> document. Those
+instructions include, by reference, a subset of the ones in the
+current document.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+If you are following these directions as part of installing FS
+<em>10.0</em> on FSL10, that will still work, but we recommend using FS
+<em>10.2</em> on FSL11 instead.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>You can install a non-FSL<em>x</em> Linux distribution. However, we can&#8217;t
+provide as much support in that case. The FSL11 distribution is tuned
+to provide a complete platform for running the FS. For other
+distributions you may have to make adjustments for several things that
+an FSL11 installation provides, including:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>which packages are installed</p>
+</li>
+<li>
+<p>required user accounts and groups</p>
+</li>
+<li>
+<p>backup methods</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_login_as_root_on_the_new_system">2.2. Login as root on the new system</h3>
+<div class="paragraph">
+<p>Login as <em>root</em> on the new system.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_rename_default_directories">2.3. Rename default directories</h3>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+This step assumes you have installed a base FS, either along
+with FSL11 or using your own methods. If the latter, and the normal
+default FS directories were not created, you can skip this step.
+</td>
+</tr>
+</table>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Rename the existing default station specific FS related directories
+on the new system to get them out of the way:</p>
+<div class="literalblock">
+<div class="content">
+<pre>cd /usr2
+mv control   control.DEFAULT
+mv sched     sched.DEFAULT
+mv proc      proc.DEFAULT</pre>
+</div>
+</div>
+</li>
+<li>
+<p>If you use the <em>/usr2/tle_files</em> directory on your old system, you
+should rename the one on the new system:</p>
+<div class="literalblock">
+<div class="content">
+<pre>cd /usr2
+mv tle_files tle_files.DEFAULT</pre>
+</div>
+</div>
+</li>
+<li>
+<p>If your station software is in <em>/usr2/st-0.0.0</em> on your old system,
+you should rename the one on the new system:</p>
+<div class="literalblock">
+<div class="content">
+<pre>cd /usr2
+mv st-0.0.0  st-0.0.0.DEFAULT</pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+The <em>/usr2/log</em> directory is not renamed since it will not be
+replaced with a copy of the directory from the old system.
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_create_directory_for_reference_copies">2.4. Create directory for reference copies</h3>
+<div class="paragraph">
+<p>It can be useful to have a reference copy of certain parts of the old
+system. In particular, you may want to preserve copies of the
+operational directories: <em>control</em>, <em>log</em>, <em>proc</em>, and <em>sched</em>; the
+last version of the station software; the home directories of <em>oper</em>
+and <em>prog</em>; old reference copies from previous updates; it may also be
+useful to preserve <em>/etc</em>. For this reason, the file transfer is
+organized around making reference copies and then making new working
+copies for items where that is appropriate. If you prefer, you can
+skip making reference copies and copy the operational directories of
+<em>control</em>, <em>log</em>, <em>proc</em>, and <em>sched</em> directly to <em>/usr2</em> on the new
+system.</p>
+</div>
+<div class="paragraph">
+<p>You can make a directory on <em>/usr2</em> (usually the largest partition and
+one with ample room) to hold the reference copies. This might be,
+e.g., <em>/usr2/old_FSL9</em>, if your previous system was FSL9. You should
+use whatever naming scheme is appropriate for your situation. The
+current step and the following one use <em>/usr2/old_FSL9</em> as an example.
+You should substitute the appropriate directory for your system.</p>
+</div>
+<div class="paragraph">
+<p>You can create the reference directory structure with:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>mkdir -p /usr2/old_FSL9/usr2</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_transfer_files">2.5. Transfer files</h3>
+<div class="paragraph">
+<p>Your station specific FS related files can be transferred from the old
+system using any convenient method. If both systems are on the network
+this can be particularly easy. The following example sub-steps use
+this approach. You should replace the <code><em>old</em></code> host name in the
+examples with your old system&#8217;s host name. These commands must be
+executed as <em>root</em>, and except where noted, from the new system.</p>
+</div>
+<div class="paragraph">
+<p>As an example, the sub-steps below use <em>/usr2/old_FSL9</em> as the
+directory to hold the files from your system. You should substitute
+the appropriate directory for your system (see the previous step
+(<a href="#_create_directory_for_reference_copies">Create directory for reference copies</a>).</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+If you want to copy-and-paste the example <em>rsync</em> commands below
+as is (this is possible for nearly all of them, the exceptions are the
+one for <code>old:/usr2/st-<em>version</em></code> and possibly for
+<code>old:/usr2/old_FSL8</code>), you can add an alias <code><em>old</em></code> for your old
+system in the <em>/etc/hosts</em> file on the new system.
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>You may need to provide the appropriate password for each <em>rsync</em>
+command below. If so, you can simplify the process by copying your new
+system&#8217;s <em>root</em> public SSH keys to the old system with <em>ssh-copy-id</em>
+first. If <em>root</em> doesn&#8217;t have an ID yet, you will get an error like:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>/usr/bin/ssh-copy-id: ERROR: No identities found</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In that case, you can generate a key with <em>ssh-keygen</em>
+(leaving the passphrase empty is recommended) and try <em>ssh-copy-id</em>
+again.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+By default <code>-a</code> option of <em>rsync</em> will copy symbolic links but
+not their <em>referents</em> (<em>scp</em> will follow the link and copy what it
+points to, the referent). This is usually what is appropriate for this
+application; it doesn&#8217;t pull files from other directories. If you want
+to copy the referents, please see the <code>SYMBOLIC&#160;LINKS</code> section of
+<code><strong>man&#160;rsync</strong></code> for more information (adding <code>--copy-links</code> will
+give the behavior of <em>scp</em>).
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock caution">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Caution</div>
+</td>
+<td class="content">
+It is assumed that the new system is on new hardware with
+disks more than large enough to accommodate all the data being
+transferred. However, if you installed the new Linux on old hardware
+with small disks, there may be a space issue.
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Warning</div>
+</td>
+<td class="content">
+The instructions below assume that the old system you are
+using has a standard FS configuration in terms of symbolic links and
+directories. If your system is different, you will need to adjust what
+you do accordingly, but you may still find the outline of sub-steps
+useful.
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Important</div>
+</td>
+<td class="content">
+These instructions assume that you can login to the old
+system as <em>root</em> using <em>ssh</em>. Allowing this is a security risk and
+should only be permitted temporarily for these command. If you are not
+able to allow it, you can use the <em>oper</em> and <em>prog</em> (or other)
+accounts on the old system to transfer the files. In that case, there
+is risk that some files may not be copied due to ownership/permission
+issues. You may need to take other steps to copy those files.
+</td>
+</tr>
+</table>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Transfer operational directories:</p>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p>Transfer <em>control</em>, <em>log</em>, <em>proc</em>, and <em>sched</em>, from your <code><em>old</em></code>
+system:</p>
+<div class="literalblock">
+<div class="content">
+<pre>cd /usr2/old_FSL9/usr2
+rsync -aH <em>old</em>:/usr2/control .
+rsync -aH <em>old</em>:/usr2/log .
+rsync -aH <em>old</em>:/usr2/proc .
+rsync -aH <em>old</em>:/usr2/sched .</pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+Your <em>log</em> directory could be large and take a significant
+amount of time to transfer.
+</td>
+</tr>
+</table>
+</div>
+</li>
+<li>
+<p>Transfer <em>tle_files</em>:</p>
+<div class="paragraph">
+<p>If you use the <em>/usr2/tle_files</em> directory on your <code><em>old</em></code> system, you
+can also transfer it:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>cd /usr2/old_FSL9/usr2
+rsync -aH <em>old</em>:/usr2/tle_files .</pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>Make &#8220;starter&#8221; working copies of the operational directories
+(except <em>log</em>):</p>
+<div class="literalblock">
+<div class="content">
+<pre>cd /usr2
+cp -a old_FSL9/usr2/control .
+cp -a old_FSL9/usr2/proc .
+cp -a old_FSL9/usr2/sched .</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>and possibly:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>cd /usr2
+cp -a old_FSL9/usr2/tle_files .</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Fix the ownership/permissions of the working copies you made:</p>
+<div class="literalblock">
+<div class="content">
+<pre>/usr2/fs/misc/fix_perm</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Answer <code><strong>y</strong></code> to confirm.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+If you don&#8217;t have a <em>/usr2/tle_files</em> directory, you will get a
+message that there is no such directory. That is benign unless you
+expect such a directory to be there.
+</td>
+</tr>
+</table>
+</div>
+</li>
+<li>
+<p>Transfer your station software directory (and make a working copy).
+This is usually the target directory pointed to by the <em>/usr2/st</em>
+symbolic link. On your old system, you can find its name with:</p>
+<div class="literalblock">
+<div class="content">
+<pre>ls -l /usr2/st</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In the rest of this sub-step, the target <code>st-<em>version</em></code> will be used.
+You should replace <code><em>version</em></code> with your version string. For example,
+use <code><em>1.0.0</em></code>, to make a target <code><em>st-1.0.0</em></code>. (You may need to adjust
+these commands if you have a different format for <code>st-<em>version</em></code>,
+perhaps <code><em>st-git</em></code>.) If your target is <code><em>st-0.0.0</em></code> you should rename
+the default on the new system first as described in the
+<a href="#_rename_default_directories">Rename default directories</a> step above.</p>
+</div>
+<div class="paragraph">
+<p>All the sub-steps below are executed on the new system:</p>
+</div>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p>Copy the target from the <code><em>old</em></code> system to the new system:</p>
+<div class="literalblock">
+<div class="content">
+<pre>cd /usr2/old_FSL9/usr2
+rsync -aH <em>old</em>:/usr2/st-<em>version</em> .</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Create a local working copy</p>
+<div class="literalblock">
+<div class="content">
+<pre>cd /usr2
+cp -a old_FSL9/usr2/st-<em>version</em> .</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Set the <em>/usr2/st</em> symbolic link to point to the target directory:</p>
+<div class="literalblock">
+<div class="content">
+<pre>cd /usr2
+ln -fsn st-<em>version</em> st</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Set its ownership to prevent users other than <em>prog</em> from modifying
+it:</p>
+<div class="literalblock">
+<div class="content">
+<pre>cd /usr2
+chown -R prog.rtx st-<em>version</em>
+chmod -R go-w st-<em>version</em></pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>Copy your <em>oper</em> and <em>prog</em> directories to the new system. This
+sub-step is optional. The FSL11 installation made default home
+directories for these users on <em>/usr2</em>. If you had not customized
+content for the users on the old system, you could just use the
+versions on the new system. Still it may be useful to have a copy of
+your old directories on the new system for reference, especially if
+you realize later that there were additional programs and files you
+want to use on the new system. You can accomplish the transfers as
+<em>root</em> using:</p>
+<div class="literalblock">
+<div class="content">
+<pre>cd /usr2/old_FSL9/usr2
+rsync -aH <em>old</em>:/usr2/oper .
+rsync -aH <em>old</em>:/usr2/prog .</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Transfer other files.</p>
+<div class="paragraph">
+<p>You may need or want copies of other directories. These might include:
+<em>/etc</em>; <em>/usr/local/sbin</em> and <em>/usr/local/bin</em> (for RAID and AUID
+scripts); other directories from <em>/usr2</em>:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>cd /usr2/old_FSL9
+rsync -aH --copy-links <em>old</em>:/etc .
+rsync -aH --mkpath <em>old</em>:/usr/local/sbin usr/local/sbin
+rsync -aH --mkpath <em>old</em>:/usr/local/bin usr/local/bin
+...</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>and possibly reference copies of even older installations
+(<code>/usr2/old_FSL8</code> and/or others):</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>cd /usr2/
+rsync -aH <em>old</em>:/usr2/old_FSL8 .
+...</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Set the permissions of the reference directory.</p>
+<div class="paragraph">
+<p>You should probably set the entire directory to <em>not</em> have write
+permission:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>cd /usr2
+chmod -R a-w old_FSL9</pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_optional_cleanup">2.6. Optional cleanup</h3>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Important</div>
+</td>
+<td class="content">
+This optional step is to be performed by <em>oper</em>. Be sure to
+change accounts if you decide to do it.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>If you would like, you can make a clean start by deleting old
+experiment files from <em>/usr2/proc</em> and <em>/usr2/sched</em>. Copies of the
+files deleted are preserved in the reference directory in case they
+are ever needed.</p>
+</div>
+<div class="paragraph">
+<p>One possible strategy is to identify the most recent file you <em>want</em>
+to delete (the <code><strong>lt</strong></code> alias, or the <code><strong>ls&#160;-lt&#160;|&#160;less</strong></code>
+command, is useful for identifying it). In <em>/usr2/proc</em>, for example,
+that might be <em>vo3347gs.prc</em>.  Working as <em>oper</em> enter:</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+If you use this method, make sure that <em>station.prc</em>,
+<em>point.prc</em>, and any other procedure libraries that you use routinely,
+have been updated more recently than the file you identified. The
+<em>touch</em> command could be used to change their modification times.
+</td>
+</tr>
+</table>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>cd /usr2/proc
+find . -type f ! -newer vo3347gs.prc | xargs rm -f</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Likewise for  <em>/usr2/sched</em>, the most recent file you <em>want</em> to delete
+might, for example, be <em>vo3347gs.lst</em>. Working as <em>oper</em> enter:</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+If you use this method, make sure that any other procedure files
+(typically <em>.snp</em> files) that you use routinely, have been updated
+more recently than the file you identified.
+</td>
+</tr>
+</table>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>cd /usr2/sched
+find . -type f ! -newer vo3347gs.lst | xargs rm -f</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If you accidentally delete any files that you wanted to keep from
+either directory, you can copy them (as <em>oper</em>) from the reference
+directory when you discover they are missing. Files copied later in
+this scenario may require changes depending on the details of the FS
+updates you apply before then.</p>
+</div>
+<div class="paragraph">
+<p>Other approaches can be used for delete files you don&#8217;t want. You
+could also delete any sub-directory structure in either or both of
+these directories, if you want.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_customize_files_on_the_new_system">2.7. Customize files on the new system</h3>
+<div class="paragraph">
+<p>There are several things you may need to adjust on the new system.
+These include:</p>
+</div>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p>Install additional Debian packages</p>
+<div class="paragraph">
+<p>You may need to install packages for your new system that you had
+installed on the old system.</p>
+</div>
+</li>
+<li>
+<p>Copy/merge additional system files, such as:</p>
+<div class="ulist disc">
+<ul class="disc">
+<li>
+<p><em>/etc/hosts</em></p>
+</li>
+<li>
+<p><em>/etc/ntp.conf</em></p>
+</li>
+<li>
+<p><em>/etc/hosts.allow</em></p>
+</li>
+<li>
+<p><em>/etc/hosts.deny</em></p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Customize the <em>oper</em> and <em>prog</em> home directories on the new system
+to include any features you want from the old system.</p>
+<div class="paragraph">
+<p>This would typically include updating the default <em>~/.profile</em>,
+<em>~/.bashrc</em>, <em>~/.bash_aliases</em>, and <em>~/bin</em>. If you were previously
+using <em>tcsh</em> (the default for FSL9 and earlier) and are now changing
+to <em>bash</em> (the default for FSL10 and later), you will need to
+translate customized settings from your <em>~/.login</em> and <em>~/.cshrc</em>
+files.</p>
+</div>
+</li>
+<li>
+<p>Update operational directories <em>control</em>, <em>proc</em>, and <em>sched</em></p>
+<div class="paragraph">
+<p>If you will be using a new FS version on the new system you may need
+to update files in these directories (and others). This is covered in
+the update notices you will need to apply for the new version.</p>
+</div>
+</li>
+<li>
+<p>Update station software</p>
+<div class="paragraph">
+<p>If you are moving to a new FS and FSL<em>x</em> version, any needed changes
+are covered in the FS update notice. If you are converting to 64-bit,
+instructions can be found in the following steps.</p>
+</div>
+<div class="paragraph">
+<p>If there is other software you use, you would need to install that as
+well.</p>
+</div>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_login_as_prog_on_the_new_system">2.8. Login as prog on the new system</h3>
+<div class="paragraph">
+<p>The following steps up to <a href="#_reboot">Reboot</a> should be executed as <em>prog</em> on
+the new system.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_update_station_programs_for_64_bit">2.9. Update station programs for 64-bit</h3>
+<div class="paragraph">
+<p>This step is for modifying your station programs in <em>/usr2/st</em>. There
+are two possible issues, conversion of FORTRAN code and conversion of
+C code.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+If you are not converting from 32- to 64-bit, you should skip
+this step and go directly to the <a href="#_make_local_software">Make local software</a> step below.
+</td>
+</tr>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_conversion_of_fortran_code">2.9.1. Conversion of FORTRAN code</h4>
+<div class="paragraph">
+<p>If you don&#8217;t have any FORTRAN station code or you have already
+converted it to <em>f95</em>, skip this sub-step.</p>
+</div>
+<div class="paragraph">
+<p>Use of <em>f95</em> is necessary on 64-bit systems. If you have station
+programs in FORTRAN, please email Ed so he is aware.</p>
+</div>
+<div class="paragraph">
+<p>You will need to adapt your <em>Makefile</em>s
+to use the same compiler options as the FS, which can be
+found in <em>/usr2/fs/include.mk</em>.
+As a first cut, it may work to add the following two lines
+to your <em>Makefile</em>s for FORTRAN programs:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>FFLAGS  += -ff2c -I../../fs/include -fno-range-check -finit-local-zero -fno-automatic -fbackslash
+FLIBS   += -lgfortran -lm</pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_conversion_of_c_code">2.9.2. Conversion of C code</h4>
+<div class="paragraph">
+<p>If you don&#8217;t have any C station code, you can skip this sub-step.</p>
+</div>
+<div class="paragraph">
+<p>If you have C station code, it should work as written unless you have
+declared integers that interface to the FS as <code>long</code> (this was
+actually a common practice due to the example code that been
+provided). For a start at fixing those, please see
+<a href="https://github.com/dehorsley/unlongify" class="bare">https://github.com/dehorsley/unlongify</a>.  The following sub-steps
+describe how to install and use the <em>unlongify</em> tool.</p>
+</div>
+<div class="sect4">
+<h5 id="_install_go_language">2.9.2.1. Install go language</h5>
+<div class="paragraph">
+<p>If you haven&#8217;t already, you will need to first install the <em>go</em>
+language. If you are using FSL11, you can install the <em>go</em> language in
+one of two ways listed below:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><a href="#_option_a_installing_golang_package">Option A - Installing golang package</a></p>
+</li>
+<li>
+<p><a href="#_option_b_installing_latest_go_language">Option B - Installing latest go language</a></p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>We recommend the first way for those that are only using <em>go</em> for the
+<em>unlongify</em> tool. After installing the <em>go</em> language, continue the
+<a href="#_conversion_of_c_code">Conversion of C code</a> instructions starting at
+<a href="#_configure_prog_account_for_go_language">Configure prog account for go language</a> sub-step below.</p>
+</div>
+<div class="sect5">
+<h6 id="_option_a_installing_golang_package">Option A - Installing golang package</h6>
+<div class="paragraph">
+<p>You can use the Debian package management system to install <em>go</em>.
+This will give you an older version of <em>go</em> that is perfectly adequate
+for the task at hand and is supported by the normal security update
+mechanism. To install it this way, as <em>root</em> use:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>apt-get install golang</pre>
+</div>
+</div>
+</div>
+<div class="sect5">
+<h6 id="_option_b_installing_latest_go_language">Option B - Installing latest go language</h6>
+<div class="paragraph">
+<p>You can install the latest version of <em>go</em>, but this is outside the
+normal security update mechanism. In this case, you will need to
+manage your own updates, which may not be suitable for an operational
+environment. If you use this method it is recommended that you sign-up
+for <em>go</em> language announcements so that you will be informed when a
+security update is available. You can sign-up at
+<a href="https://groups.google.com/forum/#!forum/golang-announce" class="bare">https://groups.google.com/forum/#!forum/golang-announce</a>.</p>
+</div>
+<div class="paragraph">
+<p>Another alternative is to delete the latest <em>go</em> (<code><strong>rm -rf
+/usr/local/go</strong></code>) after you have made <em>unlongify</em>. You can
+always re-install it if you need it again.</p>
+</div>
+<div class="paragraph">
+<p>Both the initial install and updates are handled by the
+<em>fsadapt</em> script, as <em>root</em>:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>cd /root/fsl11
+./fsadapt</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In the first window select <em>only</em> the option (i.e., only that line has a <code>*</code>):</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>goinst    Install (or 'Update') Go programming language</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Then press <kbd>Enter</kbd> while <code>OK</code> is highlighted. On the next screen, press <kbd>Tab</kbd>
+to highlight <code>Cancel</code> and then press <kbd>Enter</kbd>.</p>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_configure_prog_account_for_go_language">2.9.2.2. Configure prog account for go language</h5>
+<div class="paragraph">
+<p>Once you have the <em>go</em> language installed, you need to define the
+<code>GOPATH</code> environment variable and include it in <em>prog</em>'s path. The
+default <em>~prog/.profile</em> file includes two commands (commented out by
+default) to accomplish these things:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>#export GOPATH=~/go
+#PATH="$GOPATH/bin:/usr/local/bin/go:$PATH"</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You will need to uncomment these two lines and then logout
+and log back in again as <em>prog</em> or, in a current login session
+for <em>prog</em>, re-execute the file:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>. ~/.profile</pre>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_install_unlongify">2.9.2.3. Install unlongify</h5>
+<div class="paragraph">
+<p>Then you should be able to execute the installation step given
+at the URL above (as <em>prog</em>):</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>cd
+go get github.com/dehorsley/unlongify</pre>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_use_unlongify">2.9.2.4. Use unlongify</h5>
+<div class="paragraph">
+<p>Please read the <em>README.md</em> file, which is displayed at the URL above.
+Alternatively, it can be viewed at
+<em>~/prog/go/src/github.com/dehorsley/unlongify/README.md</em> where it was
+installed by the above command. Please pay particular attention to the
+<code>Note</code> about system calls.</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+The <em>unlongify</em> program attempts to process all <em>*.h</em> and <em>*.c</em>
+files in the path specified as its argument. If it encounters a file
+with a syntax error, an error message will be printed and processing
+will stop. Presumably, this would not happen for files that are in
+active use, e.g., are referred to in <em>Makefile</em>s. However, there may
+be code with issues in files that are not currently used. If an error
+occurs, the messages should help you identify files with issues, which
+can moved (re)moved or corrected as appropriate. Thanks to Carlo
+Migoni (Sardinia) for reporting this and spurring the addition of file
+names to the error messages.
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_make_local_software">2.10. Make local software</h3>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Important</div>
+</td>
+<td class="content">
+If you are installing a 64-bit system as part of upgrading
+to FS <em>10.0</em>, you should return to the FS update instructions at this
+point.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>If <em>/usr2/st/Makefile</em> is set-up in the standard way, you can do this with:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>cd /usr2/st
+make rmdoto rmexe all</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Once your code <em>make</em>s successfully, you can continue, but you may
+need to debug it in the <a href="#_test_the_fs">Test the FS</a> step below.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_reboot">2.11. Reboot</h3>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Important</div>
+</td>
+<td class="content">
+Reboot the computer. This is important for initializing
+shared memory for the new version.
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_login_as_oper_on_the_new_system">2.12. Login as oper on the new system</h3>
+<div class="paragraph">
+<p>The remaining steps assume you are logged in as <em>oper</em> on the new
+system.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_test_the_fs">2.13. Test the FS</h3>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+You may need to debug your station code as part of this.
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Last updated 2024-07-11 09:12:53 -0400
+</div>
+</div>
+</body>
+</html>
