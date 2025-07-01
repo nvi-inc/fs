@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020-2024 NVI, Inc.
+// Copyright (c) 2020-2025 NVI, Inc.
 //
 // This file is part of VLBI Field System
 // (see http://github.com/nvi-inc/fs).
@@ -21,7 +21,7 @@
 :doctype: book
 
 = FS 10.2 to Latest Commit Update Notes
-Version 1.6 - April 2025
+Version 1.7 - July 2025
 
 :sectnums:
 :stem: latexmath
@@ -53,7 +53,7 @@ notes were completed. However, that may not be complete. _Let the user
 beware._
 
 This document is up to date with the
-`0fd7297690a7e13395665b350b432dd2322c21fc` (`0fd72976`) commit. Due to
+`6be435f6120bca47231cbf968a4b5b730b7e8f7a` (`6be435f6`) commit. Due to
 small increments, such as updating this document, that may not be the
 literal last commit, but the differences should be small unless you
 happen to `pull` between a significant change and this document being
@@ -83,7 +83,7 @@ then as _prog_ execute:
 
  cd /usr2/fs-git
  git fetch
- git checkout -q 0fd72976
+ git checkout -q 6be435f6
 
 . If you are using FSL8, or otherwise unable to use _git_:
 
@@ -109,17 +109,17 @@ that:
 
 * For the __tag__ in the `*wget*` and `*tar*` commands, use the short
 SHA for the commit. For example, for commit under discussion here,
-`0fd7297690a7e13395665b350b432dd2322c21fc`, use `0fd72976`.
+`6be435f6120bca47231cbf968a4b5b730b7e8f7a`, use `6be435f6`.
 
 * After extracting the archive, change the name of the output
 directory to use the latest feature release and the short SHA of the
-commit, like _fs-10.2.0-66-0fd72976_ (note the _g_ before the short
+commit, like _fs-10.2.0-76-g6be435f6_ (note the _g_ before the short
 SHA), which will then be used in the following `*cd*` command. For
 example (kbd:[Tab] completion is your friend for the long SHA):
 
  cd /usr2
- mv fs-0fd7297690a7e13395665b350b432dd2322c21fc fs-10.2.0-66-g0fd72976
- cd /usr2/fs-10.2.0-66-g0fd72976
+ mv fs-6be435f6120bca47231cbf968a4b5b730b7e8f7a fs-10.2.0-66-g6be435f6
+ cd /usr2/fs-10.2.0-76-g6be435f6
 
 * You will end the "`installing from an archive`" with the step
 setting the link for __/usr2/fs__ by running *`make install`*.
@@ -343,6 +343,64 @@ have nested collapsible boxes inside them if there are many sub-items.
 
 === FS changes
 
+. Fix bug in `mk5_status` (and `fb_status`) command when handling long
+recorder `error?` query responses (closing
+https://github.com/nvi-inc/fs/issues/234[#234]).
+
++
+[%collapsible]
+====
+
+In the `mk5_status` (and `fb_status`) command, if an `error?` query
+response was too long to fit in the buffer (`256` characters), the
+basic checks on its format could generate an error. If so, the class
+number that had been allocated to return previous `status?` (and
+possibly other  `error?`) responses would not be passed back to the
+caller to be processed, leaving the class number in limbo (a class
+number leak). After about 35+ of these errors there would be no class
+numbers left and the FS would crash.
+
+Additionally, the `error?` response was not reported to the caller
+preventing it from being displayed for relatively easy identification
+of the underlying recorder error.
+
+The cause of the problem was actually more general in nature. Any
+error in the process of getting the `error?` response (or in the
+process of getting a `status?` response after the first), could also
+cause a class number leak.
+
+In addition to fixing these two class number leaks, some other small
+improvements were made:
+
+[disc]
+
+* The buffer size was increased `1024` characters.
+
+* The error message for an incorrectly formatted `status?` and
+  `error?` response was revised to say that it was a format error and
+  that it could have been due to truncation. Previously, it just said
+  there was no reply, which is a different case.
+
+* The available response when a formatting error is detected is
+  returned to the caller for display.
+
+* The error number codes of the `mk5_status` command were moved to an
+  `include` header to make them accessible in more than one file of
+  code without duplicating them. This was helpful for returning the
+  available response where there was a formatting error.
+
+* If the command ends with a processing error so that it is not known
+  whether there are remaining recorder errors to process, the error
+  report says there _may_ be errors yet to process, instead of that
+  there _are_.
+
+This fix was also included in the _10.2.1_ patch release.
+
+Thanks to Jon Quick (HartRAO) for reporting this bug and testing the
+fix.
+
+====
+
 . Fix bug in the `terminate` command (closing
 https://github.com/nvi-inc/fs/issues/226[#226]).
 
@@ -372,6 +430,8 @@ There was usually only a very small time window in which this could
 happen. The code was aware of this case, but there was a bug in how it
 was handled.
 
+This fix was also included in the _10.2.1_ patch release.
+
 ====
 
 . Fix bug in the display server shim for _xterm_ on FSL11, restoring
@@ -387,7 +447,10 @@ _fsserver/shims/xterm_. As a result, it was not possible on FSL11
 systems to use _autoftp_ (or `sy=xterm ...`, which should be avoided
 anyway). The simple fix for this was to make separate _python2_ and
 _python3_ versions, like the other _python_ scripts in FS _10.2_.
-This bug only occurred for FSL11 systems.
+This bug only occurred for FSL11 systems (and other systems that use
+FS _python3_ support).
+
+This fix was also included in the _10.2.1_ patch release.
 
 ====
 
@@ -406,6 +469,8 @@ number of open files could be reached, causing subsequent
 `satellite=...` commands to fail. This situation could happen, e.g.,
 if many of the commands were used sequentially to approximate
 continuous tracking.
+
+This fix was also included in the _10.2.1_ patch release.
 
 Thanks to Jamie McCallum and David Schunck (both at Hobart) for
 finding this, reporting it, and providing the fix.
@@ -458,7 +523,7 @@ certain situations. For DDC_V firmware, which does not have multicast
 time, it caused spurious times to be displayed. While for non-DDC_V
 (DDC_E/DDC_U) firmware, which does have time available, it caused the
 time to be suppressed. This was due to an error in FS initialization
-in 10.2.0. The two situations where the bug occurred were:
+in _10.2.0_. The two situations where the bug occurred were:
 
 [disc]
 
@@ -481,7 +546,9 @@ and restart the FS before using it, after:
 *  Changing _equip.ctl_, when switching between DDC_V firmware and a
 non-DDC_V firmware (DDC_E/DDC_U), in either direction.
 
-Thanks to J. Quick (HartRAO) for reporting this bug.
+This fix was also included in the _10.2.1_ patch release.
+
+Thanks to Jon Quick (HartRAO) for reporting this bug.
 
 ====
 
@@ -628,7 +695,7 @@ However, it does look better, particularly for replacements of
 internal FS commands line `wx`. Information on using the _popen_
 program can be found from `*help=sy*`.
 
-Thanks to J. Quick (HartRAO) for conceiving, and providing an
+Thanks to Jon Quick (HartRAO) for conceiving, and providing an
 implementation, of this change,
 
 ====
@@ -1092,6 +1159,19 @@ properly on non-UTF-8 systems, principally FSL9 and earlier.
 
 * The extended ASCII character for angstroms (&Aring;) was incorrectly
 specified in the _help/lvdt.*_ files. It was replaced with the word.
+
+====
+
+. Add patch release _10.2.1_.
+
++
+[%collapsible]
+====
+
+Please see the <<10.2.1.adoc#,FS 10.2.1 Update Notes>> document for
+the details. All of the changes in that patch release have already
+been merged into the _main_ branch and will be included in the _10.3_
+release when it becomes available.
 
 ====
 
