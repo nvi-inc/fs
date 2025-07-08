@@ -87,10 +87,11 @@ printf("updating shared memory irdbe=%d\n",irdbe);
      channel1=shm_addr->rdbe_channels[irdbe+1].ifc[j].channels.channels[i];
    }
  int tone0=pcal_tone0_r2dbe(channel1-1,cycle->pcal_offset,cycle->pcal_spacing);
- for (i=0;i<512;i++) {
-    r1dbe_cycle.pcal_amp[i]=cycle->pcal_amp[i+tone0];
-    r1dbe_cycle.pcal_phase[i]=cycle->pcal_phase[i+tone0];
- }
+ if(tone0 >=0 )
+   for (i=0;i<512;i++) {
+     r1dbe_cycle.pcal_amp[i]=cycle->pcal_amp[i+tone0];
+     r1dbe_cycle.pcal_phase[i]=cycle->pcal_phase[i+tone0];
+   }
 
  r1dbe_cycle.pcal_ifx=cycle->pcal_ifx;;
  if(0==cycle->pcal_ifx)

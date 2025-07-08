@@ -80,10 +80,10 @@ int r2dbe(char me[5], char who[2], char letter, int irdbe)
       for (i=0;i<8;i++)
          printf(" i %d, ibc0 %f ibc1 %f\n",i,packet.ibc0[i],packet.ibc1[i]);
 #endif
-      calc_ts(&packet,&cycle);
+//      calc_ts(&packet,&cycle);
       calc_pc(&packet,&cycle,irdbe);
       update_shm(&packet,&cycle,irdbe);
-
+      log_mcast(&packet,&cycle,letter);
      }
 
 idle:
