@@ -1,5 +1,6 @@
 # Copied from github/gitignore/C.gitignore
 # Prerequisites
+*.gitignore
 *.d
 
 # Object files
@@ -73,3 +74,5 @@ third_party/lib/
 
 .fs_version
 .DS_Store
+.vs
+
