@@ -15,7 +15,7 @@ INCFLG = -I$(FSINC) -I$(S2INC)
 
 # Flags
 FFLAGS = -c
-CFLAGS = -g $(INCFLG)
+CFLAGS = -g $(INCFLG) -std=gnu89
 
 # Objects
 OBJECTS = quik_util.o rcl_das.o stats.o s2das_util.o message.o

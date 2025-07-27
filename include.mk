@@ -8,7 +8,7 @@ endif
 
 FC1 := $(FC)
 
-CFLAGS += -Werror=int-to-pointer-cast
+CFLAGS += -std=gnu89
 
 ifeq ($(FC),fort77)
 FLIBS   += -lf2c -lm

@@ -7,7 +7,8 @@ OBJECTS = fsserver.o server.o window.o list.o prompt.o fsclient.o window.o list.
 all: $(TARGETS)
 shims: $(SHIMS)
 
-CFLAGS += -g -std=gnu99 -Wall -Wextra -Werror=implicit-function-declaration
+CFLAGS += -g -Wall -Wextra -Werror=implicit-function-declaration
+# There is another CFLAGS increment at the end below
 LIBS = ../flib/flib.a ../fclib/fclib.a ../clib/clib.a ../rtelb/rtelb.a
 LDLIBS += -lutil -lrt -lanl -lnsl -pthread -lnng -ljansson 
 CPPFLAGS += -pthread -D_GNU_SOURCE
@@ -34,3 +35,4 @@ endif
 
 
 include ../include.mk
+CFLAGS += -std=gnu99

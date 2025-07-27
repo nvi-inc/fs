@@ -4,6 +4,7 @@
 all: ../bin/vueinfo ../bin/fsvue
 #
 LIBES = ../poclb/poclb.a ../clib/clib.a ../rtelb/rtelb.a ../newlb/newlb.a -lm
+CFLAGS += -std=gnu89
 #
 OBJECTS = \
 vueinfo.o what_help.o vuecalq.o

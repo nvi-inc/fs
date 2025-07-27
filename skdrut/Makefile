@@ -73,6 +73,8 @@ OBJECTS=\
 #FFLAGS=-C -c -g
 #FFLAGS=-C -c -G
 #CFLAGS=-C -c
+#
+CFLAGS += -std=gnu89
 
 #CC:=$(CC)
 #FC:=$(FORT)

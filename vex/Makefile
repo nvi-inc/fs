@@ -11,6 +11,7 @@ ifeq ($(FC),fort77)
 CFLAGS= -c -DF2C
 endif
 #
+CFLAGS += -std=gnu89
 
 vex.a: $(OBJECTS)
 	touch $@
