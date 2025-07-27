@@ -10,3 +10,6 @@ OBJECTS = erchk.o get_err.o read_ctl.o
 erchk:
 	rm -f ../bin/erchk
 	make
+
+
+include ../include.mk

@@ -8,7 +8,7 @@ endif
 
 FC1 := $(FC)
 
-CFLAGS += -Werror=int-to-pointer-cast
+CFLAGS += -Werror=int-to-pointer-cast -fpermissive
 
 ifeq ($(FC),fort77)
 FLIBS   += -lf2c -lm

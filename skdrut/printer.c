@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020, 2025 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -19,6 +19,8 @@
  */
 /* AEM 20041125 add string.h */
 #include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
 
 int
 #ifdef F2C

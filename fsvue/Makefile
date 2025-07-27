@@ -19,3 +19,5 @@ vueinfo.o what_help.o vuecalq.o
 vueinfo:
 	rm -f ../bin/vueinfo
 	make
+
+include ../include.mk
