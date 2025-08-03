@@ -595,4 +595,15 @@ typedef struct fscom {
     int iping;
   } r2dbe_tsys_data[MAX_RDBE];
 
+  struct rdtcn2 {
+    struct rdtcn2_control {
+      int continuous;
+      int cycle;
+      int tsys_request;
+      int stop_request;
+      struct data_valid_cmd data_valid;
+    } control[2];
+    int iping;
+  } rdtcn2 [MAX_RDBE];
+
 } Fscom;

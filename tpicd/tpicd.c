@@ -63,6 +63,7 @@ main()
   struct rdtcn_control rdtcn_control[MAX_RDBE];
   struct dbtcn_control dbtcn_control;
   int iping[MAX_RDBE];
+  struct rdtcn2_control rdtcn2_control[MAX_RDBE];
 
 /* connect to the FS */
 
@@ -103,7 +104,7 @@ main()
   memcpy(&dbbc_cont_cal,&shm_addr->dbbc_cont_cal,sizeof(dbbc_cont_cal));
   memcpy(&dbbc3_cont_cal,&shm_addr->dbbc3_cont_cal,sizeof(dbbc3_cont_cal));
 
-  if(RDBE == shm_addr->equip.rack) {
+  if(RDBE == shm_addr->equip.rack && RDBE == shm_addr->equip.rack_type) {
     for(i=0;i<MAX_RDBE;i++) {
       rdtcn_control[i].continuous=shm_addr->tpicd.continuous;
       rdtcn_control[i].cycle=shm_addr->tpicd.cycle;
@@ -112,10 +113,25 @@ main()
 	     sizeof(struct data_valid_cmd));
       iping[i]=1-shm_addr->rdtcn[i].iping;
       if(iping[i]!=0)
-	iping[i]=1;
+       iping[i]=1;
       memcpy(&shm_addr->rdtcn[i].control[iping[i]],&rdtcn_control,
 	     sizeof(struct rdtcn_control));
       shm_addr->rdtcn[i].iping=iping[i];
+    }
+    goto loop;
+  } else if(RDBE == shm_addr->equip.rack && R2DBE == shm_addr->equip.rack_type) {
+    for(i=0;i<MAX_RDBE;i++) {
+      rdtcn2_control[i].continuous=shm_addr->tpicd.continuous;
+      rdtcn2_control[i].cycle=shm_addr->tpicd.cycle;
+      rdtcn2_control[i].stop_request=shm_addr->tpicd.stop_request;
+      memcpy(&rdtcn2_control[i].data_valid,&data_valid,
+	     sizeof(struct data_valid_cmd));
+      iping[i]=1-shm_addr->rdtcn2[i].iping;
+      if(iping[i]!=0)
+       iping[i]=1;
+      memcpy(&shm_addr->rdtcn2[i].control[iping[i]],&rdtcn2_control,
+	     sizeof(struct rdtcn2_control));
+      shm_addr->rdtcn2[i].iping=iping[i];
     }
     goto loop;
   } else if(DBBC3 == shm_addr->equip.rack) {
