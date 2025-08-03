@@ -568,8 +568,10 @@ void cshm_init()
   }
 
   for(i=0;i<MAX_RDBE+1;i++) {
-    m5state_init(&shm_addr->rdbe_channels[i].ifc[j].ifc.state);
     for (j=0;j<MAX_RDBE_IF;j++) {
+      m5state_init(&shm_addr->rdbe_channels[i].ifc[j].ifc.state);
+      shm_addr->rdbe_channels[i].ifc[j].ifc.ifc=j;
+      shm_addr->rdbe_channels[i].ifc[j].ifc.state.known=1;
       m5state_init(&shm_addr->rdbe_channels[i].ifc[j].channels.state);
       for (k=0;k<MAX_R2DBE_CH;k++)
         shm_addr->rdbe_channels[i].ifc[j].channels.channels[k]=-1;
