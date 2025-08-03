@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <errno.h>
+#include <string.h>
 
 #include "../include/params.h"
 #include "../include/fs_types.h"
@@ -36,6 +37,12 @@ int r2dbe(char me[5], char who[2], char letter, int irdbe)
     char buf[sizeof(r2dbe_multicast_t)];
     int ip[5];
     struct r2dbe_tsys_cycle cycle;
+    struct rdtcn2_control rdtcn2_control;
+    int it[6], itmc[6];
+    int seconds;
+    int last = 0;
+    int iping;
+
     r2dbe_multicast_t packet = {};
 
     int error_no;
@@ -51,6 +58,7 @@ int r2dbe(char me[5], char who[2], char letter, int irdbe)
     }
 
     for (;;) {
+      int tsys_request=0;
       ssize_t n = read_mcast(sock,buf,sizeof(buf),&cycle,who);
 
 #ifdef WEH
@@ -83,6 +91,40 @@ int r2dbe(char me[5], char who[2], char letter, int irdbe)
 //      calc_ts(&packet,&cycle);
       calc_pc(&packet,&cycle,irdbe);
       update_shm(&packet,&cycle,irdbe);
+
+      /* check control to get the last state before logging */
+
+      iping=shm_addr->rdtcn2[irdbe].iping;
+       if(0==iping || 1==iping) {
+          memcpy(&rdtcn2_control,
+                   &shm_addr->rdtcn2[irdbe].control[iping], sizeof(rdtcn2_control));
+
+          tsys_request=rdtcn2_control.tsys_request;
+
+          if(1==tsys_request) {
+              rdtcn2_control.tsys_request=0;
+              memcpy(&shm_addr->rdtcn2[irdbe].control[iping],&rdtcn2_control,
+              sizeof(struct rdtcn2_control));
+          }
+      }
+      int skip_remaining= 1==rdtcn2_control.stop_request ||
+               rdtcn2_control.continuous == 0 &&
+               (rdtcn2_control.data_valid.user_dv ==0 || shm_addr->KHALT !=0 ||
+                0==strncmp(shm_addr->LSKD2,"none ",5));
+
+      if (0==tsys_request && skip_remaining) {
+          last=0;
+          continue;
+      }
+
+      rte_time(it,it+5);
+      rte2secs(it,&seconds);
+
+      int no_logging = 0 != last && seconds-last < (rdtcn2_control.cycle+99)/100 || skip_remaining;
+      if(0==tsys_request && no_logging)
+          continue;
+
+      last=seconds;
       log_mcast(&packet,&cycle,letter,irdbe);
      }
 

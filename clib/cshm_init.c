@@ -630,6 +630,16 @@ void cshm_init()
   for (i=0;i<MAX_RDBE;i++)
     shm_addr->rdbe_tsys_data[i].iping=-1;
 
+  for(i=0;i<MAX_RDBE;i++) {
+    for (j=0;j<2;j++) {
+      shm_addr->rdtcn2[i].control[j].continuous=0;
+      shm_addr->rdtcn2[i].control[j].cycle=0;
+      shm_addr->rdtcn2[i].control[j].tsys_request=0;
+      shm_addr->rdtcn2[i].control[j].stop_request=1;
+      shm_addr->rdtcn2[i].control[j].data_valid.user_dv=0;
+    }
+    shm_addr->rdtcn2[i].iping=0;
+  }
+
   return;
 }
-
