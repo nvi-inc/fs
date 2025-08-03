@@ -19,6 +19,8 @@
  */
 /* rdbe_data_send commmand buffer parsing utilities */
 
+#define _XOPEN_SOURCE
+#define _BSD_SOURCE
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -26,7 +28,6 @@
 #include <limits.h>
 #include <math.h>
 #include <errno.h>
-#define _XOPEN_SOURCE
 #include <time.h>
 
 #include "../include/params.h"
