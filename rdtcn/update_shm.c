@@ -108,6 +108,9 @@ printf("updating shared memory irdbe=%d\n",irdbe);
  r1dbe_cycle.pcaloff=cycle->pcal_offset;
  r1dbe_cycle.pcal_spacing=cycle->pcal_spacing;
 
+ r1dbe_cycle.tsys[MAX_RDBE_CH][0]=cycle->tsys[MAX_R2DBE_CH][0];
+ r1dbe_cycle.tsys[MAX_RDBE_CH][1]=cycle->tsys[MAX_R2DBE_CH][1];
+
  r1dbe_cycle1.arrival=cycle->arrival;
 
   iping=1-shm_addr->rdbe_tsys_data[irdbe].iping;
