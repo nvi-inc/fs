@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #
-# Copyright (c) 2020, 2022-2024 NVI, Inc.
+# Copyright (c) 2020, 2022-2025 NVI, Inc.
 #
 # This file is part of VLBI Field System
 # (see http://github.com/nvi-inc/fs).
@@ -853,7 +853,7 @@ foreach $file (@ARGV) {
 	}
 	if(!$equip && /;equip,/i) {
 	    $equip=1;
-	    $rdbe=/rdbe/;
+	    $rdbe=/r2?dbe/;
 	    $dbbc3=/dbbc3/;
 	}
 	if(/${slash}wx\/(.*)/i) {
