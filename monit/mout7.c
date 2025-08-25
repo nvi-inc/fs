@@ -250,11 +250,15 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
     } else
       printw("%4s"," ");
 
+    int swap;
     move(irow,0);
-    if(ifc.lo>=0.0 && krf)
+    if(ifc.lo>=0.0 && krf) {
         printw("BBC    RF     Ts-L  Ts-U");
-    else
+        swap=2==ifc.sideband ? 1 : 0;
+    } else {
         printw("BBC    IF     Ts-L  Ts-U");
+        swap=0;
+    }
 
     move(irow++,9);
     if(ifc.lo>=0.0)
@@ -269,8 +273,6 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
 
     int itpis[MAX_DBBC3_DET] = {};
     mk5dbbc3d(itpis);
-
-    int swap=krf && 2==ifc.sideband ? 1 : 0;
 
     for(i=0;i<fs->dbbc3_ddc_bbcs_per_if;i++) {
         int ibbc =next*8+i;
@@ -291,7 +293,7 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
         } else
             printw(" %8s"," ");
 
-        if (all && (def || rec) || !rec && ifc.lo>=0.0 || itpis[ibbc+swap*MAX_DBBC3_BBC]) {
+        if (all && (def || rec) || !rec && ifc.lo>=0.0 || itpis[ibbc+    swap*MAX_DBBC3_BBC]) {
             printw(" ");
             if(!swap)
               print_tsys(bbc[ibbc].tsys_lsb,bbc[ibbc].clipped_lsb,reverse);
@@ -300,7 +302,7 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
         } else
             printw(" %5s"," ");
 
-        if(all && (def || rec) || !rec && ifc.lo>=0.0 || itpis[ibbc+(1-swap)*MAX_DBBC3_BBC]) {
+        if (all && (def || rec) || !rec && ifc.lo>=0.0 || itpis[ibbc+(1-swap)*MAX_DBBC3_BBC]) {
             printw(" ");
             if(!swap)
               print_tsys(bbc[ibbc].tsys_usb,bbc[ibbc].clipped_usb,reverse);
