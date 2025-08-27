@@ -1,5 +1,8 @@
+# Lerner    2021-04-27   Adapted new 64-bit version for OSO code
+
 OBJECTS = ibcon.o opbrd.o opdev.o rddev.o wrdev.o sib.o statbrd.o rspdev.o\
-echo_out.o find_delay.o iclrdev.o
+echo_out.o find_delay.o iclrdev.o check_network.o handle_network.o\
+util_network.o
 
 ifeq (/usr/local/include/sys/ugpib.h,$(wildcard /usr/local/include/sys/ugpib.h))
 CPPFLAGS += -DCONFIG_GPIB -DNI_DRIVER
