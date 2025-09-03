@@ -3088,6 +3088,12 @@ core3h_mode mask4 for board?W should be zero, but is not.
 ""
 DR -635
 Core3H board?W vsi input should be vsi1-2 and it is not.
+"
+DR -636
+board?W destination 0 is 'none'.
+"
+DR -637
+board?W destination 1 is not 'none'.
 ""
 DS   -1
 Unable to open dsad.ctl file.

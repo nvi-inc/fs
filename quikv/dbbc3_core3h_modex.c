@@ -70,7 +70,8 @@ static void add_check_queries( out_recs, out_class, board, all)
         cls_snd(out_class, str, strlen(str) , 0, 0);
         ++*out_recs;
 
-        if(DBBC3_DDCV!=shm_addr->equip.rack_type) {
+        if(DBBC3_DDCV!=shm_addr->equip.rack_type ||
+           DBBC3_DDCV==shm_addr->equip.rack_type && 126 <= shm_addr->dbbc3_ddcv_v) {
             strcpy(str,"core3h=");
             strcat(str,board);
             strcat(str,",destination 1");

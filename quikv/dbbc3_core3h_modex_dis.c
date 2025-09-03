@@ -144,7 +144,8 @@ void dbbc3_core3h_modex_dis(command,iboard,ip,force_set,options,kmon)
             ierr = -524;
             goto error;
         } else if (!dest1) {
-            if(DBBC3_DDCV!=shm_addr->equip.rack_type) {
+            if(DBBC3_DDCV!=shm_addr->equip.rack_type||
+               DBBC3_DDCV==shm_addr->equip.rack_type && 126 <= shm_addr->dbbc3_ddcv_v) {
               ierr = -525;
               goto error;
             } else {
@@ -336,31 +337,42 @@ send:
             logitn(NULL,-627,"dr",iboard);
             ierr=-600;
         }
-        if(shm_addr->dbbc3_core3h_modex[iboard-1].mask1.state.known) {
-            if(shm_addr->dbbc3_core3h_modex[iboard-1].mask1.mask1) {
-                if(lclm.none0.none0) {
-                    logitn(NULL,-628,"dr",iboard);
-                    ierr=-600;
-                }
-             } else {
-                if(!lclm.none0.none0) {
-                    logitn(NULL,-629,"dr",iboard);
-                    ierr=-600;
-                }
-             }
-        }
-        if(shm_addr->dbbc3_core3h_modex[iboard-1].mask2.state.known) {
-            if(shm_addr->dbbc3_core3h_modex[iboard-1].mask2.mask2) {
-                if(lclm.none1.none1 && DBBC3_DDCV!=shm_addr->equip.rack_type) {
-                    logitn(NULL,-630,"dr",iboard);
-                    ierr=-600;
-                }
-             } else {
-                if(!lclm.none1.none1) {
-                    logitn(NULL,-631,"dr",iboard);
-                    ierr=-600;
-                }
-             }
+        if(DBBC3_DDCU==shm_addr->equip.rack_type) {
+            if(shm_addr->dbbc3_core3h_modex[iboard-1].mask1.state.known) {
+                if(shm_addr->dbbc3_core3h_modex[iboard-1].mask1.mask1) {
+                    if(lclm.none0.none0) {
+                        logitn(NULL,-628,"dr",iboard);
+                        ierr=-600;
+                    }
+                 } else {
+                    if(!lclm.none0.none0) {
+                        logitn(NULL,-629,"dr",iboard);
+                        ierr=-600;
+                    }
+                 }
+            }
+            if(shm_addr->dbbc3_core3h_modex[iboard-1].mask2.state.known) {
+                if(shm_addr->dbbc3_core3h_modex[iboard-1].mask2.mask2) {
+                    if(lclm.none1.none1 && DBBC3_DDCV!=shm_addr->equip.rack_type) {
+                        logitn(NULL,-630,"dr",iboard);
+                        ierr=-600;
+                    }
+                 } else {
+                    if(!lclm.none1.none1) {
+                        logitn(NULL,-631,"dr",iboard);
+                        ierr=-600;
+                    }
+                 }
+            }
+        } else {
+            if(lclm.none0.none0) {
+                logitn(NULL,-636,"dr",iboard);
+                ierr=-600;
+            }
+            if(!lclm.none1.none1) {
+                logitn(NULL,-637,"dr",iboard);
+                ierr=-600;
+            }
         }
 
         if(0!=ierr) {
