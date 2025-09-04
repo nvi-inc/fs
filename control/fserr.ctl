@@ -2901,7 +2901,7 @@ DR -301
 Can't change mode while recording, use disk_record=off first or (dangerous) use 'disk_record_ok' as 'okay' parameter.
 ""
 DR -302
-'mask2' cannot have selected channels unless DDBC3 is DDC_E, DDC_U, or DDC_V/v126
+'mask2' cannot have selected channels unless DBC3 is DC_V/v126 (or later) or DDC_U
 ""
 DR -303
 Can't specify 'mask2' for more BBCs per IF than set in dbbc3.ctl.
@@ -2925,10 +2925,10 @@ DR -310
 The number of selected channels in each mask must be a power of two (or zero).
 ""
 DR -311
-For DBBC3 DDC_U, at least one of 'mask1' and 'mask2' must be non-zero.
+For DDC_V/v126 (and later) and for DDC_U, at least one of 'mask1' and 'mask2' must be non-zero.
 ""
 DR -312
-For DBBC3 DDC_V and DDC_E, 'mask1' must be non-zero.
+For DDC_V/v125 (and earlier) and for DDC_E, 'mask1' must be non-zero.
 ""
 DR -400
 error retrieving acknowledgement of command.

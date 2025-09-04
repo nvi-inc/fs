@@ -194,7 +194,7 @@ send:
                 logitn(NULL,-611,"dr",iboard);
                 ierr=-600;
             }
-            if(126 == shm_addr->dbbc3_ddcv_v) {
+            if(126 <= shm_addr->dbbc3_ddcv_v) {
                 if(shm_addr->dbbc3_core3h_modex[iboard-1].mask2.mask2 != lclc.mask2.mask2) {
                     logitn(NULL,-612,"dr",iboard);
                     ierr=-600;
@@ -212,10 +212,8 @@ send:
                 ierr=-600;
             }
         } else if(DBBC3_DDCU==shm_addr->equip.rack_type ||
-                  DBBC3_DDCE==shm_addr->equip.rack_type) {
-            if(shm_addr->dbbc3_core3h_modex[iboard-1].mask1.state.known &&
-                    shm_addr->dbbc3_core3h_modex[iboard-1].mask1.mask1 &&
-                    shm_addr->dbbc3_core3h_modex[iboard-1].mask2.state.known &&
+                  DBBC3_DDCE==shm_addr->equip.rack_type && 126 >= shm_addr->dbbc3_ddce_v) {
+            if(shm_addr->dbbc3_core3h_modex[iboard-1].mask1.mask1 &&
                     shm_addr->dbbc3_core3h_modex[iboard-1].mask2.mask2) {
                 if(shm_addr->dbbc3_core3h_modex[iboard-1].mask1.mask1 != lclc.mask1.mask1) {
                     logitn(NULL,-611,"dr",iboard);
@@ -233,8 +231,7 @@ send:
                     logitn(NULL,-614,"dr",iboard);
                     ierr=-600;
                 }
-            } else if(shm_addr->dbbc3_core3h_modex[iboard-1].mask1.state.known &&
-                          shm_addr->dbbc3_core3h_modex[iboard-1].mask1.mask1) {
+            } else if(shm_addr->dbbc3_core3h_modex[iboard-1].mask1.mask1) {
                 if(shm_addr->dbbc3_core3h_modex[iboard-1].mask1.mask1 != lclc.mask1.mask1) {
                     logitn(NULL,-611,"dr",iboard);
                     ierr=-600;
@@ -268,6 +265,23 @@ send:
                     logitn(NULL,-614,"dr",iboard);
                     ierr=-600;
                 }
+            }
+        } else if(DBBC3_DDCE==shm_addr->equip.rack_type) {
+            if(shm_addr->dbbc3_core3h_modex[iboard-1].mask1.mask1 != lclc.mask1.mask1) {
+                logitn(NULL,-611,"dr",iboard);
+                ierr=-600;
+            }
+            if(shm_addr->dbbc3_core3h_modex[iboard-1].mask1.mask1 != lclc.mask2.mask2) {
+                logitn(NULL,-612,"dr",iboard);
+                ierr=-600;
+            }
+            if(lclm.mask3.mask3) {
+                logitn(NULL,-633,"dr",iboard);
+                ierr=-600;
+            }
+            if(lclm.mask4.mask4) {
+                logitn(NULL,-634,"dr",iboard);
+                ierr=-600;
             }
         }
 

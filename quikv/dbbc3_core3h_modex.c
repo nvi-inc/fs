@@ -407,15 +407,13 @@ parse:
         }
 
     if(lcl.mask2.state.known && lcl.mask2.mask2) {
-        if(DBBC3_DDCU!=shm_addr->equip.rack_type &&
-           DBBC3_DDCE!=shm_addr->equip.rack_type &&
-           (DBBC3_DDCV==shm_addr->equip.rack_type && 126 != shm_addr->dbbc3_ddcv_v)) {
+        if(DBBC3_DDCE==shm_addr->equip.rack_type ||
+           DBBC3_DDCV==shm_addr->equip.rack_type && 126 > shm_addr->dbbc3_ddcv_v) {
             ierr=-302;
             goto error;
         }
         if(8 == shm_addr->dbbc3_ddc_bbcs_per_if ||
-                (12 == shm_addr->dbbc3_ddc_bbcs_per_if &&
-                 lcl.mask2.mask2 & 0xFFFF0000)) {
+                12 == shm_addr->dbbc3_ddc_bbcs_per_if && lcl.mask2.mask2 & 0xFFFF0000) {
             ierr=-303;
             goto error;
         }
@@ -428,13 +426,14 @@ parse:
         goto error;
     }
 
-    if(DBBC3_DDCU==shm_addr->equip.rack_type) {
+    if(DBBC3_DDCU==shm_addr->equip.rack_type ||
+       DBBC3_DDCV==shm_addr->equip.rack_type && 126 <= shm_addr->dbbc3_ddcv_v) {
         if(!(lcl.mask1.state.known && lcl.mask1.mask1) &&
                 !(lcl.mask2.state.known && lcl.mask2.mask2)) {
             ierr=-311;
             goto error;
         }
-    } else if(DBBC3_DDCV==shm_addr->equip.rack_type ||
+    } else if(DBBC3_DDCV==shm_addr->equip.rack_type && 126 > shm_addr->dbbc3_ddcv_v ||
               DBBC3_DDCE==shm_addr->equip.rack_type) {
         if(!(lcl.mask1.state.known && lcl.mask1.mask1)) {
             ierr=-312;
