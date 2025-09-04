@@ -383,6 +383,10 @@ void vsi_bitmask_2_dbbc3_core3h(ptr,lclc,board,masks)
         sprintf(ptr,"core3h=%1.1s,vsi_bitmask 0x%x 0x%x",board,
                     lclc->mask2.mask2,
                     lclc->mask1.mask1);
+    else if(-2==masks)
+        sprintf(ptr,"core3h=%1.1s,vsi_bitmask 0x%x 0x%x",board,
+                    lclc->mask1.mask1,
+                    lclc->mask1.mask1);
     else
         sprintf(ptr,"core3h=%1.1s,vsi_bitmask 0x%x",board,lclc->mask1.mask1);
 
@@ -434,7 +438,7 @@ int dbbc3_vdif_frame_params(lclc)
     channels1=bits1[1]+bits1[2]+bits1[3];
     channels2=bits2[1]+bits2[2]+bits2[3];
 
-    if(DBBC3_DDCV==shm_addr->equip.rack_type && 126 == shm_addr->dbbc3_ddcv_v)
+    if(DBBC3_DDCV==shm_addr->equip.rack_type && 126 <= shm_addr->dbbc3_ddcv_v)
        channels=channels1+channels2;
     else if(bitmask1 && bitmask2 &&
        channels1 != channels2)
