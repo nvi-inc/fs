@@ -34,11 +34,11 @@ decimation: decimation factor: integers 1-255. Default is inferred
             from 'sample' (next parameter). For DDC_V, only '1' and
             '2' are permitted.
 
-sample:     sample rate in Ms/s. For DDC_U, the value divided into the
-            maximum DDC_U sample rate, 256 Ms/s, must yield a valid
-            integer decimation factor. For DDC_V, only 128 and 64 are
-            accepted. Unless a decimation factor was specified, the
-            default for DDC_U is 256 (decimation 1); for DDC_V, 64
+sample:     sample rate in Ms/s. For DDC_U/DDC_E, the value divided
+            into the maximum DDC_U sample rate, 256 Ms/s, must yield a
+            valid integer decimation factor. For DDC_V, only 128 and
+            64 are accepted. Unless a decimation factor was specified,
+            the default for DDC_U is 256 (decimation 1); for DDC_V, 64
             (decimation 2). In response, since the sample rate is not
             reported by the board, the reported 'decimation' implied
             sample rate is shown in parenthesizes for reference.
@@ -210,10 +210,10 @@ specified. The boards do not respond with the effective sample rate.
 In the monitor response for 'core3h_mode', the implied sample rate is
 shown in parentheses for information purposes only.
 
-To use a non-zero 'mask2', the personality must be DDC_U.
-Additionally, there can't be bits turned on for BBCs in 'mask2' that
-exceed the number available as set by the number of BBCs per IF in
-'dbbc3.ctl'.
+To use a non-zero 'mask2', the personality must be DDC_v v126 or later
+or DDC_U. Additionally, there can't be bits turned on for BBCs in
+'mask2' that exceed the number available as set by the number of BBCs
+per IF in 'dbbc3.ctl'.
 
 There are five requirements for correct mask values:
 
@@ -226,51 +226,57 @@ There are five requirements for correct mask values:
   3. If both masks are non-zero, they must have the same number of
      channels and width.
 
-  4. For DDC_V, 'mask1' must be non-zero and 'mask2' cannot be
-     non-zero.
+  4. For DDC_V before v126 and for DDC_E, 'mask1' must be non-zero and
+     'mask2' cannot be non-zero.
 
-  5. For DDC_U, at least one of 'mask1' and 'mask2' must be non-zero.
+  5. For DDC_V after v125 and for DDC_U, at least one of 'mask1' and
+     'mask2' must be non-zero.
+
 
 For DDC_U, if only one of the masks in a 'core3h_mode=n,...,'force'
 command is non-zero, the FS will command the board as though the other
-mask had the same value. (You will see the additional mask displayed
-in the monitor response for the board.) This is done to satisfy the
-Core3H board requirement that both masks must have the same number of
-channels and width (bits/channel). As a consequence of this, if you
-want to record data from only the first or second Core3H board output
-(that is to say only 'mask1' or 'mask2' is commanded as non-zero in
-the 'core3h_mode' command), you will need to disable the other output
-with the Core3H board command 'destination 0 none' (or 'destination 1
-none', as appropriate). (The monitor value for a mask with the
-destination set to 'none' will be display in curly braces, '{...}',
-see below.) The FS commanding the non-zero mask in place of the zero
-one has no impact on what channels are used by the FS internally,
-e.g., for Tsys monitoring. That is controlled entirely by what masks
-were specified in the 'core3h_mode' command.
+mask had the same value. This is done to satisfy the Core3H board
+requirement that both masks must have the same number of channels and
+width (bits/channel). As a consequence of this, if you want to record
+data from only the first or second Core3H board output (that is to say
+only 'mask1' or 'mask2' is commanded as non-zero in the 'core3h_mode'
+command), you will need to disable the other output with the Core3H
+board command 'destination 1 none' (or 'destination 0 none', as
+appropriate). (The monitor value for a mask with the destination set
+to 'none' will be display in curly braces, '{...}', see below.) The FS
+commanding the non-zero mask in place of the zero one has no impact on
+what channels are used by the FS internally, e.g., for Tsys
+monitoring. That is controlled entirely by what masks were specified
+in the 'core3h_mode' command.
 
-For DDC_V, the board's 'destination 1' does not need to be set to
-'none' because that output is disabled by the firmware.
+For DDC_V versions after v125 and DDC_E, the board's 'destination 1'
+must be set be set to 'none' because the output on 'destination 0' is
+copied to 'destination 1', which may case redundant data to be
+recorded. For DDC_V before v126, the setting of 'destination 0'
+doesn't matter since that output is disabled by the firmware.
 
 The monitor display values for 'mask2' or 'mask1' will be followed by
 the Core3H board values of 'mask4' or 'mask3', respectively, in square
 brackets, '[...]', _if_ they do not have the expected values. For
 DDC_U, the value of 'mask4' is expected to agree with 'mask2' and
 'mask3' is expected to agree with 'mask1'. For the DDC_V personality,
-'mask4' and 'mask3' (and additionally 'mask2') are expected to be
-zero. If the masks do not have the expected values they are not
-configured correctly. It is a requirement for DDC_U operation that the
-'mask4' and 'mask3' agree with 'mask2' and 'mask1', respectively. For
-DDC_V, only 'mask1' should be non-zero.
+'mask4' and 'mask3' are expected to be zero. If the masks do not have
+the expected values, they are not configured correctly. It is a
+requirement for DDC_U operation that the 'mask4' and 'mask3' agree
+with 'mask2' and 'mask1', respectively. For DDC_V versions before
+v126, only 'mask1' should be non-zero. For DDC_V versions after v125,
+only 'mask1' and 'mask2' should be non-zero.
 
 The display values for the masks are enclosed in curly braces,
 '{...}', if they are non-zero and the corresponding output destination
-('0' for 'mask1'/'mask3', '1' for 'mask2'/'mask4') is set to 'none'.
+('0' for 'mask1' for all firmware personalities/versions and 'mask2'
+for DDC_V v126 and later, '1' for 'mask2' for DDC_U) is set to 'none'.
 This indicates that there is no output for that mask even though it is
 non-zero. The destination is not set by 'core3h_mode'. It must be set
 by other means, usually the boot configuration or low-level
-'core3h=...' SNAP commands. For DDC_V, curly braces are always used
-for 'mask2'/'mask4' (if non-zero) since that output is inherently
-disabled.
+'core3h=...' SNAP commands. For DDC_V versions before v126 for all
+DDC_E versions, curly braces are always used for 'mask2' (if non-zero)
+since there is no output for that mask.
 
 The meaning of the bits in the mask are given in the following table
 starting with the least significant bit. Mask1 represents the first
