@@ -316,18 +316,23 @@ send:
             ierr=-600;
         }
 
-        if((DBBC3_DDCU==shm_addr->equip.rack_type ||
-            DBBC3_DDCE==shm_addr->equip.rack_type) && 4!=lclm.vsi_input.vsi_input) {
-            logitn(NULL,-621,"dr",iboard);
-            ierr=-600;
-        } else if(DBBC3_DDCV==shm_addr->equip.rack_type && 126 == shm_addr->dbbc3_ddcv_v) {
+        if(DBBC3_DDCU==shm_addr->equip.rack_type ||
+            DBBC3_DDCE==shm_addr->equip.rack_type && 126 >= shm_addr->dbbc3_ddce_v) {
+            if( 4!=lclm.vsi_input.vsi_input) {
+                logitn(NULL,-621,"dr",iboard);
+                ierr=-600;
+            }
+        } else if(DBBC3_DDCV==shm_addr->equip.rack_type && 126 <= shm_addr->dbbc3_ddcv_v ||
+                   DBBC3_DDCE==shm_addr->equip.rack_type && 126 < shm_addr->dbbc3_ddce_v) {
             if(3!=lclm.vsi_input.vsi_input) {
                 logitn(NULL,-635,"dr",iboard);
                 ierr=-600;
             }
-        } else if(DBBC3_DDCV==shm_addr->equip.rack_type && 1!=lclm.vsi_input.vsi_input) {
-            logitn(NULL,-622,"dr",iboard);
-            ierr=-600;
+        } else if(DBBC3_DDCV==shm_addr->equip.rack_type) {
+            if(1!=lclm.vsi_input.vsi_input) {
+                logitn(NULL,-622,"dr",iboard);
+                ierr=-600;
+            }
         }
 
         if(shm_addr->dbbc3_core3h_modex[iboard-1].start.start != lclc.start.start) {
