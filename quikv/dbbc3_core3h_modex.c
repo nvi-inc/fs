@@ -470,8 +470,7 @@ parse:
     strcpy(outbuf,"core3h=");
     strcat(outbuf,board[iboard]);
 
-    if(DBBC3_DDCU == shm_addr->equip.rack_type ||
-       DBBC3_DDCE == shm_addr->equip.rack_type)
+    if(DBBC3_DDCU == shm_addr->equip.rack_type)
         strcat(outbuf,",splitmode on");
     else
         strcat(outbuf,",splitmode off");
