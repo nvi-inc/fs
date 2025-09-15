@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020, 2024 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -26,3 +26,6 @@ ssize_t unmarshal_adb3l_t(adb3l_t *t, uint8_t *data, size_t n);
 ssize_t unmarshal_core3h_t(core3h_t *t, uint8_t *data, size_t n);
 ssize_t unmarshal_bbc_t(bbc_t *t, uint8_t *data, size_t n);
 ssize_t unmarshal_dbbc3_ddc_multicast_t(dbbc3_ddc_multicast_t *t, uint8_t *data, size_t n);
+
+ssize_t unmarshal_core3h_t_v_126(core3h_t *t, uint8_t *data, size_t n);
+ssize_t unmarshal_dbbc3_ddc_multicast_t_v_126(dbbc3_ddc_multicast_t *t, uint8_t *data, size_t n);

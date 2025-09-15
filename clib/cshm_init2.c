@@ -39,8 +39,8 @@ void cshm_init2()
 {
   int i,j;
   static int time_included = -1;
+  static int epoch_inserted = -1;
   char *ptr;
-
 
   if(0>time_included) {
       int actual, error;
@@ -51,7 +51,17 @@ void cshm_init2()
           time_included=0;
   }
 
+  if(0>epoch_inserted) {
+      int actual, error;
+      ptr=getenv_DBBC3("FS_DBBC3_MULTICAST_CORE3H_VDIF_EPOCH_INSERTED",&actual,NULL,&error,1);
+      if(0==error)
+          epoch_inserted=actual;
+      else
+          epoch_inserted=0;
+  }
+
   shm_addr->dbbc3_tsys_data.iping=0;
+  shm_addr->dbbc3_tsys_data.epoch_inserted=epoch_inserted;
   for(i=0;i<2;i++) {
       shm_addr->dbbc3_tsys_data.data[i].last=0;
       for(j=0;j<MAX_DBBC3_IF;j++) {

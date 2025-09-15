@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020, 2024 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -53,6 +53,7 @@ typedef struct {
 
 typedef struct {
     uint32_t timestamp;
+    uint32_t vdif_epoch;
     uint32_t pps_delay;
     uint32_t total_power_cal_on;
     uint32_t total_power_cal_off;

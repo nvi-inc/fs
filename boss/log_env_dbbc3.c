@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 NVI, Inc.
+ * Copyright (c) 2023-2024 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -35,6 +35,7 @@ void log_env_dbbc3__()
                    "FS_DBBC3_MULTICAST_CORE3H_POLARITY2_ON_OFF_SWAP",
                    "FS_DBBC3_MULTICAST_CORE3H_TIME_ADD_SECONDS",
                    "FS_DBBC3_MULTICAST_CORE3H_TIME_INCLUDED",
+                   "FS_DBBC3_MULTICAST_CORE3H_VDIF_EPOCH_INSERTED",
                    "FS_DBBC3_MULTICAST_VERSION_ERROR_MINUTES",
                    "FS_DBBC3_BBCNNN_TPI_USB_LSB_SWAP",
                    "FS_DBBC3_BBCNNN_GAIN_USB_LSB_SWAP",

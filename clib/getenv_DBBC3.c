@@ -80,6 +80,18 @@ char *getenv_DBBC3( char *env, int *actual_p, int *nominal_p, int *error_p, int 
              actual=0;
          else
              actual=nominal;
+    } else if(0==strcmp(env,"FS_DBBC3_MULTICAST_CORE3H_VDIF_EPOCH_INSERTED")) {
+        if(DBBC3==shm_addr->equip.rack &&
+           DBBC3_DDCV == shm_addr->equip.rack_type && shm_addr->dbbc3_ddcv_v>=126)
+             nominal=1;
+         else
+             nominal=0;
+         if(NULL!=ptr && 0==strcmp(ptr,"1"))
+             actual=1;
+         else if(NULL!=ptr)
+             actual=0;
+         else
+             actual=nominal;
     } else if(0==strcmp(env,"FS_DBBC3_MULTICAST_VERSION_ERROR_MINUTES")) {
         nominal=1;
         if(NULL!=ptr && 0==strcmp(ptr,"0"))

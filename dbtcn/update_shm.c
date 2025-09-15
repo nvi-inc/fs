@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2023 NVI, Inc.
+ * Copyright (c) 2020-2024 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -70,7 +70,10 @@ void update_shm( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
             cycle->ifc[i].time=seconds;
         else
             cycle->ifc[i].time=t->core3h[i].timestamp+epoch;
-        cycle->ifc[i].vdif_epoch=-1;
+        if(!shm_addr->dbbc3_tsys_data.epoch_inserted)
+          cycle->ifc[i].vdif_epoch=-1;
+        else
+          cycle->ifc[i].vdif_epoch=t->core3h[i].vdif_epoch;
         cycle->ifc[i].time_error=cycle->ifc[i].time-seconds;
     }
 
