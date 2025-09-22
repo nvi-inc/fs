@@ -160,6 +160,13 @@ void dbbc3_core3h_modex_dis(command,iboard,ip,force_set,options,kmon)
     strcpy(output,command->name);
     strcat(output,"/");
 
+    if(kcom) {
+        m5state_init(&lclm.mask3.state);
+        m5state_init(&lclm.mask4.state);
+        m5state_init(&lclm.none0.state);
+        m5state_init(&lclm.none1.state);
+    }
+
     count=0;
     while( count>= 0) {
         if (count > 0) strcat(output,",");

@@ -440,6 +440,7 @@ parse:
             ierr=-312;
             goto error;
         }
+        lcl.mask2.state.known=0;
     }
 
     lcl.set=1; /* needs to be set between the two memcpy()s,

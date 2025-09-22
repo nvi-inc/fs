@@ -198,33 +198,37 @@ void dbbc3_core3h_modex_enc(output,count,lclc,lclm,iboard)
                    (DBBC3_DDCU==shm_addr->equip.rack_type &&
                      lclm->none1.state.known && lclm->none1.none1 ||
                       DBBC3_DDCV==shm_addr->equip.rack_type && 126 <= shm_addr->dbbc3_ddcv_v &&
-                       lclm->none0.state.known && lclm->none0.none0 ||
-                      DBBC3_DDCV==shm_addr->equip.rack_type && 126 > shm_addr->dbbc3_ddcv_v ||
-                      DBBC3_DDCE==shm_addr->equip.rack_type);
+                       lclm->none0.state.known && lclm->none0.none0 );
             if(none)
                 strcpy(output,"{");
-            if(lclc->mask2.state.known && lclc->mask2.mask2) {
-                output=output+strlen(output);
-                strcpy(output,"0x");
-                m5sprintf(output+2,"%x",&lclc->mask2.mask2,&lclc->mask2.state);
+            if(lclc->mask2.state.known) {
+                if(DBBC3_DDCU == shm_addr->equip.rack_type ||
+                   DBBC3_DDCV==shm_addr->equip.rack_type && 126 <= shm_addr->dbbc3_ddcv_v ||
+                   DBBC3_DDCV==shm_addr->equip.rack_type && 126 >  shm_addr->dbbc3_ddcv_v && lclc->mask2.mask2 ||
+                   DBBC3_DDCE == shm_addr->equip.rack_type && lclc->mask1.state.known && lclc->mask2.mask2 != lclc->mask1.mask1) {
+                    output=output+strlen(output);
+                    strcpy(output,"0x");
+                    m5sprintf(output+2,"%x",&lclc->mask2.mask2,&lclc->mask2.state);
+                }
             }
             if(none) {
                 output=output+strlen(output);
                 strcpy(output,"}");
             }
 
-            if((DBBC3_DDCU == shm_addr->equip.rack_type ||
-                DBBC3_DDCE == shm_addr->equip.rack_type && 126 == shm_addr->dbbc3_ddce_v) &&
-               lclm->mask4.state.known && lclc->mask2.state.known &&
-               lclm->mask4.mask4 != lclc->mask2.mask2 ||
-               (DBBC3_DDCV == shm_addr->equip.rack_type ||
-                DBBC3_DDCE == shm_addr->equip.rack_type && 127 <= shm_addr->dbbc3_ddce_v) &&
-               lclm->mask4.state.known && lclm->mask4.mask4) {
-                output=output+strlen(output);
-                strcpy(output,"[0x");
-                m5sprintf(output+3,"%x",&lclm->mask4.mask4,&lclm->mask4.state);
-                output=output+strlen(output);
-                strcpy(output,"]");
+            if(lclm->mask4.state.known) {
+                if((DBBC3_DDCU == shm_addr->equip.rack_type ||
+                            DBBC3_DDCE == shm_addr->equip.rack_type && 126 >= shm_addr->dbbc3_ddce_v) &&
+                        lclc->mask2.state.known && lclm->mask4.mask4 != lclc->mask2.mask2 ||
+                        (DBBC3_DDCV == shm_addr->equip.rack_type ||
+                         DBBC3_DDCE == shm_addr->equip.rack_type && 127 <= shm_addr->dbbc3_ddce_v) &&
+                        lclm->mask4.mask4 ) {
+                    output=output+strlen(output);
+                    strcpy(output,"[0x");
+                    m5sprintf(output+3,"%x",&lclm->mask4.mask4,&lclm->mask4.state);
+                    output=output+strlen(output);
+                    strcpy(output,"]");
+                }
             }
             break;
         case 3:
@@ -242,18 +246,19 @@ void dbbc3_core3h_modex_enc(output,count,lclc,lclm,iboard)
                 strcpy(output,"}");
             }
 
-            if((DBBC3_DDCU == shm_addr->equip.rack_type ||
-                DBBC3_DDCE == shm_addr->equip.rack_type && 126 == shm_addr->dbbc3_ddce_v) &&
-              lclm->mask3.state.known && lclc->mask1.state.known &&
-              lclm->mask3.mask3 != lclc->mask1.mask1 ||
-               (DBBC3_DDCV == shm_addr->equip.rack_type ||
-                DBBC3_DDCE == shm_addr->equip.rack_type && 127 <= shm_addr->dbbc3_ddce_v) &&
-               lclm->mask3.state.known && lclm->mask3.mask3) {
-                output=output+strlen(output);
-                strcpy(output,"[0x");
-                m5sprintf(output+3,"%x",&lclm->mask3.mask3,&lclm->mask3.state);
-                output=output+strlen(output);
-                strcpy(output,"]");
+            if(lclm->mask3.state.known) {
+                if((DBBC3_DDCU == shm_addr->equip.rack_type ||
+                            DBBC3_DDCE == shm_addr->equip.rack_type && 126 >= shm_addr->dbbc3_ddce_v) &&
+                        lclc->mask1.state.known && lclm->mask3.mask3 != lclc->mask1.mask1 ||
+                        (DBBC3_DDCV == shm_addr->equip.rack_type ||
+                         DBBC3_DDCE == shm_addr->equip.rack_type && 127 <= shm_addr->dbbc3_ddce_v) &&
+                        lclm->mask3.mask3) {
+                    output=output+strlen(output);
+                    strcpy(output,"[0x");
+                    m5sprintf(output+3,"%x",&lclm->mask3.mask3,&lclm->mask3.state);
+                    output=output+strlen(output);
+                    strcpy(output,"]");
+                }
             }
             break;
         case 4:
