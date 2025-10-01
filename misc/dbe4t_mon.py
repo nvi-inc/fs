@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 import socket 
 import time 
@@ -6,14 +6,15 @@ import getopt
 import string
 import sys
 import struct
-import Tkinter as Tk
-import tkFont
+import tkinter as Tk
+import tkinter.font
 import matplotlib
+import warnings
 import os
 matplotlib.use('TkAgg')
 from matplotlib.figure import Figure
 import numpy as np
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from ctypes import *
 
 class TSYS(BigEndianStructure):
@@ -44,14 +45,14 @@ class TSYS(BigEndianStructure):
 parms = {'-h':"239.0.2.29", '-p':"20020", '-l':"off"}
 try:
     opts, pargs = getopt.getopt(sys.argv[1:], "h:p:l:", ["multicast host", "multicast port", "logging"])
-except getopt.GetoptError, msg:
+except getopt.GetoptError as msg:
     sys.exit(msg)
 for o,v in opts:
     parms[o] = v
 MCAST_ADDR = str(parms['-h'])
 MCAST_PORT = int(parms['-p'])
 LOGGING = str(parms['-l'])
-print "MCAST Host:", MCAST_ADDR, "MCAST Port:", MCAST_PORT, "logging:", LOGGING
+print("MCAST Host:", MCAST_ADDR, "MCAST Port:", MCAST_PORT, "logging:", LOGGING)
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
 sock.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
 sock.bind((MCAST_ADDR,MCAST_PORT))
@@ -62,10 +63,10 @@ def handle_input(sock, state):
     if state == Tk.READABLE:
         data, addr = sock.recvfrom(60000,socket.MSG_WAITALL)
         tsys=TSYS();
-        memmove(addressof(tsys), buffer(data)[:], min(sizeof(tsys), len(data)))
+        memmove(addressof(tsys), data, min(sizeof(tsys), len(data)))
         if LOGGING == 'on':
             flogdat.write(data)
-        rtm=tsys.read_time
+        rtm=tsys.read_time.decode()
         prtm=time.strptime(rtm, "%Y%j%H%M%S")
         frtm=time.strftime("%a %b %d",prtm)
         output = "%s : %d : %d : %s : %s" % (addr[0], tsys.epoch_ref, tsys.epoch_sec, frtm, rtm[0:4]+ '-' + rtm[4:7] + '-' + rtm[7:9] + '-' + rtm[9:11] + '-' + rtm[11:13] )
@@ -96,57 +97,63 @@ def handle_input(sock, state):
         axa.cla()
         axa.plot(pcaltmp.real,'r')
         axa.plot(pcaltmp.imag,'b')
-	axa.set_title('pulse cal IF' + str(tsys.pcal_ifx))
-        canvaspcal.show()
+        axa.set_title('pulse cal IF' + str(tsys.pcal_ifx))
+        canvaspcal.draw()
         axb.cla()
         axb.plot(np.log10(np.abs(pcaltmpfft[0:2048])),'b')
-	axb.set_title('pulse cal fft IF' + str(tsys.pcal_ifx))
+        axb.set_title('pulse cal fft IF' + str(tsys.pcal_ifx))
         axb.set_ylim([6,12])
-        canvaspcalfft.show()
+        canvaspcalfft.draw()
         pcalstr="pcal freq %.6f pps offset %7.0e gps offset %7.0e" % (tsys.pcal_freq, tsys.pps_offset, tsys.gps_offset)
         label3.config(text=pcalstr)
 
         axtsys0.cla()
         axtsys1.cla()
-        axtsys0.plot(np.log10(tsys.tsys0_on) ,'r')
-        axtsys0.plot(np.log10(tsys.tsys0_off),'b')
-        axtsys1.plot(np.log10(tsys.tsys1_on) ,'r')
-        axtsys1.plot(np.log10(tsys.tsys1_off) ,'b')
-	axtsys0.set_title('diode pwr IF0')
-	axtsys1.set_title('diode pwr IF1')
+        with np.errstate(divide = 'ignore'):
+            axtsys0.plot(np.log10(tsys.tsys0_on) ,'r')
+        with np.errstate(divide = 'ignore'):
+            axtsys0.plot(np.log10(tsys.tsys0_off),'b')
+        with np.errstate(divide = 'ignore'):
+            axtsys1.plot(np.log10(tsys.tsys1_on) ,'r')
+        with np.errstate(divide = 'ignore'):
+            axtsys1.plot(np.log10(tsys.tsys1_off) ,'b')
+        axtsys0.set_title('diode pwr IF0')
+        axtsys1.set_title('diode pwr IF1')
         axtsys0.set_ylim([2,8])
         axtsys1.set_ylim([2,8])
-        canvastsys.show()
+        canvastsys.draw()
 
         axtemp0.cla()
         axtemp1.cla()
-        axtemp0.plot(np.array(tsys.tsys0_on)/(np.array(tsys.tsys0_on)-np.array(tsys.tsys0_off)))
-        axtemp1.plot(np.array(tsys.tsys1_on)/(np.array(tsys.tsys1_on)-np.array(tsys.tsys1_off)))
-	axtemp0.set_title('tsys IF0')
-	axtemp1.set_title('tsys IF1')
+        with np.errstate(divide='ignore',invalid='ignore'):
+            axtemp0.plot(np.array(tsys.tsys0_on)/(np.array(tsys.tsys0_on)-np.array(tsys.tsys0_off)))
+        with np.errstate(divide='ignore',invalid='ignore'):
+            axtemp1.plot(np.array(tsys.tsys1_on)/(np.array(tsys.tsys1_on)-np.array(tsys.tsys1_off)))
+        axtemp0.set_title('tsys IF0')
+        axtemp1.set_title('tsys IF1')
         axtemp0.set_ylim([0,100])
         axtemp1.set_ylim([0,100])
-        canvastemp.show()
+        canvastemp.draw()
 
         axbst0.cla()
         axbst1.cla()
         axbst0.plot(np.array(tsys.lbc0))
         axbst1.plot(np.array(tsys.lbc1))
-	axbst0.set_title('Bstate IF0')
-	axbst1.set_title('Bstate IF1')
+        axbst0.set_title('Bstate IF0')
+        axbst1.set_title('Bstate IF1')
         axbst0.set_ylim([0,1])
         axbst1.set_ylim([0,1])
-        canvasbst.show()
+        canvasbst.draw()
 
 root = Tk.Tk()
 root.tk_setPalette(background='white')
-default_font = tkFont.Font(family="Helvetica", size=7)
-text_font = tkFont.Font(family="Helvetica", size=7)
-fixed_font = tkFont.Font(family="Helvetica", size=7)
-matplotlib.rc('figure',figsize=(4,.8),dpi=96)
+default_font = tkinter.font.Font(family="Helvetica", size=12)
+text_font = tkinter.font.Font(family="Helvetica", size=12)
+fixed_font = tkinter.font.Font(family="Helvetica", size=12)
+matplotlib.rc('figure',figsize=(4,1.6),dpi=96)
 matplotlib.rcParams['figure.subplot.bottom']=0.2
 matplotlib.rcParams['figure.subplot.top']=0.8
-matplotlib.rc('font',size=5)
+matplotlib.rc('font',size=10)
 
 root.createfilehandler(sock,Tk.READABLE, handle_input)
 root.title('R2DBE Monitor svn 10261 ' + MCAST_ADDR + ' ' + str(MCAST_PORT))
@@ -160,23 +167,33 @@ label3.pack(anchor='w')
 figpcal = Figure()
 axpcal0 = figpcal.add_subplot(121)
 axpcal1 = figpcal.add_subplot(122)
-figpcal.tight_layout()
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore",matplotlib.MatplotlibDeprecationWarning)
+    figpcal.tight_layout()
 figpcalfft = Figure()
 axpcalfft0 = figpcalfft.add_subplot(121)
 axpcalfft1 = figpcalfft.add_subplot(122)
-figpcalfft.tight_layout()
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore",matplotlib.MatplotlibDeprecationWarning)
+    figpcalfft.tight_layout()
 figtsys = Figure()
 axtsys0 = figtsys.add_subplot(121)
 axtsys1 = figtsys.add_subplot(122)
-figtsys.tight_layout()
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore",matplotlib.MatplotlibDeprecationWarning)
+    figtsys.tight_layout()
 figtemp = Figure()
 axtemp0 = figtemp.add_subplot(121)
 axtemp1 = figtemp.add_subplot(122)
-figtemp.tight_layout()
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore",matplotlib.MatplotlibDeprecationWarning)
+    figtemp.tight_layout()
 figbst = Figure()
 axbst0 = figbst.add_subplot(121)
 axbst1 = figbst.add_subplot(122)
-figbst.tight_layout()
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore",matplotlib.MatplotlibDeprecationWarning)
+    figbst.tight_layout()
 
 canvaspcal = FigureCanvasTkAgg(figpcal, master=root)
 canvaspcal.get_tk_widget().pack(fill='both', expand=1)
