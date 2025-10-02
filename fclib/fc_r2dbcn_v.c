@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 NVI, Inc.
+ * Copyright (c) 2024, 2025 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -20,7 +20,7 @@
 void fc_r2dbcn_d__(device,ierr,ip)
 char device[2];
 int *ierr;
-long ip[5];
+int ip[5];
 {
     void rdbcn_d();
 
