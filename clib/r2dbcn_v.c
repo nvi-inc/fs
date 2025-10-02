@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 NVI, Inc.
+ * Copyright (c) 2024, 2025  NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -43,7 +43,7 @@ void r2dbcn_d(device, ierr,ip)
 char device[4];                        /* device mnemonic */
 int *ierr;                             /* error return, -1 if no such device */
                                        /*                0 okay              */
-long ip[5];
+int ip[5];
 {
   char crdbe;
 
@@ -64,7 +64,7 @@ long ip[5];
 
   return;
 }
-void r2dbcn_v(double *dtpi, double *dtpi2, long ip[5], int *icont, int *isamples)
+void r2dbcn_v(double *dtpi, double *dtpi2, int ip[5], int *icont, int *isamples)
 {
   char str[20];
   int rtn1;    /* argument for cls_rcv - unused */
@@ -75,7 +75,7 @@ void r2dbcn_v(double *dtpi, double *dtpi2, long ip[5], int *icont, int *isamples
   char buf[BUFSIZE];
   int out_recs,out_class;
   char name[6];
-  long on[MAX_R2DBE_CH],off[MAX_R2DBE_CH];
+  int on[MAX_R2DBE_CH],off[MAX_R2DBE_CH];
   int ierr,ifcr;
 
   out_recs=0;
