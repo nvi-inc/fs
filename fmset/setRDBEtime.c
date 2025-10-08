@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, 2022 NVI, Inc.
+ * Copyright (c) 2020, 2022, 2025 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -48,7 +48,7 @@ time_t formtime;
 int delta;
 {
 int count;
- char *name;
+char *name, letter;
 
         RDBE_data_send( 0);
 
@@ -91,6 +91,8 @@ ip[4] = 0;
    rte_sleep(SLEEP_TIME);
    exit(0);
  }
+ letter=name[4];
+
  nsem_take("fsctl",0);
 
 	while(skd_run_to(name,'w',ip,200)==1) {
@@ -110,7 +112,7 @@ inclass = ip[0];
 if( ip[2] < 0 )
 	{
 	endwin();
-	fprintf(stderr,"Error %d from rdbc%d\n",ip[2],iRDBE);
+	fprintf(stderr,"Error %d from rdbc%c\n",ip[2],letter);
         logita(NULL,ip[2],ip+3,ip+4);
 	cls_clr(outclass);
 	cls_clr(inclass);

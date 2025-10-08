@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, 2022 NVI, Inc.
+ * Copyright (c) 2020, 2022, 2025 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -51,7 +51,7 @@ int *vdif_epoch;
 {
 	int centisec[6], centiavg, centidiff, hsdiff;
         int it[6];
-	char *name;
+	char *name, letter;
 	char *str;
 	int out_recs;
 	int out_class;
@@ -59,6 +59,22 @@ int *vdif_epoch;
 	int start_raw,now_raw;
         int formtime32;
         int fstime32;
+
+	if(1==iRDBE) {
+	  name="rdbca";
+	} else if(2==iRDBE) {
+	  name="rdbcb";
+	} else if(3==iRDBE) {
+	  name="rdbcc";
+	} else if(4==iRDBE) {
+	  name="rdbcd";
+	} else {
+	  endwin();
+	  fprintf(stderr,"Internal error in getRDBEtime, no RDBE selected\n");
+	  rte_sleep(SLEEP_TIME);
+	  exit(0);
+	}
+	letter=name[4];
 
 	if(synch) {
           synch=0;
@@ -86,16 +102,12 @@ int *vdif_epoch;
 	  ip[2]=out_recs;
 	  
 	  if(1==iRDBE) {
-	    name="rdbca";
 	    logit("rdbe-A sync command sent.",0,NULL);
 	  } else if(2==iRDBE) {
-	    name="rdbcb";
 	    logit("rdbe-B sync command sent.",0,NULL);
 	  } else if(3==iRDBE) {
-	    name="rdbcc";
 	    logit("rdbe-C sync command sent.",0,NULL);
 	  } else if(4==iRDBE) {
-	    name="rdbcd";
 	    logit("rdbe-D sync command sent.",0,NULL);
 	  } else {
 	    endwin();
@@ -121,7 +133,7 @@ int *vdif_epoch;
 	    {
 	      if(ip[2] != -104) {
 		endwin();
-		fprintf(stderr,"Error %d from rdbc%d\n",ip[2],iRDBE);
+		fprintf(stderr,"Error %d from rdbc%c\n",ip[2],letter);
 		logita(NULL,ip[2],ip+3,ip+4);
 		rte_sleep(SLEEP_TIME);
 		exit(0);
@@ -143,7 +155,7 @@ int *vdif_epoch;
 	if( ip[2] != 0 )
 		{
 		endwin();
-		fprintf(stderr,"Error %d from rdbc%d\n",ip[2],iRDBE);
+		fprintf(stderr,"Error %d from rdbc%c\n",ip[2],letter);
                 logita(NULL,ip[2],ip+3,ip+4);
                 rte_sleep(SLEEP_TIME);
 		exit(0);
