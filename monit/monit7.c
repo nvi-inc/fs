@@ -154,13 +154,11 @@ main(int argc, char *argv[])
     int is_escape=0;
     int is_lb=0;
     int is_inter=0;
-    int alternating=shm_addr->dbbc3_ignore_alt_mcast_to;
     for(;;) {
         rte_time(it,it+5);
         isleep=100-it[0];
         isleep=isleep>100?100:isleep;
         isleep=isleep<1?100:isleep;
-        if(alternating && it[1]%2==1) isleep+=100;
         rte_sleep((unsigned) isleep);
 
         if (nsem_test("fs   ") != 1) {
