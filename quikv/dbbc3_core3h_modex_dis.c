@@ -316,9 +316,11 @@ send:
             ierr=-600;
         }
 
-        if(DBBC3_DDCU==shm_addr->equip.rack_type && 1!=lclm.splitmode.splitmode) {
-            logitn(NULL,-619,"dr",iboard);
-            ierr=-600;
+        if(DBBC3_DDCU==shm_addr->equip.rack_type || DBBC3_DDCE==shm_addr->equip.rack_type && 126 >= shm_addr->dbbc3_ddce_v) {
+            if(1!=lclm.splitmode.splitmode) {
+              logitn(NULL,-619,"dr",iboard);
+              ierr=-600;
+            }
         } else if(0!=lclm.splitmode.splitmode) {
             logitn(NULL,-620,"dr",iboard);
             ierr=-600;
