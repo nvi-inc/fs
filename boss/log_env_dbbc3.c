@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 NVI, Inc.
+ * Copyright (c) 2023-2025 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -22,11 +22,13 @@
 #include <string.h>
 
 char *getenv_DBBC3( char *env, int *actual, int *nominal, int *error, int options);
+char *getenv_DBBC3_string( char *env, char **actual, char **nominal, int *error, int options);
 
 void log_env_dbbc3__()
 {
     char *ptr;
     int i,actual, nominal, error;
+    char *actual_string, *nominal_string;
     char buf[128];
     char *env[ ]= {
                    "FS_DBBC3_MULTICAST_BBC_TPI_USB_LSB_SWAP",
@@ -46,10 +48,21 @@ void log_env_dbbc3__()
                    "FS_DBBC3_BBC_GAIN_USB_LSB_SWAP",
                    NULL };
 
+    char *env_string[ ]= {
+                   "FS_DBBC3_CORE3H_MODE_FORCE_DEFAULT",
+                   NULL };
+
     for (i=0;i<sizeof(env)/sizeof(char *)-1;i++) {
         ptr=getenv_DBBC3(env[i],&actual,&nominal,&error,1);
         if(0==error && actual!=nominal) {
            snprintf(buf,128,"%s,%d,(%d)",env[i],actual,nominal);
+           logits(buf,0,NULL,':');
+        }
+    }
+    for (i=0;NULL!=env_string[i];i++) {
+        ptr=getenv_DBBC3_string(env_string[i],&actual_string,&nominal_string,&error,1);
+        if(0==error && strcmp(actual_string,nominal_string)) {
+           snprintf(buf,128,"%s,%s,(%s)",env_string[i],actual_string,nominal_string);
            logits(buf,0,NULL,':');
         }
     }

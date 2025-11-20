@@ -260,8 +260,11 @@ void dbbc3_core3h_modex(command,itask,ip)
         int okay = 0;
         if(NULL != command->argv[1]) {
             force=0==strcmp("force",command->argv[1]) ||
-                  0==strcmp("keepsync",command->argv[1]);
-            if(!force && 0!=strcmp("$",command->argv[1]) &&
+                  0==strcmp("keepsync",command->argv[1])||
+                  0==strcmp("noreset",command->argv[1])||
+                  0==strcmp("resetlast",command->argv[1])||
+                  0==strcmp("keepsynclast",command->argv[1]);
+            if(!force && 0!=strcmp("$",command->argv[1]) && 0!=strcmp("check",command->argv[1]) &&
                     0!=strlen(command->argv[1])) {
                 ierr=-304;
                 goto error;
@@ -491,18 +494,31 @@ parse:
     cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
     out_recs++;
 
-    strcpy(outbuf,"core3h=");
-    strcat(outbuf,board[iboard]);
-    strcat(outbuf,",reset");
-    if(2==lcl.force.force)
-      strcat(outbuf," keepsync");
-    cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
-    out_recs++;
+    if(3>lcl.force.force) {
+        strcpy(outbuf,"core3h=");
+        strcat(outbuf,board[iboard]);
+        strcat(outbuf,",reset");
+        if(2==lcl.force.force)
+            strcat(outbuf," keepsync");
+        cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
+        out_recs++;
+    }
 
     vdif_frame_2_dbbc3_core3h(outbuf,&lcl,board[iboard]);
     cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
     out_recs++;
 
+    if(3<lcl.force.force && lcl.force.force<6) {
+        strcpy(outbuf,"core3h=");
+        strcat(outbuf,board[iboard]);
+        strcat(outbuf,",reset");
+        if(5==lcl.force.force)
+            strcat(outbuf," keepsync");
+        cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
+        out_recs++;
+    }
+
+    vdif_frame_2_dbbc3_core3h(outbuf,&lcl,board[iboard]);
 dbbcn:
     ip[0]=9;
     ip[1]=out_class;

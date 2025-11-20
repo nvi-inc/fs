@@ -33,7 +33,9 @@
 #include "../include/fscom.h"         /* shared memory definition */
 #include "../include/shm_addr.h"      /* shared memory pointer */
 
-static char *force_key[ ]=         { "$", "force","keepsync" };
+char *getenv_DBBC3_string( char *env, char **actual, char **nominal, int *error, int options);
+
+static char *force_key[ ]=         { "check", "force", "keepsync", "noreset", "resetlast", "keepsynclast" };
 static char *disk_key[ ]=         { "disk_record_ok" };
 static char *split_key[ ]=         { "off", "on" };
 static char *input_key[ ]=         { "tvg","vsi1","vsi2","vsi1-2","vsi1-2-3-4","gps" };
@@ -57,6 +59,7 @@ int dbbc3_core3h_modex_dec(lcl,count,ptr)
     int ierr, i, arg_key();
     float sample;
     int crate;
+    int default_value;
 
     ierr=0;
     if(ptr == NULL) ptr="";
@@ -149,7 +152,45 @@ int dbbc3_core3h_modex_dec(lcl,count,ptr)
             }
             break;
         case 6:
-            ierr=arg_key(ptr,force_key,NFORCE_KEY,&lcl->force.force,0,TRUE);
+            default_value=0;
+            if(!strcmp(ptr,"$") ||!strcmp(ptr,"")) {
+                char *actual_string,*nominal_string;
+                int error;
+                char env[] = {"FS_DBBC3_CORE3H_MODE_FORCE_DEFAULT"};
+                char *val=getenv_DBBC3_string(env,&actual_string,&nominal_string,&error,0);
+                if(-1==error) {
+                    /* there is a mismatch between the env var name here and in getenv_DBBC3_string() */
+                    ierr=-210;
+                    break;
+                } else if (-2==error) {
+                    /* this can only happen if boss, via getenv_dbbc3_string(), failed to trap this error */
+                    char buf[128];
+                    snprintf(buf,128,"Unknown value for '%s': '%s'.",env,val);
+                    logite(buf,-226,"dr");
+                    ierr=-230;
+                    break;
+                } else if(error) {
+                    /* this can only happen if boss, via getenv_dbbc3_string(), failed to trap this error */
+                    char buf[128];
+                    snprintf(buf,128,"Unknown error, %d, getting value of: '%s'.",error,env);
+                    logite(buf,-226,"dr");
+                    ierr=-240;
+                    break;
+                } else {
+                    ptr="";
+                    ierr=arg_key(actual_string,force_key,NFORCE_KEY,&default_value,0,FALSE);
+                    if(ierr != 0) {
+                        /* there is a mismatch between the values here and in getenv_DBBC3_string() */
+                        /* and maybe also in log_env_dbbc3() */
+                        char buf[128];
+                        snprintf(buf,128,"Unsupported value for '%s': '%s'.",env,actual_string);
+                        logite(buf,-226,"dr");
+                        ierr=-250;
+                        break;
+                    }
+                }
+            }
+            ierr=arg_key(ptr,force_key,NFORCE_KEY,&lcl->force.force,default_value,TRUE);
             m5state_init(&lcl->force.state);
             if(ierr==0) {
                 lcl->force.state.known=1;

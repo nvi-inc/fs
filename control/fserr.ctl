@@ -2880,7 +2880,7 @@ DR -205
 Sample rate must either be null or a positive number.
 ""
 DR -206
-The 'force' parameter must be 'force', '$', or null.
+The 'force' parameter must be null or one of $, check, force, keepsync, noreset, resetlast, or keepsynclast.
 ""
 DR -207
 The 'okay' parameter must be 'disk_record_ok' or null.
@@ -2891,11 +2891,26 @@ For DBBC3 DDC_V decimate must be 1 or 2.
 DR -215
 Clock rate (MHz: 256 for DDC_U or 128 for DDC_V) divided by sample rate must be an integer 1-255.
 ""
+DR -216
+Internal error in environment variable name for FS_DBBC3_CORE3H_MODE_FORCE_DEFAULT
+""
 DR -225
 Can't specify sample rate and decimate parameters simultaneously.
 ""
+DR -226 Placeholder for variable FS_DBBC3_CORE3H_MODE_FORCE_DEFAULT messages
+
+""
 DR -235
 For DBBC3 DDC_V sample rate must imply a decimate of 1 or 2.
+""
+DR -236
+Unrecognized value for FS_DBBC3_CORE3H_MODE_FORCE_DEFAULT
+""
+DR -246
+Unknown error getting value of FS_DBBC3_CORE3H_MODE_FORCE_DEFAULT
+""
+DR -256
+Value of FS_DBBC3_CORE3H_MODE_FORCE_DEFAULT must be: check, force, keepsync, noreset, resetlast, or keepsynclast
 ""
 DR -301
 Can't change mode while recording, use disk_record=off first or (dangerous) use 'disk_record_ok' as 'okay' parameter.
@@ -2907,7 +2922,7 @@ DR -303
 Can't specify 'mask2' for more BBCs per IF than set in dbbc3.ctl.
 ""
 DR -304
-The 'force' parameter must be 'force', '$', or null.
+The 'force' parameter must be null or one of $, check, force, keepsync, noreset, resetlast, or keepsynclast.
 ""
 DR -305
 Internal error, impossible state clause.
