@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020 NVI, Inc.
+* Copyright (c) 2020, 2025 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -23,6 +23,7 @@
       include '../skdrincl/freqs.ftni'
       include 'drcom.ftni'
 
+! 2025-11-20 JMGipson. Modified so that Pcal offset has same precision for skd/vex
 ! 2021-12-22 JMGipson. Used drudg_write for consistency 
 ! make and write out the lo command.
 ! on entry
@@ -61,7 +62,7 @@
           nch=nch+ir2as(rpc,ibuf,nch,5,3)
         endif
       else if(kgeo) then
-         nch=ichmv_ch(ibuf,nch,"rcp,1")
+         nch=ichmv_ch(ibuf,nch,"rcp,1.000")
       endif ! have pol and pcal
       call drudg_write(lu_outfile,cbuf)     
       return

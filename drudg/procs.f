@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020-2021 NVI, Inc.
+* Copyright (c) 2020-2021, 2025 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -30,6 +30,8 @@ C Version 9.0 is supported with this routine.
       include '../skdrincl/data_xfer.ftni'
 
 ! History Now with most recent at top. 
+! 2025-11-20 JMG. Modified so that phase-cal behavior is the same 
+!                for skd files and vex files created by sked.
 ! 2021-09-28 JMG Fixed problem with truncating DBBC3_DDC. Also got rid of writing out second recorder which is obsolete
 ! 2021-02-08 JMG Introuduced lvdif_thread
 ! 2021-01-05 JMG Replaced max_frq by max_code. (Max_frq was confusing and led to coding errors.)
@@ -462,11 +464,12 @@ C    for procedure names.
         call lowercase(codtmp)
 
         kpcal = .true.    ! on/off switch, default is on for non-VEX files
-        kpcal_d = .false. ! detection or not
+        kpcal_d = .false. ! detection or not 
         if (kvex) then ! check for on/off
           kpcal = .false.
           do ic=1,nchan(istn,icode)
             if(freqpcal(ic,istn,icode) .gt.0) kpcal = .true.
+            if(kgeo) cycle 
             if(npctone(ic,istn,icode)  .ne.0) kpcal_d =.true.
           end do
         endif ! check for on/off
