@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020 NVI, Inc.
+* Copyright (c) 2020, 2025 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -36,6 +36,8 @@ C  4. Track assignments in "itras" are converted to VLBA
 C     track numbers when they are returned in "itrk".
 C
 C History
+! 2023-09-19 JMG. Got rid of bounds checking error 
+
 C 951214 nrv New.
 C 960124 nrv Bad fan-out logic replaced.
 C 960201 nrv Worse fan-out logic replaced.
@@ -137,12 +139,20 @@ C                       itrax(isb,ibit,ihd,ichan+6)=it+6
 
 C 3. Fan-in mode. Not implemented.
       iy=index(cmode,":1")
-! 1:1 is valid mode--no fanout or fanint
-      if (iy.ne.0. .and. cmode(iy-1:iy-1) .ne. "1") then ! fan-in
-        write(*,*) "TRKALL: Fan in mode not implemented!"
-        write(*,*) "Mode: ", cmode
-!        read(cmode(1:iy-1),*) n
+! Only valid fanint mode is 1:1. This has no fanout or fanin.       
+    
+      
+! 2023-09-19 JMGipson. Previously had single if step: 
+!      if(iy .ne. 0 .and. cmode(iy-1:iy-1) .ne. "1") then
+!    But this  caused problems on bounds checking if iy=0 
+  
+
+      if (iy.ne.0)  then 
+       if(cmode(iy-1:iy-1) .ne. "1") then ! fan-in
+         write(*,*) "TRKALL: Fan in mode not implemented!"
+         write(*,*) "Mode: ", cmode
         return
+       endif 
       endif
 C
       endif ! VLBA mode and check for fan

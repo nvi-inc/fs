@@ -1,4 +1,9 @@
 This file contains a summary of changes made and why.
+2025-11-20 procs.f    Modified so that phase-cal behavior is the same  for skd files and vex files created by sked.
+2025-11-20 proc_lo.f:  Modified so that Pcal offset has same precision for skd/vex
+2025-11-20 Following 2 were merged in from JMG development version which ran on NASA VM.
+   2023-09-19 trkall.f    Fixed bounds error.  (Note. This was merged in from JMG development version.)
+   2022-03-19 ../skdrincl/statn.ftni  Increased char variable for recorder:  8-->12  (This was merged in from JMG development version.)
 2023-02-21 ../skdrut/vglinp.f:  changed length of read in variable from 8 to 16
 2023-02-21 snap.f: Now uses cexper for session code. Previously derived from filename
 2023-02-21 strip_path.f:  Fixed sleeping bug which caused overwrite of memory when extracting file_name.
