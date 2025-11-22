@@ -239,13 +239,17 @@ is intended to be the primary DBBC3 version check for the
 - the final command of such a setup/check, which should make the error
   more visible
 
-The 'core3h_mode=n,...,force' commands also check the DBBC3 firmware
+The 'core3h_mode=n,...,force' commands also checks the DBBC3 firmware
 version.
+
+Note that the DBBC3 firmware version is also checked in the multicast
+data.
 
 If a '?' parameter is included just after 'n', e.g.,
 'core3h_mode=1,?', the FS's model for that board's configuration is
 reported. The model for all boards can be reported with
-'core3h_mode=?'.
+'core3h_mode=?'. (This use of '?' is supported by most other device
+commands.)
 
 The decimation factor can be specified in the SNAP command either
 explicitly with the 'decimation' parameter or implicitly with the
