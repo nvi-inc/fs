@@ -12,7 +12,11 @@ Settable parameters:
 state:      'begin' or 'end'. No default, see 'Comments' section for
             the details.
 
-force:      force setup: literal 'force', 'keepsync', '$', or null.
+force:      force setup: literal 'check', 'force', 'keepsync','noreset',
+            'resetlast', 'keepsynclast', '$', or null.
+            The meaning of '$' or null is nominally 'check', but can be
+            modified with the environment variable
+            'FS_DBBC3_CORE3H_MODE_FORCE_DEFAULT'.
             See comments.
 
 okay        override to allow command while recording, literal text:
@@ -66,42 +70,86 @@ sync        whether the board is synced: 'synced' or 'unsynced'
 Comments:
 
 This command is unusual as a FS command in two ways. First, instead of
-two Forms, Command and Monitor, it has three:
+two forms, Command and Monitor, it has three:
 
 1. Command Form -- This Form, invoked as 'core3h_mde=n,...,force', (or
-   'core3n_mode=,...,keepsync') is similar in function to the Command
-   Form of the commands for other devices. It commands the Core3H
-   board specified by 'n' with the configuration specified by the
-   other parameters when 'force' (or 'keepsync') is included as the
-   sixth parameter. The Command Form also updates the FS's model of
-   the device's configuration. The use of the 'force' (or 'keepsync')
-   parameter is unusual for a Command Form; it is used in this case to
-   distinguish it from the Checking Form (see below). Any errors
-   reported indicate there was a problem configuring the board.
+   with other "forcing" values 'keepsync','noreset', 'resetlast',
+   'keepsynclast' in place of 'force') is similar in function to the
+   Command Form of the commands for other devices. It commands the
+   Core3H board specified by 'n' with the configuration specified by
+   the other parameters when 'force' (or other forcing values) is
+   included as the sixth parameter. The Command Form also updates the
+   FS's model of the device's configuration. The use of the forcing
+   values is unusual for a Command Form; they are used to distinguish
+   them from the Checking Form (see below). Any errors reported
+   indicate there was a problem configuring the board.
 
-   The 'core3h_mode=end,force' (or 'core3h_mode=end,keepsync') command
+   At the time of this release, using the Command Form (except with
+   'force' for determining the boot configuration) is considered
+   experimental.
+
+   The 'core3h_mode=end,force' (or with other forcing values) command
    is also a Command Form. It sets the transmission state for each
    board.
 
+   The meaning of forcing values are:
+
+     force -- Sends the setup with a 'reset' before the 'vdif_frame'
+              command. This is the historical approach and also used
+              for obtaining the commends needed in the DBBC3 boot
+              configuration files for the mode. Its use in the FS
+              requires a re-sync of the DBBC3 before data transmission
+              can be started.
+
+      keepsync -- The same as 'force', but adds 'keepsync' to the
+                  'reset' command. If sync is maintained, no re-sync
+                  should be needed, in principle. The user should be
+                  wary of problems.
+
+      noreset -- The same as 'force', but no 'reset' is sent. If sync
+                 is maintained, no re-sync should be needed, in
+                 principle. Additionally, depending on what was
+                 changed in the configuration (details TBD), a 'reset'
+                 may in fact be required. The user should be wary on
+                 both counts.
+
+       resetlast -- The same as 'force', but the 'reset' is sent after
+                    the 'vdif_frame' command, which may in fact be the
+                    necessary order (to be verified). The user should
+                    be wary of problems. Using this value requires a
+                    re-sync of the DBBC3 before data transmission can
+                    be started.
+
+       keepsynclast -- The same as 'resetlast', but adds 'keepsync' to
+                       the 'reset' command. This ordering of the
+                       'reset' and'vdif_frame' may required (to be
+                       verified). If sync is maintained, no re-sync
+                       should be needed, in principle. The user should
+                       be wary on both counts.
+
+        If sync is lost, it should be reported when starting data
+        transmission with 'core3h_mode=end,force' (or other forcing
+        values).
+
 2. Checking Form -- This Form is unique to 'core3h_mode'. Its use is
-   similar to the Command Form (see above), but the sixth parameter is
-   null (or '$'). In this case, the board is not commanded. Instead,
-   only the FS's model of the board's configuration is updated, each
+   similar to the Command Form (see above), but the 'force' parameter
+   is 'check'. In this case, the board is not commanded. Instead, only
+   the FS's model of the board's configuration is updated, each
    deviation of the board's actual configuration from the model is
    reported as an error, and the board's actual configuration is
    reported. If there are any deviations, a summary error message is
    printed after the actual configuration so that the command ends
    with an error.
 
-   The 'core3h_mode=end' command, without 'force' (and 'keepsync') is
-   also a Checking Form. It reports any deviations from what is
-   expected for which boards are transmitting data. The transmission
-   states themselves are not reported, but are available in the
-   Monitor Form for the boards (see below). If there were any
+   The 'core3h_mode=end' command, with 'check' is also a Checking
+   Form. It reports any deviations from what is expected for which
+   boards are transmitting data. The transmission states themselves
+   are not reported, but are available in the Checking Form and
+   Monitor Form (see below) for the boards. If there were any
    transmission state errors, a final summary error is produced.
    Otherwise, no news is good news.
 
-3. Monitor Form -- This Form is similar in function to the Monitor
+3. Monitor Form -- This form is similar in function to the Monitor
    Form of the commands for other devices. It returns the current
    state of the device. The board to query is specified by 'n' with no
    other parameters, e.g., 'core3h_mode=1'. All the boards can be
@@ -111,13 +159,6 @@ two Forms, Command and Monitor, it has three:
 
    There is no Monitor Form for 'core3h_mode=end'. The transmission
    state is reported by the Monitor Form for the 'n' boards.
-
-Using 'keepsync' as the sixth parameter changes the 'reset' command
-sent to the Core3H board to 'reset keepsync'. This attempts to
-preserve the sync. However, it may not be reliable. If sync is lost,
-it should be reported when starting data transmission with
-'core3h_mode=end,keepsync' (or 'core3h_mode=end,force'). At the time
-of this release, using 'keepsync' is considered experimental.
 
 The second unusual aspect of 'core3h_mode' is that in
 'core3h_mode=state,...', the 'state' values of 'begin' and 'end' are
@@ -141,47 +182,50 @@ No commands other than 'core3h_mode=n,...' command should be executed
 between them. If there are other commands, the results may be
 incorrect, particularly for 'mk5c_mode'/'fb_mode' and 'tpicd'.
 
-Accepting '$' for the sixth parameter for the Monitor Form is to
-support allowing the operator to use 'force' (or 'keepsync') as the
-argument for a setup procedure from 'drudg' to force setup, while
-making just checking the default for schedules. The 'drudg' generated
-setup procedures are called from schedules with no argument, for
-example:
+The default value for the 'force' parameter is 'check'. This can be
+overridden by setting the value of the
+'FS_DBBC3_COREH_MODE_FORCE_DEFAULT' environment variable to one of the
+other allowed values: 'force', 'keepsync','noreset', 'resetlast', or
+'keepsynclast' ('check' is also acceptable as the value).
+
+Accepting '$' for the 'force' parameter is to support allowing the
+operator to override the default by specifying a value as the argument
+of the overall (or the Core3H) setup procedure created by 'drudg'
+while keeping the default if nothing is specified, The 'drudg'
+generated setup procedures are called from schedules with no argument,
+for example:
 
     setup01
 
-This only checks the setups of the Core3H boards (and sets up the rest
-of the mode configuration).
+This uses whatever the default is for the 'force' parameter of
+'core3h_mode' (and sets up the rest of the mode configuration).
 
-Although it is not recommended at this time, the operator can in
-principle use the same procedure with 'force' (or 'keepsync') as its
-argument to setup the Core3H boards (and the rest of the mode
-configuration). For example, with:
+The operator can use the same procedure with a non-default value for
+'force' parameter. For example, with 'keepsync':
 
-    setup01=force
+    setup01=keepsync
 
-The 'force' will be passed to Core3H setup sub-procedure, 'core3h01'
-in this case, which will pass it to the Core3H setup commands. Due to
-the structure of SNAP, if no argument is given, a '$' will appear as
-the value of the 'force' parameter in Core3H setup commands. Hence the
-commands accepts '$' for the 'force' parameter to preserve the
-checking functionality when nothing is specified.
+In this case, the 'keepsync' will be passed to Core3H setup
+sub-procedure, 'core3h01' (in this example), which will pass it to the
+'core3h_mode' commands. Due to the structure of SNAP, if no argument
+is given, a '$' will appear as the value of the 'force' parameter in
+'core3h_mode' commands. Hence the commands accepts '$' for the 'force'
+parameter to provide default functionality when nothing is specified.
 
-This approach is used to provide a means to configure the Core3H
-boards, while avoiding having a schedule configure them. When they are
-configured, with 'force', the operator must sync them, which is not an
-automated process that can done by the schedule. Once they are synced,
-the operator can start the data transmission for the boards used by
-the mode (and make sure those not used are disabled), by executing the
-command:
+This approach is used to provide a means to specify the default value
+of the 'force' parameter in a schedule. It is best if the default
+value is not one that will require a re-sync afterward since doing
+that automatically in a schedule is not supported. The values that
+always require a re-sync afterwards are 'force' and 'resetlast'. In
+some cases (TBD), a re-sync may be required for the remaining values
+other than 'check'. If a re-sync is needed, the 'core3h_mode=end,$'
+command will report the error. This can serve as a reminder to the
+operator to sync the boards and re-start data transmission. They will
+need to re-synced manually. Once they are synced, the operator can
+start the data transmission for the boards used by the mode (and make
+sure those not used are disabled), by executing the command:
 
     core3h_mode=end,force
-
-Using a setup procedure with 'force' will also execute this command,
-but it will fail with an error message for the first board to be
-started because the Core3H boards have not been synced. That error
-message can serve as reminder to the operator to sync the boards and
-then execute the above command with 'end,force'.
 
 The 'core3h_mode=end' command, with or without 'force', checks the
 DBBC3 firmware version for agreement with the FS control files. This
