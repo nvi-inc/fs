@@ -210,7 +210,7 @@ specified. The boards do not respond with the effective sample rate.
 In the monitor response for 'core3h_mode', the implied sample rate is
 shown in parentheses for information purposes only.
 
-To use a non-zero 'mask2', the personality must be DDC_v v126 or later
+To use a non-zero 'mask2', the personality must be DDC_V v126 or later
 or DDC_U. Additionally, there can't be bits turned on for BBCs in
 'mask2' that exceed the number available as set by the number of BBCs
 per IF in 'dbbc3.ctl'.
@@ -252,7 +252,7 @@ in the 'core3h_mode' command.
 For DDC_V versions after v125 and DDC_E, the board's 'destination 1'
 must be set be set to 'none' because the output on 'destination 0' is
 copied to 'destination 1', which may case redundant data to be
-recorded. For DDC_V before v126, the setting of 'destination 0'
+recorded. For DDC_V before v126, the setting of 'destination 1'
 doesn't matter since that output is disabled by the firmware.
 
 The monitor display values for 'mask2' or 'mask1' will be followed by
