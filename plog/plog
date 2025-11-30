@@ -48,62 +48,69 @@ PLOG_FULL_SUFFIX="${PLOG_FULL_SUFFIX:-_full}"
 
 usage_long() {
     cat <<EOF
-Push log files to the data centers with IP addresses redacted.
+Push logs and files to the data centers with IP addresses redacted.
 
 USAGE:
     ${black}$0 [options] ARG [ARG...]${normal}
 
-ARG can be an experiment ID or the path of a file.
+ARG can be an experiment ID or the path to a file.  For an experiment ID, if
+the log contains multicast data, the default is to push a reduced log (with no
+multicast data) and a compressed '_full' log (with multicast data included).
+Both have IP addresses redacted unless the '-D' option is used.  For a path,
+only redaction is available.  Also for a path, the file should not be on
+'/tmp'.  The log or file may already be compressed.
 
 ${underline}Options:${normal}
-    ${black}-l${normal}            Use latest log in $FS_LOG_PATH for STATION code.
-                  without 'station' or 'point' in the name,
-                  and the name must be more than just the STATION code
-    ${black}-t${normal}            Test run: print commands, do not actually push files to server
+    ${black}-l${normal}            Add the experiment ID for the latest log in
+                    $FS_LOG_PATH for STATION code without 'station' or 'point' in
+                    the name.
+    ${black}-t${normal}            Test run: print commands for processing, not actually
+                    pushing files to server
     ${black}-h${normal}            Print this message
     ${black}-c CENTER${normal}     Push files to data CENTER. Overrides the DATA_CENTERS
-                  environment variable. Flag can be given multiple times.
-                  Upper and lower case values are accepted.
-    ${black}-p${normal}            Also push proc file
+                    environment variable. Flag can be given multiple times.
+                    Upper and lower case values are accepted.
+    ${black}-p${normal}            For experiment IDs, also push the corresponding .prc file
+                    from $FS_PROC_PATH
     ${black}-q${normal}            Quiet mode
-    ${black}-z${normal}            Push a compressed log (only full if log contains multicast
-                  data). Can't be used with '-r'.
+    ${black}-z${normal}            Push only a compressed log (multicast or not). Can't be used
+                    with '-r'.
     ${black}-r${normal}            Push only a reduced log if log contains multicast log data
-                  Ignored for a non-multicast log. Can't be used with '-z' in
-                  either case.
+                    Ignored for a non-multicast log. Can't be used with '-z' in
+                    either case.
     ${black}-v${normal}            Print plog version and exit
     ${black}-g${normal}            Force gzip compression/uncompression
     ${black}-D${normal}            Don't redact IP addresses
 
-If the log contains RDBE or DBBC3 multicast data:
-
-1.  If not already done, the log file will be renamed to
-    '$FS_LOG_PATH/<log>_full.log'.
-
-2.  If neither '-r' or '-z' is supplied both a reduced log and a
-    compressed full log will be created on /tmp and uploaded.
-
-3.  If '-r' is supplied, only a reduced log file, without multicast
-    data, created in /tmp and is transferred to the data center.
-
-4.  If '-z' is supplied, only a compressed full log file is created in
-    /tmp and transferred to the data center.
-
 To see progress when compressing, reducing, and redacting, install the 'pv'
 package.
 
-plog requires the STATION environment variable be set to the
-two-letter station code. Upper and lower case values are accepted, but
-they are mapped to lower case. E.g. add the following ~/.login (tcsh)
-or ~/.profile (bash):
+For an experiment ID, if the log contains RDBE or DBBC3 multicast data:
+
+1.  If not already done, the log file will be renamed by inserting '_full'
+    before '.log'.
+
+2.  If neither '-r' or '-z' is supplied both a reduced log and a compressed
+    full log will be created on /tmp and uploaded.
+
+3.  If '-r' is supplied, only a reduced log file, without multicast data,
+    created in /tmp and is transferred to the data center.
+
+4.  If '-z' is supplied, only a compressed full log file is created in /tmp
+    and transferred to the data center.
+
+For experiment IDs, the STATION environment variable must be set to the
+two-letter station code. Upper and lower case values are accepted, but they
+are mapped to lower case. E.g. add the following ~/.login (tcsh) or ~/.profile
+(bash):
 
     setenv STATION gs ${blue}#tcsh${normal}
     export STATION=gs ${blue}#bash${normal}
 
-Data centers are specified in the DATA_CENTERS environment variable
-which can contain CDDIS, OPAR, BKG, and HAYSTACK (VGOS only). Multiple
-centers are separated with a space. Upper and lower case values are
-accepted. E.g. add the following to your login script
+Data centers are specified in the DATA_CENTERS environment variable which can
+contain CDDIS, OPAR, BKG, and HAYSTACK (VGOS only). Multiple centers are
+separated with a space. Upper and lower case values are accepted. E.g. add the
+following to your login script
 
     setenv DATA_CENTERS "CDDIS HAYSTACK" ${blue}#tcsh${normal}
     export DATA_CENTERS="CDDIS HAYSTACK" ${blue}#bash${normal}
@@ -126,30 +133,33 @@ variable.  E.g. add the following to your login script
     setenv NETRC_DIR "/usr2/control" ${blue}#tcsh${normal}
     export NETRC_DIR="/usr2/control" ${blue}#bash${normal}
 
-Unless the '-D' option is used, plog will, on a best-effort basis,
-redact four-octet decimal IPv4 addresses from the files pushed. Both
-false positives and negatives are possible. The addresses will be
-replaced with the string 'IP_ADDR_REDACTED_BY_PLOG'. The original
-files will not be altered.
+Unless the '-D' option is used, plog will, on a best-effort basis, redact
+four-octet decimal IPv4 addresses from the files pushed. Both false positives
+and negatives are possible. The addresses will be replaced with the string
+'IP_ADDR_REDACTED_BY_PLOG'. The original files will not be altered.
 
-The default transfer method from BKG is ftp-ssl.  If you have FSL8 or
-another old distribution that does not support curl ftp-ssl with BKG,
-but worked with the previous versions of plog that used non-ssl ftp
-for BKG, you can restore the previous behaviour with:
+For experiment IDs, 'plog' looks in the log directory, usually /usr2/log (and
+for procedure files, /usr2/proc). You can specify a different directory with
+the FS_LOG_PATH environment variable (and procedure files, FS_PROC_PATH).
+You should not use '/tmp' for the directory.
+
+plog defaults to using bzip2 compression, if it is available, for full log
+files. Otherwise gzip is used. The use of gzip can be forced with the command
+line option -g or setting the PLOG_COMPRESSED_EXT environment variable to gz:
+
+    setenv PLOG_COMPRESSED_EXT gz  ${blue}#tcsh${normal}
+    export PLOG_COMPRESSED_EXT=gz  ${blue}#bash${normal}
+
+The default transfer method from BKG is ftp-ssl.  If you have FSL8 or another
+old distribution that does not support curl ftp-ssl with BKG, but worked with
+the previous versions of plog that used non-ssl ftp for BKG, you can restore
+the previous behaviour with:
 
     setenv PLOG_BKG_METHOD ftp ${blue}#tcsh${normal}
     export PLOG_BKG_METHOD=ftp ${blue}#bash${normal}
 
-However, this method will no longer work when BKG stops support
-of non-ssl ftp, which is expected at the end of May 2022.
-
-plog defaults to using bzip2 compression, if it is available, for full
-log files. Otherwise gzip is used. The use of gzip can be forced with
-the command line option -g or setting the PLOG_COMPRESSED_EXT
-environment variable to gz:
-
-    setenv PLOG_COMPRESSED_EXT gz  ${blue}#tcsh${normal}
-    export PLOG_COMPRESSED_EXT=gz  ${blue}#bash${normal}
+However, this method will no longer work when BKG stops support of non-ssl
+ftp, which is expected at the end of May 2022.
 
 Examples of usage:
     ${blue}# push log for latest session, sending reduced if needed${normal}
@@ -201,8 +211,8 @@ fi
 
 usage(){
     cat <<EOF
-Usage: $0 [-l] [-t] [-h] [-c CENTER] ARG ...
-Push log file(s) to the data centers.
+Usage: $0 [-l] [-t] [-h] [-c CENTER] [-p] [-q] [-r|-z] [-v] [-g] [-D] ARG ...
+Push log(s) and path(s) to the data centers.
 EOF
 }
 
@@ -262,6 +272,7 @@ pftp() {
     local IFS=","
     local G="{${F[*]}}"
     local IFS=" " #Then don't take commas out when expanding
+    info "Copying files to $URL ..."
     eval $DRY curl $SSL_REQUIRED -n $CURL_NETRC_FILE_OPTION -T '$G' "ftp://$URL/"
 }
 
@@ -304,7 +315,7 @@ cddis() {
 
     local DRY=${DRY:-" >/dev/null"}
 
-    info "Logging into CDDIS..."
+    info "Logging into CDDIS ..."
     # Curl flags used:
     # -c     -- cookie jar (write)
     # -b     -- cookie jar (read)
@@ -330,7 +341,7 @@ cddis() {
 
     info "Done"
 
-    info "Copying file to CDDIS..."
+    info "Copying file(s) to CDDIS ..."
 
     local quiet=""
     if [[ -n "$QUIET" ]]; then 
@@ -369,7 +380,7 @@ opar() {
 
     local DRY=${DRY:-" >/dev/null"}
 
-    info "Copying files to OPAR..."
+    info "Copying file(s) to OPAR ..."
     while (( "$#" )); do
         eval $DRY curl \
             -n \
@@ -630,7 +641,7 @@ main () {
 
     # List of files or experiment names
     REFS=($@)
-    # List of exisiting files that will be pushed
+    # List of existing files that will be pushed
     FILES=()
 
     if [[ -n "$LATEST" ]]; then
@@ -664,7 +675,7 @@ main () {
         fi
 
         # If it's not a file, assume it's the name of an observation.
-        
+
         # we need the name of the station if we're going to lookup by observation name
         set +u
         if [[ -z "$STATION" ]]; then
