@@ -810,10 +810,12 @@ main () {
         fi
     done
 
-    for center in $DATA_CENTERS; do
-        info Uploading to $center
-        eval \$PLOG_CTR_$center ${FILES[@]}
-    done
+    if [[ ${#FILES[@]} -gt 0 ]]; then
+        for center in $DATA_CENTERS; do
+            info Uploading to $center
+            eval \$PLOG_CTR_$center ${FILES[@]}
+        done
+    fi
 }
 
 # Don't run main if file is being "source"d
