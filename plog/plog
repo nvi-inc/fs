@@ -1,7 +1,7 @@
 #!/bin/bash
 #NB "strict" mode is used if run as a script
 #
-# Copyright (c) 2020-2023 NVI, Inc.
+# Copyright (c) 2020-2023, 2025 NVI, Inc.
 #
 # This file is part of VLBI Field System
 # (see http://github.com/nvi-inc/fs).
@@ -20,7 +20,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-VERSION=2023-06-30
+VERSION=2025-11-30
 
 version(){
     echo "[plog $VERSION]"
@@ -48,7 +48,7 @@ PLOG_FULL_SUFFIX="${PLOG_FULL_SUFFIX:-_full}"
 
 usage_long() {
     cat <<EOF
-Push log files to the data centers.
+Push log files to the data centers with IP addresses redacted.
 
 USAGE:
     ${black}$0 [options] ARG [ARG...]${normal}
@@ -73,6 +73,7 @@ ${underline}Options:${normal}
                   either case.
     ${black}-v${normal}            Print plog version and exit
     ${black}-g${normal}            Force gzip compression/uncompression
+    ${black}-D${normal}            Don't redact IP addresses
 
 If the log contains RDBE or DBBC3 multicast data:
 
@@ -88,7 +89,8 @@ If the log contains RDBE or DBBC3 multicast data:
 4.  If '-z' is supplied, only a compressed full log file is created in
     /tmp and transferred to the data center.
 
-To see progress when compressing and reducing, install the 'pv' package.
+To see progress when compressing, reducing, and redacting, install the 'pv'
+package.
 
 plog requires the STATION environment variable be set to the
 two-letter station code. Upper and lower case values are accepted, but
@@ -123,6 +125,12 @@ variable.  E.g. add the following to your login script
 
     setenv NETRC_DIR "/usr2/control" ${blue}#tcsh${normal}
     export NETRC_DIR="/usr2/control" ${blue}#bash${normal}
+
+Unless the '-D' option is used, plog will, on a best-effort basis,
+redact four-octet decimal IPv4 addresses from the files pushed. Both
+false positives and negatives are possible. The addresses will be
+replaced with the string 'IP_ADDR_REDACTED_BY_PLOG'. The original
+files will not be altered.
 
 The default transfer method from BKG is ftp-ssl.  If you have FSL8 or
 another old distribution that does not support curl ftp-ssl with BKG,
@@ -213,6 +221,16 @@ info(){
         echo -e "${green}INFO:${normal} plog:" "$@" >&2
     fi
 }
+infon(){
+    if [[ -z "$QUIET" ]]; then
+        echo -ne "${green}INFO:${normal} plog:" "$@" >&2
+    fi
+}
+infot(){
+    if [[ -z "$QUIET" ]]; then
+        echo -e "$@" >&2
+    fi
+}
 
 # Check if pv (Pipe Viewer) is installed.
 # Used for progress meters
@@ -266,7 +284,7 @@ fmtarray() {
 # Add file to upload queue
 add() {
     FILES+=($@)
-    info queued $@
+    info Queued $@
 }
 
 CDDIS_URL="https://depot.cddis.eosdis.nasa.gov/CDDIS_FileUpload"
@@ -414,7 +432,7 @@ compress() {
     local name=$(basename "$1")
     local out="/tmp/$name.$PLOG_COMPRESSED_EXT"
 
-    info Compressing log file...
+    info Creating compressed file $out ...
     if [[ -n "$DRY" ]]; then
         >&2 echo "$compress_program --best -c $1 >  $out"
     else
@@ -433,7 +451,7 @@ uncompress() {
         local uncompress_program=gunzip
     fi
 
-    info Uncompressing log file...
+    info Creating uncompressed file $out ...
     if [[ -n "$DRY" ]]; then
         >&2 echo "$uncompress_program -c $1 >  $out"
     else
@@ -446,7 +464,7 @@ reduce() {
     local ext=${1#*.}
     local name=$(basename $(basename "$1" .$ext) $PLOG_FULL_SUFFIX)
     local out="/tmp/$name.log"
-    info Creating reduced log file...
+    info Creating reduced file $out ...
     if [[ -n "$DRY" ]]; then
         >&2 echo "$egrep_program -v "$PLOG_REDUCE_PATTERN" $1 > $out"
     elif [[ "$PLOG_COMPRESSED_EXT" =~ bz2 && ! "$1" =~ \.bz2 ]]; then
@@ -455,6 +473,32 @@ reduce() {
         safe_pv "$1" | egrep -v "$PLOG_REDUCE_PATTERN" > "$out"
     else
         safe_pv "$1" | "$egrep_program" -v "$PLOG_REDUCE_PATTERN" > "$out"
+    fi
+    echo "$out"
+}
+check_ip() {
+if [[ -z "$CHECK_IP" ]]; then
+    echo ""
+    return
+fi
+infon Checking for IP addresses ...
+if "$egrep_program" -q "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b" "$1"; then
+    infot " some found."
+    echo "1"
+else
+    infot " none found."
+    echo ""
+fi
+}
+# Return redacted file in /tmp must be uncompressed file
+redact() {
+    local name=$(basename "$1" .tmp)
+    local out="/tmp/$name"
+    info Creating redacted file $out ...
+    if [[ -n "$DRY" ]]; then
+        >&2 echo "sed 's/[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}/IP_ADDR_REDACTED_BY_PLOG/g' $1 > $out"
+    else
+        safe_pv "$1" | sed 's/[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}/IP_ADDR_REDACTED_BY_PLOG/g' > "$out"
     fi
     echo "$out"
 }
@@ -487,8 +531,9 @@ main () {
     COMPRESS=
     QUIET=
     BOTH=1
+    CHECK_IP=1
 
-    while getopts hltqpzrvc:g opt; do
+    while getopts hltqpzrvc:gD opt; do
         case $opt in
             l)
                 LATEST=1
@@ -525,6 +570,9 @@ main () {
                 ;;
             g)
                 PLOG_COMPRESSED_EXT=gz
+                ;;
+            D)
+                CHECK_IP=
                 ;;
             *)
                 usage >&2
@@ -596,12 +644,23 @@ main () {
         # If it's a file, do not process it, just add it to
         # the list; if it isn't, complain and exit.
         if [[ "$ref" =~ /  ]]; then
-            if [[ -f "$ref" ]]; then
-                add $ref
-                continue
-            else
+            if [[ ! -f "$ref" ]]; then
                 fatal "file $ref not found"
             fi
+            info Found $ref
+            REDACT=$(check_ip $ref)
+            if [[ -z "$REDACT" ]]; then
+                add $ref
+                continue
+            fi
+            if [[ ${ref##*.} == $PLOG_COMPRESSED_EXT ]]; then
+                file=$(uncompress $ref)
+                $DRY mv $file "$file.tmp"
+                add $(compress $(redact "$file.tmp"))
+            else
+                add $(redact $ref)
+            fi
+            continue
         fi
 
         # If it's not a file, assume it's the name of an observation.
@@ -620,7 +679,13 @@ main () {
             if [[ ! -f "$proc" ]]; then
                 fatal "$proc not found"
             fi
-            add $proc
+            info Found $proc
+            REDACT=$(check_ip $proc)
+            if [[ -z "$REDACT" ]]; then
+                add $proc
+            else
+                add $(redact $proc)
+            fi
         fi
 
         # Look for a regular log, a full log, or a compressed version of either.
@@ -628,12 +693,12 @@ main () {
         log=()
         for f in $FS_LOG_PATH/$ref${STATION}{,$PLOG_FULL_SUFFIX}.log{,.$PLOG_COMPRESSED_EXT}; do
             if [[ -f $f ]]; then
-                info found $f
+                info Found $f
                 log+=( $f )
             fi
         done
         if [[ ${#log[@]} -lt 1 ]]; then
-            fatal "log file for $ref not found"
+            fatal "Log file for $ref not found"
             exit
         fi
         if [[ ${#log[@]} -gt 1 ]]; then
@@ -642,9 +707,14 @@ main () {
                   "Inspect the files and either concatenate them or removed the invalid one(s)."
         fi
 
+        # If log contains IP address data, it will need to be redacted
+        REDACT=$(check_ip $log)
+
         # If log contains multicast data, rename to _full.* since we will upload a reduced file
         FULL=
+        infon Checking for multicast data ...
         if "$egrep_program" -q "$PLOG_REDUCE_PATTERN" $log; then
+            infot " some found."
             FULL=1
             logext=${log#*.} # extension, preserving .gz if it exists
             full=$FS_LOG_PATH/$ref$STATION$PLOG_FULL_SUFFIX.$logext
@@ -653,39 +723,84 @@ main () {
                     fatal "$log is open in the FS (ddout), close it first; aborting"
                 fi
                 # This should be safe, because we checked if file exists earlier.
-                warn file contains multicast, renaming $(basename $log) to $(basename $full)
+                warn File contains multicast, renaming $(basename $log) to $(basename $full)
                 $DRY mv $log $full
             fi
             log=$full
+        else
+            infot " none found."
         fi
 
         # If given '-z' command, compressed file, add it to the queue, and move on
         if [[ -n "$COMPRESS" ]]; then
-            add $(compress $log)
+            if [[ -z "$REDACT" ]]; then
+                add $(compress $log)
+                continue
+            fi
+            if [[ $log =~ $PLOG_COMPRESSED_EXT$ ]]; then
+                file=$(uncompress $log)
+                $DRY mv $file "$file.tmp"
+                add $(compress $(redact "$file.tmp"))
+            else
+                add $(compress $(redact $log))
+            fi
             continue
         fi
 
         # If log doesn't contains data that should be excluded in reduced log, add it to queue and move on.
         if [[ -z "$FULL" ]]; then
             # If log is compressed, extract in a tmp dir upload
-            if [[ $log =~ $PLOG_COMPRESSED_EXT$ ]]; then
-                add $(uncompress $log)
+            if [[ -z "$REDACT" ]]; then
+                if [[ $log =~ $PLOG_COMPRESSED_EXT$ ]]; then
+                    add $(uncompress $log)
+                    continue
+                fi
+                add $log
+                continue
+            else
+                if [[ $log =~ $PLOG_COMPRESSED_EXT$ ]]; then
+                    file=$(uncompress $log)
+                    $DRY mv $file "$file.tmp"
+                    add $(redact "$file.tmp")
+                    continue
+                fi
+                add $(redact $log)
                 continue
             fi
-            add $log
-            continue
         fi
 
         # The log must now contain multicast data, so generate reduced log and add it to the queue
-        add $(reduce $log)
-        # If not given '-r' also send a compressed log.
-        if [[ -n "$BOTH" ]]; then
-            add $(compress $log)
+        if [[ -z "$REDACT" ]]; then
+            add $(reduce $log)
+            # If not given '-r' also send a compressed log.
+            if [[ -n "$BOTH" ]]; then
+                add $(compress $log)
+            fi
+        else
+            if [[ $log =~ $PLOG_COMPRESSED_EXT$ ]]; then
+                uncompressed_file=$(uncompress $log)
+                file=$(reduce $uncompressed_file)
+                $DRY mv $file "$file.tmp"
+                add $(redact "$file.tmp")
+                # If not given '-r' also send a compressed log.
+                if [[ -n "$BOTH" ]]; then
+                    $DRY mv $uncompressed_file "$uncompressed_file.tmp"
+                    add $(compress $(redact "$uncompressed_file.tmp"))
+               fi
+            else
+                file=$(reduce $log)
+                $DRY mv $file "$file.tmp"
+                add $(redact "$file.tmp")
+                # If not given '-r' also send a compressed log.
+                if [[ -n "$BOTH" ]]; then
+                    add $(compress $(redact $log))
+                fi
+            fi
         fi
     done
 
     for center in $DATA_CENTERS; do
-        info uploading to $center
+        info Uploading to $center
         eval \$PLOG_CTR_$center ${FILES[@]}
     done
 }
