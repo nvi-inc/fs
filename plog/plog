@@ -20,7 +20,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-VERSION=2025-11-30
+VERSION=2025-12-01
 
 version(){
     echo "[plog $VERSION]"
@@ -516,10 +516,16 @@ redact() {
 
 # Find latest modified log in $FS_LOG_PATH which isn't station or point
 get_latest_exp() {
+# station code 'll' is complicated, there are five 'grep -v' statements to prevent nonsense with '_full'
+# could generalize this for any two characters at the end of $PLOG_FULL_SUFFIX, but really they are fixed
     local log=$(ls -t $FS_LOG_PATH\
         | grep ".$STATION\($PLOG_FULL_SUFFIX\)\?\\.log\(.$PLOG_COMPRESSED_EXT\)\?\$"\
         | egrep -v '(station|point)'\
         | grep -v "[^${STATION:0:1}][^${STATION:1:1}]$PLOG_FULL_SUFFIX\.log"\
+        | grep -v "[${STATION:0:1}][^${STATION:1:1}]$PLOG_FULL_SUFFIX\.log"\
+        | grep -v "[^${STATION:0:1}][${STATION:1:1}]$PLOG_FULL_SUFFIX\.log"\
+        | grep -v "^$STATION$PLOG_FULL_SUFFIX\.log"\
+        | grep -v "^$PLOG_FULL_SUFFIX\.log"\
         | head -1)
 
     if [[ -z "$log" ]]; then
