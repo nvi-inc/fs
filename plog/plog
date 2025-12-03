@@ -515,7 +515,15 @@ redact() {
     fi
     echo "$out"
 }
-
+# we need the name of the station if we're going to lookup by observation name
+check_STATION() {
+        set +u
+        if [[ -z "$STATION" ]]; then
+            fatal "STATION environment variable not set. Set to two-letter station id."
+        fi
+        set -u
+        STATION=$(echo "$STATION" | tr '[:upper:]' '[:lower:]')
+}
 # Find latest modified log in $FS_LOG_PATH which isn't station or point
 get_latest_exp() {
 # station code 'll' is complicated, there are five 'grep -v' statements to prevent nonsense with '_full'
@@ -657,6 +665,7 @@ main () {
     FILES=()
 
     if [[ -n "$LATEST" ]]; then
+        check_STATION
         llog=$(get_latest_exp)
         REFS+=( $llog )
     fi
@@ -687,14 +696,7 @@ main () {
         fi
 
         # If it's not a file, assume it's the name of an observation.
-
-        # we need the name of the station if we're going to lookup by observation name
-        set +u
-        if [[ -z "$STATION" ]]; then
-            fatal "STATION environment variable not set. Set to two-letter station id."
-        fi
-        set -u
-        STATION=$(echo "$STATION" | tr '[:upper:]' '[:lower:]')
+        check_STATION
 
         # Should we add the proc file?
         if [[ -n "$PUSH_PROC" ]]; then
