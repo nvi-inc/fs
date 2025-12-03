@@ -20,7 +20,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-VERSION=2025-12-01
+VERSION=2025-12-03
 
 version(){
     echo "[plog $VERSION]"
@@ -66,6 +66,8 @@ ${underline}Options:${normal}
                     the name.
     ${black}-t${normal}            Test run: print commands for processing, not actually
                     pushing files to server
+    ${black}-T${normal}            Test run: do everything normally except pushing the
+                    files to the server
     ${black}-h${normal}            Print this message
     ${black}-c CENTER${normal}     Push files to data CENTER. Overrides the DATA_CENTERS
                     environment variable. Flag can be given multiple times.
@@ -211,7 +213,7 @@ fi
 
 usage(){
     cat <<EOF
-Usage: $0 [-l] [-t] [-h] [-c CENTER] [-p] [-q] [-r|-z] [-v] [-g] [-D] ARG ...
+Usage: $0 [-l] [-t] [-h] [-c CENTER] [-p] [-q] [-r|-z] [-v] [-g] [-D] [-T] ARG ...
 Push log(s) and path(s) to the data centers.
 EOF
 }
@@ -549,8 +551,9 @@ main () {
     QUIET=
     BOTH=1
     CHECK_IP=1
+    DRY_SERVER=
 
-    while getopts hltqpzrvc:gD opt; do
+    while getopts hltqpzrvc:gDT opt; do
         case $opt in
             l)
                 LATEST=1
@@ -590,6 +593,9 @@ main () {
                 ;;
             D)
                 CHECK_IP=
+                ;;
+            T)
+                DRY_SERVER=echo
                 ;;
             *)
                 usage >&2
@@ -816,6 +822,9 @@ main () {
         fi
     done
 
+    if [[ -n "$DRY_SERVER" ]]; then
+        DRY="$DRY_SERVER"
+    fi
     if [[ ${#FILES[@]} -gt 0 ]]; then
         for center in $DATA_CENTERS; do
             info Uploading to $center
