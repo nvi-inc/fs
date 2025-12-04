@@ -42,6 +42,7 @@ fi
 # Lines to remove from log file to make "reduced" logs
 # Use egrep syntax
 PLOG_REDUCE_PATTERN="${PLOG_REDUCE_PATTERN:-^[:.0-9]*#(rdtc|dbtcn)}"
+PLOG_REDACT_REPLACEMENT_STRING="${PLOG_REDACT_REPLACEMENT_STRING:-IP_ADDR_REDACTED_BY_PLOG}"
 
 # Added to filename before extension of log files with all data
 PLOG_FULL_SUFFIX="${PLOG_FULL_SUFFIX:-_full}"
@@ -535,9 +536,9 @@ redact() {
     local out="/tmp/$name"
     info Creating redacted file $out ...
     if [[ -n "$DRY" ]]; then
-        >&2 echo "perl -pe 's/\b(?:\d{1,3}\.){3}\d{1,3}\b/IP_ADDR_REDACTED_BY_PLOG/g' $1 > $out"
+        >&2 echo "perl -pe 's/\b(?:\d{1,3}\.){3}\d{1,3}\b/$PLOG_REDACT_REPLACEMENT_STRING/g' $1 > $out"
     else
-        safe_pv "$1" | perl -pe 's/\b(?:\d{1,3}\.){3}\d{1,3}\b/IP_ADDR_REDACTED_BY_PLOG/g' > "$out"
+        safe_pv "$1" | perl -pe 's/\b(?:\d{1,3}\.){3}\d{1,3}\b/'"$PLOG_REDACT_REPLACEMENT_STRING"'/g' > "$out"
     fi
 
     if [[ -n "$PRINT_IPS" && -z "$IPS_PRINTED" ]]; then
