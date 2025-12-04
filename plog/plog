@@ -57,8 +57,10 @@ ARG can be an experiment ID or the path to a file.  For an experiment ID, if
 the log contains multicast data, the default is to push a reduced log (with no
 multicast data) and a compressed '_full' log (with multicast data included).
 Both have IP addresses redacted unless the '-D' option is used.  For a path,
-only redaction is available.  Also for a path, the file should not be on
-'/tmp'.  The log or file may already be compressed.
+or a procedure file when using '-p', only redaction is available.  If '-p' is
+used, a compressed procedure file will be ignored (but can be pushed as a
+path).  Other logs and files may already be compressed.  If redaction is
+needed, the log or file must not be at the top-level of '/tmp'.
 
 ${underline}Options:${normal}
     ${black}-l${normal}            Add the experiment ID for the latest log in
@@ -138,12 +140,13 @@ variable.  E.g. add the following to your login script
 Unless the '-D' option is used, plog will, on a best-effort basis, redact
 four-octet decimal IPv4 addresses from the files pushed. Both false positives
 and negatives are possible. The addresses will be replaced with the string
-'IP_ADDR_REDACTED_BY_PLOG'. The original files will not be altered.
+'IP_ADDR_REDACTED_BY_PLOG'. The original files will not be altered. If a file
+will be redacted, it must not be at the top-level of '/tmp'.
 
 For experiment IDs, 'plog' looks in the log directory, usually /usr2/log (and
 for procedure files, /usr2/proc). You can specify a different directory with
-the FS_LOG_PATH environment variable (and procedure files, FS_PROC_PATH).
-You should not use '/tmp' for the directory.
+the FS_LOG_PATH environment variable (and for procedure files, FS_PROC_PATH).
+If redaction is needed, the directory must not be '/tmp'.
 
 plog defaults to using bzip2 compression, if it is available, for full log
 files. Otherwise gzip is used. The use of gzip can be forced with the command
@@ -503,6 +506,16 @@ else
     echo ""
 fi
 }
+#used if redacting to make sure file is not at the top level of /tmp
+check_tmp() {
+local path=$(realpath -m -- "$1" || fatal "Using realpath to check file path failed")
+if [[ "$path" == "" ]]; then
+    fatal "Checking file path failed"
+fi
+if [[ $(dirname -- "$path") == "/tmp" ]]; then
+  fatal "$path is in the top-level of /tmp"
+  fi
+}
 # Return redacted file in /tmp must be uncompressed file
 redact() {
     local name=$(basename "$1" .tmp)
@@ -685,6 +698,7 @@ main () {
                 add $ref
                 continue
             fi
+            check_tmp $ref
             if [[ ${ref##*.} == $PLOG_COMPRESSED_EXT ]]; then
                 file=$(uncompress $ref)
                 $DRY mv $file "$file.tmp"
@@ -709,6 +723,7 @@ main () {
             if [[ -z "$REDACT" ]]; then
                 add $proc
             else
+                check_tmp $proc
                 add $(redact $proc)
             fi
         fi
@@ -734,6 +749,11 @@ main () {
 
         # If log contains IP address data, it will need to be redacted
         REDACT=$(check_ip $log)
+
+        #check not at top of /tmp for redacting
+        if [[ -n "$REDACT" ]]; then
+            check_tmp $log
+        fi
 
         # If log contains multicast data, rename to _full.* since we will upload a reduced file
         FULL=
