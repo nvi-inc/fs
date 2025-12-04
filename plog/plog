@@ -139,9 +139,13 @@ variable.  E.g. add the following to your login script
 
 Unless the '-D' option is used, plog will, on a best-effort basis, redact
 four-octet decimal IPv4 addresses from the files pushed. Both false positives
-and negatives are possible. The addresses will be replaced with the string
-'IP_ADDR_REDACTED_BY_PLOG'. The original files will not be altered. If a file
-will be redacted, it must not be at the top-level of '/tmp'.
+and negatives are possible. The addresses will be replaced with the
+string 'IP_ADDR_REDACTED_BY_PLOG'. The original files will not be altered. If
+a file will be redacted, it must not be at the top-level of '/tmp'. For a
+path, unless '-D' is used, if the file has a different compression than is
+selected (gzip instead of bzip2, or vice-versa) the file will be rejected;
+files with other compression types (e.g., xz), will be uploaded without
+redaction, which is probably not what is wanted.
 
 For experiment IDs, 'plog' looks in the log directory, usually /usr2/log (and
 for procedure files, /usr2/proc). You can specify a different directory with
@@ -648,8 +652,10 @@ main () {
 
      if [[ "$PLOG_COMPRESSED_EXT" =~ bz2 ]]; then
          egrep_program=bzegrep
+         OTHER_COMPRESSED_EXT=gz
      else
          egrep_program=zegrep
+         OTHER_COMPRESSED_EXT=bz2
      fi
 
 
@@ -693,6 +699,9 @@ main () {
                 fatal "file $ref not found"
             fi
             info Found $ref
+            if [[ ${ref##*.} == $OTHER_COMPRESSED_EXT && -n "$CHECK_IP" ]]; then
+                fatal "File has incorrect compression: $OTHER_COMPRESSED_EXT"
+            fi
             REDACT=$(check_ip $ref)
             if [[ -z "$REDACT" ]]; then
                 add $ref
