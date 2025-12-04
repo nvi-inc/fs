@@ -20,7 +20,9 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-VERSION=2025-12-03
+VERSION=2025-12-04
+
+EGREP_IP_STRING='([0-9]{1,3}\.){3}[0-9]{1,3}'
 
 version(){
     echo "[plog $VERSION]"
@@ -85,6 +87,8 @@ ${underline}Options:${normal}
     ${black}-v${normal}            Print plog version and exit
     ${black}-g${normal}            Force gzip compression/uncompression
     ${black}-D${normal}            Don't redact IP addresses
+    ${black}-e${normal}            Echo each unique IP address redacted. Causes one extra slow
+                    pass per ARG.
 
 To see progress when compressing, reducing, and redacting, install the 'pv'
 package.
@@ -139,13 +143,14 @@ variable.  E.g. add the following to your login script
 
 Unless the '-D' option is used, plog will, on a best-effort basis, redact
 four-octet decimal IPv4 addresses from the files pushed. Both false positives
-and negatives are possible. The addresses will be replaced with the
-string 'IP_ADDR_REDACTED_BY_PLOG'. The original files will not be altered. If
-a file will be redacted, it must not be at the top-level of '/tmp'. For a
-path, unless '-D' is used, if the file has a different compression than is
-selected (gzip instead of bzip2, or vice-versa) the file will be rejected;
-files with other compression types (e.g., xz), will be uploaded without
-redaction, which is probably not what is wanted.
+and negatives are possible. The -e' option can be used to display the strings
+that will be redacted (add '-T' to preview without pushing any files). The
+addresses will be replaced with the string 'IP_ADDR_REDACTED_BY_PLOG'. The
+original files will not be altered. If a file will be redacted, it must not be
+at the top-level of '/tmp'. For a path, unless '-D' is used, if the file has a
+different compression than is selected (gzip instead of bzip2, or vice-versa)
+the file will be rejected; files with other compression types (e.g., xz), will
+be uploaded without redaction, which is probably not what is wanted.
 
 For experiment IDs, 'plog' looks in the log directory, usually /usr2/log (and
 for procedure files, /usr2/proc). You can specify a different directory with
@@ -220,7 +225,7 @@ fi
 
 usage(){
     cat <<EOF
-Usage: $0 [-l] [-t] [-h] [-c CENTER] [-p] [-q] [-r|-z] [-v] [-g] [-D] [-T] ARG ...
+Usage: $0 [-lthpqvgDTe] [-c CENTER] [-r|-z] ARG ...
 Push log(s) and path(s) to the data centers.
 EOF
 }
@@ -502,7 +507,7 @@ if [[ -z "$CHECK_IP" ]]; then
     return
 fi
 infon Checking for IP addresses ...
-if "$egrep_program" -q "([0-9]{1,3}\.){3}[0-9]{1,3}" "$1"; then
+if "$egrep_program" -q "$EGREP_IP_STRING" "$1"; then
     infot " some found."
     echo "1"
 else
@@ -530,7 +535,18 @@ redact() {
     else
         safe_pv "$1" | sed 's/[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}/IP_ADDR_REDACTED_BY_PLOG/g' > "$out"
     fi
+
+    if [[ -n "$PRINT_IPS" && -z "$IPS_PRINTED" ]]; then
+        info Creating redacted string list ...
+        if [[ -n "$DRY" ]]; then
+            >&2 echo "egrep -o $EGREP_IP_STRING $1 | sort -u"
+        else
+            safe_pv "$1" | egrep -o "$EGREP_IP_STRING" | sort -u >&2
+        fi
+    fi
+
     echo "$out"
+
 }
 # we need the name of the station if we're going to lookup by observation name
 check_STATION() {
@@ -577,8 +593,9 @@ main () {
     BOTH=1
     CHECK_IP=1
     DRY_SERVER=
+    PRINT_IPS=
 
-    while getopts hltqpzrvc:gDT opt; do
+    while getopts hltqpzrvc:gDTe opt; do
         case $opt in
             l)
                 LATEST=1
@@ -621,6 +638,9 @@ main () {
                 ;;
             T)
                 DRY_SERVER=echo
+                ;;
+            e)
+                PRINT_IPS=1
                 ;;
             *)
                 usage >&2
@@ -711,6 +731,7 @@ main () {
                 continue
             fi
             check_tmp $ref
+            IPS_PRINTED=
             if [[ ${ref##*.} == $PLOG_COMPRESSED_EXT ]]; then
                 file=$(uncompress $ref)
                 $DRY mv $file "$file.tmp"
@@ -738,6 +759,7 @@ main () {
             if [[ -z "$REDACT" ]]; then
                 add $proc
             else
+                IPS_PRINTED=
                 check_tmp $proc
                 add $(redact $proc)
             fi
@@ -772,6 +794,7 @@ main () {
         #check not at top of /tmp for redacting
         if [[ -n "$REDACT" ]]; then
             check_tmp $log
+            IPS_PRINTED=
         fi
 
         # If log contains multicast data, rename to _full.* since we will upload a reduced file
@@ -848,6 +871,7 @@ main () {
                 add $(redact "$file.tmp")
                 # If not given '-r' also send a compressed log.
                 if [[ -n "$BOTH" ]]; then
+                    IPS_PRINTED=1
                     $DRY mv $uncompressed_file "$uncompressed_file.tmp"
                     add $(compress $(redact "$uncompressed_file.tmp"))
                fi
@@ -857,6 +881,7 @@ main () {
                 add $(redact "$file.tmp")
                 # If not given '-r' also send a compressed log.
                 if [[ -n "$BOTH" ]]; then
+                    IPS_PRINTED=1
                     add $(compress $(redact $log))
                 fi
             fi
