@@ -22,8 +22,6 @@
 
 VERSION=2025-12-04
 
-EGREP_IP_STRING='([0-9]{1,3}\.){3}[0-9]{1,3}'
-
 version(){
     echo "[plog $VERSION]"
 }
@@ -87,8 +85,8 @@ ${underline}Options:${normal}
     ${black}-v${normal}            Print plog version and exit
     ${black}-g${normal}            Force gzip compression/uncompression
     ${black}-D${normal}            Don't redact IP addresses
-    ${black}-e${normal}            Echo each unique IP address redacted. Causes one extra slow
-                    pass per ARG.
+    ${black}-e${normal}            Echo each unique IP address redacted. Causes one extra pass
+                    per ARG.
 
 To see progress when compressing, reducing, and redacting, install the 'pv'
 package.
@@ -507,7 +505,7 @@ if [[ -z "$CHECK_IP" ]]; then
     return
 fi
 infon Checking for IP addresses ...
-if "$egrep_program" -q "$EGREP_IP_STRING" "$1"; then
+if "$egrep_program" -q '\b([0-9]{1,3}\.){3}[0-9]{1,3}\b' "$1"; then
     infot " some found."
     echo "1"
 else
@@ -531,17 +529,17 @@ redact() {
     local out="/tmp/$name"
     info Creating redacted file $out ...
     if [[ -n "$DRY" ]]; then
-        >&2 echo "sed 's/[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}/IP_ADDR_REDACTED_BY_PLOG/g' $1 > $out"
+        >&2 echo "perl -pe 's/\b(?:\d{1,3}\.){3}\d{1,3}\b/IP_ADDR_REDACTED_BY_PLOG/g' $1 > $out"
     else
-        safe_pv "$1" | sed 's/[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}/IP_ADDR_REDACTED_BY_PLOG/g' > "$out"
+        safe_pv "$1" | perl -pe 's/\b(?:\d{1,3}\.){3}\d{1,3}\b/IP_ADDR_REDACTED_BY_PLOG/g' > "$out"
     fi
 
     if [[ -n "$PRINT_IPS" && -z "$IPS_PRINTED" ]]; then
         info Creating redacted string list ...
         if [[ -n "$DRY" ]]; then
-            >&2 echo "egrep -o $EGREP_IP_STRING $1 | sort -u"
+            >&2 echo "perl -nE 'while (/\b(?:\d{1,3}\.){3}\d{1,3}\b/g) { say $& }' $1 | sort -u"
         else
-            safe_pv "$1" | egrep -o "$EGREP_IP_STRING" | sort -u >&2
+            safe_pv "$1" | perl -nE 'while (/\b(?:\d{1,3}\.){3}\d{1,3}\b/g) { say $& }' | sort -u >&2
         fi
     fi
 
