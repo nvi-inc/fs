@@ -696,9 +696,12 @@ main () {
         # the list; if it isn't, complain and exit.
         if [[ "$ref" =~ /  ]]; then
             if [[ ! -f "$ref" ]]; then
-                fatal "file $ref not found"
+                fatal "File $ref not found"
             fi
             info Found $ref
+            if [[ ! -r "$ref" ]]; then
+                fatal "File $ref not readable"
+            fi
             if [[ ${ref##*.} == $OTHER_COMPRESSED_EXT && -n "$CHECK_IP" ]]; then
                 fatal "File has incorrect compression: $OTHER_COMPRESSED_EXT"
             fi
@@ -725,9 +728,12 @@ main () {
         if [[ -n "$PUSH_PROC" ]]; then
             proc="$FS_PROC_PATH/$ref$STATION.prc"
             if [[ ! -f "$proc" ]]; then
-                fatal "$proc not found"
+                fatal "File $proc not found"
             fi
             info Found $proc
+            if [[ ! -r "$proc" ]]; then
+                fatal "File $proc not readable"
+            fi
             REDACT=$(check_ip $proc)
             if [[ -z "$REDACT" ]]; then
                 add $proc
@@ -754,6 +760,10 @@ main () {
             fatal "Conflicting log files:"\
                   "\n$(IFS=$'\n';echo -e "${log[*]}")\n"\
                   "Inspect the files and either concatenate them or removed the invalid one(s)."
+        fi
+
+        if [[ ! -r "$log" ]]; then
+            fatal "File $log not readable"
         fi
 
         # If log contains IP address data, it will need to be redacted
