@@ -488,14 +488,20 @@ reduce() {
     local name=$(basename $(basename "$1" .$ext) $PLOG_FULL_SUFFIX)
     local out="/tmp/$name.log"
     info Creating reduced file $out ...
-    if [[ -n "$DRY" ]]; then
-        >&2 echo "$egrep_program -v "$PLOG_REDUCE_PATTERN" $1 > $out"
-    elif [[ "$PLOG_COMPRESSED_EXT" =~ bz2 && ! "$1" =~ \.bz2 ]]; then
+    if [[ "$PLOG_COMPRESSED_EXT" == bz2 && ${1##*.} != bz2 ]]; then
 # bunzip2 (via bzegrep) doesn't pass the first 5000 bytes of an uncompressed
-# file from stdin (seems like a bug), so use egrep directly as a work around
-        safe_pv "$1" | egrep -v "$PLOG_REDUCE_PATTERN" > "$out"
+# file from stdin (seems like a bug), so use perl as a work around, faster too
+        if [[ -n "$DRY" ]]; then
+            >&2 echo "perl -ne 'print unless /$PLOG_REDUCE_PATTERN/' $1 > $out"
+        else
+            safe_pv "$1" | perl -ne 'print unless /'"$PLOG_REDUCE_PATTERN"'/' > "$out"
+        fi
     else
-        safe_pv "$1" | "$egrep_program" -v "$PLOG_REDUCE_PATTERN" > "$out"
+        if [[ -n "$DRY" ]]; then
+            >&2 echo "$egrep_program -v "$PLOG_REDUCE_PATTERN" $1 > $out"
+        else
+            safe_pv "$1" | "$egrep_program" -v "$PLOG_REDUCE_PATTERN" > "$out"
+        fi
     fi
     echo "$out"
 }
