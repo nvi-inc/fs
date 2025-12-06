@@ -738,9 +738,9 @@ main () {
             check_tmp $ref
             IPS_PRINTED=
             if [[ ${ref##*.} == $PLOG_COMPRESSED_EXT ]]; then
-                file=$(uncompress $ref)
-                $DRY mv $file "$file.tmp"
-                add $(compress $(redact "$file.tmp"))
+                uncompressed_file=$(uncompress $ref)
+                $DRY mv $uncompressed_file "$uncompressed_file.tmp"
+                add $(compress $(redact "$uncompressed_file.tmp"))
             else
                 add $(redact $ref)
             fi
@@ -830,9 +830,9 @@ main () {
                 continue
             fi
             if [[ $log =~ $PLOG_COMPRESSED_EXT$ ]]; then
-                file=$(uncompress $log)
-                $DRY mv $file "$file.tmp"
-                add $(compress $(redact "$file.tmp"))
+                uncompressed_file=$(uncompress $log)
+                $DRY mv $uncompressed_file "$uncompressed_file.tmp"
+                add $(compress $(redact "$uncompressed_file.tmp"))
             else
                 add $(compress $(redact $log))
             fi
@@ -851,9 +851,9 @@ main () {
                 continue
             else
                 if [[ $log =~ $PLOG_COMPRESSED_EXT$ ]]; then
-                    file=$(uncompress $log)
-                    $DRY mv $file "$file.tmp"
-                    add $(redact "$file.tmp")
+                    uncompressed_file=$(uncompress $log)
+                    $DRY mv $uncompressed_file "$uncompressed_file.tmp"
+                    add $(redact "$uncompressed_file.tmp")
                     continue
                 fi
                 add $(redact $log)
