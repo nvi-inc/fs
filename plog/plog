@@ -20,7 +20,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-VERSION=2025-12-04
+VERSION=2025-12-06
 
 version(){
     echo "[plog $VERSION]"
@@ -871,23 +871,22 @@ main () {
         else
             if [[ $log =~ $PLOG_COMPRESSED_EXT$ ]]; then
                 uncompressed_file=$(uncompress $log)
-                file=$(reduce $uncompressed_file)
-                $DRY mv $file "$file.tmp"
-                add $(redact "$file.tmp")
-                # If not given '-r' also send a compressed log.
+                $DRY mv $uncompressed_file "$uncompressed_file.tmp"
+                # for -r, would be slightly faster if reduced then redacted
+                redacted_file=$(redact "$uncompressed_file.tmp")
+                add $(reduce "$redacted_file")
                 if [[ -n "$BOTH" ]]; then
                     IPS_PRINTED=1
-                    $DRY mv $uncompressed_file "$uncompressed_file.tmp"
-                    add $(compress $(redact "$uncompressed_file.tmp"))
+                    add $(compress "$redacted_file")
                fi
             else
-                file=$(reduce $log)
-                $DRY mv $file "$file.tmp"
-                add $(redact "$file.tmp")
+                # for -r, would be slightly faster if reduced then redacted
+                redacted_file=$(redact "$log")
+                add $(reduce "$redacted_file")
                 # If not given '-r' also send a compressed log.
                 if [[ -n "$BOTH" ]]; then
                     IPS_PRINTED=1
-                    add $(compress $(redact $log))
+                    add $(compress $redacted_file)
                 fi
             fi
         fi
