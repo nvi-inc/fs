@@ -535,7 +535,7 @@ redact() {
     local name=$(basename "$1" .tmp)
     local out="/tmp/$name"
 
-    if [[ -n "$PRINT_IPS" && -z "$IPS_PRINTED" ]]; then
+    if [[ -n "$PRINT_IPS" ]]; then
         info Creating redacted string list ...
         if [[ -n "$DRY" ]]; then
             >&2 echo "perl -nE 'while (/\b(?:\d{1,3}\.){3}\d{1,3}\b/g) { say $& }' $1 | sort -u"
@@ -737,7 +737,6 @@ main () {
                 continue
             fi
             check_tmp $ref
-            IPS_PRINTED=
             if [[ ${ref##*.} == $PLOG_COMPRESSED_EXT ]]; then
                 uncompressed_file=$(uncompress $ref)
                 $DRY mv $uncompressed_file "$uncompressed_file.tmp"
@@ -765,7 +764,6 @@ main () {
             if [[ -z "$REDACT" ]]; then
                 add $proc
             else
-                IPS_PRINTED=
                 check_tmp $proc
                 add $(redact $proc)
             fi
@@ -800,7 +798,6 @@ main () {
         #check not at top of /tmp for redacting
         if [[ -n "$REDACT" ]]; then
             check_tmp $log
-            IPS_PRINTED=
         fi
 
         # If log contains multicast data, rename to _full.* since we will upload a reduced file
@@ -878,7 +875,6 @@ main () {
                     $DRY mv $uncompressed_file "$uncompressed_file.tmp"
                     redacted_file=$(redact "$uncompressed_file.tmp")
                     add $(reduce "$redacted_file")
-                    IPS_PRINTED=1
                     add $(compress $redacted_file)
                 else
                     #reduce first so redacting is faster
@@ -892,7 +888,6 @@ main () {
                     # redact first so we don't also to redact the unreduced file
                     redacted_file=$(redact "$log")
                     add $(reduce "$redacted_file")
-                    IPS_PRINTED=1
                     add $(compress $redacted_file)
                 else
                     #reduce first so redacting is faster
