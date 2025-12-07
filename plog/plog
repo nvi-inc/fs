@@ -20,7 +20,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-VERSION=2025-12-06
+VERSION=2025-12-07
 
 version(){
     echo "[plog $VERSION]"
@@ -872,22 +872,33 @@ main () {
         else
             if [[ $log =~ $PLOG_COMPRESSED_EXT$ ]]; then
                 uncompressed_file=$(uncompress $log)
-                $DRY mv $uncompressed_file "$uncompressed_file.tmp"
-                # for -r, would be slightly faster if reduced then redacted
-                redacted_file=$(redact "$uncompressed_file.tmp")
-                add $(reduce "$redacted_file")
+                # for not -r send both
                 if [[ -n "$BOTH" ]]; then
-                    IPS_PRINTED=1
-                    add $(compress "$redacted_file")
-               fi
-            else
-                # for -r, would be slightly faster if reduced then redacted
-                redacted_file=$(redact "$log")
-                add $(reduce "$redacted_file")
-                # If not given '-r' also send a compressed log.
-                if [[ -n "$BOTH" ]]; then
+                    # redact first so we don't also to redact the unreduced file
+                    $DRY mv $uncompressed_file "$uncompressed_file.tmp"
+                    redacted_file=$(redact "$uncompressed_file.tmp")
+                    add $(reduce "$redacted_file")
                     IPS_PRINTED=1
                     add $(compress $redacted_file)
+                else
+                    #reduce first so redacting is faster
+                    reduced_file=$(reduce "$uncompressed_file")
+                    $DRY mv $reduced_file "$reduced_file.tmp"
+                    add $(redact "$reduced_file.tmp")
+                fi
+            else
+                # for not -r send both
+                if [[ -n "$BOTH" ]]; then
+                    # redact first so we don't also to redact the unreduced file
+                    redacted_file=$(redact "$log")
+                    add $(reduce "$redacted_file")
+                    IPS_PRINTED=1
+                    add $(compress $redacted_file)
+                else
+                    #reduce first so redacting is faster
+                    reduced_file=$(reduce "$log")
+                    $DRY mv $reduced_file "$reduced_file.tmp"
+                    add $(redact "$reduced_file.tmp")
                 fi
             fi
         fi
