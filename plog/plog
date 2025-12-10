@@ -55,7 +55,7 @@ usage_long() {
 Push logs and files to the data centers with IP addresses redacted.
 
 USAGE:
-    ${black}$0 [options] ARG [ARG...]${normal}
+    ${black}$(basename $0) [options] ARG [ARG...]${normal}
 
 ARG can be an experiment ID or the path to a file.  For an experiment ID, if
 the log contains multicast data, the default is to push a reduced log (with no
@@ -70,21 +70,25 @@ not already present, none of the original files are modified.  For each run of
 $(basename $0) that needs to create modified files, a directory of the form
 /tmp/$(basename $0)_XXX will be created to hold them.
 
+To see progress when compressing, reducing, and redacting, install the 'pv'
+package.
+
 ${underline}Options:${normal}
     ${black}-l${normal}            Add the experiment ID for the latest log in
                     $FS_LOG_PATH for STATION code without 'station' or 'point' in
                     the name.
-    ${black}-t${normal}            Test run: print commands for processing, not actually
-                    pushing files to server
-    ${black}-T${normal}            Test run: do everything normally except pushing the
-                    files to the server
+    ${black}-t${normal}            Test run: print commands for processing, not actually pushing
+                    files to server (commands that are printed are not executed)
+    ${black}-T${normal}            Test run: except for pushing files to server, process
+                    normally; just printing the commands for the transfer
+                    (commands that are printed are not executed)
     ${black}-h${normal}            Print this message
     ${black}-c CENTER${normal}     Push files to data CENTER. Overrides the DATA_CENTERS
                     environment variable. Flag can be given multiple times.
                     Upper and lower case values are accepted.
     ${black}-p${normal}            For experiment IDs, also push the corresponding .prc file
                     from $FS_PROC_PATH
-    ${black}-q${normal}            Quiet mode
+    ${black}-q${normal}            Quiet mode if not '-t' or '-T'
     ${black}-z${normal}            Push only a compressed log (multicast or not). Can't be used
                     with '-r'.
     ${black}-r${normal}            Push only a reduced log if log contains multicast log data
@@ -94,10 +98,7 @@ ${underline}Options:${normal}
     ${black}-g${normal}            Force gzip compression/uncompression
     ${black}-D${normal}            Don't redact IP addresses
     ${black}-e${normal}            Echo each unique IP address redacted. Causes one extra pass
-                    per ARG.
-
-To see progress when compressing, reducing, and redacting, install the 'pv'
-package.
+                    per ARG. (no output with '-t')
 
 For an experiment ID, if the log contains RDBE or DBBC3 multicast data:
 
@@ -230,8 +231,9 @@ fi
 
 usage(){
     cat <<EOF
-Usage: $0 [-lthpqvgDTe] [-c CENTER] [-r|-z] ARG ...
+Usage: $(basename $0) [-lthpqvgDTe] [-c CENTER] [-r|-z] ARG ...
 Push log(s) and path(s) to the data centers.
+Use -h for help.
 EOF
 }
 
