@@ -20,7 +20,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-VERSION=2025-12-10
+VERSION=2025-12-11
 
 version(){
     echo "[plog $VERSION]"
@@ -99,6 +99,8 @@ ${underline}Options:${normal}
     ${black}-D${normal}            Don't redact IP addresses
     ${black}-e${normal}            Echo each unique IP address redacted. Causes one extra pass
                     per ARG. (no output with '-t')
+    ${black}-U${normal}            Don't unlink files after upload. (WARNING: This may cause
+                    /tmp to fill up if used repetitively.)
 
 For an experiment ID, if the log contains RDBE or DBBC3 multicast data:
 
@@ -231,7 +233,7 @@ fi
 
 usage(){
     cat <<EOF
-Usage: $(basename $0) [-lthpqvgDTe] [-c CENTER] [-r|-z] ARG ...
+Usage: $(basename $0) [-lthpqvgDTeU] [-c CENTER] [-r|-z] ARG ...
 Push log(s) and path(s) to the data centers.
 Use -h for help.
 EOF
@@ -576,8 +578,11 @@ fi
 # create temporary directory if needed
 check_tmp() {
 if [[ -n "$DRY" ]]; then
-    PLOG_TEMP_DIR="/tmp"
-    return
+    PLOG_TEMP_DIR=$(mktemp -du  "/tmp/$(basename $0)_XXX" || fatal "Using mktemp to fake create temporary directory failed." )
+    if [[ "$PLOG_TEMP_DIR" == "" ]]; then
+        fatal "Fake creating temporary directory failed"
+    fi
+    info "Fake created temporary directory $PLOG_TEMP_DIR"
 elif [[ "$PLOG_TEMP_DIR" == "" ]]; then
     PLOG_TEMP_DIR=$(mktemp -d  "/tmp/$(basename $0)_XXX" || fatal "Using mktemp to create temporary directory failed." )
     if [[ "$PLOG_TEMP_DIR" == "" ]]; then
@@ -669,8 +674,9 @@ main () {
     CHECK_IP=1
     DRY_SERVER=
     PRINT_IPS=
+    UNLINK=1
 
-    while getopts hltqpzrvc:gDTe opt; do
+    while getopts hltqpzrvc:gDTeU opt; do
         case $opt in
             l)
                 LATEST=1
@@ -716,6 +722,9 @@ main () {
                 ;;
             e)
                 PRINT_IPS=1
+                ;;
+            U)
+                UNLINK=
                 ;;
             *)
                 usage >&2
@@ -973,6 +982,7 @@ main () {
         fi
     done
 
+    DRY_SAVE=$DRY
     if [[ -n "$DRY_SERVER" ]]; then
         DRY="$DRY_SERVER"
     fi
@@ -981,6 +991,16 @@ main () {
             info Uploading to $center
             eval \$PLOG_CTR_$center ${FILES[@]}
         done
+        DRY=$DRY_SAVE
+        if [[ -n "$UNLINK" && ! "$PLOG_TEMP_DIR" == "" ]]; then
+            for file in ${FILES[@]}; do
+                name=$(basename "$file")
+                temp_file="$PLOG_TEMP_DIR/$name"
+                if [[ "$file" == "$temp_file" ]]; then
+                    $DRY unlink "$temp_file"
+                fi
+            done
+        fi
     fi
 }
 
