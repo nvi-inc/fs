@@ -68,7 +68,10 @@ path).  Other logs and files may already be compressed.
 Except to rename a log with multicast data to include '_full' in the name, if
 not already present, none of the original files are modified.  For each run of
 $(basename $0) that needs to create modified files, a directory of the form
-/tmp/$(basename $0)_XXX will be created to hold them.
+/tmp/$(basename $0)_XXX will be created to hold them.  Unless the '-U' option
+is used (which is for testing only), the temporary directory and all its
+contents will removed by the time $(basename $0) terminates normally (after an
+abnormal termination, there may be temporary files left behind).
 
 To see progress when compressing, reducing, and redacting, install the 'pv'
 package.
@@ -78,10 +81,11 @@ ${underline}Options:${normal}
                     $FS_LOG_PATH for STATION code without 'station' or 'point' in
                     the name.
     ${black}-t${normal}            Test run: print commands for processing, not actually pushing
-                    files to server (commands that are printed are not executed)
+                    files to server (The commands that are printed are not
+                    executed.)
     ${black}-T${normal}            Test run: except for pushing files to server, process
                     normally; just printing the commands for the transfer
-                    (commands that are printed are not executed)
+                    (The commands that are printed are not executed.)
     ${black}-h${normal}            Print this message
     ${black}-c CENTER${normal}     Push files to data CENTER. Overrides the DATA_CENTERS
                     environment variable. Flag can be given multiple times.
@@ -99,8 +103,9 @@ ${underline}Options:${normal}
     ${black}-D${normal}            Don't redact IP addresses
     ${black}-e${normal}            Echo each unique IP address redacted. Causes one extra pass
                     per ARG. (no output with '-t')
-    ${black}-U${normal}            Don't unlink files after upload. (WARNING: This may cause
-                    /tmp to fill up if used repetitively.)
+    ${black}-U${normal}            Don't unlink temporary files when done with them. (WARNING:
+                    This option is only inteded for testing. It will cause /tmp
+                    to fill up if used repeatedly.)
 
 For an experiment ID, if the log contains RDBE or DBBC3 multicast data:
 
@@ -489,7 +494,7 @@ compress() {
     fi
 
     local temp_file="$PLOG_TEMP_DIR/$name"
-    if [[ "$1" == "$temp_file" ]]; then
+    if [[ -n "$UNLINK" && "$1" == "$temp_file" ]]; then
         if [[ -n "$DRY" ]]; then
             >&2 echo "unlink $temp_file"
         else
@@ -617,7 +622,7 @@ redact() {
     fi
 
     local temp_file="$PLOG_TEMP_DIR/$name.tmp"
-    if [[ "$1" == "$temp_file" ]]; then
+    if [[ -n "$UNLINK" && "$1" == "$temp_file" ]]; then
         if [[ -n "$DRY" ]]; then
             >&2 echo "unlink $temp_file"
         else
@@ -982,11 +987,11 @@ main () {
         fi
     done
 
-    DRY_SAVE=$DRY
-    if [[ -n "$DRY_SERVER" ]]; then
-        DRY="$DRY_SERVER"
-    fi
     if [[ ${#FILES[@]} -gt 0 ]]; then
+        DRY_SAVE=$DRY
+        if [[ -n "$DRY_SERVER" ]]; then
+            DRY="$DRY_SERVER"
+        fi
         for center in $DATA_CENTERS; do
             info Uploading to $center
             eval \$PLOG_CTR_$center ${FILES[@]}
@@ -1001,6 +1006,9 @@ main () {
                 fi
             done
         fi
+    fi
+    if [[ -n "$UNLINK" && ! "$PLOG_TEMP_DIR" == "" ]]; then
+        $DRY rmdir "$PLOG_TEMP_DIR"
     fi
 }
 
