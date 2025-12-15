@@ -36,7 +36,7 @@ extern struct fscom *shm_addr;
 #include "dbtcn.h"
 
 // These are in centiseconds
-#define TIME_OUT        145
+#define TIME_OUT        500
 #define ERROR_PERIOD   2000
 
 ssize_t read_mcast(int sock, char buf[], size_t buf_size, int it[6],
@@ -55,15 +55,11 @@ ssize_t read_mcast(int sock, char buf[], size_t buf_size, int it[6],
     static int to_try = -1;
     static int was_to = 0;
     static int was_dbbc3_cmd = 0;
-    int time_out;
     int time_out_summary_period=60;
+    static int seconds0,seconds;
 
     static unsigned was_count_next = 0;
     unsigned was_count;
-
-    int alternating=shm_addr->dbbc3_ignore_alt_mcast_to;
-    if(alternating)
-      time_out_summary_period=30;
 
 /* use the command count before the PREVIOUS select() to decide
  * if there has been DBBC3 activity that could interfere
@@ -75,16 +71,12 @@ ssize_t read_mcast(int sock, char buf[], size_t buf_size, int it[6],
     if(to_try > -1)
       to_try++;
 
-    /* set time-out */
-    if(was_to)
-      time_out=100;
-    else
-      time_out=TIME_OUT;
-
     FD_ZERO(&readfds);
     FD_SET(sock, &readfds);
-    to.tv_sec=time_out/100;
-    to.tv_usec=(time_out%100)*10000;
+
+    /* set time-out */
+    to.tv_sec=TIME_OUT/100;
+    to.tv_usec=(TIME_OUT%100)*10000;
 
     /* Check if data available */
     return_select = select(sock + 1, &readfds, NULL, NULL, &to);
@@ -92,35 +84,54 @@ ssize_t read_mcast(int sock, char buf[], size_t buf_size, int it[6],
         int dbbc3_cmd=shm_addr->dbbc3_command_active ||
             shm_addr->dbbc3_command_count != was_count;
 
-        if(!dbbc3_cmd && (!alternating || alternating && was_to && !was_dbbc3_cmd)) {
+//            logite(";\" Multicast time-out",0,NULL);
+//            logit_nd(" Multicast time-out",0,NULL);
+
+        if(!dbbc3_cmd) {
             /* it only counts as a try and a time-out
              * if we don't expect an error */
+
+            if(!data_valid) {
+//                logite(";\" Multicast time-out with no DBBC3 command(s) while data_valid=off",0,NULL);
+                logit_nd(" Multicast time-out with no DBBC3 command(s) while data_valid=off",0,NULL);
+            } else {
+//                logite(";\" Multicast time-out with no DBBC3 command(s) while data_valid=on",0,NULL);
+                logit_nd(" Multicast time-out with no DBBC3 command(s) while data_valid=on",0,NULL);
+            }
             to_count++;
             if(to_count == 0) {
-                logit(NULL,-20,"dn");
+                if(!data_valid)
+                    logit(NULL,-20,"dn");
+                else
+                    logit(NULL,-26,"dn");
+                rte_time(it,it+5);
+                seconds0=it[1]+60*it[2];
             }
-        } else if(data_valid && (!alternating || alternating && was_to)) {
-            /* any non-alternating time-out when data is valid counts */
+        } else if(data_valid) {
+            /* any time-out when data is valid counts */
+//            logite(";\" Multicast time-out with DBBC3 command(s) while data_valid=on",0,NULL);
+            logit_nd(" Multicast time-out with DBBC3 command(s) while data_valid=on",0,NULL);
             to_count++;
             if(to_count == 0) {
                 logit(NULL,-23,"dn");
+                rte_time(it,it+5);
+                seconds0=it[1]+60*it[2];
             }
+            logit(NULL,-27,"dn");
         }
         if(to_count > -1) { /* only if there was a reportable time-out */
             if(to_try < 0)
                 to_try=0;
             else {
-                if(time_out_summary_period == to_try) { /* summary if a time-out */
-                    if(time_out_summary_period==60)
-                        logitn(NULL,-25,"dn",to_count);
-                    else if(time_out_summary_period==30)
-                        logitn(NULL,-26,"dn",to_count);
-                    else {
-                        logitn(NULL,-27,"dn",time_out_summary_period);
-                        logitn(NULL,-28,"dn",to_count);
-                    }
+                rte_time(it,it+5);
+                seconds=it[1]+60*it[2];
+                if(seconds<seconds0)
+                     seconds+=3600;
+                if(seconds-seconds0 >= time_out_summary_period) { /* summary if a time-out */
+                    logitn(NULL,-25,"dn",to_count);
                     to_count=0;
                     to_try=0;
+                    seconds0=it[1]+60*it[2];
                 }
             }
         }
@@ -142,22 +153,20 @@ ssize_t read_mcast(int sock, char buf[], size_t buf_size, int it[6],
 
     was_to=0;
     if(to_try > -1) { /* summary if NOT a time-out */
-        if(time_out_summary_period == to_try) {
+        rte_time(it,it+5);
+        seconds=it[1]+60*it[2];
+        if(seconds<seconds0)
+             seconds+=3600;
+        if(seconds-seconds0 >= time_out_summary_period) { /* summary if a time-out */
             if(0 == to_count) {
-                logitn(NULL,20,"dn",time_out_summary_period);
+                logit(NULL,20,"dn");
                 to_count=-1;
                 to_try=-1;
             } else {
-                if(time_out_summary_period==60)
-                    logitn(NULL,-25,"dn",to_count);
-                else if(time_out_summary_period==30)
-                    logitn(NULL,-26,"dn",to_count);
-                else {
-                    logitn(NULL,-27,"dn",time_out_summary_period);
-                    logitn(NULL,-28,"dn",to_count);
-                }
+                logitn(NULL,-25,"dn",to_count);
                 to_count=0;
                 to_try=0;
+                seconds0=it[1]+60*it[2];
             }
         }
     }

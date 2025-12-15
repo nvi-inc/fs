@@ -2661,7 +2661,7 @@ DN   21
 DBBC3 multicast: error from select() cleared
 ""
 DN   20
-DBBC3 multicast: No time-outs in the last?WW expected messages; counting stopped.
+DBBC3 multicast: No time-outs in the last 60 seconds; counting stopped.
 ""
 DN   -1
 DBBC3 multicast: error unpacking, packet too small.
@@ -2688,7 +2688,7 @@ DN  -18
 DBBC3 multicast: retrieving interface address from socket (wrong interface?), UNIX?FFF
 ""
 DN  -20
-DBBC3 multicast: Time-out; will now count time-outs in background.
+DBBC3 multicast: Time-out with no DBBC3 command(s) while data_valid=off; will now count time-outs in background.
 ""
 DN  -21
 DBBC3 multicast: error from select(), UNIX?FFF
@@ -2697,19 +2697,19 @@ DN  -22
 DBBC3 multicast: error from recvfrom(), UNIX?FFF
 ""
 DN  -23
-DBBC3 multicast: Time-out while data_valid is on; will now count time-outs in background.
+DBBC3 multicast: Time-out with DBBC3 command(s) while data_valid=on; will now count time-outs in background.
 ""
 DN  -24
 DBBC3 multicast: Core3H boards have different times.
 ""
 DN  -25
-DBBC3 multicast: For the last 60 expected messages, there were?WW time-out(s); continuing to count.
+DBBC3 multicast: For the last 60 seconds, there were?WW time-out(s) (12 is the maximum); continuing to count.
 ""
 DN  -26
-DBBC3 multicast: For the last 30 expected messages, there were?WW time-out(s); continuing to count.
+DBBC3 multicast: Time-out with no DBBC3 command(s) while data_valid=on; will now count time-outs in background.
 ""
 DN  -27
-DBBC3 multicast: For the last?WW expected messages, ...
+DBBC3 multicast: You should AVOID using DBBC3 command(s) while data_valid=on.
 ""
 DN  -28
 DBBC3 multicast: ... there were?WW time-out(s); continuing to count.
