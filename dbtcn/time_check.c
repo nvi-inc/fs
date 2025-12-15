@@ -37,59 +37,59 @@ char *getenv_DBBC3( char *env, int *actual, int *nominal, int *error, int option
 
 void time_check( struct dbbc3_tsys_cycle *cycle)
 {
-    int i, j;
+    int i;
+    int time_agrees0=1;
     int time_agrees=1;
     static int minutes=-1;
 
-    int alternating=shm_addr->dbbc3_ignore_alt_mcast_to;
-
-    for (i=0; i<shm_addr->dbbc3_ddc_ifs;i++)
+    for (i=0; i<shm_addr->dbbc3_ddc_ifs-1;i++) {
         if(cycle->ifc[i].time_included) {
-            for (j=i+1; j<shm_addr->dbbc3_ddc_ifs;j++)
-                if(cycle->ifc[j].time_included) {
-                    if(!alternating) {
-                        if(cycle->ifc[i].time!=cycle->ifc[j].time) {
-                            time_agrees=0;
-                            break;
-                        }
-                    } else {
-                        if(cycle->ifc[i].time!=cycle->ifc[j].time &&
-                          cycle->ifc[i].time!=cycle->ifc[j].time-1) {
-                            time_agrees=0;
-                            break;
-                        }
-                    }
-               }
-            break;
-         }
+            if(cycle->ifc[i+1].time_included) {
+                if(cycle->ifc[i].time!=cycle->ifc[i+1].time &&
+                        cycle->ifc[i].time!=cycle->ifc[i+1].time-1) {
+                    time_agrees=0;
+                    time_agrees0=0;
+                    break;
+                }
+                if(cycle->ifc[i].time!=cycle->ifc[i+1].time) {
+                    time_agrees0=0;
+                    break;
+                }
 
-     if(0>minutes) {
-         int actual, error;
-         char *ptr=getenv_DBBC3("FS_DBBC3_MULTICAST_TIME_ERROR_MINUTES",&actual,NULL,&error,1);
-         if(0==error)
-             minutes=actual;
-         else
-             minutes=1;
-     }
-     if(time_agrees && time_error) {
-         logit(NULL,24,"dn");
-         time_error=0;
-     } else if (!time_agrees) {
-         int report=FALSE;
-         if(!time_error || 0>minutes)
-             report=TRUE;
-         else if(0 < minutes) {
-             int now;
-             rte_ticks(&now);
-             if((now-time_error+99)/(60*100*minutes) > 0) {
-                 report=TRUE;
-             }
-         }
-         if(report) {
-             logit(NULL,-24,"dn");
-             rte_ticks(&time_error);
-         }
-     }
+            }
+        }
+    }
 
-     return;
+    if(0>minutes) {
+        int actual, error;
+        char *ptr=getenv_DBBC3("FS_DBBC3_MULTICAST_TIME_ERROR_MINUTES",&actual,NULL,&error,1);
+        if(0==error)
+            minutes=actual;
+        else
+            minutes=1;
+    }
+    if(time_agrees0 && time_error) {
+        logit(NULL,24,"dn");
+        time_error=0;
+    } else if(time_agrees && time_error) {
+        logit(NULL,28,"dn");
+        time_error=0;
+    } else if (!time_agrees) {
+        int report=FALSE;
+        if(!time_error || 0>minutes)
+            report=TRUE;
+        else if(0 < minutes) {
+            int now;
+            rte_ticks(&now);
+            if((now-time_error+99)/(60*100*minutes) > 0) {
+                report=TRUE;
+            }
+        }
+        if(report) {
+            logit(NULL,-28,"dn");
+            rte_ticks(&time_error);
+        }
+    }
+
+    return;
 }

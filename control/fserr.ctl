@@ -2654,6 +2654,9 @@ Class buffer error from command response.
 DN   30
 DBBC3 multicast: version/personality issue resolved
 ""
+DN   28
+DBBC3 multicast: Core3H boards times now agree or only increase by at most one second per board
+""
 DN   24
 DBBC3 multicast: Core3H board times now agree
 ""
@@ -2712,7 +2715,7 @@ DN  -27
 DBBC3 multicast: You should AVOID using DBBC3 command(s) while data_valid=on.
 ""
 DN  -28
-DBBC3 multicast: ... there were?WW time-out(s); continuing to count.
+DBBC3 multicast: Core3H boards have different times and don't increase by at most one second per board
 ""
 DN  -30 Place holder for version string
 
