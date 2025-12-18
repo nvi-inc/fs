@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, 2022 NVI, Inc.
+ * Copyright (c) 2020, 2022, 2025 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -67,6 +67,7 @@ struct fila10g_cfg *fila10g_cfg_use = NULL;
 struct fila10g_cfg *ask_fila10g_cfg();
 int iRDBE;
 int iDBBC;
+int iCore3H;
 int RDBE_set_ticks;
 
 WINDOW	* maindisp;  /* main display WINDOW data structure pointer */
@@ -121,7 +122,7 @@ int nRDBE;
 int clear_area=0;
 int vdif_epoch, vdif_should;
 int kfirst = 1;
-
+int nCore3H;
  putpname("fmset");
 skd_set_return_name("fmset");
 setup_ids();         /* connect to shared memory segment */
@@ -168,11 +169,10 @@ dbbcddcv=shm_addr->dbbcddcv;
  else if(shm_addr->rdbe_units[3])
    iRDBE=4;
 
- if (rack == DBBC3) {
-    fprintf(stderr,"fmset does not support DBBC3 racks - fmset aborting\n");
-  rte_sleep(SLEEP_TIME);
-  exit(0);
- } else if (rack == RDBE) {
+ nCore3H=shm_addr->dbbc3_ddc_ifs;
+ iCore3H=1;
+
+if (rack == RDBE) {
    if(nRDBE==0) {
      fprintf(stderr,
 	     "no RDBEs available, correct rdbc?.ctl, and restart FS - fmset aborting\n");
@@ -271,7 +271,35 @@ build:
  column=10;
  hint_row=8;
 mvwaddstr( maindisp, 2, 3, "fmset - VLBA & Mark IV formatter/S2-DAS/S2-RT/Mark5B/FiLa10G/RDBE time set" );
- if(source == RDBE) {
+ if(source == DBBC3) {
+   column=6;
+   hint_row=10;
+   if(1==iCore3H) {
+     form="Core3H-1";
+     mvwaddstr( maindisp, 4, column, "Core3H-1    " );
+   } else if(2==iCore3H) {
+     form="Core3H-2";
+     mvwaddstr( maindisp, 4, column, "Core3H-2    " );
+   } else if(3==iCore3H) {
+     form="Core3H-3";
+     mvwaddstr( maindisp, 4, column, "Core3H-3    " );
+   } else if(4==iCore3H) {
+     form="Core3H-4";
+     mvwaddstr( maindisp, 4, column, "Core3H-4    " );
+   } else if(5==iCore3H) {
+     form="Core3H-5";
+     mvwaddstr( maindisp, 4, column, "Core3H-5    " );
+   } else if(6==iCore3H) {
+     form="Core3H-6";
+     mvwaddstr( maindisp, 4, column, "Core3H-6    " );
+   } else if(7==iCore3H) {
+     form="Core3H-7";
+     mvwaddstr( maindisp, 4, column, "Core3H-7    " );
+   } else if(8==iCore3H) {
+     form="Core3H-8";
+     mvwaddstr( maindisp, 4, column, "Core3H-8    " );
+   }
+ } else if(source == RDBE) {
    column=6;
    hint_row=10;
    if(1==iRDBE) {
@@ -319,6 +347,18 @@ mvwaddstr( maindisp, 2, 3, "fmset - VLBA & Mark IV formatter/S2-DAS/S2-RT/Mark5B
 mvwaddstr( maindisp, 5, column,   "Field System" );
 mvwaddstr( maindisp, 6, column,   "Computer" );
 
+irow=0;
+if (source==DBBC3) {
+ sprintf(buffer, "FMSET cannot set Core3H (DBBC3) time, only display it");
+ mvwaddstr( maindisp, hint_row+0, column,buffer);
+ sprintf(buffer, "Use '1'-'%d' for          Core3H board 1-%d.",nCore3H,nCore3H);
+ mvwaddstr( maindisp, hint_row+2, column,buffer);
+ sprintf(buffer, "Use 'n'     for next     Core3H board (wraps around).");
+ mvwaddstr( maindisp, hint_row+3, column,buffer);
+ sprintf(buffer, "Use 'p'     for previous Core3H board (wraps around).");
+ mvwaddstr( maindisp, hint_row+4, column, buffer);
+ irow=6;
+} else {
  sprintf(buffer, "Use '+'     to increment %s time by one second.",form);
    mvwaddstr( maindisp, hint_row, column,buffer);
  sprintf(buffer,"    '-'     to decrement %s time by one second." ,form);
@@ -328,6 +368,7 @@ mvwaddstr( maindisp, 6, column,   "Computer" );
  sprintf(buffer, "    '.'     to set %s time to Field System time.",form);
  mvwaddstr( maindisp, hint_row+3, column, buffer);
  irow=4;
+ }
  if(source==RDBE) {
    if(vdif_epoch < vdif_should && !kfirst) {
      sprintf(buffer,"    '>'     to increment %s VDIF epoch." ,form);
@@ -375,7 +416,7 @@ if(source == RDBE && nRDBE > 1) {
 }
 
  mvwaddstr( maindisp, hint_row+irow++, column,
-	    "    <esc>   to quit: DON'T LEAVE FMSET RUNNING FOR LONG.");
+	    "Use <esc>   to quit: DON'T LEAVE FMSET RUNNING FOR LONG.");
 
  if(source==RDBE && vdif_epoch == vdif_should)
    mvwaddstr( maindisp, hint_row+irow, 1, blank);
@@ -405,7 +446,7 @@ do 	{
 	    disphs-=100;
 	    disptime++;
 	  }
-          if(source!= RDBE)
+          if(source!= RDBE && source != DBBC3)
 	    sprintf(fmt,"%%H:%%M:%%S.%01d UT  %%d %%b (Day %%j) %%Y %s   ",
 		    disphs/10, mk5b_sync);
 	  else
@@ -494,7 +535,7 @@ do 	{
 	  mvwaddstr( maindisp, 6, column+15, buffer );
 	} else                             /* 123456789012345678901234567890123456789012345678901234 */
 	  mvwaddstr( maindisp, 6, column+15, "                                                      ");
-	if(source == RDBE) {
+	if(source == RDBE || source==DBBC3) {
 	  sprintf(buffer,"Nominal VDIF Epoch for %s time is %d",
 		  form,vdif_should);
 	  mvwaddstr( maindisp, 8, column, buffer );
@@ -564,6 +605,8 @@ do 	{
 	    shm_addr->disk_record.record.state.known==1;
 	  switch ( tolower(inc) ) {
 	case INC_KEY :  /* Increment seconds */
+          if(source==DBBC3)
+             goto build;
 	  if(m5rec)
 	    for (i=hint_row;i<hint_row+irow;i++)
 	      mvwaddstr( maindisp, i, 1, blank);
@@ -577,6 +620,8 @@ do 	{
 	  goto build;
 	  break;
 	case DEC_KEY :  /* Decrement seconds */
+          if(source==DBBC3)
+             goto build;
 	  if(m5rec)
 	    for (i=hint_row;i<hint_row+irow;i++)
 	      mvwaddstr( maindisp, i, 1, blank);
@@ -590,7 +635,7 @@ do 	{
 	  goto build;
 	  break;
 	case VDIF_INC_KEY :  /* Increment VDIF Epoch */
-	  if(source=RDBE) {
+	  if(source==RDBE) {
 	    if(vdif_epoch < vdif_should) {
 	      vdif_epoch++;
 	      setfmtime(formtime,0,vdif_epoch);
@@ -600,8 +645,8 @@ do 	{
 	  goto build;
 	  break;
 	case VDIF_DEC_KEY :  /* Decrement VDIF Epoch */
-	  if(source=RDBE) {
-	    if(0 < vdif_epoch) {
+          if(source==RDBE) {
+            if(0 < vdif_epoch) {
 	      vdif_epoch--;
 	      setfmtime(formtime,0,vdif_epoch);
 	      changedfm=1;
@@ -610,7 +655,7 @@ do 	{
 	  goto build;
 	  break;
 	case VDIF_NOM_KEY :  /* Nominal VDIF Epoch */
-	  if(source=RDBE) {
+	  if(source==RDBE) {
 	    vdif_epoch=vdif_should;
 	    setfmtime(formtime,0,vdif_epoch);
 	    changedfm=1;
@@ -618,6 +663,8 @@ do 	{
 	  goto build;
 	  break;
 	case SET_KEY :  /* Get time from user */
+          if(source==DBBC3)
+             goto build;
 	  if(m5rec)
 	    for (i=hint_row;i<hint_row+irow;i++)
 	      mvwaddstr( maindisp, i, 1, blank);
@@ -636,6 +683,8 @@ do 	{
 	  goto build;
 	  break;
 	case EQ_KEY :  /* set form time to fs time */
+          if(source==DBBC3)
+             goto build;
 	  if(m5rec)
 	    for (i=hint_row;i<hint_row+irow;i++)
 	      mvwaddstr( maindisp, i, 1, blank);
@@ -688,6 +737,56 @@ do 	{
 	  if(source== RDBE && shm_addr->rdbe_units[3])
 	    iRDBE=4;
             kfirst=1;
+	  goto build;
+	case 'n':
+	  if(source== DBBC3)
+	    iCore3H=1+ iCore3H%nCore3H;
+          kfirst=1;
+	  goto build;
+	case 'p':
+	  if(source== DBBC3)
+              iCore3H=1+ (iCore3H-2+nCore3H)%nCore3H;
+          kfirst=1;
+	  goto build;
+	case '1':
+	  if(source== DBBC3 && 1 <= nCore3H)
+              iCore3H=1;
+          kfirst=1;
+	  goto build;
+	case '2':
+	  if(source== DBBC3 && 2 <= nCore3H)
+              iCore3H=2;
+          kfirst=1;
+	  goto build;
+	case '3':
+	  if(source== DBBC3 && 3 <= nCore3H)
+              iCore3H=3;
+          kfirst=1;
+	  goto build;
+	case '4':
+	  if(source== DBBC3 && 4 <= nCore3H)
+              iCore3H=4;
+          kfirst=1;
+	  goto build;
+	case '5':
+	  if(source== DBBC3 && 5 <= nCore3H)
+              iCore3H=5;
+          kfirst=1;
+	  goto build;
+	case '6':
+	  if(source== DBBC3 && 6 <= nCore3H)
+              iCore3H=6;
+          kfirst=1;
+	  goto build;
+	case '7':
+	  if(source== DBBC3 && 7 <= nCore3H)
+              iCore3H=7;
+          kfirst=1;
+	  goto build;
+	case '8':
+	  if(source== DBBC3 && 8 <= nCore3H)
+              iCore3H=8;
+          kfirst=1;
 	  goto build;
 	case SYNCH_KEY:
 	  for (i=hint_row;i<hint_row+irow;i++)

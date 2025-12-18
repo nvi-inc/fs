@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020, 2025 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -109,6 +109,8 @@ int *ierr;
     * rack == DBBC && (rack_type == DBBC_DDC_FILA10G || rack_type == DBBC_PFB_FILA10G) */
 	     ) {
     getfila10gtime(unixtime,unixhs,fstime,fshs,formtime,formhs);
+  } else if (source == DBBC3) {
+    getcore3htime(unixtime,unixhs,fstime,fshs,formtime,formhs,vdif_epoch);
   }  else if (source == S2) {
     gets2time(s2dev[s2type],unixtime,unixhs,fstime,fshs,formtime,formhs);
   } else if(rack&VLBA)

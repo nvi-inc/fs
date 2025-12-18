@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, 2022, 2023 NVI, Inc.
+ * Copyright (c) 2020, 2022, 2023, 2025 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -142,6 +142,7 @@ int main(int argc, char * argv[])
     case 7:
     case 8:
     case 9:
+    case 10:
       if(!is_init) {
 	cls_clr(ip[1]);
 	ip[0]=ip[1]=0;
@@ -183,7 +184,6 @@ int main(int argc, char * argv[])
 #endif
   }
 }
-
 
 /* ********************************************************************* */
 
@@ -696,12 +696,12 @@ int ip[5];
       else
           fila10g=FALSE;
 
-      if(8 == mode || 9 == mode)
+      if(8 == mode || 9 == mode || 10 == mode)
           dbbc3=TRUE;
       else
           dbbc3=FALSE;
 
-      newline = 7 == mode || 8 == mode || 9 == mode;
+      newline = 7 == mode || 8 == mode || 9 == mode || 10 == mode;
 
       first=TRUE;
       changed=FALSE;
@@ -730,8 +730,16 @@ int ip[5];
               secho[out]=0;
               strcat(secho,"]");
           }
-
-          if(mode==4) {
+          if(10 == mode) { /* wait for start of second, hopefully agree with 1 PPS */
+              int it[6], isusp;
+              rte_time(it,it+5);
+              isusp=102-it[0];
+              if(isusp >= 100)
+                 isusp-=100;
+              if(isusp > 0 && isusp <100)
+                  rte_sleep(isusp);
+          }
+          if(mode==4 || 10 == mode) {
               rte_cmpt(centisec+2,centisec+4);
               rte_ticks (centisec);
           }
@@ -763,7 +771,7 @@ read:
           ip[2] = read_response(outbuf, sizeof(outbuf), fsock, time_out_local,
                   fila10g, newline, dbbc3);
 
-          if(mode==4) {
+          if(mode==4 || 10 == mode)  {
               rte_ticks (centisec+1);
               rte_cmpt(centisec+3,centisec+5);
           }
@@ -808,7 +816,7 @@ read:
 
       if(outbuf[0]!=0 && outbuf[strlen(outbuf)-1]=='\n')
           outbuf[strlen(outbuf)-1]=0;
-      if(1==ip[2] && mode != 9) {
+      if(1==ip[2] && mode != 9 && mode != 10) {
           int i, is;
           char *failed =strstr(outbuf,"Failed");
 
@@ -843,7 +851,7 @@ read:
 
       /* check errors */
 
-      if(ip[2]!=0 && mode !=9 || ip[2]<0 && mode == 9) {
+      if(ip[2]!=0 && mode !=9 && mode != 10|| ip[2]<0 && (mode == 9||mode==10) ) {
           if(ip[2]!=-109)
               close_socket();
           goto error;
@@ -852,12 +860,12 @@ read:
       if(mode==5)   /* no error report here */
           continue;
 
-      if(7!= mode && 6 != mode && 8!= mode && 9!=mode &&
+      if(7!= mode && 6 != mode && 8!= mode && 9!=mode && 10 !=mode &&
               (index(outbuf,'/')==NULL || strstr(outbuf,"ERROR")!=NULL)) {
           logite(outbuf,-200,"db");
           ip[2]=-201;
           goto error;
-      } else if ((7==mode || 6==mode || 8==mode || 9==mode) &&
+      } else if ((7==mode || 6==mode || 8==mode || 9==mode || 10 == mode) &&
               (strstr(outbuf,"Failed")!=NULL
                ||strstr(outbuf,"ERROR")!=NULL
                ||strstr(outbuf,"WARNING")!=NULL)
@@ -887,11 +895,15 @@ read:
           ip[2]=-201;
           goto error;
       }
-      if(1==ip[2] && 9 == mode)
+      if(1==ip[2] && (9 == mode || 10 == mode))
           goto read;
 
   } /* End of for loop  */
 
+  if(mode==10) {
+      cls_snd(&out_class, centisec, sizeof(centisec) , 0, 0);
+      out_recs++;
+  }
   if(dbbc3) {
       /* increment when starting and ending command */
       shm_addr->dbbc3_command_count++;

@@ -974,6 +974,15 @@ error retrieving class for time query in get_fila10gtime
 10 -402
 error decoding time in get_fila10gtime
 ""
+10 -411
+error retrieving class for time query in get_core3htime
+""
+10 -412
+error decoding VDIF epoch in get_core3htime
+""
+10 -413
+error decoding time in get_core3htime
+""
 AN   -1
 Illegal or unimplemented mode
 ""
