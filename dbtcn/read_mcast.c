@@ -84,19 +84,16 @@ ssize_t read_mcast(int sock, char buf[], size_t buf_size, int it[6],
         int dbbc3_cmd=shm_addr->dbbc3_command_active ||
             shm_addr->dbbc3_command_count != was_count;
 
-//            logite(";\" Multicast time-out",0,NULL);
-//            logit_nd(" Multicast time-out",0,NULL);
-
         if(!dbbc3_cmd) {
             /* it only counts as a try and a time-out
              * if we don't expect an error */
 
             if(!data_valid) {
-//                logite(";\" Multicast time-out with no DBBC3 command(s) while data_valid=off",0,NULL);
-                logit_nd(" Multicast time-out with no DBBC3 command(s) while data_valid=off",0,NULL);
+//                logite(";\" Multicast time-out with no DBBC3 commands while data_valid=off",0,NULL);
+                logit_nd(" Multicast time-out with no DBBC3 commands while data_valid=off",0,NULL);
             } else {
-//                logite(";\" Multicast time-out with no DBBC3 command(s) while data_valid=on",0,NULL);
-                logit_nd(" Multicast time-out with no DBBC3 command(s) while data_valid=on",0,NULL);
+//                logite(";\" Multicast time-out with no DBBC3 commands while data_valid=on",0,NULL);
+                logit_nd(" Multicast time-out with no DBBC3 commands while data_valid=on",0,NULL);
             }
             to_count++;
             if(to_count == 0) {
@@ -109,8 +106,8 @@ ssize_t read_mcast(int sock, char buf[], size_t buf_size, int it[6],
             }
         } else if(data_valid) {
             /* any time-out when data is valid counts */
-//            logite(";\" Multicast time-out with DBBC3 command(s) while data_valid=on",0,NULL);
-            logit_nd(" Multicast time-out with DBBC3 command(s) while data_valid=on",0,NULL);
+//            logite(";\" Multicast time-out with DBBC3 commands (or FMSET) while data_valid=on",0,NULL);
+            logit_nd(" Multicast time-out with DBBC3 commands (or FMSET) while data_valid=on",0,NULL);
             to_count++;
             if(to_count == 0) {
                 logit(NULL,-23,"dn");
@@ -118,6 +115,9 @@ ssize_t read_mcast(int sock, char buf[], size_t buf_size, int it[6],
                 seconds0=it[1]+60*it[2];
             }
             logit(NULL,-27,"dn");
+        } else {
+//            logite(";\" Multicast time-out with DBBC3 commands (or FMSET) while data_valid=off",0,NULL);
+            logit_nd(" Multicast time-out with DBBC3 commands (or FMSET) while data_valid=off",0,NULL);
         }
         if(to_count > -1) { /* only if there was a reportable time-out */
             if(to_try < 0)
