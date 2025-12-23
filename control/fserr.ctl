@@ -3495,7 +3495,7 @@ FV   -8
 fmset: Error from MK5CN, please see messages above.
 ""
 FV   -9
-fmset: Error from DBBCN, please see messages above.
+fmset: Error getting time, please see messages above.
 ""
 FV  -10
 fmset: Error from MATCN, please see messages above.

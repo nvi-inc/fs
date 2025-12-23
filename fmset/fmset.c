@@ -470,9 +470,9 @@ do 	{
  
 	} else {                           /* 123456789012345678901234567890123456789012345678901234 */
 	  wstandout(maindisp);
-	  mvwaddstr( maindisp, 4, column+15, "Error from device, see log for details.");
+	  mvwaddstr( maindisp, 4, column+15, "Error reading device, see log for details.");
 	  wstandend(maindisp);
-	  mvwaddstr( maindisp, 4, column+15+39, "               ");
+	  mvwaddstr( maindisp, 4, column+15+42, "               ");
 	}
 
 	if(formtime >= 0) {
