@@ -129,6 +129,18 @@ int main(int argc, char * argv[])
     fprintf(stderr,"entering dbbcn ip[0]=%d ip[1]=%d ip[2]=%d\n",
 	    ip[0],ip[1],ip[2]);
 #endif
+// modes (ip[0]):
+//  0 initialize
+//  1 one reply per input record
+//  2 relink (close and re-open)
+//  3 close
+//  4 fila10g time read (wait for change in reported time)
+//  5 mode 1, but no error response processing
+//  6 fila10g
+//  7 fila10g, multiline responses (displayed, not returned)
+//  8 DBBC3 multiline responses (displayed, not returned)
+//  9 mode 8 return, don't display
+// 10 mode 9 time read for Core3h (send at start of second)
     switch (ip[0]) {
     case 0:
       /* ** Initialize ** */ 
