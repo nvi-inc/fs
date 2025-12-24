@@ -56,7 +56,6 @@ main(int argc, char *argv[])
     char letters[]  = "abcdefgh";
     char lettersu[] = "ABCDEFGH";
     int reverse=0;
-    int late=20;
     int pol=0;
     int pol_default=0;
 
@@ -65,15 +64,6 @@ main(int argc, char *argv[])
     while (++i<argc) {
         if(0==strcmp(argv[i],"-r")) {
             reverse = 1;
-        } else if(0==strcmp(argv[i],"-l")) {
-            char dumc;
-            if(++i >= argc || 1!=sscanf(argv[i],"%d%c",&late,&dumc) || late <0 || late > 100) {
-                if (i >= argc)
-                    fprintf(stderr,"Parameter required for '-l'\n");
-                else
-                    fprintf(stderr,"Could not decode '-l' parameter as 0-100: '%s'\n",argv[i]);
-                okay=0;
-            }
         } else if(0==strcmp(argv[i],"-z")) {
             char dumc, polc;
             char pol_options[ ]= "brl";
@@ -89,9 +79,6 @@ main(int argc, char *argv[])
             fprintf(stderr,"Usage: %s [-v] [-l n] [-h]\n", argv[0]);
             fprintf(stderr,"Options:\n");
             fprintf(stderr," -r    reverse some foreground colors\n");
-            fprintf(stderr," -l n  change late arrival limit from 20\n");
-            fprintf(stderr,"    n  0-100 centiseconds; 0=none, 100=all\n");
-            fprintf(stderr,"       late packets arrive before 'n'\n");
             fprintf(stderr," -z c  set default polarization\n");
             fprintf(stderr,"    c  'b'=both, 'l'=1st, 'r'=2nd\n");
             fprintf(stderr," -h    this help output\n");
@@ -349,7 +336,7 @@ main(int argc, char *argv[])
 //            die();
 //            exit(0);
 //        }
-        mout7(next,&shm_addr->dbbc3_tsys_data.data[iping],krf,all,!undef,record,reverse,late);
+        mout7(next,&shm_addr->dbbc3_tsys_data.data[iping],krf,all,!undef,record,reverse);
         move(ROW_HOLD,COL_HOLD);  /* place cursor at consistent location */
         standend();
         printw(" ");
