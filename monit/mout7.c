@@ -47,8 +47,6 @@ extern struct fscom *fs;
 
 static char unit_letters[ ] = {"ABCDEFGH"};
 static time_t save_disp_time[MAX_DBBC3_IF];
-static time_t last_disp_time;
-static int knfirst[MAX_DBBC3_IF];
 
 static void print_tsys(float tsys, unsigned clipped, int reverse)
 {
@@ -184,9 +182,10 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
     }
 
     if(ifc.time > 0 && NULL != ptr) {
-        int tm_different = disp_time!=save_disp_time[next] && disp_time != last_disp_time;
+        /* first time is always "different" */
+        int tm_different = disp_time!=save_disp_time[next];
 
-        if(!tm_different && knfirst[next])
+        if(!tm_different)
             standout();
 
         printw("%4d.%03d.%02d:%02d:%02d",
@@ -196,15 +195,14 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
                 ptr->tm_min,
                 ptr->tm_sec);
 
-        if(!tm_different && knfirst[next])
+        if(!tm_different)
             standend();
-
-        save_disp_time[next]=disp_time;
-        last_disp_time=disp_time;
-        knfirst[next] = 1;
     } else
        printw("%17s"," ");
 
+    for (i=0;i<fs->dbbc3_ddc_ifs;i++) {
+      save_disp_time[i]=tsys_cycle->ifc[i].time+1;
+    }
     move(irow++,0);
     printw("Epoch ");
     if(ifc.time > 0) {
