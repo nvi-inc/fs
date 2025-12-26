@@ -42,6 +42,7 @@ int main(int argc, char *argv[])
     int it[6], itmc[6];
     int centisec[6];
     int seconds;
+    int hsecs;
 
     setup_ids();    /* attach to the shared memory */
     rte_prior(FS_PRIOR);
@@ -122,7 +123,7 @@ int main(int argc, char *argv[])
              if_param[i]=shm_addr->dbbc3_cont_cal.if_param[i];
 
         n = read_mcast(sock,buf,sizeof(buf),itmc,centisec,
-                dbtcn_control.data_valid.user_dv);
+                dbtcn_control.data_valid.user_dv, &hsecs);
 
         if(n<0)
             continue;
@@ -146,7 +147,7 @@ int main(int argc, char *argv[])
         smooth_ts( &cycle, reset ||!cont_cal, samples, filter, if_param);
         reset=FALSE;
 
-        update_shm(&packet,&cycle, itmc, centisec);
+        update_shm(&packet,&cycle, itmc, centisec, hsecs);
 
         time_check(&cycle);
 

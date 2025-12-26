@@ -40,7 +40,7 @@ extern struct fscom *shm_addr;
 #define ERROR_PERIOD   2000
 
 ssize_t read_mcast(int sock, char buf[], size_t buf_size, int it[6],
-        int centisec[6],int data_valid)
+        int centisec[6],int data_valid, int *hsecs)
 {
     ssize_t n;
     struct sockaddr_in from;
@@ -61,6 +61,8 @@ ssize_t read_mcast(int sock, char buf[], size_t buf_size, int it[6],
     static unsigned was_count_next = 0;
     unsigned was_count;
 
+    int it_start[6];
+
 /* use the command count before the PREVIOUS select() to decide
  * if there has been DBBC3 activity that could interfere
  */
@@ -79,6 +81,7 @@ ssize_t read_mcast(int sock, char buf[], size_t buf_size, int it[6],
     to.tv_usec=(TIME_OUT%100)*10000;
 
     /* Check if data available */
+    rte_time(it_start,it_start+5);
     return_select = select(sock + 1, &readfds, NULL, NULL, &to);
     if(return_select == 0) {  /* time-out */
         int dbbc3_cmd=shm_addr->dbbc3_command_active ||
@@ -190,5 +193,8 @@ ssize_t read_mcast(int sock, char buf[], size_t buf_size, int it[6],
     centisec[1]=centisec[0];
     centisec[3]=centisec[2];
     centisec[5]=centisec[4];
+    *hsecs=(it[1]-(it_start[1]+1))*100+it[0];
+    if (*hsecs<0)
+       *hsecs+=6000;
     return n;
 }

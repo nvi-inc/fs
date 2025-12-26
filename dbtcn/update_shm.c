@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2024 NVI, Inc.
+ * Copyright (c) 2020-2025 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -33,7 +33,7 @@
 extern struct fscom *shm_addr;
 
 void update_shm( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
-        int it[6], int centisec[6])
+        int it[6], int centisec[6], int hsecs)
 {
     int i;
     int seconds;
@@ -56,7 +56,7 @@ void update_shm( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
 
     cycle->last=seconds;
     memcpy(cycle->centisec,centisec,sizeof(cycle->centisec));
-    cycle->hsecs=it[0];
+    cycle->hsecs=hsecs;
 
     for (i=0;i<MAX_DBBC3_IF;i++) {
         cycle->ifc[i].lo=shm_addr->lo.lo[i];
