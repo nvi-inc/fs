@@ -554,4 +554,5 @@ typedef struct fscom {
 
   struct onoff_cmd onoff;
 
+  int dbbc3_mcast_arrival;
 } Fscom;

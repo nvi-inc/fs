@@ -1,5 +1,4 @@
-*
-* Copyright (c) 2020-2021, 2023 NVI, Inc.
+* Copyright (c) 2020-2021, 2023, 2025 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -528,6 +527,15 @@ c
           call char2hol(dbbc3_ddce_vs,ib,nch,nch+dbbc3_ddce_vc-1)
           nch=nch+dbbc3_ddce_vc
 c
+          call fs_get_dbbc3_mcast_arrival(dbbc3_mcast_arrival)
+          call fs_get_rack(rack)
+          call fs_get_rack_type(rack_type)
+          if(rack.ne.DBBC3.or.rack_type.ne.DBBC3_DDCE) goto 1110
+c
+          nch=mcoma(ib,nch)
+          nch = nch + ib2as(dbbc3_mcast_arrival,ib,nch,zcp8002)
+c
+1110      continue
           nch=mcoma(ib,nch)
           nch=ichmv_ch(ib,nch,'v')
           call fs_get_dbbc3_ddcu_vs(dbbc3_ddcu_vs)
@@ -535,6 +543,14 @@ c
           call char2hol(dbbc3_ddcu_vs,ib,nch,nch+dbbc3_ddcu_vc-1)
           nch=nch+dbbc3_ddcu_vc
 c
+          call fs_get_rack(rack)
+          call fs_get_rack_type(rack_type)
+          if(rack.ne.DBBC3.or.rack_type.ne.DBBC3_DDCU) goto 1120
+c
+          nch=mcoma(ib,nch)
+          nch = nch + ib2as(dbbc3_mcast_arrival,ib,nch,zcp8002)
+c
+1120      continue
           nch=mcoma(ib,nch)
           nch=ichmv_ch(ib,nch,'v')
           call fs_get_dbbc3_ddcv_vs(dbbc3_ddcv_vs)
@@ -542,6 +558,14 @@ c
           call char2hol(dbbc3_ddcv_vs,ib,nch,nch+dbbc3_ddcv_vc-1)
           nch=nch+dbbc3_ddcv_vc
 c
+          call fs_get_rack(rack)
+          call fs_get_rack_type(rack_type)
+          if(rack.ne.DBBC3.or.rack_type.ne.DBBC3_DDCV) goto 1130
+c
+          nch=mcoma(ib,nch)
+          nch = nch + ib2as(dbbc3_mcast_arrival,ib,nch,zcp8002)
+c
+1130      continue
           nch=mcoma(ib,nch)
           call fs_get_dbbc3_mcdelay(dbbc3_mcdelay)
           nch = nch + ib2as(dbbc3_mcdelay,ib,nch,zcp8002)

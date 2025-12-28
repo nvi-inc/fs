@@ -49,7 +49,9 @@ c     &         2hf ,2hfi,2hle /
       line2(1)=1
       call char2hol("dbbc3.ctl at end of file",line3(2),1,24)
       line3(1)=24
-
+c
+      dbbc3_mcast_arrival=0
+c
       call fmpopen(idcb,name,ierr,'r',idum)
       if (ierr.lt.0) then
         call logit7ci(0,0,0,1,-185,'bo',ierr)
@@ -144,6 +146,20 @@ C
          goto 990
       endif
 c
+      call fs_get_rack(rack)
+      call fs_get_rack_type(rack_type)
+      if(rack.ne.DBBC3.or.rack_type.ne.DBBC3_DDCE) goto 200
+c
+      call gtfld(ibuf,ifc,ilen,ic1,ic2)
+      if (ic1.eq.0) goto 200
+c
+      dbbc3_mcast_arrival = ias2b(ibuf,ic1,ic2-ic1+1)
+      if (dbbc3_mcast_arrival.lt.0 .or. dbbc3_mcast_arrival.gt.4) then
+        call logit7ci(0,0,0,1,-186,'bo',iline)
+        goto 990
+      endif
+c
+200   continue
       dbbc3_ddce_v =idbbcv
       dbbc3_ddce_vs= dbbcv
       dbbc3_ddce_vc=idbbcvc
@@ -192,6 +208,21 @@ C
          call logit7ci(0,0,0,1,-186,'bo',iline)
          goto 990
       endif
+c
+      call fs_get_rack(rack)
+      call fs_get_rack_type(rack_type)
+      if(rack.ne.DBBC3.or.rack_type.ne.DBBC3_DDCU) goto 300
+c
+      call gtfld(ibuf,ifc,ilen,ic1,ic2)
+      if (ic1.eq.0) goto 300
+C
+      dbbc3_mcast_arrival = ias2b(ibuf,ic1,ic2-ic1+1)
+      if (dbbc3_mcast_arrival.lt.0 .or. dbbc3_mcast_arrival.gt.4) then
+        call logit7ci(0,0,0,1,-186,'bo',iline)
+        goto 990
+      endif
+c
+300   continue
 c
       dbbc3_ddcu_v =idbbcv
       dbbc3_ddcu_vs= dbbcv
@@ -242,12 +273,29 @@ C
          goto 990
       endif
 c
+      call fs_get_rack(rack)
+      call fs_get_rack_type(rack_type)
+      if(rack.ne.DBBC3.or.rack_type.ne.DBBC3_DDCV) goto 400
+c
+      call gtfld(ibuf,ifc,ilen,ic1,ic2)
+      if (ic1.eq.0) goto 400
+c
+      dbbc3_mcast_arrival = ias2b(ibuf,ic1,ic2-ic1+1)
+      if (dbbc3_mcast_arrival.lt.0 .or. dbbc3_mcast_arrival.gt.4) then
+        call logit7ci(0,0,0,1,-186,'bo',iline)
+        goto 990
+      endif
+c
+400   continue
+c
       dbbc3_ddcv_v =idbbcv
       dbbc3_ddcv_vs= dbbcv
       dbbc3_ddcv_vc=idbbcvc
       call fs_set_dbbc3_ddcv_v(dbbc3_ddcv_v)
       call fs_set_dbbc3_ddcv_vs(dbbc3_ddcv_vs)
       call fs_set_dbbc3_ddcv_vc(dbbc3_ddcv_vc)
+c
+      call fs_set_dbbc3_mcast_arrival(dbbc3_mcast_arrival)
 c
 c now handle nominal
 c

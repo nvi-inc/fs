@@ -232,13 +232,17 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
         printw("%4s"," ");
 
     move(irow++,0);
-    printw("Arrival");
-    if(ifc.time > 0) {
-      buf[0]=0;
-      int2str(buf,tsys_cycle->hsecs,-4,0);
-      printw("%4s",buf);
-    } else
-      printw("%4s"," ");
+    printw("Arrival ");
+    if(tsys_cycle->hsecs/100>shm_addr->dbbc3_mcast_arrival)
+        standout();
+    buf[0]=0;
+    int2str(buf,tsys_cycle->hsecs/100,1,0);
+    printw("%1s.",buf);
+    buf[0]=0;
+    int2str(buf,tsys_cycle->hsecs%100,-2,1);
+    printw("%2s",buf);
+    if(tsys_cycle->hsecs/100>shm_addr->dbbc3_mcast_arrival)
+        standend();
 
     int swap;
     move(irow,0);
