@@ -47,6 +47,7 @@ extern struct fscom *fs;
 
 static char unit_letters[ ] = {"ABCDEFGH"};
 static time_t save_disp_time[MAX_DBBC3_IF];
+static time_t last_disp_time;
 
 static void print_tsys(float tsys, unsigned clipped, int reverse)
 {
@@ -174,18 +175,28 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
     move(irow++,0);
     printw("Time   ");
 
+    int it[6];
+    int seconds;
+    rte_time(it,it+5);
+    rte2secs(it,&seconds);
+    seconds-=1;
+    int age=seconds-tsys_cycle->last;
+
 /* legitimate times start at the first VDIF epoch */
 
     if(ifc.time > 0) {
-      disp_time=ifc.time+1;
+      disp_time=ifc.time+1-ifc.time_error;
+      if(age <= shm_addr->dbbc3_mcast_arrival)
+          disp_time+=age;
       ptr=gmtime(&disp_time);
     }
 
     if(ifc.time > 0 && NULL != ptr) {
         /* first time is always "different" */
-        int tm_different = disp_time!=save_disp_time[next];
+//        int tm_bad = disp_time-age<=-(shm_addr->dbbc3_mcast_arrival-1);
+        int tm_bad = ifc.time-seconds-ifc.time_error<-shm_addr->dbbc3_mcast_arrival || ifc.time-seconds-ifc.time_error>0;
 
-        if(!tm_different)
+        if(tm_bad)
             standout();
 
         printw("%4d.%03d.%02d:%02d:%02d",
@@ -195,14 +206,11 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
                 ptr->tm_min,
                 ptr->tm_sec);
 
-        if(!tm_different)
+        if(tm_bad)
             standend();
     } else
        printw("%17s"," ");
 
-    for (i=0;i<fs->dbbc3_ddc_ifs;i++) {
-      save_disp_time[i]=tsys_cycle->ifc[i].time+1;
-    }
     move(irow++,0);
     printw("Epoch ");
     if(ifc.time > 0) {
@@ -217,15 +225,23 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
 
     printw("  DBBC3-FS ");
     if(ifc.time> 0) {
+        int tm_bad = ifc.time_error<-shm_addr->dbbc3_mcast_arrival || ifc.time_error>0;
         if (!ifc.time_included)
             printw("------");
         else {
             buf[0]=0;
             int2str(buf,ifc.time_error,-4,0);
-            if(ifc.time_error)
-                standout();
-            printw("%4s",buf);
-            if(ifc.time_error)
+            for(i=0;i<strlen(buf);i++) {
+                if(buf[i]==' ')
+                   printw(" ");
+                else {
+                   if(tm_bad)
+                      standout();
+                    printw("%s",buf+i);
+                    break;
+                }
+            }
+            if(tm_bad)
                 standend();
         }
     } else
@@ -242,6 +258,22 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
     int2str(buf,tsys_cycle->hsecs%100,-2,1);
     printw("%2s",buf);
     if(tsys_cycle->hsecs/100>shm_addr->dbbc3_mcast_arrival)
+        standend();
+
+    printw(" Age");
+    buf[0]=0;
+    int2str(buf,age,-8,0);
+    for(i=0;i<8;i++) {
+        if(buf[i]==' ')
+           printw(" ");
+        else {
+           if(age>shm_addr->dbbc3_mcast_arrival)
+              standout();
+            printw("%s",buf+i);
+            break;
+        }
+    }
+    if(age>shm_addr->dbbc3_mcast_arrival)
         standend();
 
     int swap;
