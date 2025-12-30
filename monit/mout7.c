@@ -185,16 +185,18 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
 /* legitimate times start at the first VDIF epoch */
 
     if(ifc.time > 0) {
-      disp_time=ifc.time+1-ifc.time_error;
+      disp_time=ifc.time+1;
+      if(ifc.time_error>=-shm_addr->dbbc3_mcast_arrival && ifc.time_error <=0)
+          disp_time-=ifc.time_error;
       if(age <= shm_addr->dbbc3_mcast_arrival)
           disp_time+=age;
       ptr=gmtime(&disp_time);
     }
 
     if(ifc.time > 0 && NULL != ptr) {
-        /* first time is always "different" */
-//        int tm_bad = disp_time-age<=-(shm_addr->dbbc3_mcast_arrival-1);
-        int tm_bad = ifc.time-seconds-ifc.time_error<-shm_addr->dbbc3_mcast_arrival || ifc.time-seconds-ifc.time_error>0;
+        int time_error=ifc.time_error;
+        int tm_bad = time_error<-shm_addr->dbbc3_mcast_arrival || time_error>0;
+        tm_bad = tm_bad || age >shm_addr->dbbc3_mcast_arrival;
 
         if(tm_bad)
             standout();
@@ -225,12 +227,15 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
 
     printw("  DBBC3-FS ");
     if(ifc.time> 0) {
-        int tm_bad = ifc.time_error<-shm_addr->dbbc3_mcast_arrival || ifc.time_error>0;
         if (!ifc.time_included)
             printw("------");
         else {
+            int time_error=ifc.time_error;
+            int tm_bad = time_error<-shm_addr->dbbc3_mcast_arrival || time_error>0;
+            if(time_error>=-shm_addr->dbbc3_mcast_arrival && time_error<0)
+               time_error=0;
             buf[0]=0;
-            int2str(buf,ifc.time_error,-4,0);
+            int2str(buf,time_error,-4,0);
             for(i=0;i<strlen(buf);i++) {
                 if(buf[i]==' ')
                    printw(" ");
