@@ -41,15 +41,6 @@ void update_shm( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
     rte2secs(it,&seconds);
     clock_t now=seconds;
     struct tm *ptr=gmtime(&now);
-    if(ptr->tm_mon<6)
-        ptr->tm_mon=0;
-    else
-        ptr->tm_mon=6;
-    ptr->tm_mday=1;
-    ptr->tm_hour=0;
-    ptr->tm_min=0;
-    ptr->tm_sec=0;
-    clock_t epoch=mktime(ptr);
 
     int	vdif_should=(ptr->tm_year-100)%32;
     vdif_should=vdif_should*2+ptr->tm_mon/6;
@@ -63,6 +54,25 @@ void update_shm( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
         cycle->ifc[i].sideband=shm_addr->lo.sideband[i];
         cycle->ifc[i].pol=shm_addr->lo.pol[i];
         cycle->ifc[i].delay=t->core3h[i].pps_delay;
+
+        if(!shm_addr->dbbc3_tsys_data.epoch_inserted) {
+            if(ptr->tm_mon<6)
+                ptr->tm_mon=0;
+            else
+                ptr->tm_mon=6;
+        } else {
+            ptr->tm_year=100+t->core3h[i].vdif_epoch/2;
+            if(t->core3h[i].vdif_epoch%2)
+                ptr->tm_mon=6;
+            else
+                ptr->tm_mon=0;
+        }
+        ptr->tm_mday=1;
+        ptr->tm_hour=0;
+        ptr->tm_min=0;
+        ptr->tm_sec=0;
+        clock_t epoch=mktime(ptr);
+
         cycle->ifc[i].raw_timestamp=t->core3h[i].timestamp;
         cycle->ifc[i].time_included=
             shm_addr->dbbc3_tsys_data.data[0].ifc[i].time_included;
