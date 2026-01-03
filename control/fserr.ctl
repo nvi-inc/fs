@@ -4928,6 +4928,12 @@ Incorrect IF channel in dbe_tsys response from rdb?W
 NF -118
 Error processing RDBE data, see message above.
 ""
+NF -401
+Class buffer error, from monitor response for DBBC IF gain control.
+""
+NF -402
+Error decoding IFx response for DBBC IF gain control.
+""
 PC   -1
 program error: portopen8: devdb incorrect size.
 ""

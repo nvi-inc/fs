@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, 2023  NVI, Inc.
+ * Copyright (c) 2020, 2023, 2026 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -129,9 +129,6 @@ int ip[5];
     if(savec.agc!=0) {
       savec.target_null=1;
       memcpy(&lclc,&savec,sizeof(lclc));
-      lclc.agc=0;
-      lclc.att=-1;
-      savec.target_null=1;
       ifx_2_dbbc3(buf,ifchain,&lclc);
       cls_snd(&out_class, buf, strlen(buf) , 0, 0);
       out_recs++;
