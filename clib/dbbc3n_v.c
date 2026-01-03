@@ -24,7 +24,9 @@
 /* called repititively for samples */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include <sys/types.h>
 #include <math.h>
 
@@ -123,6 +125,13 @@ int ip[5];
     memcpy(ip+3,"fp",2);
     return;
   }
+
+  if(abs(lclm.tp-savec.target)>0.1*savec.target) {
+     char lwhat[ ]= "F ";
+     lwhat[1]=toupper(ifds[ifchain-1]);
+     logita(NULL,3,"fp",lwhat);
+  }
+
   if(savec.agc!=0 || det < 2*MAX_DBBC3_BBC) {
     out_recs=0;
     out_class=0;

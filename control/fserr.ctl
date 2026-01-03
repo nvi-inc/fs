@@ -3374,6 +3374,9 @@ FLAGR detected error in ANTCN, see above for error.
 FM   -1 FMPSEE Place Holder
 
 ""
+FP    3
+I?W power level is not within 10% of target
+""
 FP   -1
 Break Detected in FIVPT
 ""
@@ -4780,6 +4783,9 @@ WARNING: rdbe?W is not active but has detectors selected, they will be skipped.
 ""
 NF    7 Placeholder for large structure correction warning
 
+""
+NF    3
+I?W power level is not within 10% of target
 ""
 NF   -1
 Break detected in ONOFF: stopped

@@ -128,6 +128,12 @@ int *ierr;
                   cls_clr(ip[0]);
               return;
           }
+
+          if(abs(lclm.tp-savec[ifc].target)>0.1*savec[ifc].target) {
+              char lwhat[ ]= "F ";
+              lwhat[1]=toupper(ifds[ifc]);
+              logita(NULL,3,"nf",lwhat);
+          }
       }
     }
 
