@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2025 NVI, Inc.
+ * Copyright (c) 2020-2026 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -225,17 +225,19 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
     } else
       printw("%3s","  ");
 
-    printw("  DBBC3-FS ");
-    if(ifc.time> 0) {
+    printw(" DBBC3-FS ");
+    if(ifc.time<=0) {
+        printw("%5s"," ");
+    } else {
         if (!ifc.time_included)
-            printw("------");
+            printw("-----");
         else {
             int time_error=ifc.time_error;
             int tm_bad = time_error<-shm_addr->dbbc3_mcast_arrival || time_error>0;
             if(time_error>=-shm_addr->dbbc3_mcast_arrival && time_error<0)
                time_error=0;
             buf[0]=0;
-            int2str(buf,time_error,-4,0);
+            int2str(buf,time_error,-5,0);
             for(i=0;i<strlen(buf);i++) {
                 if(buf[i]==' ')
                    printw(" ");
@@ -249,8 +251,7 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
             if(tm_bad)
                 standend();
         }
-    } else
-        printw("%4s"," ");
+    }
 
     move(irow++,0);
     printw("Arrival ");
