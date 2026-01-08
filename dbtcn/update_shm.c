@@ -48,6 +48,7 @@ void update_shm( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
     cycle->last=seconds;
     memcpy(cycle->centisec,centisec,sizeof(cycle->centisec));
     cycle->hsecs=hsecs;
+    cycle->no_mcast_since_restart=0;
 
     for (i=0;i<MAX_DBBC3_IF;i++) {
         cycle->ifc[i].lo=shm_addr->lo.lo[i];

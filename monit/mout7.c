@@ -193,7 +193,9 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
       ptr=gmtime(&disp_time);
     }
 
-    if(ifc.time > 0 && NULL != ptr) {
+    if(ifc.time <= 0 || NULL == ptr) {
+        printw("%17s"," ");
+    } else {
         int time_error=ifc.time_error;
         int tm_bad = time_error<-shm_addr->dbbc3_mcast_arrival || time_error>0;
         tm_bad = tm_bad || age >shm_addr->dbbc3_mcast_arrival;
@@ -210,71 +212,74 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
 
         if(tm_bad)
             standend();
-    } else
-       printw("%17s"," ");
+    }
 
     move(irow++,0);
     printw("Epoch ");
-    if(ifc.time > 0) {
-      if(ifc.vdif_epoch >= 0) {
+    if(!shm_addr->dbbc3_tsys_data.epoch_inserted) {
+        printw("%3s","---");
+    } else if(tsys_cycle->no_mcast_since_restart) {
+        printw("%3s"," ");
+    } else {
         buf[0]=0;
         int2str(buf,ifc.vdif_epoch,-3,0);
         printw("%3s",buf);
-      } else
-        printw("%3s","---");
-    } else
-      printw("%3s","  ");
+    }
 
     printw(" DBBC3-FS ");
-    if(ifc.time<=0) {
+    if (!ifc.time_included) {
+        printw("-----");
+    } else if(tsys_cycle->no_mcast_since_restart || ifc.time <= 0) {
         printw("%5s"," ");
     } else {
-        if (!ifc.time_included)
-            printw("-----");
-        else {
-            int time_error=ifc.time_error;
-            int tm_bad = time_error<-shm_addr->dbbc3_mcast_arrival || time_error>0;
-            if(time_error>=-shm_addr->dbbc3_mcast_arrival && time_error<0)
-               time_error=0;
-            buf[0]=0;
-            int2str(buf,time_error,-5,0);
-            for(i=0;i<strlen(buf);i++) {
-                if(buf[i]==' ')
-                   printw(" ");
-                else {
-                   if(tm_bad)
-                      standout();
-                    printw("%s",buf+i);
-                    break;
-                }
+        int time_error=ifc.time_error;
+        int tm_bad = time_error<-shm_addr->dbbc3_mcast_arrival || time_error>0;
+        if(time_error>=-shm_addr->dbbc3_mcast_arrival && time_error<0)
+            time_error=0;
+        buf[0]=0;
+        int2str(buf,time_error,-5,0);
+        for(i=0;i<strlen(buf);i++) {
+            if(buf[i]==' ')
+                printw(" ");
+            else {
+                if(tm_bad)
+                    standout();
+                printw("%s",buf+i);
+                break;
             }
-            if(tm_bad)
-                standend();
         }
+        if(tm_bad)
+            standend();
     }
 
     move(irow++,0);
     printw("Arrival ");
-    if(tsys_cycle->hsecs/100>shm_addr->dbbc3_mcast_arrival)
-        standout();
-    buf[0]=0;
-    int2str(buf,tsys_cycle->hsecs/100,1,0);
-    printw("%1s.",buf);
-    buf[0]=0;
-    int2str(buf,tsys_cycle->hsecs%100,-2,1);
-    printw("%2s",buf);
-    if(tsys_cycle->hsecs/100>shm_addr->dbbc3_mcast_arrival)
-        standend();
+    if(tsys_cycle->no_mcast_since_restart) {
+        printw("    ");
+    } else {
+        if(tsys_cycle->hsecs/100>shm_addr->dbbc3_mcast_arrival)
+            standout();
+        buf[0]=0;
+        int2str(buf,tsys_cycle->hsecs/100,1,0);
+        printw("%1s.",buf);
+        buf[0]=0;
+        int2str(buf,tsys_cycle->hsecs%100,-2,1);
+        printw("%2s",buf);
+        if(tsys_cycle->hsecs/100>shm_addr->dbbc3_mcast_arrival)
+            standend();
+    }
 
     printw(" Age");
+    if(tsys_cycle->no_mcast_since_restart && ifc.time <= 0)
+        age=seconds-tsys_cycle->no_mcast_since_restart;
     buf[0]=0;
     int2str(buf,age,-8,0);
     for(i=0;i<8;i++) {
         if(buf[i]==' ')
-           printw(" ");
+            printw(" ");
         else {
-           if(age>shm_addr->dbbc3_mcast_arrival)
-              standout();
+            if(age>shm_addr->dbbc3_mcast_arrival)
+                standout();
             printw("%s",buf+i);
             break;
         }
@@ -284,7 +289,9 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
 
     int swap;
     move(irow,0);
-    if(ifc.lo>=0.0 && krf) {
+    if(tsys_cycle->no_mcast_since_restart)
+        printw("BBC           Ts-L  Ts-U");
+    else if(ifc.lo>=0.0 && krf) {
         printw("BBC    RF     Ts-L  Ts-U");
         swap=2==ifc.sideband ? 1 : 0;
     } else {
@@ -293,15 +300,16 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
     }
 
     move(irow++,9);
-    if(ifc.lo>=0.0)
+    if(tsys_cycle->no_mcast_since_restart || ifc.lo<0.0)
+        printw("   ");
+    else {
         if(ifc.pol==1)
             printw("(R)");
         else if(ifc.pol==2)
             printw("(L)");
         else
             printw("   ");
-    else
-         printw("   ");
+    }
 
     int itpis[MAX_DBBC3_DET] = {};
     mk5dbbc3d(itpis);
@@ -312,6 +320,8 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
             ibbc=next*8+64+i-8;
         move(irow+i,0);
         printw("%03d",ibbc+1);
+        if(tsys_cycle->no_mcast_since_restart)
+             continue;
         if(bbc[ibbc].freq!=UINT_MAX) {
             double freq=bbc[ibbc].freq*1e-6;
             if(ifc.lo>=0.0 && krf)

@@ -44,6 +44,7 @@ main()
     key_t key;
     void shm_att();
     int rte_secs();
+    int i, j;
 
     key = SHM_KEY;
     size = SHM_SIZE;
@@ -65,6 +66,16 @@ main()
 				       &shm_addr->time.init_error,
 				       &shm_addr->time.init_errno);
     shm_addr->terminate_ticks=0;
+
+
+    for(i=0;i<2;i++) {
+        shm_addr->dbbc3_tsys_data.data[i].last=0;
+        shm_addr->dbbc3_tsys_data.data[i].no_mcast_since_restart=0;
+        for(j=0;j<MAX_DBBC3_IF;j++) {
+            shm_addr->dbbc3_tsys_data.data[i].ifc[j].time = 0;
+        }
+    }
+
     key = SEM_KEY;
     nsems = SEM_NUM;
     if( (sem_id = sem_get( key, nsems)) == -1) {

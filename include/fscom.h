@@ -508,6 +508,7 @@ typedef struct fscom {
           time_t last;
           int centisec[6];
           int hsecs;
+          int no_mcast_since_restart;
           struct dbbc3_tsys_ifc {
               double lo;
               int sideband;

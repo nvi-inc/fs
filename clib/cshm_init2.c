@@ -62,15 +62,22 @@ void cshm_init2()
 
   shm_addr->dbbc3_tsys_data.iping=0;
   shm_addr->dbbc3_tsys_data.epoch_inserted=epoch_inserted;
+
+  int seconds;
+  int it[6];
+  rte_time(it,it+5);
+  rte2secs(it,&seconds);
+
   for(i=0;i<2;i++) {
-      shm_addr->dbbc3_tsys_data.data[i].last=0;
+      if(shm_addr->dbbc3_tsys_data.data[i].no_mcast_since_restart==0)
+          shm_addr->dbbc3_tsys_data.data[i].no_mcast_since_restart=seconds;
+
       for(j=0;j<MAX_DBBC3_IF;j++) {
           shm_addr->dbbc3_tsys_data.data[i].ifc[j].lo=-1.0;
           shm_addr->dbbc3_tsys_data.data[i].ifc[j].delay=UINT_MAX;
           shm_addr->dbbc3_tsys_data.data[i].ifc[j].time_included=time_included;
           shm_addr->dbbc3_tsys_data.data[i].ifc[j].time_error=-1000000;
           shm_addr->dbbc3_tsys_data.data[i].ifc[j].vdif_epoch= -1;
-          shm_addr->dbbc3_tsys_data.data[i].ifc[j].time = 0;
       }
       for(j=0;j<MAX_DBBC3_BBC;j++) {
           shm_addr->dbbc3_tsys_data.data[i].bbc[j].freq=UINT_MAX;
