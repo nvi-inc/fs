@@ -272,8 +272,25 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
     printw(" Age");
     if(tsys_cycle->no_mcast_since_restart && ifc.time <= 0)
         age=seconds-tsys_cycle->no_mcast_since_restart;
-    buf[0]=0;
-    int2str(buf,age,-8,0);
+    int days=age/86400;
+    int hours=age%86400/3600;
+    int minutes=age%86400%3600/60;
+    int secs=age%86400%3600%60;
+    if(days>=99)
+      snprintf(buf,9," >99days");
+    else if(days>=10)
+      snprintf(buf,9," >%dd%02dh",days,hours);
+    else if(days>=1)
+      snprintf(buf,9,"  >%dd%02dh",days,hours);
+    else if(hours>=10)
+      snprintf(buf,9," >%dh%02dm",hours,minutes);
+    else if(hours>=1)
+      snprintf(buf,9," %d:%02d:%02d",hours,minutes,secs);
+    else if(minutes>=1)
+      snprintf(buf,9,"   %2d:%02d",minutes,secs);
+    else
+      snprintf(buf,9,"      %2d",secs);
+
     for(i=0;i<8;i++) {
         if(buf[i]==' ')
             printw(" ");
