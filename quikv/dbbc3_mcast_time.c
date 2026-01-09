@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021, 2023-2025 NVI, Inc.
+ * Copyright (c) 2020-2021, 2023-2026 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -52,6 +52,10 @@ void dbbc3_mcast_time(command,itask,ip)
     ip[0]=ip[1]=ip[2]=0;
 
     int iping=shm_addr->dbbc3_tsys_data.iping;
+    if(shm_addr->dbbc3_tsys_data.data[iping].no_mcast_since_restart) {
+       ierr=-305;
+       goto error;
+    }
     struct tm *ptr=gmtime(&shm_addr->dbbc3_tsys_data.data[iping].last);
 
     strcpy(output,command->name);

@@ -3362,6 +3362,9 @@ Core3H board?W has a time offset not equal to or one greater then the preceding 
 DW -304
 One or more Core3H boards have a time offset problem and/or the multicast data is stale, please see messages above.
 ""
+DW -305
+No multicast received since last FS restart.
+""
 ER -902
 Unable to find ":" in S2 error decode response.
 ""
