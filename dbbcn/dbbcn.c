@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, 2022, 2023, 2025 NVI, Inc.
+ * Copyright (c) 2020, 2022, 2023, 2025-2026 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -753,8 +753,12 @@ int ip[5];
           }
           if(mode==4 || 10 == mode) {
               rte_cmpt(centisec+2,centisec+4);
-              rte_ticks (centisec);
-          }
+              if(mode == 4)
+                rte_ticks (centisec);
+              else
+                rte_rawt (centisec);
+           //all devices except DBBC3 use _ticks, it is not clear why it is diffent}
+           }
 
           if(dbbc3) {
               /* increment when starting and ending command */
@@ -784,7 +788,11 @@ read:
                   fila10g, newline, dbbc3);
 
           if(mode==4 || 10 == mode)  {
-              rte_ticks (centisec+1);
+              if(mode == 4)
+                rte_ticks (centisec+1);
+              else
+                rte_rawt (centisec+1);
+           //all devices except DBBC3 use _ticks, it is not clear why it is diffent
               rte_cmpt(centisec+3,centisec+5);
           }
 

@@ -1,0 +1,66 @@
+core3h_time - Core3H board time (DBBC3 rack)
+
+Syntax:   core3h_time=board
+
+Response: core3h_time/board,epoch,seconds,days,time,(nominal),difference
+
+Settable parameters:
+
+board:      board to read, 1 to the number of IFs specified in
+            'dbbc3.ctl. (nominal maximum 8). No default. The previous
+            value is not available with '*'.
+
+Monitor only parameter:
+
+epoch       VDIF epoch (halfYearsSince2000); the value for January
+            1-June 30, 2020 should be '0'
+
+seconds     seconds since epoch
+
+days        full days since the start of 2000 until the epoch date
+            (daysSince2000); the value for January 1-June 30, 2020
+            should be '0'
+
+time        board date/time in format YYYY-MM-DDThh:mm:ss
+
+nominal     nominal VDIF epoch for board 'time', shown in parentheses
+
+difference  board time minus FS time in seconds, positive if the board
+            leads the FS
+
+Comments:
+
+All dates and times are UTC.
+
+This command samples the 'time' of Core3H 'board' at the start of the
+next UTC second.
+
+It may take more than one second for the board to respond. As a
+result, the board 'time' shown may not match the FS log time stamp.
+However, 'difference' is calculated as the FS time when the request
+was made and the board time returned. If it is zero, they agree at the
+one second level.
+
+Another consequence of the board sometimes taking more than one second
+to respond is that consecutive 'core3H_mode=...' commands may not
+return board times that are consecutive.
+
+The Core3H board's labels for 'epoch' and 'days' are shown in the
+Monitor only parameters list in parentheses.
+
+The 'nominal' value is not returned by the board. It is calculated
+based on the board 'time' and displayed for informational purposes.
+
+The VDIF epoch is described by this section from the VDIF
+specification:
+
+  Reference epoch: [It is] ... the 6-month period in which the VDIF
+  clock was set, with an origin of at 00UTC 1 Jan 2000, such that ‘0’
+  corresponds to the first 6 months of 2000, ‘1’ corresponds to the 6
+  months starting 00H 1 July 2000, etc. After setting, [it] ... is
+  static and is not incremented. [It] ... rolls over to 0 again when
+  the reference epoch corresponds to the 6-month period starting 00H 1
+  Jan 2032.
+
+NOTE: Some DBBC3 firmware versions may automatically increment the
+epoch value at the start of a new 6-month period.

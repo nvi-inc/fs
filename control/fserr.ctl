@@ -2660,6 +2660,27 @@ Error decoding dbbcNN/ response, could be a DBBC version mis-match, see error DC
 DK -451
 Class buffer error from command response.
 ""
+DL -101
+No default for board number
+""
+DL -201
+Board number must be positive and less than or equal to?W (the number of boards set in dbbc3.ctl).
+""
+DL -301
+Parameter required
+""
+DL -401
+Class buffer error from monitor response.
+""
+DL -402 Place holder for time response string
+
+""
+DL -403
+Error decoding core3h board time response, above DL -402 error shows the string that did not decode.
+""
+DL -404
+Too many core3h board time response buffers.
+""
 DN   30
 DBBC3 multicast: version/personality issue resolved
 ""
