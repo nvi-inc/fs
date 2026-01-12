@@ -51,18 +51,27 @@ int ip[5];                           /* ipc parameters */
         ierr=-301;
         goto error;
       }
-      ierr=arg_int(command->argv[0],&iboard,1,FALSE);
-      if(ierr==0 && (iboard<1 || iboard >shm_addr->dbbc3_ddc_ifs))
-          ierr=-200;
-      if(ierr==-200) {
-          char str[3];
-          snprintf(str,3,"%2d",shm_addr->dbbc3_ddc_ifs);
-          memcpy(ip+4,str,2);
+
+      if(!strcmp(command->argv[0],"next")) {
+        if(shm_addr->dbbc3_core3h_time_previous<=0 || shm_addr->dbbc3_core3h_time_previous>shm_addr->dbbc3_ddc_ifs)
+           iboard=1;
+        else
+           iboard=1+shm_addr->dbbc3_core3h_time_previous%shm_addr->dbbc3_ddc_ifs;
+      } else {
+          ierr=arg_int(command->argv[0],&iboard,1,FALSE);
+          if(ierr==0 && (iboard<1 || iboard >shm_addr->dbbc3_ddc_ifs))
+              ierr=-200;
+          if(ierr==-200) {
+              char str[3];
+              snprintf(str,3,"%2d",shm_addr->dbbc3_ddc_ifs);
+              memcpy(ip+4,str,2);
+          }
+          if (ierr) {
+              ierr-=1;
+              goto error;
+          }
       }
-      if (ierr) {
-          ierr-=1;
-          goto error;
-      }
+      shm_addr->dbbc3_core3h_time_previous=iboard;
 
       out_recs=0;
       out_class=0;

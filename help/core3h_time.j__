@@ -7,8 +7,8 @@ Response: core3h_time/board,epoch,seconds,days,time,(nominal),difference
 Settable parameters:
 
 board:      board to read, 1 to the number of IFs specified in
-            'dbbc3.ctl. (nominal maximum 8). No default. The previous
-            value is not available with '*'.
+            'dbbc3.ctl. (nominal maximum 8) or 'next' (see comments).
+            No default. The previous value is not available with '*'.
 
 Monitor only parameter:
 
@@ -34,6 +34,15 @@ All dates and times are UTC.
 
 This command samples the 'time' of Core3H 'board' at the start of the
 next UTC second.
+
+If 'board' is specified as 'next', the board requested is one greater
+than the previous board requested (wrapping back to '1' after the last
+board specified by the number of IFs in 'dbbc3.ctl').  This applies
+regardless of whether the previous request used 'next' or specified a
+board explicitly. The board for 'next' is determined by the previous
+request and not the previous board that had a successful response;
+this prevents' 'next' from getting stuck on a board with a problem.
+After a FS restart, the 'next' board is '1'.
 
 It may take more than one second for the board to respond. As a
 result, the board 'time' shown may not match the FS log time stamp.

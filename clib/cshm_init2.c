@@ -86,5 +86,7 @@ void cshm_init2()
       }
   }
 
+  shm_addr->dbbc3_core3h_time_previous=0;
+
   return;
 }
