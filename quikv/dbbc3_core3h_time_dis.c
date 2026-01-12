@@ -91,6 +91,19 @@ int ip[5];
     for (i=0;i<5;i++) ip[i]=0;
     cls_snd(&ip[0],output,strlen(output),0,0);
     ip[1]=1;
+    if(!strcmp(lclm.time,"2000-01-01T00:00:00")) {
+      char str[3];
+      ip[2]=-405;
+      memcpy(ip+3,"dl",2);
+      snprintf(str,3,"%2d",lclm.iboard);
+      memcpy(ip+4,str,2);
+    } else if(lclm.seconds_fm-lclm.seconds_fs != 0) {
+      char str[3];
+      ip[2]=-406;
+      memcpy(ip+3,"dl",2);
+      snprintf(str,3,"%2d",lclm.iboard);
+      memcpy(ip+4,str,2);
+    }
     return;
 
 error2:

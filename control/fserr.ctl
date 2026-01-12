@@ -2681,6 +2681,12 @@ Error decoding core3h board time response, above DL -402 error shows the string 
 DL -404
 Too many core3h board time response buffers.
 ""
+DL -405
+Core3H board?W time is at the start of epoch 0. It probably needs to be re-synced.
+""
+DL -406
+Core3H board?W time differs from FS time.
+""
 DN   30
 DBBC3 multicast: version/personality issue resolved
 ""
