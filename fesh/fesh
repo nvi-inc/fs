@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright (c) 2020-2023 NVI, Inc.
+# Copyright (c) 2020-2023, 2026 NVI, Inc.
 #
 # This file is part of VLBI Field System
 # (see http://github.com/nvi-inc/fs).
@@ -19,10 +19,158 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-VERSION=2023-06-12
+VERSION=2026-01-21
 
 version(){
     echo "[fesh $VERSION]"
+}
+
+download_files() {
+    if [[ -z "${FESH_EMAIL:-}" ]]; then
+        user=anonymous
+    else
+        user="anonymous:$FESH_EMAIL"
+    fi
+    if [[ -n "$verbose" ]]; then
+        CURL_VERBOSE=-v
+        WGET_VERBOSE=
+    else
+        WGET_VERBOSE=-nv
+        CURL_VERBOSE=
+    fi
+
+    if [[ "$FESH_DATA_CENTER" =~ vlbeer ]]; then
+        echo "Fetching $sched.vex ..." >&2
+        wget $WGET_VERBOSE "ftp://ftp@vlbeer.ira.inaf.it/vlb_arc/ftp/vlbi_arch/$month/$sched.vex"
+        echo Done >&2
+        return
+    fi
+
+    echo "Fetching $sched.skd ..." >&2
+    if [[ "$FESH_DATA_CENTER" =~ cddis ]]; then
+        if [[ "$FESH_CDDIS_METHOD" =~ ^ftp$ ]]; then
+            wget $WGET_VERBOSE "ftp://ftp@cddis.gsfc.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
+            echo Done >&2
+
+            if [[ -n "$txt" ]]; then
+                echo "Fetching $sched.txt ..." >&2
+                wget $WGET_VERBOSE "ftp://ftp@cddis.gsfc.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.txt"
+                echo Done >&2
+            fi
+        elif [[ "$FESH_CDDIS_METHOD" =~ ^https$ ]]; then
+            if [[ ! -e "$NETRC_DIR/.netrc" ]]; then
+                fatal "$NETRC_DIR/.netrc not found, see usage"
+            fi
+
+            if ! grep -q urs.earthdata.nasa.gov "$NETRC_DIR/.netrc"; then
+                fatal "$NETRC_DIR/.netrc does not contain CDDIS login information, see usage"
+            fi
+            curl  -k  -f -c /dev/null $CURL_VERBOSE -n \
+                $CURL_NETRC_FILE_OPTION \
+                -L -O "https://cddis.nasa.gov/archive/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
+            echo Done >&2
+
+            if [[ -n "$txt" ]]; then
+                echo "Fetching $sched.txt ..." >&2
+                curl  -k  -f -c /dev/null $CURL_VERBOSE -n \
+                    $CURL_NETRC_FILE_OPTION \
+                    -L -O "https://cddis.nasa.gov/archive/vlbi/ivsdata/aux/$year/$sched/$sched.txt"
+                echo Done >&2
+            fi
+        else
+            curl -u "$user" -k -O $CURL_VERBOSE --ftp-ssl "ftp://gdc.cddis.eosdis.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
+            echo Done >&2
+
+            if [[ -n "$txt" ]]; then
+                echo "Fetching $sched.txt ..." >&2
+                curl -u "$user" -k -O $CURL_VERBOSE --ftp-ssl "ftp://gdc.cddis.eosdis.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.txt"
+                echo Done >&2
+            fi
+        fi
+    elif [[ "$FESH_DATA_CENTER" =~ opar ]]; then
+        wget $WGET_VERBOSE "ftp://ftp@ivsopar.obspm.fr/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
+        echo Done >&2
+
+        if [[ -n "$txt" ]]; then
+            echo "Fetching $sched.txt ..." >&2
+            wget $WGET_VERBOSE "ftp://ftp@ivsopar.obspm.fr/vlbi/ivsdata/aux/$year/$sched/$sched.txt"
+            echo Done >&2
+        fi
+    elif [[ "$FESH_DATA_CENTER" =~ bkg ]]; then
+        if [[ "$FESH_BKG_METHOD" =~ ^ftp$ ]]; then
+            wget $WGET_VERBOSE "ftp://ftp@ivs.bkg.bund.de/pub/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
+            echo Done >&2
+
+            if [[ -n "$txt" ]]; then
+                echo "Fetching $sched.txt ..." >&2
+                wget $WGET_VERBOSE "ftp://ftp@ivs.bkg.bund.de/pub/vlbi/ivsdata/aux/$year/$sched/$sched.txt"
+                echo Done >&2
+            fi
+        else
+            curl --ssl-reqd $CURL_VERBOSE -u anonymous:anonymous -O "ftp://ivs.bkg.bund.de/pub/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
+            echo Done >&2
+
+            if [[ -n "$txt" ]]; then
+                echo "Fetching $sched.txt ..." >&2
+                curl --ssl-reqd $CURL_VERBOSE -u anonymous:anonymous -O "ftp://ivs.bkg.bund.de/pub/vlbi/ivsdata/aux/$year/$sched/$sched.txt"
+                echo Done >&2
+            fi
+        fi
+    fi
+}
+# Find latest temporary directory
+get_latest_tmp() {
+    local tmp=$(ls -t /tmp\
+        | grep "^fesh_${sched}_...$"\
+        | head -1)
+
+    if [[ -z "$tmp" ]]; then
+        fatal "no /tmp/fesh_${sched}_... directory found"
+    fi
+    echo "/tmp/$tmp"
+}
+check_station() {
+    set +u
+    if [[ -z "$station" ]]; then
+        fatal "Neither STATION environment variable nor -s are set; should be set to two-letter station code if using drudg."
+    fi
+    set -u
+
+#force lower case station code
+    station=$(echo "$station" | tr '[:upper:]' '[:lower:]')
+}
+check_file_date() {
+    local need_drudg=
+    if [[ -e "$1" ]]; then
+        if [[ "$1" -ot "$SCHED_DIR/$sched.skd" ]]; then
+            need_drudg=1
+            echo "    $1 is older than $SCHED_DIR/$sched.skd" >&2
+        else
+            echo "    $1 is newer than $SCHED_DIR/$sched.skd" >&2
+        fi
+    else
+        echo "    $1 doesn't exist" >&2
+        need_drudg=1
+    fi
+    echo "$need_drudg"
+}
+check_drudg_output () {
+    check_station
+    if [[ -e $CONTROL_DIR/skedf.ctl ]]; then
+        echo -e "\nChecking drudg output:" >&2
+        snp_date=$(check_file_date "$SNAP_DIR/$sched$station.snp")
+        prc_date=$(check_file_date "$PROC_DIR/$sched$station.prc")
+        lst_date=$(check_file_date "$LIST_DIR/$sched$station.lst")
+        if [[ -n "$snp_date" || -n "$prc_date" || -n "$lst_date"  ]]; then
+            echo -e "\nSome drudg output is older than $SCHED_DIR/$sched.skd or is misssing. You" >&2
+            echo "should use 'fesh -Sdf $sched' to update." >&2
+        else
+            echo -e "\nAll drudg output is newer than $SCHED_DIR/$sched.skd. That should be okay." >&2
+        fi
+    else
+        echo -e "\n'$CONTROL_DIR/skedf.ctl' doesn't exist, can't check drudg output" >&2
+        exit 1
+    fi
 }
 
 #enable 'strict' mode
@@ -100,6 +248,9 @@ Fetch schedule file
 
 Options:
  -n       Fetch next schedule in master file (not supported yet)
+ -C       check for changed schedule file (and .txt file if previously
+          download) on server; if there were any changes, new versions
+          are left on /tmp and a hint for how proceed is printed
  -d       drudg schedule with default settings, not supported for vlbeer
           (needs STATION environment variable or -s set with two letter id)
  -D dc    Use alternate data center; dc=bkg, cddis, opar, or vlbeer. Upper
@@ -283,11 +434,15 @@ verbose=
 txt=
 print=
 download=1
-while getopts 'a:c:nfdD:hHm:p:Ps:St:T:u:vVxy:' opt; do
+check_new=
+while getopts 'a:Cc:nfdD:hHm:p:Ps:St:T:u:vVxy:' opt; do
     case $opt in
         n)
             echo "'next' not implemented."
             exit 1
+            ;;
+        C)
+            check_new=1
             ;;
         d)
             if [[ ! -e $CONTROL_DIR/skedf.ctl ]]; then
@@ -471,34 +626,36 @@ if [[ "$cont_cal_answer" =~ off  ]]; then
 fi
 
 ## Conflict check
-if [[ "$FESH_DATA_CENTER" =~ vlbeer ]]; then
-    if [[ -e $SCHED_DIR/$sched.vex ]]; then
-        if [[ -z "$force" ]]; then
-            echo "$SCHED_DIR/$sched.vex exists, delete or use '-f' to get fresh schedule" >&2
-            exit 1
-        fi
-        rm "$SCHED_DIR/$sched.vex"
-    fi
-elif [[ -n "$download" ]]; then
-    if [[ -e $SCHED_DIR/$sched.skd ]]; then
-        if [[ -z "$force" ]]; then
-            echo "$SCHED_DIR/$sched.skd exists, delete or use '-f' to get fresh schedule" >&2
-            exit 1
-        fi
-        rm "$SCHED_DIR/$sched.skd"
-    fi
-    if [[ -n "$txt" ]]; then
-        if [[ -e $SCHED_DIR/$sched.txt ]]; then
-            if [[ -z "$force" ]]; then
-                echo "$SCHED_DIR/$sched.txt exists, delete or use '-f' to get fresh schedule" >&2
-                exit 1
-            fi
-            rm "$SCHED_DIR/$sched.txt"
-        fi
+if [[ -z "$check_new" ]]; then
+    if [[ "$FESH_DATA_CENTER" =~ vlbeer ]]; then
+	if [[ -e $SCHED_DIR/$sched.vex ]]; then
+	    if [[ -z "$force" ]]; then
+		echo "$SCHED_DIR/$sched.vex exists, delete or use '-f' to get fresh schedule" >&2
+		exit 1
+	    fi
+	    rm "$SCHED_DIR/$sched.vex"
+	fi
+    elif [[ -n "$download" ]]; then
+	if [[ -e $SCHED_DIR/$sched.skd ]]; then
+	    if [[ -z "$force" ]]; then
+		echo "$SCHED_DIR/$sched.skd exists, delete or use '-f' to get fresh schedule" >&2
+		exit 1
+	    fi
+	    rm "$SCHED_DIR/$sched.skd"
+	fi
+	if [[ -n "$txt" ]]; then
+	    if [[ -e $SCHED_DIR/$sched.txt ]]; then
+		if [[ -z "$force" ]]; then
+		    echo "$SCHED_DIR/$sched.txt exists, delete or use '-f' to get fresh schedule" >&2
+		    exit 1
+		fi
+		rm "$SCHED_DIR/$sched.txt"
+	    fi
+	fi
     fi
 fi
 
-if [[ -n "$run_drudg" ]]; then
+if [[ -n "$run_drudg" && -z "$check_new" ]]; then
     if [[ ! -n "$download" ]]; then
         if [[ ! -e $SCHED_DIR/$sched.skd ]]; then
             echo "$SCHED_DIR/$sched.skd doesn't exist" >&2
@@ -537,74 +694,88 @@ if [[ -n "$run_drudg" ]]; then
         rm "$LIST_DIR/$sched$station.lst"
     fi
 fi
- 
-if [[ -z "${FESH_EMAIL:-}" ]]; then
-    user=anonymous
-else
-    user="anonymous:$FESH_EMAIL"
-fi
+
 version
-if [[ -n "$download" ]]; then
-    if [[ -n "$verbose" ]]; then
-        CURL_VERBOSE=-v
-        WGET_VERBOSE=
+
+if [[ -n "$check_new" ]]; then
+    if [[ "$FESH_DATA_CENTER" =~ vlbeer ]]; then
+        if [[ ! -e $SCHED_DIR/$sched.vex ]]; then
+            fatal "Schedule $SCHED_DIR/$sched.vex is not present. Rerun without '-C'."
+        fi
     else
-        WGET_VERBOSE=-nv
-        CURL_VERBOSE=
-    fi
-    pushd "$SCHED_DIR" >/dev/null
-    echo Fetching schedule from server... >&2
-    #TODO: if not found, maybe check next or previous years?
-    if [[ "$FESH_DATA_CENTER" =~ cddis ]]; then
-        if [[ "$FESH_CDDIS_METHOD" =~ ^ftp$ ]]; then
-            wget $WGET_VERBOSE "ftp://ftp@cddis.gsfc.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
-            if [[ -n "$txt" ]]; then
-                wget $WGET_VERBOSE "ftp://ftp@cddis.gsfc.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.txt"
-            fi
-        elif [[ "$FESH_CDDIS_METHOD" =~ ^https$ ]]; then
-            if [[ ! -e "$NETRC_DIR/.netrc" ]]; then
-                fatal "$NETRC_DIR/.netrc not found, see usage"
-            fi
-
-            if ! grep -q urs.earthdata.nasa.gov "$NETRC_DIR/.netrc"; then
-                fatal "$NETRC_DIR/.netrc does not contain CDDIS login information, see usage"
-            fi
-            curl  -k  -f -c /dev/null $CURL_VERBOSE -n \
-                $CURL_NETRC_FILE_OPTION \
-                -L -O "https://cddis.nasa.gov/archive/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
-            if [[ -n "$txt" ]]; then
-                curl  -k  -f -c /dev/null $CURL_VERBOSE -n \
-                    $CURL_NETRC_FILE_OPTION \
-                    -L -O "https://cddis.nasa.gov/archive/vlbi/ivsdata/aux/$year/$sched/$sched.txt"
-            fi
-        else
-            curl -u "$user" -k -O $CURL_VERBOSE --ftp-ssl "ftp://gdc.cddis.eosdis.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
-
-            if [[ -n "$txt" ]]; then
-                curl -u "$user" -k -O $CURL_VERBOSE --ftp-ssl "ftp://gdc.cddis.eosdis.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.txt"
-            fi
+        if [[ ! -e $SCHED_DIR/$sched.skd ]]; then
+            echo "Schedule $SCHED_DIR/$sched.skd is not present. Rerun without -C,' probably" >&2
+            echo "adding -fdx to get everything" >&2
+            exit 1
         fi
-    elif [[ "$FESH_DATA_CENTER" =~ opar ]]; then
-        wget $WGET_VERBOSE "ftp://ftp@ivsopar.obspm.fr/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
+        if [[ -e $SCHED_DIR/$sched.txt ]]; then
+            txt=1
+        fi
+    fi
+    FESH_TEMP_DIR=$(mktemp -d  "/tmp/$(basename $0)_${sched}_XXX" || fatal "Using mktemp to create temporary directory failed." )
+    if [[ "$FESH_TEMP_DIR" == "" ]]; then
+        fatal "Creating temporary directory failed"
+    fi
+
+    pushd "$FESH_TEMP_DIR" >/dev/null
+    echo "Fetching from $FESH_DATA_CENTER to $FESH_TEMP_DIR for checking" >&2
+    download_files
+    update_needed=
+    echo -e "\nComparison results:" >&2
+    if [[ "$FESH_DATA_CENTER" =~ vlbeer ]]; then
+       if [[ ! -e "$sched.vex" ]]; then
+            echo "    $FESH_TEMP_DIR/$sched.vex does not exist" >&2
+        elif cmp -s "$sched.vex" $SCHED_DIR/$sched.vex ; then
+            unlink "$sched.vex"
+            echo "    $SCHED_DIR/$sched.vex is up-to-date" >&2
+        else
+            echo "    $FESH_TEMP_DIR/$sched.vex is different" >&2
+            update_needed=1
+        fi
+    else
+       if [[ ! -e "$sched.skd" ]]; then
+            echo "    $FESH_TEMP_DIR/$sched.skd does not exist" >&2
+        elif cmp -s "$sched.skd" $SCHED_DIR/$sched.skd ; then
+            unlink "$sched.skd"
+            echo "    $SCHED_DIR/$sched.skd is up-to-date" >&2
+        else
+            echo "    $FESH_TEMP_DIR/$sched.skd is different" >&2
+            update_needed=1
+        fi
         if [[ -n "$txt" ]]; then
-            wget $WGET_VERBOSE "ftp://ftp@ivsopar.obspm.fr/vlbi/ivsdata/aux/$year/$sched/$sched.txt"
+          if [[ ! -e "$sched.txt" ]]; then
+              echo "    $FESH_TEMP_DIR/$sched.txt does not exist" >&2
+          elif cmp -s "$sched.txt" $SCHED_DIR/$sched.txt ; then
+              unlink "$sched.txt"
+              echo "    $SCHED_DIR/$sched.txt is up-to-date" >&2
+          else
+              echo "    $FESH_TEMP_DIR/$sched.txt is different" >&2
+              update_needed=1
+          fi
         fi
-    elif [[ "$FESH_DATA_CENTER" =~ bkg ]]; then
-        if [[ "$FESH_BKG_METHOD" =~ ^ftp$ ]]; then
-            wget $WGET_VERBOSE "ftp://ftp@ivs.bkg.bund.de/pub/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
-            if [[ -n "$txt" ]]; then
-                wget $WGET_VERBOSE "ftp://ftp@ivs.bkg.bund.de/pub/vlbi/ivsdata/aux/$year/$sched/$sched.txt"
-            fi
-        else
-            curl --ssl-reqd $CURL_VERBOSE -u anonymous:anonymous -O "ftp://ivs.bkg.bund.de/pub/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
-            if [[ -n "$txt" ]]; then
-                curl --ssl-reqd $CURL_VERBOSE -u anonymous:anonymous -O "ftp://ivs.bkg.bund.de/pub/vlbi/ivsdata/aux/$year/$sched/$sched.txt"
-            fi
-        fi
-    elif [[ "$FESH_DATA_CENTER" =~ vlbeer ]]; then
-        wget $WGET_VERBOSE "ftp://ftp@vlbeer.ira.inaf.it/vlb_arc/ftp/vlbi_arch/$month/$sched.vex"
     fi
-    echo Done >&2
+    if [[ -z "$update_needed" ]] ; then
+        rmdir $FESH_TEMP_DIR
+        echo -e "\nFiles from the server are up-to-date." >&2
+        if [[ ! "$FESH_DATA_CENTER" =~ vlbeer ]]; then
+          check_drudg_output
+        fi
+    else
+       cat <<EOF >&2
+
+Use -R to update $SCHED_DIR with the different files in
+$FESH_TEMP_DIR (changed schedule files from CDDIS, BKG, and OPAR will
+automatically be DRUDG'd.)
+EOF
+    fi
+    popd >/dev/null
+    exit 0
+fi
+if [[ -n "$download" ]]; then
+    pushd "$SCHED_DIR" >/dev/null
+    echo "Fetching from $FESH_DATA_CENTER to $SCHED_DIR" >&2
+    #TODO: if not found, maybe check next or previous years?
+    download_files
     popd >/dev/null
 fi
 
