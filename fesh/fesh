@@ -19,7 +19,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-VERSION=2026-01-21
+VERSION=2026-01-22
 
 version(){
     echo "[fesh $VERSION]"
@@ -251,6 +251,11 @@ Options:
  -C       check for changed schedule file (and .txt file if previously
           download) on server; if there were any changes, new versions
           are left on /tmp and a hint for how proceed is printed
+ -R       update files that were found to be changed with -C; the
+          latest versions on /tmp are used; implies -Sf for schedules
+          from vlbeer, and -Sfd for all others (i.e., geo); if only
+          the ,txt file needs to be updated, the age of the drudg
+          output will be checked.
  -d       drudg schedule with default settings, not supported for vlbeer
           (needs STATION environment variable or -s set with two letter id)
  -D dc    Use alternate data center; dc=bkg, cddis, opar, or vlbeer. Upper
@@ -291,6 +296,12 @@ STATION:
 
 If both are set, -s overrides STATION. In any event, the value is
 mapped to lower case, if it isn't already, for agreement with drudg.
+
+The '-C' option allows checking that already downloaded files and drudg output
+are up-to-date. If files need to updated, the '-R' option can be used
+afterwards for that. Additionally, messages for some errors now recommend ways
+to use '-C'/'-R' for recovering. Other approaches may work better depending on
+you needs, but the recommended ones fit most situations.
 
 Please see the end of this message about handling optional 'skedf.ctl'
 specified prompting for 'drudg'.
@@ -428,6 +439,8 @@ follow four NOTEs:
 EOF
 }
 
+version
+
 run_drudg=
 force=
 verbose=
@@ -435,7 +448,8 @@ txt=
 print=
 download=1
 check_new=
-while getopts 'a:Cc:nfdD:hHm:p:Ps:St:T:u:vVxy:' opt; do
+replace_files=
+while getopts 'a:Cc:nfdD:hHm:p:PRs:St:T:u:vVxy:' opt; do
     case $opt in
         n)
             echo "'next' not implemented."
@@ -443,6 +457,9 @@ while getopts 'a:Cc:nfdD:hHm:p:Ps:St:T:u:vVxy:' opt; do
             ;;
         C)
             check_new=1
+            ;;
+        R)
+            replace_files=1
             ;;
         d)
             if [[ ! -e $CONTROL_DIR/skedf.ctl ]]; then
@@ -626,7 +643,7 @@ if [[ "$cont_cal_answer" =~ off  ]]; then
 fi
 
 ## Conflict check
-if [[ -z "$check_new" ]]; then
+if [[ -z "$check_new" && -z "$replace_files" ]]; then
     if [[ "$FESH_DATA_CENTER" =~ vlbeer ]]; then
 	if [[ -e $SCHED_DIR/$sched.vex ]]; then
 	    if [[ -z "$force" ]]; then
@@ -655,6 +672,38 @@ if [[ -z "$check_new" ]]; then
     fi
 fi
 
+if [[ -n "$replace_files" ]]; then
+    download=
+    run_drudg=
+    tmp=$(get_latest_tmp)
+    echo "Found temporary directory $tmp" >&2
+    if [[ -e "$tmp/$sched.vex" ]]; then
+       echo "Updating $SCHED_DIR/$sched.vex" >&2
+       cp -f "$tmp/$sched.vex" "$SCHED_DIR"
+       unlink "$tmp/$sched.vex"
+    elif [[ -e "$tmp/$sched.skd" ]]; then
+# check station and skedf.ctl here, so we don't overwrite files if there is a problem
+       check_station
+       if [[ ! -e $CONTROL_DIR/skedf.ctl ]]; then
+           fatal "$CONTROL_DIR/skedf.ctl doesn't exist, can't run drudg with '-R'"
+       fi
+       echo "Updating $SCHED_DIR/$sched.skd" >&2
+       cp -f "$tmp/$sched.skd" "$SCHED_DIR"
+       unlink "$tmp/$sched.skd"
+       run_drudg=1
+       force=1
+    fi
+    if [[ -e "$tmp/$sched.txt" ]]; then
+       echo "Updating $SCHED_DIR/$sched.txt" >&2
+       cp -f "$tmp/$sched.txt" "$SCHED_DIR"
+       unlink "$tmp/$sched.txt"
+       if [[ -z "$run_drudg" ]]; then
+         check_drudg_output
+       fi
+    fi
+    rmdir "$tmp"
+fi
+
 if [[ -n "$run_drudg" && -z "$check_new" ]]; then
     if [[ ! -n "$download" ]]; then
         if [[ ! -e $SCHED_DIR/$sched.skd ]]; then
@@ -662,15 +711,8 @@ if [[ -n "$run_drudg" && -z "$check_new" ]]; then
             exit 1
         fi
     fi
-    set +u
-    if [[ -z "$station" ]]; then
-        >&2 echo "$0: ERROR: Neither STATION environment variable nor -s are set; should be set to two-letter station code if using drudg."
-        exit 1
-    fi
-    set -u
 
-#force lower case station code
-    station=$(echo "$station" | tr '[:upper:]' '[:lower:]')
+    check_station
 
     if [[ -e $SNAP_DIR/$sched$station.snp ]]; then
         if [[ -z "$force" ]]; then
@@ -694,8 +736,6 @@ if [[ -n "$run_drudg" && -z "$check_new" ]]; then
         rm "$LIST_DIR/$sched$station.lst"
     fi
 fi
-
-version
 
 if [[ -n "$check_new" ]]; then
     if [[ "$FESH_DATA_CENTER" =~ vlbeer ]]; then
@@ -771,6 +811,7 @@ EOF
     popd >/dev/null
     exit 0
 fi
+
 if [[ -n "$download" ]]; then
     pushd "$SCHED_DIR" >/dev/null
     echo "Fetching from $FESH_DATA_CENTER to $SCHED_DIR" >&2
