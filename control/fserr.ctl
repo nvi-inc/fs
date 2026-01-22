@@ -3374,12 +3374,6 @@ mcast_time command does not accept arguments.
 DW -302
 Multi-cast time data is stale, more than 20 seconds old.
 ""
-DW -303
-Core3H board?W has a time offset not equal to or one greater then the preceding board
-""
-DW -304
-One or more Core3H boards have a time offset problem and/or the multicast data is stale, please see messages above.
-""
 DW -305
 No multicast received since last FS restart.
 ""
