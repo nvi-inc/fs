@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, 2022, 2023, 2025 NVI, Inc.
+ * Copyright (c) 2020, 2022, 2023, 2025, 2026 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -32,4 +32,3 @@ void version_check( dbbc3_ddc_multicast_t *t);
 void perform_swaps( dbbc3_ddc_multicast_t *t);
 void smooth_ts( struct dbbc3_tsys_cycle *cycle, int reset, int samples,
         int filter, float if_param[MAX_DBBC3_IF]);
-void time_check( struct dbbc3_tsys_cycle *cycle);

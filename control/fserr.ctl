@@ -2690,12 +2690,6 @@ Core3H board?W time differs from FS time.
 DN   30
 DBBC3 multicast: version/personality issue resolved
 ""
-DN   28
-DBBC3 multicast: Core3H boards times now agree or only increase by at most one second per board
-""
-DN   24
-DBBC3 multicast: Core3H board times now agree
-""
 DN   21
 DBBC3 multicast: error from select() cleared
 ""
@@ -2749,9 +2743,6 @@ DBBC3 multicast: Time-out with no DBBC3 commands while data_valid=on; will now c
 ""
 DN  -27
 DBBC3 multicast: You should AVOID using DBBC3 commands (and FMSET) while recording, calibration data will be lost.
-""
-DN  -28
-DBBC3 multicast: Core3H boards have different times and don't increase by at most one second per board
 ""
 DN  -30 Place holder for version string
 

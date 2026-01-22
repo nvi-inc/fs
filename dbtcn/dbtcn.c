@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2025 NVI, Inc.
+ * Copyright (c) 2020-2026 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -148,8 +148,6 @@ int main(int argc, char *argv[])
         reset=FALSE;
 
         update_shm(&packet,&cycle, itmc, centisec, hsecs);
-
-        time_check(&cycle);
 
         /* check control to get the last state before logging */
 
