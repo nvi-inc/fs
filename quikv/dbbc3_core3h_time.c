@@ -53,10 +53,10 @@ int ip[5];                           /* ipc parameters */
       }
 
       if(!strcmp(command->argv[0],"next")) {
-        if(shm_addr->dbbc3_core3h_time_previous<=0 || shm_addr->dbbc3_core3h_time_previous>shm_addr->dbbc3_ddc_ifs)
+        if(shm_addr->dbbc3_core3h_time.previous_board<=0 || shm_addr->dbbc3_core3h_time.previous_board>shm_addr->dbbc3_ddc_ifs)
            iboard=1;
         else
-           iboard=1+shm_addr->dbbc3_core3h_time_previous%shm_addr->dbbc3_ddc_ifs;
+           iboard=1+shm_addr->dbbc3_core3h_time.previous_board%shm_addr->dbbc3_ddc_ifs;
       } else {
           ierr=arg_int(command->argv[0],&iboard,1,FALSE);
           if(ierr==0 && (iboard<1 || iboard >shm_addr->dbbc3_ddc_ifs))
@@ -71,7 +71,7 @@ int ip[5];                           /* ipc parameters */
               goto error;
           }
       }
-      shm_addr->dbbc3_core3h_time_previous=iboard;
+      shm_addr->dbbc3_core3h_time.previous_board=iboard;
 
       out_recs=0;
       out_class=0;

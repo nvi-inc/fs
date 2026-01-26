@@ -557,6 +557,8 @@ typedef struct fscom {
 
   int dbbc3_mcast_arrival;
 
-  int dbbc3_core3h_time_previous;
+  struct {
+    int previous_board;
+  } dbbc3_core3h_time;
 
 } Fscom;
