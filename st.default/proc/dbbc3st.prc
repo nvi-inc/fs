@@ -469,3 +469,13 @@ dbbc_ifall
 dbbc_collect
 wx
 enddef
+define  dbbc3_time    00000000000x
+core3h_time=next
+core3h_time=next
+core3h_time=next
+core3h_time=next
+core3h_time=next
+core3h_time=next
+core3h_time=next
+core3h_time=next
+enddef

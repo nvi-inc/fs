@@ -364,3 +364,13 @@ core3h_mode=7,0x33333333,,64.0,$
 core3h_mode=8,0x33333333,,64.0,$
 core3h_mode=end,$
 enddef
+define  dbbc3_time    00000000000x
+core3h_time=next
+core3h_time=next
+core3h_time=next
+core3h_time=next
+core3h_time=next
+core3h_time=next
+core3h_time=next
+core3h_time=next
+enddef
