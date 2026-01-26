@@ -87,6 +87,7 @@ void cshm_init2()
   }
 
   shm_addr->dbbc3_core3h_time.previous_board=0;
+  shm_addr->dbbc3_core3h_time.previous_epoch=-1;
 
   return;
 }

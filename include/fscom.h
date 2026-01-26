@@ -559,6 +559,7 @@ typedef struct fscom {
 
   struct {
     int previous_board;
+    int previous_epoch;
   } dbbc3_core3h_time;
 
 } Fscom;

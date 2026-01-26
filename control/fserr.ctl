@@ -2687,6 +2687,12 @@ Core3H board?W time is at the start of epoch 0. It probably needs to be re-synce
 DL -406
 Core3H board?W time differs from FS time.
 ""
+DL -407
+Core3H board?W time VDIF epoch differs from that of the previous board sampled.
+""
+DL -408
+See above time errors for Core3H board?W.
+""
 DN   30
 DBBC3 multicast: version/personality issue resolved
 ""

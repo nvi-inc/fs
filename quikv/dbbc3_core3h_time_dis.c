@@ -92,18 +92,25 @@ int ip[5];
     cls_snd(&ip[0],output,strlen(output),0,0);
     ip[1]=1;
     if(!strcmp(lclm.time,"2000-01-01T00:00:00")) {
-      char str[3];
-      ip[2]=-405;
-      memcpy(ip+3,"dl",2);
-      snprintf(str,3,"%2d",lclm.iboard);
-      memcpy(ip+4,str,2);
-    } else if(lclm.seconds_fm-lclm.seconds_fs != 0) {
-      char str[3];
-      ip[2]=-406;
-      memcpy(ip+3,"dl",2);
-      snprintf(str,3,"%2d",lclm.iboard);
-      memcpy(ip+4,str,2);
+      logitn(NULL,-405,"dl",lclm.iboard);
+      ip[2]=-408;
+    } else {
+      if(shm_addr->dbbc3_core3h_time.previous_epoch >=0 &&
+              shm_addr->dbbc3_core3h_time.previous_epoch != lclm.vdif_epoch) {
+        logitn(NULL,-407,"dl",lclm.iboard);
+        ip[2]=-408;
+      }
+      if(lclm.seconds_fm-lclm.seconds_fs != 0) {
+        logitn(NULL,-406,"dl",lclm.iboard);
+      }
     }
+    shm_addr->dbbc3_core3h_time.previous_epoch = lclm.vdif_epoch;
+    if(ip[2]!=0) {
+        char str[3];
+        memcpy(ip+3,"dl",2);
+        snprintf(str,3,"%2d",lclm.iboard);
+        memcpy(ip+4,str,2);
+      }
     return;
 
 error2:
