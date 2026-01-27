@@ -647,7 +647,9 @@ if [[ -z "$check_new" && -z "$replace_files" ]]; then
     if [[ "$FESH_DATA_CENTER" =~ vlbeer ]]; then
 	if [[ -e $SCHED_DIR/$sched.vex ]]; then
 	    if [[ -z "$force" ]]; then
-		echo "$SCHED_DIR/$sched.vex exists, delete or use '-f' to get fresh schedule" >&2
+		echo "$SCHED_DIR/$sched.vex exists. Rerun with '-C' to check it (and then" >&2
+		echo "with '-R', if appropriate, to replace it)." >&2
+		echo "Or rerun adding '-f' to force deleting all conflicting files." >&2
 		exit 1
 	    fi
 	    rm "$SCHED_DIR/$sched.vex"
@@ -655,7 +657,9 @@ if [[ -z "$check_new" && -z "$replace_files" ]]; then
     elif [[ -n "$download" ]]; then
 	if [[ -e $SCHED_DIR/$sched.skd ]]; then
 	    if [[ -z "$force" ]]; then
-		echo "$SCHED_DIR/$sched.skd exists, delete or use '-f' to get fresh schedule" >&2
+		echo "$SCHED_DIR/$sched.skd exists. Rerun with '-C' to check it (and then " >&2
+		echo "with '-R', if appropriate, to replace it and drudg it)." >&2
+		echo "Or rerun adding '-f' to force deleting all conflicting files." >&2
 		exit 1
 	    fi
 	    rm "$SCHED_DIR/$sched.skd"
@@ -663,7 +667,8 @@ if [[ -z "$check_new" && -z "$replace_files" ]]; then
 	if [[ -n "$txt" ]]; then
 	    if [[ -e $SCHED_DIR/$sched.txt ]]; then
 		if [[ -z "$force" ]]; then
-		    echo "$SCHED_DIR/$sched.txt exists, delete or use '-f' to get fresh schedule" >&2
+		    echo "$SCHED_DIR/$sched.txt exists. Rerun with '-fdx' to get a fresh" >&2
+		    echo "copy (along with a fresh schedule and drudg it)." >&2
 		    exit 1
 		fi
 		rm "$SCHED_DIR/$sched.txt"
@@ -707,7 +712,7 @@ fi
 if [[ -n "$run_drudg" && -z "$check_new" ]]; then
     if [[ ! -n "$download" ]]; then
         if [[ ! -e $SCHED_DIR/$sched.skd ]]; then
-            echo "$SCHED_DIR/$sched.skd doesn't exist" >&2
+            echo "$SCHED_DIR/$sched.skd doesn't exist. Download it first. Rerun without '-S'." >&2
             exit 1
         fi
     fi
@@ -716,21 +721,27 @@ if [[ -n "$run_drudg" && -z "$check_new" ]]; then
 
     if [[ -e $SNAP_DIR/$sched$station.snp ]]; then
         if [[ -z "$force" ]]; then
-            echo "$SNAP_DIR/$sched$station.snp exists, delete or use '-f' to re-drudg" >&2
+            echo "$SNAP_DIR/$sched$station.snp exists. Rerun with '-C' to check it" >&2
+            echo "(and then follow the directions)." >&2
+            echo "Or rerun adding '-f' to force deleting all conflicting files." >&2
             exit 1
         fi
         rm "$SNAP_DIR/$sched$station.snp"
     fi
     if [[ -e $PROC_DIR/$sched$station.prc ]]; then
         if [[ -z "$force" ]]; then
-            echo "$PROC_DIR/$sched$station.prc exists, delete or use '-f' to re-drudg" >&2
+            echo "$PROC_DIR/$sched$station.prc exists. Rerun with '-C' to check it" >&2
+            echo "(and then follow the directions)." >&2
+            echo "Or rerun adding '-f' to force deleting all conflicting files." >&2
             exit 1
         fi
         rm "$PROC_DIR/$sched$station.prc"
     fi
     if [[ -e $LIST_DIR/$sched$station.lst ]]; then
         if [[ -z "$force" ]]; then
-            echo "$LIST_DIR/$sched$station.lst exists, delete or use '-f' to re-drudg" >&2
+            echo "$LIST_DIR/$sched$station.lst exists. Rerun with '-C' to check it" >&2
+            echo "(and then follow the directions)." >&2
+            echo "Or rerun adding '-f' to force deleting all conflicting files." >&2
             exit 1
         fi
         rm "$LIST_DIR/$sched$station.lst"
