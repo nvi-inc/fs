@@ -173,6 +173,8 @@ check_drudg_output () {
     fi
 }
 
+version
+
 #enable 'strict' mode
 set -euo pipefail
 
@@ -198,6 +200,8 @@ else
 # we can still get the schedule
 # use current directory without other information
     SCHED_DIR=${SCHED_DIR:-"."}
+    echo "WARNING: '$CONTROL_DIR/skedf.ctl' doesn't exist,"  >&2
+    echo "WARNING: 'using '$SCHED_DIR' for schedule directory"  >&2
 fi
 
 FESH_DATA_CENTER=${FESH_DATA_CENTER:-'cddis'}
@@ -432,8 +436,6 @@ read the follow four NOTEs:
    -setting the vdif_single_thread_per_file answer to anything but yes or no
 EOF
 }
-
-version
 
 run_drudg=
 force=
