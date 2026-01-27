@@ -284,18 +284,17 @@ Options:
  -u val   Override drudg SETUP_PROC answer to val
  -h       Print this message
 
-NOTE: If you specify a schedule that doesn't exist, you will get a
-file or a directory error from the server.
+NOTE: If you specify a schedule that doesn't exist on the server, you will get
+a file or a directory error from the server.
 
-For the '-d' option, the STATION environment variable, or the -s
-option, must be set with the two-letter station code. For example, for
-STATION:
+For the '-d' option, the STATION environment variable, or the -s option, must
+be set with the two-letter station code. For example, for STATION:
 
     setenv STATION gs #in ~/.login for tcsh or
     export STATION=gs #in ~/.profile for bash
 
-If both are set, -s overrides STATION. In any event, the value is
-mapped to lower case, if it isn't already, for agreement with drudg.
+If both are set, -s overrides STATION. In any event, the value is mapped to
+lower case, if it isn't already, for agreement with drudg.
 
 The '-C' option allows checking that already downloaded files and drudg output
 are up-to-date. If files need to updated, the '-R' option can be used
@@ -309,59 +308,57 @@ specified prompting for 'drudg'.
 The '-d' option is not supported for data center 'vlbeer'.
 
 The default data center is CDDIS but can be changed by setting the
-FESH_DATA_CENTER environment variable. Accepted values are bkg, cddis,
-opar (the three 'geo' centers) or vlbeer. The value is mapped to lower
-case, if it isn't already. For example, to make the default bkg, use:
+FESH_DATA_CENTER environment variable. Accepted values are bkg, cddis, opar
+(the three 'geo' centers) or vlbeer. The value is mapped to lower case, if it
+isn't already. For example, to make the default bkg, use:
 
     setenv FESH_DATA_CENTER bkg #in ~/.login for tcsh or
     export FESH_DATA_CENTER=bkg #in ~/.profile for bash
 
-The '-D' option can be used to specify an alternate data center when
-running the script.  If the data center is vlbeer, the '-d' option
-cannot be used.
+The '-D' option can be used to specify an alternate data center when running
+the script.  If the data center is vlbeer, the '-d' option cannot be used.
 
-For geo data centers, fesh by default gets a schedule for the current
-year, but this can be overridden with '-y yyyy' option to specify a
-four digit year 'yyyy'. That option can be used to get a schedule for
-the next year. The 'yyyy' is not checked for validity and the
-download will fail if it is not correct.
+For geo data centers, fesh by default gets a schedule for the current year,
+but this can be overridden with '-y yyyy' option to specify a four digit year
+'yyyy'. That option can be used to get a schedule for the next year. The
+'yyyy' is not checked for validity and the download will fail if it is not
+correct.
 
 For vlbeer, fesh by default gets a schedule from the hidden .latest
-sub-directory for the current month, but this can be overridden with
-'-m mmmyy' to specify a three character month abbreviation 'jan',
-'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov',
-'dec' as 'mmm' and a two digit year 'yy'. The hidden .latest
-sub-directory of the specified month will be used.  The adding of
-/.latest to the current or '-m' specified directory can be suppressed
-the -H option.  The 'mmmyy' is not checked for validity and the
-download will fail if it is not correct.
+sub-directory for the current month, but this can be overridden with '-m
+mmmyy' to specify a three character month abbreviation 'jan', 'feb', 'mar',
+'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec' as 'mmm' and a
+two digit year 'yy'. The hidden .latest sub-directory of the specified month
+will be used.  The adding of /.latest to the current or '-m' specified
+directory can be suppressed the -H option.  The 'mmmyy' is not checked for
+validity and the download will fail if it is not correct.
 
-fesh (curl actually) will prompt for an email to use as the password
-for anonymous ftp-ssl access for CDDIS. The prompt can be suppressed
-by setting a working email address in the FESH_EMAIL variable, e.g.:
+fesh (curl actually) will prompt for an email to use as the password for
+anonymous ftp-ssl access for CDDIS. The prompt can be suppressed by setting a
+working email address in the FESH_EMAIL variable, e.g.:
 
     setenv FESH_EMAIL user@address #in ~/.login for tcsh or
     export FESH_EMAIL=user@address #in ~/.profile for bash
 
-The directories for .skd, .snp, and .prc files are obtained from
-the skedf.ctl control file. The listing files go with the .skd files
-by default, but can be over-ridden with the LIST_DIR environment
-variable. For example to make it the current directory, use:
+The directories for .skd, .snp, and .prc files are obtained from the skedf.ctl
+control file. The listing files go with the .skd files by default, but can be
+over-ridden with the LIST_DIR environment variable. For example to make it the
+current directory, use:
 
     setenv LIST_DIR . #in ~/.login for tcsh or
     export LIST_DIR=. #in ~/.profile for bash
 
-If the -x option is used to download the .txt file (for geo schedules
-only), the file is placed in the same directory as the .skd file.
+If the -x option is used to download the .txt file (for geo schedules only),
+the file is placed in the same directory as the .skd file.
 
-The default transfer method from CDDIS is ftp-ssl.  You can use https
-as the method with CDDIS if you set:
+The default transfer method from CDDIS is ftp-ssl.  You can use https as the
+method with CDDIS if you set:
 
     setenv FESH_CDDIS_METHOD https #in ~/.login for tcsh or
     export FESH_CDDIS_METHOD=https #in ~/.profile for bash
 
-For the CDDIS https method, the login must be configured in ".netrc"
-which by default is in "~".  For example:
+For the CDDIS https method, the login must be configured in ".netrc" which by
+default is in "~".  For example:
 
     machine urs.earthdata.nasa.gov
         login mycddisuser
@@ -369,61 +366,58 @@ which by default is in "~".  For example:
 
 See "man 5 netrc" for more details on ".netrc".
 
-If your curl supports the "--netrc-file" option (see "man curl") , you
-can change the directory used for ".netrc" by setting the NETRC_DIR
-environment variable.  This matches plog. E.g., add the following to
-your login script
+If your curl supports the "--netrc-file" option (see "man curl") , you can
+change the directory used for ".netrc" by setting the NETRC_DIR environment
+variable.  This matches plog. E.g., add the following to your login script
 
     setenv NETRC_DIR "/usr2/control" #in ~/.login for tcsh or
     export NETRC_DIR="/usr2/control" #in ~/.profile for bash
 
-If you have FSL8 or another old distribution that does not support
-curl ftp-ssl or https with CDDIS, but worked with the previous
-versions of fesh that used wget for non-ssl ftp, you can restore the
-previous behaviour with:
+If you have FSL8 or another old distribution that does not support curl
+ftp-ssl or https with CDDIS, but worked with the previous versions of fesh
+that used wget for non-ssl ftp, you can restore the previous behaviour with:
 
     setenv FESH_CDDIS_METHOD ftp #in ~/.login for tcsh or
     export FESH_CDDIS_METHOD=ftp #in ~/.profile for bash
 
-However, this method will no longer work when CDDIS stops support
-of non-ssl ftp, which is expected at the end of October 2020.
+However, this method will no longer work when CDDIS stops support of non-ssl
+ftp, which is expected at the end of October 2020.
 
-The default transfer method from BKG is ftp-ssl.  If you have FSL8 or
-another old distribution that does not support curl ftp-ssl
-with BKG, but worked with the previous versions of fesh that used wget
-for non-ssl ftp, you can restore the previous behaviour with:
+The default transfer method from BKG is ftp-ssl.  If you have FSL8 or another
+old distribution that does not support curl ftp-ssl with BKG, but worked with
+the previous versions of fesh that used wget for non-ssl ftp, you can restore
+the previous behaviour with:
 
     setenv FESH_BKG_METHOD ftp #in ~/.login for tcsh or
     export FESH_BKG_METHOD=ftp #in ~/.profile for bash
 
-However, this method will no longer work when BKG stops support
-of non-ssl ftp, which is expected at the end of May 2022.
+However, this method will no longer work when BKG stops support of non-ssl
+ftp, which is expected at the end of May 2022.
 
-With the '-d' option, if the 'skedf.ctl' control file specifies
-prompting for any of: tpicd, vsi_align, cont_cal, cont_cal_polarity,
-using setup_proc, or single VDIF thread per file, a fixed answer can
-be provided by setting the environment variables: FESH_GEO_TPICD,
-FESH_GEO_VSI_ALIGN, FESH_GEO_CONT_CAL, FESH_GEO_CONT_CAL_POLARITY,
-FESH_GEO_USE_SETUP_PROC, and FESH_GEO_VDIF_SINGLE_THREAD_PER_FILE
-respectively. These settings can be overridden when running the script
-with the options: '-t', '-a', '-c', '-p', '-u', and '-T' respectively.
-Using '' as the value for an option will unset the corresponding value
-supplied as an environment variable. Please be sure to read the
-follow four NOTEs:
+With the '-d' option, if the 'skedf.ctl' control file specifies prompting for
+any of: tpicd, vsi_align, cont_cal, cont_cal_polarity, using setup_proc, or
+single VDIF thread per file, a fixed answer can be provided by setting the
+environment variables: FESH_GEO_TPICD, FESH_GEO_VSI_ALIGN, FESH_GEO_CONT_CAL,
+FESH_GEO_CONT_CAL_POLARITY, FESH_GEO_USE_SETUP_PROC, and
+FESH_GEO_VDIF_SINGLE_THREAD_PER_FILE respectively. These settings can be
+overridden when running the script with the options: '-t', '-a', '-c', '-p',
+'-u', and '-T' respectively.  Using '' as the value for an option will unset
+the corresponding value supplied as an environment variable. Please be sure to
+read the follow four NOTEs:
 
-  NOTE: If used incorrectly, this feature can fail in complicated ways
-  with no obvious indication. Use at your own risk. Simple use with
-  single mode schedules should be fine.
+  NOTE: If used incorrectly, this feature can fail in complicated ways with no
+  obvious indication. Use at your own risk. Simple use with single mode
+  schedules should be fine.
 
-  NOTE: If there is more than mode in the schedule, it is not possible
-  to supply answers in this way. 'drudg' will have to be run manually.
+  NOTE: If there is more than mode in the schedule, it is not possible to
+  supply answers in this way. 'drudg' will have to be run manually.
 
   NOTE: If any of these environment variables or options are used, the
   corresponding prompts must be enabled in 'skedf.ctl'. If there isn't
-  agreement, incorrect .prc files may be created without an obvious
-  indication of a problem. Be careful in particular of
-  FESH_GEO_VSI_ALIGN and the '-a' option since the corresponding
-  prompt will only occur if a DBBC3 PFB mode is in use.
+  agreement, incorrect .prc files may be created without an obvious indication
+  of a problem. Be careful in particular of FESH_GEO_VSI_ALIGN and the '-a'
+  option since the corresponding prompt will only occur if a DBBC3 PFB mode is
+  in use.
 
   NOTE: To provide minimal protection, the script will reject:
 
