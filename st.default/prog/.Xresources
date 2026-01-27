@@ -88,6 +88,16 @@ scnch*geometry:         146x8+0+516
 helpsh.title:            fs help
 !helpsh*scrollBar:        true
 helpsh*geometry:         80x24+75+75
-! monit7 (DBBC3 Tsys display, 21 lines)
-monit7*geometry:	24x22-0+155
+! monit7 (DBBC3 Tsys display,-p -b 16 -i 8)
+monit7*geometry:	99x45-0+155
+! monit7 (DBBC3 Tsys display,-p -b 8 -i 8)
+!monit7*geometry:	99x29-0+155
+! monit7 (DBBC3 Tsys display,-p -b 16 -i 2)
+!monit7*geometry:	49x23-0+155
+! monit7 (DBBC3 Tsys display,-p -b 8 -i 2)
+!monit7*geometry:	49x15-0+155
+! monit7 (DBBC3 Tsys display non-p -b 16)
+!monit7*geometry:	24x22-0+155
+! monit7 (DBBC3 Tsys display non-p -b 8)
+!monit7*geometry:	24x14-0+155
 monit7.title:		DBBC3 Tsys

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2023, 2025 NVI, Inc.
+ * Copyright (c) 2020-2023, 2025, 2026 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -82,10 +82,25 @@ main(int argc, char *argv[])
     fs = shm_addr;
 
     int bbcs_to_display_per_if=fs->dbbc3_ddc_bbcs_per_if;
+    int ifs_to_display=fs->dbbc3_ddc_ifs;
 
     while (++i<argc) {
         if(0==strcmp(argv[i],"-r")) {
             reverse = 1;
+        } else if(0==strcmp(argv[i],"-p")) {
+            panel = 1;
+        } else if(0==strcmp(argv[i],"-b")) {
+            bbcs_to_display_per_if=atoi(argv[++i]);
+            if(bbcs_to_display_per_if<=0 || bbcs_to_display_per_if> (MAX_DBBC3_BBC)/(MAX_DBBC3_IF)) {
+                fprintf(stderr,"BBCs to display per IF must be in the range [1,%d]\n",(MAX_DBBC3_BBC)/(MAX_DBBC3_IF));
+                okay=0;
+            }
+        } else if(0==strcmp(argv[i],"-i")) {
+            ifs_to_display=atoi(argv[++i]);
+            if(ifs_to_display<=0 || ifs_to_display> MAX_DBBC3_IF) {
+                fprintf(stderr,"IFs to display  must be in the range [1,%d]\n",MAX_DBBC3_IF);
+                okay=0;
+            }
         } else if(0==strcmp(argv[i],"-z")) {
             char dumc, polc;
             char pol_options[ ]= "brl";
@@ -98,8 +113,11 @@ main(int argc, char *argv[])
             } else
               pol=pol_default=strchr(pol_options,polc)-pol_options;
         } else if(0==strcmp(argv[i],"-h")) {
-            fprintf(stderr,"Usage: %s [-v] [-l n] [-h]\n", argv[0]);
+            fprintf(stderr,"Usage: %s [-b n] [-p] [-r] [-z c] [-h]\n", argv[0]);
             fprintf(stderr,"Options:\n");
+            fprintf(stderr," -b n  Minimum BBCs to display per IF (defaults to dbbc3.ctl value)\n");
+            fprintf(stderr," -i n  Minimum IFs to display in Panel (defaults to dbbc3.ctl value)\n");
+            fprintf(stderr," -p    panel display (all IFs)\n");
             fprintf(stderr," -r    reverse some foreground colors\n");
             fprintf(stderr," -z c  set default polarization\n");
             fprintf(stderr,"    c  'b'=both, 'l'=1st, 'r'=2nd\n");
@@ -115,8 +133,6 @@ main(int argc, char *argv[])
         sleep(10);
         exit(-1);
     }
-    setup_ids();
-    fs = shm_addr;
 
     /*  First check to see if the field system is running */
 
@@ -375,7 +391,8 @@ main(int argc, char *argv[])
 //            die();
 //            exit(0);
 //        }
-        mout7(next,&shm_addr->dbbc3_tsys_data.data[iping],krf,all,!undef,record,reverse);
+        mout7(next,&shm_addr->dbbc3_tsys_data.data[iping],krf,all,!undef,record,
+             reverse, panel,bbcs_to_display_per_if,ifs_to_display);
         move(ROW_HOLD,COL_HOLD);  /* place cursor at consistent location */
         standend();
         printw(" ");

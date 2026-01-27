@@ -119,142 +119,9 @@ static void print_tsys(float tsys, unsigned clipped, int reverse)
     }
     standend();
 }
-void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
-        int def, int rec, int reverse)
+static void arrival_age(char buf[128],struct dbbc3_tsys_cycle *tsys_cycle,int age,
+   int seconds,time_t time)
 {
-    struct dbbc3_tsys_ifc ifc;
-    struct dbbc3_tsys_bbc bbc[MAX_DBBC3_BBC];
-    char buf[128];
-    int i;
-    static time_t disp_time = 0;
-    struct tm *ptr;
-    int irow=0;
-
-    memcpy(&ifc,&tsys_cycle->ifc[next],sizeof(ifc));
-    memcpy(&bbc,tsys_cycle->bbc,sizeof(bbc));
-
-    move(irow++,0);
-    printw("IF %c",unit_letters[next]);
-    printw(" LO ");
-    if(ifc.lo>=0.0) {
-        buf[0]=0;
-        dble2str(buf,ifc.lo,-8,1);
-        printw("%8s",buf);
-
-        if(1==ifc.sideband)
-            printw("%4s"," USB");
-        else if(2==ifc.sideband)
-            printw("%4s"," LSB");
-        else
-            printw("%4s"," ");
-    } else {
-        printw("%8s"," ");
-        printw("%4s"," ");
-    }
-
-    if(rec && !all)
-        printw("%4s"," Rec");
-    else if(def && !all)
-        printw("%4s"," Def");
-    else /* all || !all */
-        printw("%4s"," All");
-
-    move(irow++,0);
-    printw("Delay");
-    buf[0]=0;
-    if(UINT_MAX != ifc.delay) {
-        uns2str2(buf,ifc.delay,-8,0);
-        printw("%8s",buf);
-     } else
-        printw("%8s"," ");
-
-    printw(" Tsys ");
-    if (ifc.lo < 0.0)
-        printw("%5s"," ");
-    else
-        print_tsys(ifc.tsys,ifc.clipped,reverse);
-
-    move(irow++,0);
-    printw("Time   ");
-
-    int it[6];
-    int seconds;
-    rte_time(it,it+5);
-    rte2secs(it,&seconds);
-    seconds-=1;
-    int age=seconds-tsys_cycle->last;
-
-/* legitimate times start at the first VDIF epoch */
-
-    if(ifc.time > 0) {
-      disp_time=ifc.time+1;
-      if(ifc.time_error>=-shm_addr->dbbc3_mcast_arrival && ifc.time_error <=0)
-          disp_time-=ifc.time_error;
-      if(age <= shm_addr->dbbc3_mcast_arrival)
-          disp_time+=age;
-      ptr=gmtime(&disp_time);
-    }
-
-    if(ifc.time <= 0 || NULL == ptr) {
-        printw("%17s"," ");
-    } else {
-        int time_error=ifc.time_error;
-        int tm_bad = time_error<-shm_addr->dbbc3_mcast_arrival || time_error>0;
-        tm_bad = tm_bad || age >shm_addr->dbbc3_mcast_arrival;
-
-        if(tm_bad)
-            standout();
-
-        printw("%4d.%03d.%02d:%02d:%02d",
-                ptr->tm_year+1900,
-                ptr->tm_yday+1,
-                ptr->tm_hour,
-                ptr->tm_min,
-                ptr->tm_sec);
-
-        if(tm_bad)
-            standend();
-    }
-
-    move(irow++,0);
-    printw("Epoch ");
-    if(!shm_addr->dbbc3_tsys_data.epoch_inserted) {
-        printw("%3s","---");
-    } else if(tsys_cycle->no_mcast_since_restart) {
-        printw("%3s"," ");
-    } else {
-        buf[0]=0;
-        int2str(buf,ifc.vdif_epoch,-3,0);
-        printw("%3s",buf);
-    }
-
-    printw(" DBBC3-FS ");
-    if (!ifc.time_included) {
-        printw("-----");
-    } else if(tsys_cycle->no_mcast_since_restart || ifc.time <= 0) {
-        printw("%5s"," ");
-    } else {
-        int time_error=ifc.time_error;
-        int tm_bad = time_error<-shm_addr->dbbc3_mcast_arrival || time_error>0;
-        if(time_error>=-shm_addr->dbbc3_mcast_arrival && time_error<0)
-            time_error=0;
-        buf[0]=0;
-        int2str(buf,time_error,-5,0);
-        for(i=0;i<strlen(buf);i++) {
-            if(buf[i]==' ')
-                printw(" ");
-            else {
-                if(tm_bad)
-                    standout();
-                printw("%s",buf+i);
-                break;
-            }
-        }
-        if(tm_bad)
-            standend();
-    }
-
-    move(irow++,0);
     printw("Arrival ");
     if(tsys_cycle->no_mcast_since_restart) {
         printw("    ");
@@ -272,27 +139,28 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
     }
 
     printw(" Age");
-    if(tsys_cycle->no_mcast_since_restart && ifc.time <= 0)
+    if(tsys_cycle->no_mcast_since_restart && time <= 0)
         age=seconds-tsys_cycle->no_mcast_since_restart;
     int days=age/86400;
     int hours=age%86400/3600;
     int minutes=age%86400%3600/60;
     int secs=age%86400%3600%60;
     if(days>=99)
-      snprintf(buf,9," >99days");
+        snprintf(buf,9," >99days");
     else if(days>=10)
-      snprintf(buf,9," >%dd%02dh",days,hours);
+        snprintf(buf,9," >%dd%02dh",days,hours);
     else if(days>=1)
-      snprintf(buf,9,"  >%dd%02dh",days,hours);
+        snprintf(buf,9,"  >%dd%02dh",days,hours);
     else if(hours>=10)
-      snprintf(buf,9," >%dh%02dm",hours,minutes);
+        snprintf(buf,9," >%dh%02dm",hours,minutes);
     else if(hours>=1)
-      snprintf(buf,9," %d:%02d:%02d",hours,minutes,secs);
+        snprintf(buf,9," %d:%02d:%02d",hours,minutes,secs);
     else if(minutes>=1)
-      snprintf(buf,9,"   %2d:%02d",minutes,secs);
+        snprintf(buf,9,"   %2d:%02d",minutes,secs);
     else
-      snprintf(buf,9,"      %2d",secs);
+        snprintf(buf,9,"      %2d",secs);
 
+    int i;
     for(i=0;i<8;i++) {
         if(buf[i]==' ')
             printw(" ");
@@ -305,71 +173,291 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
     }
     if(age>shm_addr->dbbc3_mcast_arrival)
         standend();
+}
+void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
+        int def, int rec, int reverse, int panel, int bbcs_to_display_per_if0,
+        int ifs_to_display0)
+{
+    struct dbbc3_tsys_ifc ifc;
+    struct dbbc3_tsys_bbc bbc[MAX_DBBC3_BBC];
+    char buf[128];
+    int i, j, k;
+    static time_t disp_time = 0;
+    struct tm *ptr;
 
-    int swap;
-    move(irow,0);
-    if(tsys_cycle->no_mcast_since_restart)
-        printw("BBC           Ts-L  Ts-U");
-    else if(ifc.lo>=0.0 && krf) {
-        printw("BBC    RF     Ts-L  Ts-U");
-        swap=2==ifc.sideband ? 1 : 0;
-    } else {
-        printw("BBC    IF     Ts-L  Ts-U");
-        swap=0;
-    }
+    int it[6];
+    int seconds;
+    rte_time(it,it+5);
+    rte2secs(it,&seconds);
+    seconds-=1;
+    int age=seconds-tsys_cycle->last;
 
-    move(irow++,9);
-    if(tsys_cycle->no_mcast_since_restart || ifc.lo<0.0)
-        printw("   ");
-    else {
-        if(ifc.pol==1)
-            printw("(R)");
-        else if(ifc.pol==2)
-            printw("(L)");
-        else
-            printw("   ");
+    int cols=1;
+    int rows=1;
+    if(panel) {
+        next=0;
+        cols=4;
+        rows=2;
     }
 
     int itpis[MAX_DBBC3_DET] = {};
     mk5dbbc3d(itpis);
 
-    for(i=0;i<fs->dbbc3_ddc_bbcs_per_if;i++) {
-        int ibbc =next*8+i;
-        if(i>=8)
-            ibbc=next*8+64+i-8;
-        move(irow+i,0);
-        printw("%03d",ibbc+1);
-        if(tsys_cycle->no_mcast_since_restart)
-             continue;
-        if(bbc[ibbc].freq!=UINT_MAX) {
-            double freq=bbc[ibbc].freq*1e-6;
-            if(ifc.lo>=0.0 && krf)
+    int bbcs_to_display_per_if=0;
+    int ifs_to_display=0;
+    for (k=0;k<MAX_DBBC3_IF;k++) {
+        for (j=0;j<8;j++) {
+            if(itpis[ 0+k*8+j              ] ||
+               itpis[ 0+k*8+j+MAX_DBBC3_BBC]) {
+                ifs_to_display=1+k;
+                if( 1+j>bbcs_to_display_per_if)
+                  bbcs_to_display_per_if=1+j;
+            }
+            if(itpis[64+k*8+j              ] ||
+               itpis[64+k*8+j+MAX_DBBC3_BBC]) {
+                ifs_to_display=1+k;
+                if(9+j>bbcs_to_display_per_if)
+                  bbcs_to_display_per_if=9+j;
+            }
+        }
+    }
+
+    if(bbcs_to_display_per_if <bbcs_to_display_per_if0)
+       bbcs_to_display_per_if=bbcs_to_display_per_if0;
+    if(ifs_to_display <ifs_to_display0)
+       ifs_to_display=ifs_to_display0;
+
+    int rows_needed, cols_needed;
+    if(panel) {
+     rows_needed=2+5+bbcs_to_display_per_if;
+     if(ifs_to_display >4 )
+         rows_needed+=1+5+bbcs_to_display_per_if;
+     cols_needed=24+25*3;
+     if(ifs_to_display <4)
+        cols_needed=24+25*(ifs_to_display-1);
+    } else {
+       rows_needed=1+5+bbcs_to_display_per_if;
+       cols_needed=24;
+    }
+    if(rows_needed >win_rows || cols_needed >win_cols ) {
+       clear();
+       move(0,0);
+       printw("Window too small.");
+       move(1,0);
+       printw("Resize window to at");
+       move(2,0);
+       printw(" least:");
+       move(3,0);
+       printw(" Columns %d Rows %d",cols_needed,rows_needed);
+       move(4,0);
+       printw(" (.Xresources: %dx%d).",cols_needed,rows_needed);
+       move(5,0);
+       printw("Current:");
+       move(6,0);
+       printw(" Columns %d Rows %d.",win_cols,win_rows);
+       return;
+    }
+
+    for(k=0;k<rows;k++) {
+        for(j=0;j<cols;j++) {
+            int irow=(6+bbcs_to_display_per_if)*k;
+            int icol=25*j;
+            if(panel)
+               irow+=2;
+            memcpy(&ifc,&tsys_cycle->ifc[next],sizeof(ifc));
+            memcpy(&bbc,tsys_cycle->bbc,sizeof(bbc));
+            if(panel && !j && !k) {
+                move(0,0);
+                arrival_age(buf,tsys_cycle,age,seconds,ifc.time);
+            }
+            move(irow++,icol);
+            printw("IF %c",unit_letters[next]);
+            printw(" LO ");
+            if(ifc.lo>=0.0) {
+                buf[0]=0;
+                dble2str(buf,ifc.lo,-8,1);
+                printw("%8s",buf);
+
                 if(1==ifc.sideband)
-                    freq=ifc.lo+freq;
+                    printw("%4s"," USB");
                 else if(2==ifc.sideband)
-                    freq=ifc.lo-freq;
+                    printw("%4s"," LSB");
+                else
+                    printw("%4s"," ");
+            } else {
+                printw("%8s"," ");
+                printw("%4s"," ");
+            }
+
+            if(rec && !all)
+                printw("%4s"," Rec");
+            else if(def && !all)
+                printw("%4s"," Def");
+            else /* all || !all */
+                printw("%4s"," All");
+
+            move(irow++,icol);
+            printw("Delay");
             buf[0]=0;
-            dble2str(buf,freq,-8,1);
-            printw(" %8s",buf);
-        } else
-            printw(" %8s"," ");
+            if(UINT_MAX != ifc.delay) {
+                uns2str2(buf,ifc.delay,-8,0);
+                printw("%8s",buf);
+             } else
+                printw("%8s"," ");
 
-        if (all && (def || rec) || !rec && ifc.lo>=0.0 || itpis[ibbc+    swap*MAX_DBBC3_BBC]) {
-            printw(" ");
-            if(!swap)
-              print_tsys(bbc[ibbc].tsys_lsb,bbc[ibbc].clipped_lsb,reverse);
+            printw(" Tsys ");
+            if (ifc.lo < 0.0)
+                printw("%5s"," ");
             else
-              print_tsys(bbc[ibbc].tsys_usb,bbc[ibbc].clipped_usb,reverse);
-        } else
-            printw(" %5s"," ");
+                print_tsys(ifc.tsys,ifc.clipped,reverse);
 
-        if (all && (def || rec) || !rec && ifc.lo>=0.0 || itpis[ibbc+(1-swap)*MAX_DBBC3_BBC]) {
-            printw(" ");
-            if(!swap)
-              print_tsys(bbc[ibbc].tsys_usb,bbc[ibbc].clipped_usb,reverse);
-            else
-              print_tsys(bbc[ibbc].tsys_lsb,bbc[ibbc].clipped_lsb,reverse);
-        } else
-            printw(" %5s"," ");
+            move(irow++,icol);
+            printw("Time   ");
+
+        /* legitimate times start at the first VDIF epoch */
+
+            if(ifc.time > 0) {
+              disp_time=ifc.time+1;
+              if(ifc.time_error>=-shm_addr->dbbc3_mcast_arrival && ifc.time_error <=0)
+                  disp_time-=ifc.time_error;
+              if(age <= shm_addr->dbbc3_mcast_arrival)
+                  disp_time+=age;
+              ptr=gmtime(&disp_time);
+            }
+
+            if(ifc.time <= 0 || NULL == ptr) {
+                printw("%17s"," ");
+            } else {
+                int time_error=ifc.time_error;
+                int tm_bad = time_error<-shm_addr->dbbc3_mcast_arrival || time_error>0;
+                tm_bad = tm_bad || age >shm_addr->dbbc3_mcast_arrival;
+
+                if(tm_bad)
+                    standout();
+
+                printw("%4d.%03d.%02d:%02d:%02d",
+                        ptr->tm_year+1900,
+                        ptr->tm_yday+1,
+                        ptr->tm_hour,
+                        ptr->tm_min,
+                        ptr->tm_sec);
+
+                if(tm_bad)
+                    standend();
+            }
+
+            move(irow++,icol);
+            printw("Epoch ");
+            if(!shm_addr->dbbc3_tsys_data.epoch_inserted) {
+                printw("%3s","---");
+            } else if(tsys_cycle->no_mcast_since_restart) {
+                printw("%3s"," ");
+            } else {
+                buf[0]=0;
+                int2str(buf,ifc.vdif_epoch,-3,0);
+                printw("%3s",buf);
+            }
+
+            printw(" DBBC3-FS ");
+            if (!ifc.time_included) {
+                printw("-----");
+            } else if(tsys_cycle->no_mcast_since_restart || ifc.time <= 0) {
+                printw("%5s"," ");
+            } else {
+                int time_error=ifc.time_error;
+                int tm_bad = time_error<-shm_addr->dbbc3_mcast_arrival || time_error>0;
+                if(time_error>=-shm_addr->dbbc3_mcast_arrival && time_error<0)
+                    time_error=0;
+                buf[0]=0;
+                int2str(buf,time_error,-5,0);
+                for(i=0;i<strlen(buf);i++) {
+                    if(buf[i]==' ')
+                        printw(" ");
+                    else {
+                        if(tm_bad)
+                            standout();
+                        printw("%s",buf+i);
+                        break;
+                    }
+                }
+                if(tm_bad)
+                    standend();
+            }
+
+            if(!panel) {
+                move(irow++,icol);
+                arrival_age(buf,tsys_cycle,age,seconds,ifc.time);
+            }
+
+            int swap;
+
+            move(irow,icol);
+            if(tsys_cycle->no_mcast_since_restart)
+                printw("BBC           Ts-L  Ts-U");
+            else if(ifc.lo>=0.0 && krf) {
+                printw("BBC    RF     Ts-L  Ts-U");
+                swap=2==ifc.sideband ? 1 : 0;
+            } else {
+                printw("BBC    IF     Ts-L  Ts-U");
+                swap=0;
+            }
+
+            move(irow++,icol+9);
+            if(tsys_cycle->no_mcast_since_restart || ifc.lo<0.0)
+                printw("   ");
+            else {
+                if(ifc.pol==1)
+                    printw("(R)");
+                else if(ifc.pol==2)
+                    printw("(L)");
+                else
+                    printw("   ");
+            }
+
+            for(i=0;i<bbcs_to_display_per_if;i++) {
+                int ibbc =next*8+i;
+                if(i>=8)
+                    ibbc=next*8+64+i-8;
+                move(irow+i,icol);
+                printw("%03d",ibbc+1);
+                if(tsys_cycle->no_mcast_since_restart)
+                     continue;
+                if(bbc[ibbc].freq!=UINT_MAX) {
+                    double freq=bbc[ibbc].freq*1e-6;
+                    if(ifc.lo>=0.0 && krf)
+                        if(1==ifc.sideband)
+                            freq=ifc.lo+freq;
+                        else if(2==ifc.sideband)
+                            freq=ifc.lo-freq;
+                    buf[0]=0;
+                    dble2str(buf,freq,-8,1);
+                    printw(" %8s",buf);
+                } else
+                    printw(" %8s"," ");
+
+                if (all && (def || rec) || !rec && ifc.lo>=0.0 || itpis[ibbc+    swap*MAX_DBBC3_BBC]) {
+                    printw(" ");
+                    if(!swap)
+                      print_tsys(bbc[ibbc].tsys_lsb,bbc[ibbc].clipped_lsb,reverse);
+                    else
+                      print_tsys(bbc[ibbc].tsys_usb,bbc[ibbc].clipped_usb,reverse);
+                } else
+                    printw(" %5s"," ");
+
+                if (all && (def || rec) || !rec && ifc.lo>=0.0 || itpis[ibbc+(1-swap)*MAX_DBBC3_BBC]) {
+                    printw(" ");
+                    if(!swap)
+                      print_tsys(bbc[ibbc].tsys_usb,bbc[ibbc].clipped_usb,reverse);
+                    else
+                      print_tsys(bbc[ibbc].tsys_lsb,bbc[ibbc].clipped_lsb,reverse);
+                } else
+                    printw(" %5s"," ");
+            }
+            if(panel) {
+                next++;
+                if(next>ifs_to_display-1)
+                  return;
+            }
+        }
     }
 }
