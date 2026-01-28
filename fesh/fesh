@@ -777,6 +777,18 @@ if [[ -n "$check_new" ]]; then
             echo "    $SCHED_DIR/$sched.vex is up-to-date" >&2
         else
             echo "    $FESH_TEMP_DIR/$sched.vex is different" >&2
+            new_date=$(sed -n -e 's/^.*\(PI revision number:\)  \+|\( \+[^ ]\+\).*/\1 \2/p' $FESH_TEMP_DIR/$sched.vex)
+            old_date=$(sed -n -e 's/^.*\(PI revision number:\)  \+|\( \+[^ ]\+\).*/\1 \2/p' $SCHED_DIR/$sched.vex)
+            echo "" >&2
+            printf "    %s:\n         %s\n" "$SCHED_DIR/$sched.vex" "$old_date" >&2
+            printf "    %s:\n         %s\n" "$FESH_TEMP_DIR/$sched.vex" "$new_date" >&2
+            if [[ "$old_date" == "$new_date" ]]; then
+               echo -e "\nBEWARE: The files are different but have the same PI revision number."
+            elif [[  "$old_date" > "$new_date" ]]; then
+               echo -e "\nBEWARE: The PI revision number in the file from the server appears to be OLDER." >&2
+            else
+               echo -e "\nThe PI revision number in the file from the server appears to be NEWER." >&2
+            fi
             update_needed=1
         fi
     else
@@ -787,6 +799,18 @@ if [[ -n "$check_new" ]]; then
             echo "    $SCHED_DIR/$sched.skd is up-to-date" >&2
         else
             echo "    $FESH_TEMP_DIR/$sched.skd is different" >&2
+            new_date=$(grep SCHEDULE_CREATE_DATE $FESH_TEMP_DIR/$sched.skd)
+            old_date=$(grep SCHEDULE_CREATE_DATE $SCHED_DIR/$sched.skd)
+            echo "" >&2
+            printf "    %s:\n         %s\n" "$SCHED_DIR/$sched.skd" "$old_date" >&2
+            printf "    %s:\n         %s\n" "$FESH_TEMP_DIR/$sched.skd" "$new_date" >&2
+            if [[ "$old_date" == "$new_date" ]]; then
+               echo -e "\nBEWARE: The files are different but have the same SCHEDULE_CREATE_DATE." >&2
+            elif [[  "$old_date" > "$new_date" ]]; then
+               echo -e "\nBEWARE: SCHEDULE_CREATE_DATE in the file from the server appears to be OLDER." >&2
+            else
+               echo -e "\nThe SCHEDULE_CREATE_DATE in the file from the server appears to be NEWER." >&2
+            fi
             update_needed=1
         fi
         if [[ -n "$txt" ]]; then
