@@ -716,6 +716,9 @@ if [[ -n "$run_drudg" && -z "$check_new" ]]; then
     check_station
 
     if [[ -e $SNAP_DIR/$sched$station.snp ]]; then
+        if fuser -v $SNAP_DIR/$sched$station.snp 2>&1 | grep -q " boss$" ; then
+            fatal "Can't update $SNAP_DIR/$sched$station.snp while the FS (boss) is using it"
+        fi
         if [[ -z "$force" ]]; then
             echo "$SNAP_DIR/$sched$station.snp exists. Rerun with '-C' to check it" >&2
             echo "(and then follow the directions)." >&2
@@ -725,6 +728,12 @@ if [[ -n "$run_drudg" && -z "$check_new" ]]; then
         rm "$SNAP_DIR/$sched$station.snp"
     fi
     if [[ -e $PROC_DIR/$sched$station.prc ]]; then
+        if fuser -v $PROC_DIR/$sched$station.prc 2>&1 | grep -q " boss$" ; then
+            fatal "Can't update $PROC_DIR/$sched$station.prc while the FS (boss) is using it"
+        fi
+        if fuser -v $PROC_DIR/$sched$station.prc 2>&1 | grep -q " pfmed$" ; then
+            fatal "Can't update $PROC_DIR/$sched$station.prc while the FS (pfmed) is using it"
+        fi
         if [[ -z "$force" ]]; then
             echo "$PROC_DIR/$sched$station.prc exists. Rerun with '-C' to check it" >&2
             echo "(and then follow the directions)." >&2
