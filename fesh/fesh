@@ -142,11 +142,11 @@ check_station() {
 check_file_date() {
     local need_drudg=
     if [[ -e "$1" ]]; then
-        if [[ "$1" -ot "$SCHED_DIR/$sched.skd" ]]; then
+        if [[ "$1" -ot "$2" ]]; then
             need_drudg=1
-            echo "    $1 is older than $SCHED_DIR/$sched.skd" >&2
+            echo "    $1 is older than $2" >&2
         else
-            echo "    $1 is newer than $SCHED_DIR/$sched.skd" >&2
+            echo "    $1 is newer than $2" >&2
         fi
     else
         echo "    $1 doesn't exist" >&2
@@ -158,14 +158,18 @@ check_drudg_output () {
     check_station
     if [[ -e $CONTROL_DIR/skedf.ctl ]]; then
         echo -e "\nChecking drudg output:" >&2
-        snp_date=$(check_file_date "$SNAP_DIR/$sched$station.snp")
-        prc_date=$(check_file_date "$PROC_DIR/$sched$station.prc")
-        lst_date=$(check_file_date "$LIST_DIR/$sched$station.lst")
+        snp_date=$(check_file_date "$SNAP_DIR/$sched$station.snp" $1)
+        prc_date=$(check_file_date "$PROC_DIR/$sched$station.prc" $1)
+        lst_date=$(check_file_date "$LIST_DIR/$sched$station.lst" $1)
         if [[ -n "$snp_date" || -n "$prc_date" || -n "$lst_date"  ]]; then
-            echo -e "\nSome drudg output is older than $SCHED_DIR/$sched.skd or is misssing. You" >&2
-            echo "should use 'fesh -Sdf $sched' to update." >&2
+            echo -e "\nSome drudg output is older than $1 or is misssing. You" >&2
+            if [[ ! "$FESH_DATA_CENTER" =~ vlbeer ]]; then
+                echo "should use 'fesh -Sfd $sched' to update." >&2
+            else
+                echo "should rerun drudg to make any updates you need." >&2
+            fi
         else
-            echo -e "\nAll drudg output is newer than $SCHED_DIR/$sched.skd. That should be okay." >&2
+            echo -e "\nAll drudg output is newer than $1. That should be okay." >&2
         fi
     else
         echo -e "\n'$CONTROL_DIR/skedf.ctl' doesn't exist, can't check drudg output" >&2
@@ -682,6 +686,8 @@ if [[ -n "$replace_files" ]]; then
        echo "Updating $SCHED_DIR/$sched.vex" >&2
        cp -f "$tmp/$sched.vex" "$SCHED_DIR"
        unlink "$tmp/$sched.vex"
+       echo -e "\nBEWARE: Any drudg output is older than $sched.vex. You should run drudg to make" >&2
+       echo "any updates you need," >&2
     elif [[ -e "$tmp/$sched.skd" ]]; then
 # check station and skedf.ctl here, so we don't overwrite files if there is a problem
        check_station
@@ -699,7 +705,7 @@ if [[ -n "$replace_files" ]]; then
        cp -f "$tmp/$sched.txt" "$SCHED_DIR"
        unlink "$tmp/$sched.txt"
        if [[ -z "$run_drudg" ]]; then
-         check_drudg_output
+         check_drudg_output "$SCHED_DIR/$sched.skd"
        fi
     fi
     rmdir "$tmp"
@@ -838,7 +844,9 @@ if [[ -n "$check_new" ]]; then
         rmdir $FESH_TEMP_DIR
         echo -e "\nFiles from the server are up-to-date." >&2
         if [[ ! "$FESH_DATA_CENTER" =~ vlbeer ]]; then
-          check_drudg_output
+          check_drudg_output "$SCHED_DIR/$sched.skd"
+        else
+          check_drudg_output "$SCHED_DIR/$sched.vex"
         fi
     else
        cat <<EOF >&2
