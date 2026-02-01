@@ -144,12 +144,12 @@ check_file_date() {
     if [[ -e "$1" ]]; then
         if [[ "$1" -ot "$2" ]]; then
             need_drudg=1
-            echo "    $1 is older than $2" >&2
+            echo "    $(basename $1) is older than $(basename $2)" >&2
         else
-            echo "    $1 is newer than $2" >&2
+            echo "    $(basename $1) is newer than $(basename $2)" >&2
         fi
     else
-        echo "    $1 doesn't exist" >&2
+        echo "    $(basename $1) doesn't exist" >&2
         need_drudg=1
     fi
     echo "$need_drudg"
@@ -162,14 +162,14 @@ check_drudg_output () {
         prc_date=$(check_file_date "$PROC_DIR/$sched$station.prc" $1)
         lst_date=$(check_file_date "$LIST_DIR/$sched$station.lst" $1)
         if [[ -n "$snp_date" || -n "$prc_date" || -n "$lst_date"  ]]; then
-            echo -e "\nSome drudg output is older than $1 or is misssing. You" >&2
+            echo -e "\nSome drudg output is older than $(basename $1) or is misssing. You should" >&2
             if [[ ! "$FESH_DATA_CENTER" =~ vlbeer ]]; then
-                echo "should use 'fesh -Sfd $sched' to update." >&2
+                echo "use 'fesh -Sfd $sched' to update." >&2
             else
-                echo "should rerun drudg to make any updates you need." >&2
+                echo "use drudg to make any updates you need." >&2
             fi
         else
-            echo -e "\nAll drudg output is newer than $1. That should be okay." >&2
+            echo -e "\nAll drudg output is newer than $(basename $1). That should be okay." >&2
         fi
     else
         echo -e "\n'$CONTROL_DIR/skedf.ctl' doesn't exist, can't check drudg output" >&2
@@ -795,14 +795,14 @@ if [[ -n "$check_new" ]]; then
             new_date=$(sed -n -e 's/^.*\(PI revision number:\)  \+|\( \+[^ ]\+\).*/\1 \2/p' $FESH_TEMP_DIR/$sched.vex)
             old_date=$(sed -n -e 's/^.*\(PI revision number:\)  \+|\( \+[^ ]\+\).*/\1 \2/p' $SCHED_DIR/$sched.vex)
             echo "" >&2
-            printf "    %s:\n         %s\n" "$SCHED_DIR/$sched.vex" "$old_date" >&2
-            printf "    %s:\n         %s\n" "$FESH_TEMP_DIR/$sched.vex" "$new_date" >&2
+            printf "        %s:\n             %s\n" "$SCHED_DIR/$sched.vex" "$old_date" >&2
+            printf "        %s:\n             %s\n" "$FESH_TEMP_DIR/$sched.vex" "$new_date" >&2
             if [[ "$old_date" == "$new_date" ]]; then
-               echo -e "\nBEWARE: The files are different but have the same PI revision number."
+               echo -e "\n        BEWARE: The files are different but have the same PI revision number."
             elif [[  "$old_date" > "$new_date" ]]; then
-               echo -e "\nBEWARE: The PI revision number in the file from the server appears to be OLDER." >&2
+               echo -e "\n        BEWARE: The PI revision number in the server file appears to be OLDER." >&2
             else
-               echo -e "\nThe PI revision number in the file from the server appears to be NEWER." >&2
+               echo -e "\n        The PI revision number in the server file appears to be NEWER." >&2
             fi
             update_needed=1
         fi
@@ -817,16 +817,19 @@ if [[ -n "$check_new" ]]; then
             new_date=$(grep SCHEDULE_CREATE_DATE $FESH_TEMP_DIR/$sched.skd)
             old_date=$(grep SCHEDULE_CREATE_DATE $SCHED_DIR/$sched.skd)
             echo "" >&2
-            printf "    %s:\n         %s\n" "$SCHED_DIR/$sched.skd" "$old_date" >&2
-            printf "    %s:\n         %s\n" "$FESH_TEMP_DIR/$sched.skd" "$new_date" >&2
+            printf "        %s:\n             %s\n" "$SCHED_DIR/$sched.skd" "$old_date" >&2
+            printf "        %s:\n             %s\n" "$FESH_TEMP_DIR/$sched.skd" "$new_date" >&2
             if [[ "$old_date" == "$new_date" ]]; then
-               echo -e "\nBEWARE: The files are different but have the same SCHEDULE_CREATE_DATE." >&2
+               echo -e "\n        BEWARE: The files are different but have the same SCHEDULE_CREATE_DATE." >&2
             elif [[  "$old_date" > "$new_date" ]]; then
-               echo -e "\nBEWARE: SCHEDULE_CREATE_DATE in the file from the server appears to be OLDER." >&2
+               echo -e "\n        BEWARE: SCHEDULE_CREATE_DATE in the server file appears to be OLDER." >&2
             else
-               echo -e "\nThe SCHEDULE_CREATE_DATE in the file from the server appears to be NEWER." >&2
+               echo -e "\n        The SCHEDULE_CREATE_DATE in the server file appears appears to be NEWER." >&2
             fi
             update_needed=1
+            if [[ -n "$txt" ]]; then
+                echo "" >&2
+            fi
         fi
         if [[ -n "$txt" ]]; then
           if [[ ! -e "$sched.txt" ]]; then
@@ -842,7 +845,7 @@ if [[ -n "$check_new" ]]; then
     fi
     if [[ -z "$update_needed" ]] ; then
         rmdir $FESH_TEMP_DIR
-        echo -e "\nFiles from the server are up-to-date." >&2
+        echo -e "\n    Files from the server are up-to-date." >&2
         if [[ ! "$FESH_DATA_CENTER" =~ vlbeer ]]; then
           check_drudg_output "$SCHED_DIR/$sched.skd"
         else
