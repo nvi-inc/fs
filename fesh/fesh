@@ -456,9 +456,17 @@ while getopts 'a:Cc:nfdD:hHm:p:PRs:St:T:u:vVxy:' opt; do
             exit 1
             ;;
         C)
+            if [[ -n "$replace_files" ]] ; then
+                echo "Can't use '-R' and '-C' together."
+                exit 1
+            fi
             check_new=1
             ;;
         R)
+            if [[ -n "$check_new" ]] ; then
+                echo "Can't use '-C' and '-R' together."
+                exit 1
+            fi
             replace_files=1
             ;;
         d)
