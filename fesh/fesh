@@ -799,14 +799,16 @@ if [[ -n "$check_new" ]]; then
             echo "    $FESH_TEMP_DIR/$sched.vex does not exist" >&2
         elif cmp -s "$sched.vex" $SCHED_DIR/$sched.vex ; then
             unlink "$sched.vex"
-            echo "    $SCHED_DIR/$sched.vex is up-to-date" >&2
+            echo "    $SCHED_DIR/$sched.vex agrees with the server." >&2
+            old_date=$(sed -n -e 's/^.*\(PI revision number:\)  \+|\( \+[^ ]\+\).*/\1 \2/p' $SCHED_DIR/$sched.vex)
+            printf "        %s\n" "$old_date" >&2
         else
             echo "    $FESH_TEMP_DIR/$sched.vex is different" >&2
             new_date=$(sed -n -e 's/^.*\(PI revision number:\)  \+|\( \+[^ ]\+\).*/\1 \2/p' $FESH_TEMP_DIR/$sched.vex)
             old_date=$(sed -n -e 's/^.*\(PI revision number:\)  \+|\( \+[^ ]\+\).*/\1 \2/p' $SCHED_DIR/$sched.vex)
             echo "" >&2
             printf "        %s:\n             %s\n" "$SCHED_DIR/$sched.vex" "$old_date" >&2
-            printf "        %s:\n             %s\n" "$FESH_TEMP_DIR/$sched.vex" "$new_date" >&2
+            printf "        %s from the server:\n             %s\n" "$FESH_TEMP_DIR/$sched.vex" "$new_date" >&2
             if [[ "$old_date" == "$new_date" ]]; then
                echo -e "\n        BEWARE: The files are different but have the same PI revision number."
             elif [[  "$old_date" > "$new_date" ]]; then
@@ -821,34 +823,34 @@ if [[ -n "$check_new" ]]; then
             echo "    $FESH_TEMP_DIR/$sched.skd does not exist" >&2
         elif cmp -s "$sched.skd" $SCHED_DIR/$sched.skd ; then
             unlink "$sched.skd"
-            echo "    $SCHED_DIR/$sched.skd is up-to-date" >&2
+            echo "    $SCHED_DIR/$sched.skd agrees with the server." >&2
+            old_date=$(grep SCHEDULE_CREATE_DATE $SCHED_DIR/$sched.skd)
+            printf "        %s\n" "$old_date" >&2
         else
             echo "    $FESH_TEMP_DIR/$sched.skd is different" >&2
             new_date=$(grep SCHEDULE_CREATE_DATE $FESH_TEMP_DIR/$sched.skd)
             old_date=$(grep SCHEDULE_CREATE_DATE $SCHED_DIR/$sched.skd)
             echo "" >&2
             printf "        %s:\n             %s\n" "$SCHED_DIR/$sched.skd" "$old_date" >&2
-            printf "        %s:\n             %s\n" "$FESH_TEMP_DIR/$sched.skd" "$new_date" >&2
+            printf "        %s from the server:\n             %s\n" "$FESH_TEMP_DIR/$sched.skd" "$new_date" >&2
             if [[ "$old_date" == "$new_date" ]]; then
                echo -e "\n        BEWARE: The files are different but have the same SCHEDULE_CREATE_DATE." >&2
             elif [[  "$old_date" > "$new_date" ]]; then
                echo -e "\n        BEWARE: SCHEDULE_CREATE_DATE in the server file appears to be OLDER." >&2
             else
-               echo -e "\n        The SCHEDULE_CREATE_DATE in the server file appears appears to be NEWER." >&2
+               echo -e "\n        The SCHEDULE_CREATE_DATE in the server file appears to be NEWER." >&2
             fi
             update_needed=1
-            if [[ -n "$txt" ]]; then
-                echo "" >&2
-            fi
         fi
         if [[ -n "$txt" ]]; then
+          echo "" >&2
           if [[ ! -e "$sched.txt" ]]; then
               echo "    $FESH_TEMP_DIR/$sched.txt does not exist" >&2
           elif cmp -s "$sched.txt" $SCHED_DIR/$sched.txt ; then
               unlink "$sched.txt"
-              echo "    $SCHED_DIR/$sched.txt is up-to-date" >&2
+              echo "    $SCHED_DIR/$sched.txt agrees with the server." >&2
           else
-              echo "    $FESH_TEMP_DIR/$sched.txt is different" >&2
+              echo "    $FESH_TEMP_DIR/$sched.txt from the server is different" >&2
               update_needed=1
           fi
         fi
