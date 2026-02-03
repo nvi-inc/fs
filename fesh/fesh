@@ -159,26 +159,25 @@ check_file_date() {
     echo "$need_drudg"
 }
 check_drudg_output () {
+# this was already checked, but try again for safety
     check_station
+    local need_drudg=
     if [[ -e $CONTROL_DIR/skedf.ctl ]]; then
         echo -e "\nChecking drudg output:" >&2
         snp_date=$(check_file_date "$SNAP_DIR/$sched$station.snp" $1)
         prc_date=$(check_file_date "$PROC_DIR/$sched$station.prc" $1)
         lst_date=$(check_file_date "$LIST_DIR/$sched$station.lst" $1)
         if [[ -n "$snp_date" || -n "$prc_date" || -n "$lst_date"  ]]; then
-            echo -e "\nSome drudg output is older than $(basename $1) or is misssing. You should" >&2
-            if [[ ! "$FESH_DATA_CENTER" =~ vlbeer ]]; then
-                echo "use 'fesh -Sfd $sched' to update." >&2
-            else
-                echo "use drudg to make any updates you need." >&2
-            fi
+            echo -e "\n    Some drudg output is older than $(basename $1) or is misssing." >&2
+            need_drudg=1
         else
-            echo -e "\nAll drudg output is newer than $(basename $1). That should be okay." >&2
+            echo -e "\n    All drudg output is newer than $(basename $1). That should be okay." >&2
         fi
     else
         echo -e "\n'$CONTROL_DIR/skedf.ctl' doesn't exist, can't check drudg output" >&2
         exit 1
     fi
+    echo "$need_drudg"
 }
 
 version
@@ -253,6 +252,8 @@ fatal(){
 year=$(date +%Y)
 month=$(LANG=C date +%b%y|tr [:upper:] [:lower:])
 
+run_drudg_file="run_drudg"
+
 usage() {
     cat <<EOF
 Usage: $0 [options] schedule
@@ -263,11 +264,10 @@ Options:
  -C       check for changed schedule file (and .txt file if previously
           download) on server; if there were any changes, new versions
           are left on /tmp and a hint for how proceed is printed
- -R       update files that were found to be changed with -C; the
-          latest versions on /tmp are used; implies -Sf for schedules
-          from vlbeer, and -Sfd for all others (i.e., geo); if only
-          the ,txt file needs to be updated, the age of the drudg
-          output will be checked.
+ -R       update files that were found to be changed with '-C; the
+          latest versions on /tmp are used; for geo, drudg will be run
+          automatically if the .skd file is update or if the drudg output
+          was stale in '-C'
  -d       drudg schedule with default settings, not supported for vlbeer
           (needs STATION environment variable or -s set with station code)
  -D dc    Use alternate data center; dc=bkg, cddis, opar, or vlbeer. Upper
@@ -309,9 +309,9 @@ If both are set, -s overrides STATION. In any event, the value is mapped to
 lower case, if it isn't already, for agreement with drudg.
 
 The '-C' option allows checking that already downloaded files and drudg output
-are up-to-date. If files need to updated, the '-R' option can be used
-afterwards for that. Additionally, messages for some errors now recommend ways
-to use '-C'/'-R' for recovering. Other approaches may work better depending on
+are up-to-date. If files need to updated, the '-R' option should be used
+afterward for that. Additionally, messages for some errors recommend ways to
+use '-C'/'-R' for recovering. Other approaches may work better depending on
 you needs, but the recommended ones fit most situations.
 
 Please see the end of this message about handling optional 'skedf.ctl'
@@ -696,30 +696,34 @@ if [[ -n "$replace_files" ]]; then
     run_drudg=
     tmp=$(get_latest_tmp)
     echo "Found temporary directory $tmp" >&2
-    if [[ -e "$tmp/$sched.vex" ]]; then
-       echo "Updating $SCHED_DIR/$sched.vex" >&2
-       cp -f "$tmp/$sched.vex" "$SCHED_DIR"
-       unlink "$tmp/$sched.vex"
-       echo -e "\nBEWARE: Any drudg output is older than $sched.vex. You should run drudg to make" >&2
-       echo "any updates you need," >&2
-    elif [[ -e "$tmp/$sched.skd" ]]; then
-# check station and skedf.ctl here, so we don't overwrite files if there is a problem
-       check_station
-       if [[ ! -e $CONTROL_DIR/skedf.ctl ]]; then
-           fatal "$CONTROL_DIR/skedf.ctl doesn't exist, can't run drudg with '-R'"
+    if [[ "$FESH_DATA_CENTER" =~ vlbeer ]]; then
+       if [[ -e "$tmp/$sched.vex" ]]; then
+           echo "Updating $SCHED_DIR/$sched.vex" >&2
+           cp -f "$tmp/$sched.vex" "$SCHED_DIR"
+           echo -e "\nBEWARE: Any drudg output is older than $SCHED_DIR/$sched.vex."
+           echo      "        You should run drudg manually to update any files you need." >&2
+           unlink "$tmp/$sched.vex"
        fi
-       echo "Updating $SCHED_DIR/$sched.skd" >&2
-       cp -f "$tmp/$sched.skd" "$SCHED_DIR"
-       unlink "$tmp/$sched.skd"
-       run_drudg=1
-       force=1
-    fi
-    if [[ -e "$tmp/$sched.txt" ]]; then
-       echo "Updating $SCHED_DIR/$sched.txt" >&2
-       cp -f "$tmp/$sched.txt" "$SCHED_DIR"
-       unlink "$tmp/$sched.txt"
-       if [[ -z "$run_drudg" ]]; then
-         check_drudg_output "$SCHED_DIR/$sched.skd"
+    else
+       if [[ -e "$tmp/$run_drudg_file" ]] ; then
+# check station and skedf.ctl here, so we don't overwrite files if there is a problem
+           check_station
+           if [[ ! -e $CONTROL_DIR/skedf.ctl ]]; then
+               fatal "$CONTROL_DIR/skedf.ctl doesn't exist, can't run drudg with '-R'"
+           fi
+           run_drudg=1
+           force=1
+           unlink "$tmp/$run_drudg_file"
+       fi
+       if [[ -e "$tmp/$sched.skd" ]]; then
+           echo "Updating $SCHED_DIR/$sched.skd" >&2
+           cp -f "$tmp/$sched.skd" "$SCHED_DIR"
+           unlink "$tmp/$sched.skd"
+       fi
+       if [[ -e "$tmp/$sched.txt" ]]; then
+          echo "Updating $SCHED_DIR/$sched.txt" >&2
+          cp -f "$tmp/$sched.txt" "$SCHED_DIR"
+          unlink "$tmp/$sched.txt"
        fi
     fi
     rmdir "$tmp"
@@ -788,6 +792,10 @@ if [[ -n "$check_new" ]]; then
             txt=1
         fi
     fi
+
+#check here so nothing is created unless drudg check can work
+    check_station
+
     FESH_TEMP_DIR=$(mktemp -d  "/tmp/$(basename $0)_${sched}_XXX" || fatal "Using mktemp to create temporary directory failed." )
     if [[ "$FESH_TEMP_DIR" == "" ]]; then
         fatal "Creating temporary directory failed"
@@ -860,20 +868,56 @@ if [[ -n "$check_new" ]]; then
         fi
     fi
     if [[ -z "$update_needed" ]] ; then
+        echo -e "\n    The files from the server agree with those in $SCHED_DIR." >&2
+    else
+        echo -e "\n    The files from the server do not agree with those in $SCHED_DIR." >&2
+    fi
+    if [[ ! "$FESH_DATA_CENTER" =~ vlbeer ]]; then
+        ext="skd"
+    else
+        ext="vex"
+    fi
+    drudg_needed=$(check_drudg_output "$SCHED_DIR/$sched.$ext")
+    if [[ ! "$FESH_DATA_CENTER" =~ vlbeer ]]; then
+       if [[ -e "$sched.skd" ]]; then
+           drudg_needed=1
+       fi
+       if [[ -n "$drudg_needed" ]] ; then
+           touch "$FESH_TEMP_DIR/$run_drudg_file"
+       fi
+    fi
+    if [[ -z "$update_needed" && -z "$drudg_needed" ]] ; then
         rmdir $FESH_TEMP_DIR
-        echo -e "\n    Files from the server are up-to-date." >&2
-        if [[ ! "$FESH_DATA_CENTER" =~ vlbeer ]]; then
-          check_drudg_output "$SCHED_DIR/$sched.skd"
-        else
-          check_drudg_output "$SCHED_DIR/$sched.vex"
+        echo -e "\nNo action needed." >&2
+    elif [[ "$FESH_DATA_CENTER" =~ vlbeer ]]; then
+        if [[ -n "$update_needed" ]]; then
+            cat <<EOF >&2
+
+Rerun with '-R' to update $SCHED_DIR with
+$FESH_TEMP_DIR/$sched.$ext. You should run drudg
+manually afterward to update/create any drudg output you need.
+EOF
+        elif [[ -n "$drudg_needed" ]]; then
+            rmdir $FESH_TEMP_DIR
+            cat <<EOF >&2
+
+Do NOT rerun with '-R'. You should run drudg manually to update/create
+any drudg output you need.
+EOF
         fi
     else
-       cat <<EOF >&2
+       if [[ -n "$update_needed" ]]; then
+           cat <<EOF >&2
 
-Use -R to update $SCHED_DIR with the different files in
-$FESH_TEMP_DIR (changed schedule files from CDDIS, BKG, and OPAR will
-automatically be DRUDG'd.)
+Rerun with '-R' to update $SCHED_DIR with the different files in
+$FESH_TEMP_DIR. Drudg will be run automatically if needed.
 EOF
+       elif [[ -n "$drudg_needed" ]]; then
+           cat <<EOF >&2
+
+Rerun with '-R' to update the drudg output.
+EOF
+       fi
     fi
     popd >/dev/null
     exit 0
