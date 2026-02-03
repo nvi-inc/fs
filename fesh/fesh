@@ -132,9 +132,13 @@ get_latest_tmp() {
 check_station() {
     set +u
     if [[ -z "$station" ]]; then
-        fatal "Neither STATION environment variable nor -s are set; should be set to two-letter station code if using drudg."
+        fatal "Use STATION environment variable or '-s' to set the station code."
     fi
     set -u
+
+    if [ ${#station} -ne 2 ]; then
+        fatal "Station code from STATION env. var. or '-s' must be two characters."
+    fi
 
 #force lower case station code
     station=$(echo "$station" | tr '[:upper:]' '[:lower:]')
@@ -265,7 +269,7 @@ Options:
           the ,txt file needs to be updated, the age of the drudg
           output will be checked.
  -d       drudg schedule with default settings, not supported for vlbeer
-          (needs STATION environment variable or -s set with two letter id)
+          (needs STATION environment variable or -s set with station code)
  -D dc    Use alternate data center; dc=bkg, cddis, opar, or vlbeer. Upper
           and lower case are accepted. (see more below about setting the
           default data center)
@@ -296,7 +300,7 @@ NOTE: If you specify a schedule that doesn't exist on the server, you will get
 a file or a directory error from the server.
 
 For the '-d' option, the STATION environment variable, or the -s option, must
-be set with the two-letter station code. For example, for STATION:
+be set with the two character station code. For example, for STATION:
 
     setenv STATION gs #in ~/.login for tcsh or
     export STATION=gs #in ~/.profile for bash
