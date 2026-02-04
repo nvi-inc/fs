@@ -41,16 +41,22 @@ download_files() {
 
     if [[ "$FESH_DATA_CENTER" =~ vlbeer ]]; then
         echo "Fetching $sched.vex ..." >&2
-        wget $WGET_VERBOSE "ftp://ftp@vlbeer.ira.inaf.it/vlb_arc/ftp/vlbi_arch/$month/$sched.vex"
-        echo Done >&2
+        if wget $WGET_VERBOSE "ftp://ftp@vlbeer.ira.inaf.it/vlb_arc/ftp/vlbi_arch/$month/$sched.vex"; then
+            echo Done >&2
+        else
+            fatal "Downloading $sched.vex failed"
+        fi
         return
     fi
 
     echo "Fetching $sched.skd ..." >&2
     if [[ "$FESH_DATA_CENTER" =~ cddis ]]; then
         if [[ "$FESH_CDDIS_METHOD" =~ ^ftp$ ]]; then
-            wget $WGET_VERBOSE "ftp://ftp@cddis.gsfc.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
-            echo Done >&2
+            if wget $WGET_VERBOSE "ftp://ftp@cddis.gsfc.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.skd"; then
+                echo Done >&2
+            else
+                fatal "Downloading $sched.skd failed"
+            fi
 
             echo "Fetching $sched.txt ..." >&2
             if wget $WGET_VERBOSE "ftp://ftp@cddis.gsfc.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.txt"; then
@@ -68,10 +74,13 @@ download_files() {
             if ! grep -q urs.earthdata.nasa.gov "$NETRC_DIR/.netrc"; then
                 fatal "$NETRC_DIR/.netrc does not contain CDDIS login information, see usage"
             fi
-            curl  -k  -f -c /dev/null $CURL_VERBOSE -n \
+            if curl  -k  -f -c /dev/null $CURL_VERBOSE -n \
                 $CURL_NETRC_FILE_OPTION \
-                -L -O "https://cddis.nasa.gov/archive/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
-            echo Done >&2
+                -L -O "https://cddis.nasa.gov/archive/vlbi/ivsdata/aux/$year/$sched/$sched.skd"; then
+                echo Done >&2
+            else
+                fatal "Downloading $sched.skd failed"
+            fi
 
             echo "Fetching $sched.txt ..." >&2
             if curl  -k  -f -c /dev/null $CURL_VERBOSE -n \
@@ -84,8 +93,11 @@ download_files() {
                 echo "Failed, but continuing since $sched.txt was not required by using '-x'." >&2
             fi
         else
-            curl -u "$user" -k -O $CURL_VERBOSE --ftp-ssl "ftp://gdc.cddis.eosdis.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
-            echo Done >&2
+            if curl -u "$user" -k -O $CURL_VERBOSE --ftp-ssl "ftp://gdc.cddis.eosdis.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.skd" ; then
+                echo Done >&2
+            else
+                fatal "Downloading $sched.skd failed"
+            fi
 
             echo "Fetching $sched.txt ..." >&2
             if curl -u "$user" -k -O $CURL_VERBOSE --ftp-ssl "ftp://gdc.cddis.eosdis.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.txt"; then
@@ -97,8 +109,11 @@ download_files() {
             fi
         fi
     elif [[ "$FESH_DATA_CENTER" =~ opar ]]; then
-        wget $WGET_VERBOSE "ftp://ftp@ivsopar.obspm.fr/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
-        echo Done >&2
+        if wget $WGET_VERBOSE "ftp://ftp@ivsopar.obspm.fr/vlbi/ivsdata/aux/$year/$sched/$sched.skd"; then
+            echo Done >&2
+        else
+            fatal "Downloading $sched.skd failed"
+        fi
 
         echo "Fetching $sched.txt ..." >&2
         if wget $WGET_VERBOSE "ftp://ftp@ivsopar.obspm.fr/vlbi/ivsdata/aux/$year/$sched/$sched.txt"; then
@@ -110,8 +125,11 @@ download_files() {
             fi
     elif [[ "$FESH_DATA_CENTER" =~ bkg ]]; then
         if [[ "$FESH_BKG_METHOD" =~ ^ftp$ ]]; then
-            wget $WGET_VERBOSE "ftp://ftp@ivs.bkg.bund.de/pub/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
-            echo Done >&2
+            if wget $WGET_VERBOSE "ftp://ftp@ivs.bkg.bund.de/pub/vlbi/ivsdata/aux/$year/$sched/$sched.skd"; then
+                echo Done >&2
+            else
+                fatal "Downloading $sched.skd failed"
+            fi
 
             echo "Fetching $sched.txt ..." >&2
             if wget $WGET_VERBOSE "ftp://ftp@ivs.bkg.bund.de/pub/vlbi/ivsdata/aux/$year/$sched/$sched.txt"; then
@@ -122,8 +140,11 @@ download_files() {
                 echo "Failed, but continuing since $sched.txt was not required by using '-x'." >&2
             fi
         else
-            curl --ssl-reqd $CURL_VERBOSE -u anonymous:anonymous -O "ftp://ivs.bkg.bund.de/pub/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
-            echo Done >&2
+            if curl --ssl-reqd $CURL_VERBOSE -u anonymous:anonymous -O "ftp://ivs.bkg.bund.de/pub/vlbi/ivsdata/aux/$year/$sched/$sched.skd"; then
+                echo Done >&2
+            else
+                fatal "Downloading $sched.skd failed"
+            fi
 
             echo "Fetching $sched.txt ..." >&2
             if curl --ssl-reqd $CURL_VERBOSE -u anonymous:anonymous -O "ftp://ivs.bkg.bund.de/pub/vlbi/ivsdata/aux/$year/$sched/$sched.txt"; then
