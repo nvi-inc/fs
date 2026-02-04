@@ -52,10 +52,13 @@ download_files() {
             wget $WGET_VERBOSE "ftp://ftp@cddis.gsfc.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
             echo Done >&2
 
-            if [[ -n "$txt" ]]; then
-                echo "Fetching $sched.txt ..." >&2
-                wget $WGET_VERBOSE "ftp://ftp@cddis.gsfc.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.txt"
+            echo "Fetching $sched.txt ..." >&2
+            if wget $WGET_VERBOSE "ftp://ftp@cddis.gsfc.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.txt"; then
                 echo Done >&2
+            elif [[ -n "$txt" ]]; then
+               fatal "Download of $sched.txt, required by '-x', failed."
+            else
+                echo "Failed, but continuing since $sched.txt was not required by using '-x'." >&2
             fi
         elif [[ "$FESH_CDDIS_METHOD" =~ ^https$ ]]; then
             if [[ ! -e "$NETRC_DIR/.netrc" ]]; then
@@ -70,50 +73,65 @@ download_files() {
                 -L -O "https://cddis.nasa.gov/archive/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
             echo Done >&2
 
-            if [[ -n "$txt" ]]; then
-                echo "Fetching $sched.txt ..." >&2
-                curl  -k  -f -c /dev/null $CURL_VERBOSE -n \
-                    $CURL_NETRC_FILE_OPTION \
-                    -L -O "https://cddis.nasa.gov/archive/vlbi/ivsdata/aux/$year/$sched/$sched.txt"
-                echo Done >&2
+            echo "Fetching $sched.txt ..." >&2
+            if curl  -k  -f -c /dev/null $CURL_VERBOSE -n \
+                $CURL_NETRC_FILE_OPTION \
+                -L -O "https://cddis.nasa.gov/archive/vlbi/ivsdata/aux/$year/$sched/$sched.txt"; then
+                 echo Done >&2
+            elif [[ -n "$txt" ]]; then
+               fatal "Download of $sched.txt, required by '-x', failed."
+            else
+                echo "Failed, but continuing since $sched.txt was not required by using '-x'." >&2
             fi
         else
             curl -u "$user" -k -O $CURL_VERBOSE --ftp-ssl "ftp://gdc.cddis.eosdis.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
             echo Done >&2
 
-            if [[ -n "$txt" ]]; then
-                echo "Fetching $sched.txt ..." >&2
-                curl -u "$user" -k -O $CURL_VERBOSE --ftp-ssl "ftp://gdc.cddis.eosdis.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.txt"
-                echo Done >&2
+            echo "Fetching $sched.txt ..." >&2
+            if curl -u "$user" -k -O $CURL_VERBOSE --ftp-ssl "ftp://gdc.cddis.eosdis.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.txt"; then
+              echo Done >&2
+            elif [[ -n "$txt" ]]; then
+               fatal "Download of $sched.txt, required by '-x', failed."
+            else
+                echo "Failed, but continuing since $sched.txt was not required by using '-x'." >&2
             fi
         fi
     elif [[ "$FESH_DATA_CENTER" =~ opar ]]; then
         wget $WGET_VERBOSE "ftp://ftp@ivsopar.obspm.fr/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
         echo Done >&2
 
-        if [[ -n "$txt" ]]; then
-            echo "Fetching $sched.txt ..." >&2
-            wget $WGET_VERBOSE "ftp://ftp@ivsopar.obspm.fr/vlbi/ivsdata/aux/$year/$sched/$sched.txt"
+        echo "Fetching $sched.txt ..." >&2
+        if wget $WGET_VERBOSE "ftp://ftp@ivsopar.obspm.fr/vlbi/ivsdata/aux/$year/$sched/$sched.txt"; then
             echo Done >&2
-        fi
+            elif [[ -n "$txt" ]]; then
+               fatal "Download of $sched.txt, required by '-x', failed."
+            else
+                echo "Failed, but continuing since $sched.txt was not required by using '-x'." >&2
+            fi
     elif [[ "$FESH_DATA_CENTER" =~ bkg ]]; then
         if [[ "$FESH_BKG_METHOD" =~ ^ftp$ ]]; then
             wget $WGET_VERBOSE "ftp://ftp@ivs.bkg.bund.de/pub/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
             echo Done >&2
 
-            if [[ -n "$txt" ]]; then
-                echo "Fetching $sched.txt ..." >&2
-                wget $WGET_VERBOSE "ftp://ftp@ivs.bkg.bund.de/pub/vlbi/ivsdata/aux/$year/$sched/$sched.txt"
-                echo Done >&2
+            echo "Fetching $sched.txt ..." >&2
+            if wget $WGET_VERBOSE "ftp://ftp@ivs.bkg.bund.de/pub/vlbi/ivsdata/aux/$year/$sched/$sched.txt"; then
+              echo Done >&2
+            elif [[ -n "$txt" ]]; then
+               fatal "Download of $sched.txt, required by '-x', failed."
+            else
+                echo "Failed, but continuing since $sched.txt was not required by using '-x'." >&2
             fi
         else
             curl --ssl-reqd $CURL_VERBOSE -u anonymous:anonymous -O "ftp://ivs.bkg.bund.de/pub/vlbi/ivsdata/aux/$year/$sched/$sched.skd"
             echo Done >&2
 
-            if [[ -n "$txt" ]]; then
-                echo "Fetching $sched.txt ..." >&2
-                curl --ssl-reqd $CURL_VERBOSE -u anonymous:anonymous -O "ftp://ivs.bkg.bund.de/pub/vlbi/ivsdata/aux/$year/$sched/$sched.txt"
-                echo Done >&2
+            echo "Fetching $sched.txt ..." >&2
+            if curl --ssl-reqd $CURL_VERBOSE -u anonymous:anonymous -O "ftp://ivs.bkg.bund.de/pub/vlbi/ivsdata/aux/$year/$sched/$sched.txt"; then
+              echo Done >&2
+            elif [[ -n "$txt" ]]; then
+               fatal "Download of $sched.txt, required by '-x', failed."
+            else
+                echo "Failed, but continuing since $sched.txt was not required by using '-x'." >&2
             fi
         fi
     fi
@@ -264,7 +282,7 @@ run_drudg_file="run_drudg"
 usage() {
     cat <<EOF
 Usage: $0 [options] schedule
-Fetch schedule file
+Fetch schedule file (and .txt file, if available, for geo)
 
 Options:
  -n       Fetch next schedule in master file (not supported yet)
@@ -290,10 +308,11 @@ Options:
  -H       suppress use of the hidden .latest sub-directory for vlbeer
  -y yyyy  Specify different (four-digit) year than the current one
           for geo data centers (see more below about specifying the year)
- -f       Force downloading of schedule (and .txt witb -x) files from server
-          (if -S is not used) and force re-drudging when -d is used, otherwise
-          existing files will not be replaced
- -x       download corresponding .txt file as well (geo only)
+ -f       Force downloading of schedule (and .txt) files from server (if -S is
+          not used) and force re-drudging when -d is used, otherwise existing
+          files will not be replaced
+ -x       require downloading corresponding .txt file (geo only), otherwise it
+          is skipped if not available
  -s xx    Override STATION environment variable
  -a val   Override drudg VSI_ALIGN answer to val
  -c val   Override drudg CONT_CAL answer to val
@@ -367,8 +386,8 @@ current directory, use:
     setenv LIST_DIR . #in ~/.login for tcsh or
     export LIST_DIR=. #in ~/.profile for bash
 
-If the -x option is used to download the .txt file (for geo schedules only),
-the file is placed in the same directory as the .skd file.
+The .txt file (for geo schedules only) is placed in the same directory as the
+schedule file.
 
 The default transfer method from CDDIS is ftp-ssl.  You can use https as the
 method with CDDIS if you set:
@@ -685,16 +704,16 @@ if [[ -z "$check_new" && -z "$replace_files" ]]; then
 	    fi
 	    rm "$SCHED_DIR/$sched.skd"
 	fi
-	if [[ -n "$txt" ]]; then
-	    if [[ -e $SCHED_DIR/$sched.txt ]]; then
-		if [[ -z "$force" ]]; then
-		    echo "$SCHED_DIR/$sched.txt exists. Rerun with '-fdx' to get a fresh" >&2
-		    echo "copy (along with a fresh schedule and drudg it)." >&2
-		    exit 1
-		fi
-		rm "$SCHED_DIR/$sched.txt"
+	if [[ -e $SCHED_DIR/$sched.txt ]]; then
+	    if [[ -z "$force" ]]; then
+		echo "$SCHED_DIR/$sched.txt exists. Rerun with '-C' to check it (and then " >&2
+		echo "with '-R', if appropriate, to replace it; that will also update the schedule if" >&2
+		echo "that is needed, and run drudg if that is needed)." >&2
+		echo "Or rerun adding '-f' to force deleting all conflicting files." >&2
+		exit 1
 	    fi
-	fi
+	    rm "$SCHED_DIR/$sched.txt"
+	 fi
     fi
 fi
 
@@ -803,11 +822,8 @@ if [[ -n "$check_new" ]]; then
     else
         if [[ ! -e $SCHED_DIR/$sched.skd ]]; then
             echo "Schedule $SCHED_DIR/$sched.skd is not present. Rerun without -C,' probably" >&2
-            echo "adding -fdx to get everything" >&2
+            echo "adding -fd to get everything and drudg the schedule." >&2
             exit 1
-        fi
-        if [[ -e $SCHED_DIR/$sched.txt ]]; then
-            txt=1
         fi
     fi
 
@@ -872,23 +888,21 @@ if [[ -n "$check_new" ]]; then
             fi
             update_needed=1
         fi
-        if [[ -n "$txt" ]]; then
-          echo "" >&2
-          if [[ ! -e "$sched.txt" ]]; then
-              echo "    $FESH_TEMP_DIR/$sched.txt does not exist" >&2
-          elif cmp -s "$sched.txt" $SCHED_DIR/$sched.txt ; then
-              unlink "$sched.txt"
-              echo "    $SCHED_DIR/$sched.txt agrees with the server." >&2
-          else
-              echo "    $FESH_TEMP_DIR/$sched.txt from the server is different" >&2
-              update_needed=1
-          fi
+        echo "" >&2
+        if [[ ! -e "$sched.txt" ]]; then
+            echo "    $FESH_TEMP_DIR/$sched.txt does not exist" >&2
+        elif cmp -s "$sched.txt" $SCHED_DIR/$sched.txt ; then
+            unlink "$sched.txt"
+            echo "    $SCHED_DIR/$sched.txt agrees with the server." >&2
+        else
+            echo "    $FESH_TEMP_DIR/$sched.txt from the server is different" >&2
+            update_needed=1
         fi
     fi
     if [[ -z "$update_needed" ]] ; then
-        echo -e "\n    The files from the server agree with those in $SCHED_DIR." >&2
+        echo -e "\n    The files that are on the server agree with those in $SCHED_DIR." >&2
     else
-        echo -e "\n    The files from the server do not agree with those in $SCHED_DIR." >&2
+        echo -e "\n    The files that are on the server do not agree with those in $SCHED_DIR." >&2
     fi
     if [[ ! "$FESH_DATA_CENTER" =~ vlbeer ]]; then
         ext="skd"
