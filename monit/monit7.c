@@ -25,6 +25,8 @@
 #include <math.h>
 #include <sys/types.h>
 #include <string.h>
+#include <sys/ioctl.h>
+#include <ctype.h>
 
 #include "../include/dpi.h"
 #include "../include/params.h"
@@ -38,10 +40,21 @@ struct fscom *fs;
 
 #define DWELL_SECONDS 2
 
-void resize()
+int win_cols;
+int win_rows;
+
+static void handle_resize()
 {
-  clear();
-  refresh();
+    struct winsize ws;
+
+    endwin();
+    refresh();
+    resize_term(0,0);
+    ioctl(0, TIOCGWINSZ, &ws);
+    win_rows=ws.ws_row;
+    win_cols=ws.ws_col;
+    clear();
+    refresh();
 }
 main(int argc, char *argv[])
 {
@@ -51,7 +64,7 @@ main(int argc, char *argv[])
     void die();
     void resize();
     unsigned rte_sleep();
-    char ch;
+    int ch;
     char numbers[]  = "123456789";
     char letters[]  = "abcdefgh";
     char lettersu[] = "ABCDEFGH";
@@ -61,6 +74,15 @@ main(int argc, char *argv[])
 
     int i=0;
     int okay=1;
+    int panel=0;
+
+    struct winsize ws;
+
+    setup_ids();
+    fs = shm_addr;
+
+    int bbcs_to_display_per_if=fs->dbbc3_ddc_bbcs_per_if;
+
     while (++i<argc) {
         if(0==strcmp(argv[i],"-r")) {
             reverse = 1;
@@ -110,9 +132,11 @@ main(int argc, char *argv[])
 
     initscr();
     signal(SIGINT, die);
-    signal(SIGWINCH, resize);
     noecho ();
     nodelay(stdscr, TRUE);
+    ioctl(0, TIOCGWINSZ, &ws);
+    win_rows=ws.ws_row;
+    win_cols=ws.ws_col;
 
     curs_set(0);
     clear();
@@ -154,6 +178,10 @@ main(int argc, char *argv[])
             exit(0);
         }
         while(ERR!=(ch=getch())) {  /* handle inputs */
+            if(KEY_RESIZE == ch) {
+                handle_resize();
+                continue;
+            }
 
             if(is_escape) { /* filter escape sequences */
               if (!is_lb) {
@@ -187,6 +215,9 @@ main(int argc, char *argv[])
               is_escape=1;
               continue;
             }
+
+            if(!isprint(ch))
+                continue;
 
             char *num=strchr(numbers,ch);
             if(NULL != num) {
@@ -222,42 +253,50 @@ main(int argc, char *argv[])
                     pol=1;
                 pol=next_pol[pol];
             } else if ( '?' == ch || '/' == ch) {
-                int irow=0;
                 clear();
-                move(irow++,0);
-                printw("Single key inputs:");
-                move(irow++,0);
-                printw("a-h - that IF");
-                move(irow++,0);
-                printw("n/p - next/previous IF");
-                move(irow++,0);
-                printw("1-9 - dwell seconds");
-                move(irow++,0);
-                printw("i - toggle RF/IF");
-                move(irow++,0);
-                printw("l - toggle all/rec(def)");
-                move(irow++,0);
-                printw("z - cycle pol. all/L/R");
-                move(irow++,0);
-                printw("0 reset all to defaults");
-                move(irow++,0);
-                printw("? or / - help");
-                move(irow++,0);
-                printw("Control-C to exit");
-                move(irow++,0);
-                printw("Any other: resume cycle");
-                move(irow++,0);
-                printw("   Use any key now to");
-                move(irow++,0);
-                printw("       leave help");
-                while(ERR==getch())
-                    ;
+                while (TRUE) {
+                    int ch;
+                    int irow=0;
+                    move(irow++,0);
+                    printw("Single key inputs:");
+                    move(irow++,0);
+                    printw("a-h - that IF");
+                    move(irow++,0);
+                    printw("n/p - next/previous IF");
+                    move(irow++,0);
+                    printw("1-9 - dwell seconds");
+                    move(irow++,0);
+                    printw("i - toggle RF/IF");
+                    move(irow++,0);
+                    printw("l - toggle all/rec(def)");
+                    move(irow++,0);
+                    printw("z - cycle pol. all/L/R");
+                    move(irow++,0);
+                    printw("0 reset all to defaults");
+                    move(irow++,0);
+                    printw("? or / - help");
+                    move(irow++,0);
+                    printw("Control-C to exit");
+                    move(irow++,0);
+                    printw("Any other: resume cycle");
+                    move(irow++,0);
+                    printw("   Use any key now to");
+                    move(irow++,0);
+                    printw("       leave help");
+                    while(ERR==(ch=getch()))
+                        ;
+                    if(KEY_RESIZE == ch)
+                        handle_resize();
+                    else if (isprint(ch))
+                        break;
+                }
                 clear();
                 ifc=ifc_before;
             }
             if(-1==ifc || ifc>fs->dbbc3_ddc_ifs)
                 ifc=0;
         }
+
         /* update display */
         int iping=shm_addr->dbbc3_tsys_data.iping;
         int undef;

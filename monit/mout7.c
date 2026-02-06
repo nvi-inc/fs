@@ -44,6 +44,8 @@
                            standout();
 
 extern struct fscom *fs;
+extern int win_cols;
+extern int win_rows;
 
 static char unit_letters[ ] = {"ABCDEFGH"};
 static time_t save_disp_time[MAX_DBBC3_IF];
