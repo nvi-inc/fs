@@ -214,7 +214,7 @@ check_drudg_output () {
         prc_date=$(check_file_date "$PROC_DIR/$sched$station.prc" $1)
         lst_date=$(check_file_date "$LIST_DIR/$sched$station.lst" $1)
         if [[ -n "$snp_date" || -n "$prc_date" || -n "$lst_date"  ]]; then
-            echo -e "\n    Some drudg output is older than $(basename $1) or is misssing." >&2
+            echo -e "\n    At least some drudg output is older than $(basename $1) or missing." >&2
             need_drudg=1
         else
             echo -e "\n    All drudg output is newer than $(basename $1). That should be okay." >&2
@@ -225,7 +225,33 @@ check_drudg_output () {
     fi
     echo "$need_drudg"
 }
-
+get_file_string() {
+     local string=""
+     if grep -q "$1" "$2"; then
+        string=$(grep "$1" "$2")
+     fi
+     echo "$string"
+}
+get_PI_revision() {
+     local string=""
+     string=$(sed -n -e 's/^.*\(PI revision number:\)  \+| \+\([^ ]\+\).*/\1 \2/p' "$1")
+     echo "$string"
+}
+print_version_string() {
+    if [[ -n "$1" ]]; then
+        if [[ -n "$2" ]]; then
+            printf "        %s:\n            %s\n" "$1" "${2//$'\n'/$'\n'            }" >&2
+        else
+            printf "        %s:\n            %s\n" "$1" "Doesn't have a $3." >&2
+        fi
+    else
+        if [[ -n "$2" ]]; then
+            printf "        %s\n" "Both have: $2" >&2
+        else
+            printf "        %s\n" "Neither has a $3" >&2
+        fi
+    fi
+}
 version
 
 #enable 'strict' mode
@@ -863,49 +889,72 @@ if [[ -n "$check_new" ]]; then
     echo -e "\nComparison results:" >&2
     if [[ "$FESH_DATA_CENTER" =~ vlbeer ]]; then
        if [[ ! -e "$sched.vex" ]]; then
-            echo "    $FESH_TEMP_DIR/$sched.vex does not exist" >&2
+            echo "    $FESH_TEMP_DIR/$sched.vex from the server does not exist" >&2
         elif cmp -s "$sched.vex" $SCHED_DIR/$sched.vex ; then
             unlink "$sched.vex"
             echo "    $SCHED_DIR/$sched.vex agrees with the server." >&2
-            old_date=$(sed -n -e 's/^.*\(PI revision number:\)  \+|\( \+[^ ]\+\).*/\1 \2/p' $SCHED_DIR/$sched.vex)
-            printf "        %s\n" "$old_date" >&2
+            old_date=$(get_PI_revision "$SCHED_DIR/$sched.vex")
+            print_version_string "" "$old_date" 'PI revision number'
         else
-            echo "    $FESH_TEMP_DIR/$sched.vex is different" >&2
-            new_date=$(sed -n -e 's/^.*\(PI revision number:\)  \+|\( \+[^ ]\+\).*/\1 \2/p' $FESH_TEMP_DIR/$sched.vex)
-            old_date=$(sed -n -e 's/^.*\(PI revision number:\)  \+|\( \+[^ ]\+\).*/\1 \2/p' $SCHED_DIR/$sched.vex)
+            echo "    $FESH_TEMP_DIR/$sched.vex from the server is different" >&2
+            old_date=$(get_PI_revision "$SCHED_DIR/$sched.vex")
+            new_date=$(get_PI_revision "$FESH_TEMP_DIR/$sched.vex")
             echo "" >&2
-            printf "        %s:\n             %s\n" "$SCHED_DIR/$sched.vex" "$old_date" >&2
-            printf "        %s from the server:\n             %s\n" "$FESH_TEMP_DIR/$sched.vex" "$new_date" >&2
-            if [[ "$old_date" == "$new_date" ]]; then
-               echo -e "\n        BEWARE: The files are different but have the same PI revision number."
+            print_version_string "$SCHED_DIR/$sched.vex"                     "$old_date" 'PI revision number'
+            echo "" >&2
+            print_version_string "$FESH_TEMP_DIR/$sched.vex from the server" "$new_date" 'PI revision number'
+            echo "" >&2
+            if [[ -z "$old_date" || -z "$new_date" ]]; then
+                echo "        BEWARE: PI revision number is missing from one or both schedules." >&2
+                if [[ "$old_date" == *$'\n'* || "$new_date" == *$'\n'* ]]; then
+                    echo "        BEWARE: One schedule has more than one PI revision number." >&2
+                fi
+            elif [[ "$old_date" == *$'\n'* || "$new_date" == *$'\n'* ]]; then
+                echo "        BEWARE: One or both schedules have more than one PI revision number." >&2
+            elif [[ "$old_date" == "$new_date" ]]; then
+                echo "        BEWARE: The files are different but have the same PI revision number."
             elif [[  "$old_date" > "$new_date" ]]; then
-               echo -e "\n        BEWARE: The PI revision number in the server file appears to be OLDER." >&2
+                echo "        BEWARE: The PI revision number in the server file appears to be LOWER." >&2
             else
-               echo -e "\n        The PI revision number in the server file appears to be NEWER." >&2
+                echo "        The PI revision number in the server file appears to be GREATER." >&2
             fi
             update_needed=1
         fi
     else
-       if [[ ! -e "$sched.skd" ]]; then
-            echo "    $FESH_TEMP_DIR/$sched.skd does not exist" >&2
+        if [[ ! -e "$sched.skd" ]]; then
+            echo "    $FESH_TEMP_DIR/$sched.skd from the server does not exist" >&2
         elif cmp -s "$sched.skd" $SCHED_DIR/$sched.skd ; then
             unlink "$sched.skd"
             echo "    $SCHED_DIR/$sched.skd agrees with the server." >&2
-            old_date=$(grep SCHEDULE_CREATE_DATE $SCHED_DIR/$sched.skd)
-            printf "        %s\n" "$old_date" >&2
+            old_date=$(get_file_string SCHEDULE_CREATE_DATE "$SCHED_DIR/$sched.skd")
+            print_version_string "" "$old_date" SCHEDULE_CREATE_DATE
+            if [[ -z "$old_date" ]]; then
+                echo -e "\n        BEWARE: SCHEDULE_CREATE_DATE is missing from both schedules." >&2
+            elif [[ "$old_date" == *$'\n'* ]]; then
+                echo -e "\n        BEWARE: Both schedules have more than one SCHEDULE_CREATE_DATE.\n" >&2
+            fi
         else
-            echo "    $FESH_TEMP_DIR/$sched.skd is different" >&2
-            new_date=$(grep SCHEDULE_CREATE_DATE $FESH_TEMP_DIR/$sched.skd)
-            old_date=$(grep SCHEDULE_CREATE_DATE $SCHED_DIR/$sched.skd)
+            echo "    $FESH_TEMP_DIR/$sched.skd from the server is different" >&2
+            old_date=$(get_file_string SCHEDULE_CREATE_DATE "$SCHED_DIR/$sched.skd")
+            new_date=$(get_file_string SCHEDULE_CREATE_DATE "$FESH_TEMP_DIR/$sched.skd")
             echo "" >&2
-            printf "        %s:\n             %s\n" "$SCHED_DIR/$sched.skd" "$old_date" >&2
-            printf "        %s from the server:\n             %s\n" "$FESH_TEMP_DIR/$sched.skd" "$new_date" >&2
-            if [[ "$old_date" == "$new_date" ]]; then
-               echo -e "\n        BEWARE: The files are different but have the same SCHEDULE_CREATE_DATE." >&2
+            print_version_string "$SCHED_DIR/$sched.skd"                     "$old_date" SCHEDULE_CREATE_DATE
+            echo "" >&2
+            print_version_string "$FESH_TEMP_DIR/$sched.skd from the server" "$new_date" SCHEDULE_CREATE_DATE
+            echo "" >&2
+            if [[ -z "$old_date" || -z "$new_date" ]]; then
+                echo "        BEWARE: SCHEDULE_CREATE_DATE is missing from one or both schedules." >&2
+                if [[ "$old_date" == *$'\n'* || "$new_date" == *$'\n'* ]]; then
+                    echo "        BEWARE: One schedule has more than one SCHEDULE_CREATE_DATE." >&2
+                fi
+            elif [[ "$old_date" == *$'\n'* || "$new_date" == *$'\n'* ]]; then
+                echo "        BEWARE: One or both schedules have more than one SCHEDULE_CREATE_DATE." >&2
+            elif [[ "$old_date" == "$new_date" ]]; then
+                echo "        BEWARE: The files are different but have the same SCHEDULE_CREATE_DATE." >&2
             elif [[  "$old_date" > "$new_date" ]]; then
-               echo -e "\n        BEWARE: SCHEDULE_CREATE_DATE in the server file appears to be OLDER." >&2
+                echo "        BEWARE: SCHEDULE_CREATE_DATE in the server file appears to be OLDER." >&2
             else
-               echo -e "\n        The SCHEDULE_CREATE_DATE in the server file appears to be NEWER." >&2
+                echo "        The SCHEDULE_CREATE_DATE in the server file appears to be NEWER." >&2
             fi
             update_needed=1
         fi
