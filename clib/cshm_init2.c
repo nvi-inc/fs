@@ -69,6 +69,9 @@ void cshm_init2()
   rte2secs(it,&seconds);
 
   for(i=0;i<2;i++) {
+      shm_addr->dbbc3_tsys_data.data[i].version[0]=0;
+      shm_addr->dbbc3_tsys_data.data[i].version_correct=0;
+
       if(shm_addr->dbbc3_tsys_data.data[i].no_mcast_since_restart==0)
           shm_addr->dbbc3_tsys_data.data[i].no_mcast_since_restart=seconds;
 

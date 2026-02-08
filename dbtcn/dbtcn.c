@@ -140,7 +140,7 @@ int main(int argc, char *argv[])
         }
         perform_swaps(&packet);
 
-        version_check(&packet);
+        version_check(&packet,&cycle);
 
         calc_ts(&packet,&cycle, cont_cal);
 

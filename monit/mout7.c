@@ -269,6 +269,33 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
             if(panel && !j && !k) {
                 move(0,0);
                 arrival_age(buf,tsys_cycle,age,seconds,ifc.time);
+
+                if(1==ifs_to_display)
+                    move(1,0);
+                else
+                    printw(" ");
+
+                if(!tsys_cycle->no_mcast_since_restart) {
+                    if( ! tsys_cycle->version_correct && it[1]%2)
+                        standout();
+                    if(ifs_to_display<=2) {
+                        char temp[sizeof(tsys_cycle->version)];
+                        memcpy(temp,tsys_cycle->version,sizeof(temp));
+                        if(strlen(temp)>24)
+                            strcpy(temp+21,"...");
+                        printw("%.24s",temp);
+                    } else if(2<ifs_to_display)
+                        printw("%.32s",tsys_cycle->version);
+                    if( ! tsys_cycle->version_correct && it[1]%2)
+                        standend();
+                } else {
+                    if(it[1]%2)
+                        standout();
+//                          123456789012345678901234567890
+                    printw("No multicast data yet.");
+                    if(it[1]%2)
+                        standend();
+                }
             }
             move(irow++,icol);
             printw("IF %c",unit_letters[next]);

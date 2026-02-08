@@ -33,7 +33,7 @@ extern struct fscom *shm_addr;
 
 char *getenv_DBBC3( char *env, int *actual, int *nominal, int *error, int options);
 
-void version_check( dbbc3_ddc_multicast_t *t)
+void version_check( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle)
 {
     char test[sizeof(t->version)+1];
     int j;
@@ -152,4 +152,10 @@ void version_check( dbbc3_ddc_multicast_t *t)
         rte_ticks(&version_error);
       }
     }
+    memcpy(cycle->version,t->version,sizeof(cycle->version)-1);
+    cycle->version[sizeof(cycle->version)-1]=0;
+    if(0==ierr)
+      cycle->version_correct=1;
+    else
+      cycle->version_correct=0;
 }
