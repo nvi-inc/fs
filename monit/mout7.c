@@ -174,6 +174,30 @@ static void arrival_age(char buf[128],struct dbbc3_tsys_cycle *tsys_cycle,int ag
     if(age>shm_addr->dbbc3_mcast_arrival)
         standend();
 }
+static void display_version(struct dbbc3_tsys_cycle *tsys_cycle,int ifs_to_display,int it1)
+{
+    if(!tsys_cycle->no_mcast_since_restart) {
+        if( ! tsys_cycle->version_correct && it1%2)
+            standout();
+        if(ifs_to_display<=2) {
+            char temp[sizeof(tsys_cycle->version)];
+            memcpy(temp,tsys_cycle->version,sizeof(temp));
+            if(strlen(temp)>24)
+                strcpy(temp+21,"...");
+            printw("%.24s",temp);
+        } else if(2<ifs_to_display)
+            printw("%.32s",tsys_cycle->version);
+        if( ! tsys_cycle->version_correct && it1%2)
+            standend();
+    } else {
+        if(it1%2)
+            standout();
+//              123456789012345678901234567890
+        printw("No multicast data yet.");
+        if(it1%2)
+            standend();
+    }
+}
 void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
         int def, int rec, int reverse, int panel, int bbcs_to_display_per_if0,
         int ifs_to_display0)
@@ -236,7 +260,7 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
      if(ifs_to_display <4)
         cols_needed=24+25*(ifs_to_display-1);
     } else {
-       rows_needed=1+5+bbcs_to_display_per_if;
+       rows_needed=1+6+bbcs_to_display_per_if;
        cols_needed=24;
     }
     if(rows_needed >win_rows || cols_needed >win_cols ) {
@@ -275,27 +299,7 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
                 else
                     printw(" ");
 
-                if(!tsys_cycle->no_mcast_since_restart) {
-                    if( ! tsys_cycle->version_correct && it[1]%2)
-                        standout();
-                    if(ifs_to_display<=2) {
-                        char temp[sizeof(tsys_cycle->version)];
-                        memcpy(temp,tsys_cycle->version,sizeof(temp));
-                        if(strlen(temp)>24)
-                            strcpy(temp+21,"...");
-                        printw("%.24s",temp);
-                    } else if(2<ifs_to_display)
-                        printw("%.32s",tsys_cycle->version);
-                    if( ! tsys_cycle->version_correct && it[1]%2)
-                        standend();
-                } else {
-                    if(it[1]%2)
-                        standout();
-//                          123456789012345678901234567890
-                    printw("No multicast data yet.");
-                    if(it[1]%2)
-                        standend();
-                }
+                display_version(tsys_cycle,ifs_to_display,it[1]);
             }
             move(irow++,icol);
             printw("IF %c",unit_letters[next]);
@@ -414,6 +418,8 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
             if(!panel) {
                 move(irow++,icol);
                 arrival_age(buf,tsys_cycle,age,seconds,ifc.time);
+                move(irow++,icol);
+                display_version(tsys_cycle,1,it[1]);
             }
 
             int swap;
