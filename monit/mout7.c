@@ -363,7 +363,7 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
                     standout();
 
                 printw("%4d.%03d.%02d:%02d:%02d",
-                        ptr->tm_year+1900,
+                        (ptr->tm_year+1900)%10000,
                         ptr->tm_yday+1,
                         ptr->tm_hour,
                         ptr->tm_min,
