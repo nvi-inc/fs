@@ -56,6 +56,57 @@ static void handle_resize()
     clear();
     refresh();
 }
+static int filter_escapes()
+{
+/* Filter out ANSI escape codes. We are primarily concerned with Control
+ * Sequence Introducers (CSI) that may come from a desktop manager. If other
+ * escape sequences, such as Operating System Commands, are discovered to cause
+ * problems, they may need to be filtered as well.
+ */
+
+  static int is_escape=0;
+  static int is_lb=0;
+  static int is_inter=0;
+  int ch;
+
+start:
+  if(ERR==(ch=getch()))
+    return ch;
+
+  if(is_escape) { /* filter escape sequences */
+    if (!is_lb) {
+      if('[' != ch) { /* not CSI */
+        is_inter=is_lb=is_escape=0;
+        goto next;
+      } else {  /* CSI */
+        is_lb=1;
+        goto start;
+      }
+    } else if(0x30 <= ch && ch <= 0x3F) { /* CSI parameter */
+      if(is_inter) { /* not after intermediate */
+        is_inter=is_lb=is_escape=0;
+        goto next;
+      } else {
+        goto start;
+      }
+    } else if(0x20 <= ch && ch <= 0x2F) { /* CSI intermediate */
+      is_inter=1;
+      goto start;
+    } else if(0x40 <= ch && ch <= 0x7E) { /* CSI final */
+      is_inter=is_lb=is_escape=0;
+      goto start;
+    } else {
+      goto start;
+    }
+  }
+
+next:
+  if ('\e' ==ch) {
+    is_escape=1;
+    goto start;
+  } else
+    return ch;
+}
 main(int argc, char *argv[])
 {
     int it[6], seconds, isleep;
@@ -178,9 +229,7 @@ main(int argc, char *argv[])
     int ifc=0;
     int krf=1;
     int all=0;
-    int is_escape=0;
-    int is_lb=0;
-    int is_inter=0;
+
     for(;;) {
         rte_time(it,it+5);
         isleep=100-it[0];
@@ -193,43 +242,10 @@ main(int argc, char *argv[])
             die();
             exit(0);
         }
-        while(ERR!=(ch=getch())) {  /* handle inputs */
+        while(ERR!=(ch=filter_escapes())) {  /* handle inputs */
             if(KEY_RESIZE == ch) {
                 handle_resize();
                 continue;
-            }
-
-            if(is_escape) { /* filter escape sequences */
-              if (!is_lb) {
-                 if('[' != ch) { /* not CSI */
-                   is_inter=is_lb=is_escape=0;
-                   goto next;
-                 } else {  /* CSI */
-                   is_lb=1;
-                   continue;
-                 }
-              } else if(0x30 <= ch && ch <= 0x3F) { /* CSI parameter */
-                if(is_inter) { /* not after intermediate */
-                   is_inter=is_lb=is_escape=0;
-                   goto next;
-                } else {
-                   continue;
-                }
-              } else if(0x20 <= ch && ch <= 0x2F) { /* CSI intermediate */
-                is_inter=1;
-                continue;
-              } else if(0x40 <= ch && ch <= 0x7E) { /* CSI final */
-                is_inter=is_lb=is_escape=0;
-                continue;
-              } else {
-                continue;
-              }
-            }
-
-        next:
-            if ('\e' ==ch) {
-              is_escape=1;
-              continue;
             }
 
             if(!isprint(ch))
