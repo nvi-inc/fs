@@ -411,7 +411,7 @@ main(int argc, char *argv[])
              reverse, panel,bbcs_to_display_per_if,ifs_to_display);
         move(ROW_HOLD,COL_HOLD);  /* place cursor at consistent location */
         standend();
-        printw(" ");
+        printw("");
 
         refresh();
     }
