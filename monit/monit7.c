@@ -315,7 +315,7 @@ main(int argc, char *argv[])
                     printw("   Use any key now to");
                     move(irow++,0);
                     printw("       leave help");
-                    while(ERR==(ch=getch()))
+                    while(ERR==(ch=filter_escapes()))
                         ;
                     if(KEY_RESIZE == ch)
                         handle_resize();
