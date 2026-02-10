@@ -959,8 +959,15 @@ if [[ -n "$check_new" ]]; then
             update_needed=1
         fi
         echo "" >&2
-        if [[ ! -e "$sched.txt" ]]; then
-            echo "    $FESH_TEMP_DIR/$sched.txt does not exist" >&2
+        if [[ ! -e "$sched.txt" && ! -e "$SCHED_DIR/$sched.txt" ]]; then
+            echo "    Neither $SCHED_DIR or the server have a $sched.txt file." >&2
+        elif [[ ! -e "$sched.txt" ]]; then
+            echo "    The server doesn't have a $sched.txt file, but $SCHED_DIR does." >&2
+            echo "" >&2
+            echo "        BEWARE: $SCHED_DIR/$sched.txt will not be removed by '-R'." >&2
+        elif [[ ! -e "$SCHED_DIR/$sched.txt" ]]; then
+            echo "    The server has a $sched.txt file, but $SCHED_DIR does not." >&2
+            update_needed=1
         elif cmp -s "$sched.txt" $SCHED_DIR/$sched.txt ; then
             unlink "$sched.txt"
             echo "    $SCHED_DIR/$sched.txt agrees with the server." >&2
