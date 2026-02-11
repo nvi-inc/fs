@@ -19,7 +19,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-VERSION=2026-01-22
+VERSION=2026-02-11
 
 version(){
     echo "[fesh $VERSION]"
