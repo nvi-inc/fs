@@ -205,7 +205,7 @@ check_file_date() {
     echo "$need_drudg"
 }
 check_drudg_output () {
-# this was already checked, but try again for safety
+# station this was already checked, but try again for safety
     check_station
     local need_drudg=
     if [[ -e $CONTROL_DIR/skedf.ctl ]]; then
@@ -252,6 +252,45 @@ print_version_string() {
         fi
     fi
 }
+check_open_drudg_files() {
+    local open_drudg_files=
+# these were already checked, but try again for safety
+    check_station
+    if [[ ! -e $CONTROL_DIR/skedf.ctl ]]; then
+        echo -e "\n'$CONTROL_DIR/skedf.ctl' doesn't exist, can't check for open drudg output." >&2
+        exit 1
+    fi
+    if [[ -e $SNAP_DIR/$sched$station.snp ]]; then
+        if fuser -v $SNAP_DIR/$sched$station.snp 2>&1 | grep -q " boss$" ; then
+            if [[ -z "$open_drudg_files" ]]; then
+                echo "" >&2
+                echo "    File(s) open in the FS:" >&2
+            fi
+            echo "        $SNAP_DIR/$sched$station.snp (boss)." >&2
+            open_drudg_files=1
+        fi
+    fi
+    if [[ -e $PROC_DIR/$sched$station.prc ]]; then
+        if fuser -v $PROC_DIR/$sched$station.prc 2>&1 | grep -q " boss$" ; then
+            if [[ -z "$open_drudg_files" ]]; then
+                echo "" >&2
+                echo "    File(s) open in the FS:" >&2
+            fi
+            echo "        $PROC_DIR/$sched$station.prc (boss)." >&2
+            open_drudg_files=1
+        fi
+        if fuser -v $PROC_DIR/$sched$station.prc 2>&1 | grep -q " pfmed$" ; then
+            if [[ -z "$open_drudg_files" ]]; then
+                echo "" >&2
+                echo "    File(s) open in the FS:" >&2
+            fi
+            echo "        $PROC_DIR/$sched$station.prc (pfmed)." >&2
+            open_drudg_files=1
+        fi
+    fi
+    echo "$open_drudg_files"
+}
+
 version
 
 #enable 'strict' mode
@@ -537,6 +576,10 @@ while getopts 'a:Cc:nfdD:hHm:p:PRs:St:T:u:vVxy:' opt; do
                 echo "Can't use '-R' and '-C' together."
                 exit 1
             fi
+            if [[ -n "$run_drudg" ]] ; then
+                echo "Can't use '-d' and '-C' together."
+                exit 1
+            fi
             check_new=1
             ;;
         R)
@@ -544,11 +587,19 @@ while getopts 'a:Cc:nfdD:hHm:p:PRs:St:T:u:vVxy:' opt; do
                 echo "Can't use '-C' and '-R' together."
                 exit 1
             fi
+            if [[ -n "$run_drudg" ]] ; then
+                echo "Can't use '-d' and '-R' together."
+                exit 1
+            fi
             replace_files=1
             ;;
         d)
-            if [[ ! -e $CONTROL_DIR/skedf.ctl ]]; then
-                echo "$CONTROL_DIR/skedf.ctl doesn't exist, can't run drudg, don't use '-d'" >&2
+            if [[ -n "$check_new" ]] ; then
+                echo "Can't use '-C' and '-d' together."
+                exit 1
+            fi
+            if [[ -n "$replace_files" ]] ; then
+                echo "Can't use '-R' and '-d' together."
                 exit 1
             fi
             run_drudg=1
@@ -652,6 +703,21 @@ if [[ "$FESH_DATA_CENTER" =~ vlbeer ]]; then
 elif [[ ! -z "${month_option:-}" ]]; then
         echo "The -m option can't be used for a geo data center"
         exit 1
+fi
+
+if [[ -n "$run_drudg" ]]; then
+    check_station
+    if [[ ! -e $CONTROL_DIR/skedf.ctl ]]; then
+        echo "$CONTROL_DIR/skedf.ctl doesn't exist, can't run drudg, don't use '-d'" >&2
+        exit 1
+    fi
+    open_drudg_files=$(check_open_drudg_files)
+    if [[ -n "$open_drudg_files" ]]; then
+        echo "" >&2
+        echo "ERROR: Can't run drudg because the above files are open in the FS." >&2
+        echo "ERROR: Try again after the files are closed in the FS or don't use '-d'." >&2
+        exit 1
+    fi
 fi
 
 if [[ ! "$FESH_CDDIS_METHOD" =~ ^(ftp|ftp-ssl|https)$ ]]; then
@@ -781,8 +847,15 @@ if [[ -n "$replace_files" ]]; then
        fi
     else
        if [[ -e "$tmp/$run_drudg_file" ]] ; then
-# check station and skedf.ctl here, so we don't overwrite files if there is a problem
+# check station, open drudg files, and skedf.ctl here, so we don't overwrite files if we need to abort
            check_station
+           open_drudg_files=$(check_open_drudg_files)
+           if [[ -n "$open_drudg_files" ]]; then
+               echo "" >&2
+               echo "ERROR: Can't run drudg because the above files are open in the FS." >&2
+               echo "ERROR: Try again after the files are closed in the FS." >&2
+               exit 1
+           fi
            if [[ ! -e $CONTROL_DIR/skedf.ctl ]]; then
                fatal "$CONTROL_DIR/skedf.ctl doesn't exist, can't run drudg with '-R'"
            fi
@@ -821,12 +894,7 @@ if [[ -n "$run_drudg" && -z "$check_new" ]]; then
         fi
     fi
 
-    check_station
-
     if [[ -e $SNAP_DIR/$sched$station.snp ]]; then
-        if fuser -v $SNAP_DIR/$sched$station.snp 2>&1 | grep -q " boss$" ; then
-            fatal "Can't update $SNAP_DIR/$sched$station.snp while the FS (boss) is using it"
-        fi
         if [[ -z "$force" ]]; then
             echo "$SNAP_DIR/$sched$station.snp exists. Rerun with '-C' to check it" >&2
             echo "(and then follow the directions)." >&2
@@ -836,12 +904,6 @@ if [[ -n "$run_drudg" && -z "$check_new" ]]; then
         rm "$SNAP_DIR/$sched$station.snp"
     fi
     if [[ -e $PROC_DIR/$sched$station.prc ]]; then
-        if fuser -v $PROC_DIR/$sched$station.prc 2>&1 | grep -q " boss$" ; then
-            fatal "Can't update $PROC_DIR/$sched$station.prc while the FS (boss) is using it"
-        fi
-        if fuser -v $PROC_DIR/$sched$station.prc 2>&1 | grep -q " pfmed$" ; then
-            fatal "Can't update $PROC_DIR/$sched$station.prc while the FS (pfmed) is using it"
-        fi
         if [[ -z "$force" ]]; then
             echo "$PROC_DIR/$sched$station.prc exists. Rerun with '-C' to check it" >&2
             echo "(and then follow the directions)." >&2
@@ -869,13 +931,16 @@ if [[ -n "$check_new" ]]; then
     else
         if [[ ! -e $SCHED_DIR/$sched.skd ]]; then
             echo "Schedule $SCHED_DIR/$sched.skd is not present. Rerun without -C,' probably" >&2
-            echo "adding -fd to get everything and drudg the schedule." >&2
+            echo "adding '-fd' to overwrite everything and drudg the schedule." >&2
             exit 1
         fi
     fi
 
 #check here so nothing is created unless drudg check can work
     check_station
+    if [[ ! -e $CONTROL_DIR/skedf.ctl ]]; then
+        fatal "$CONTROL_DIR/skedf.ctl doesn't exist, can't check drudg output"
+    fi
 
     FESH_TEMP_DIR=$(mktemp -d  "/tmp/$(basename $0)_${sched}_XXX" || fatal "Using mktemp to create temporary directory failed." )
     if [[ "$FESH_TEMP_DIR" == "" ]]; then
@@ -1026,6 +1091,14 @@ EOF
 
 Rerun with '-R' to update the drudg output.
 EOF
+       fi
+       if [[ -n "$drudg_needed" ]]; then
+           open_drudg_files=$(check_open_drudg_files)
+           if [[ -n "$open_drudg_files" ]]; then
+               echo "">&2
+               echo "WARNING: '-R' will be blocked because it will run drudg and the above files," >&2
+               echo "WARNING: that it will recreate, are open in the FS." >&2
+           fi
        fi
     fi
     popd >/dev/null
