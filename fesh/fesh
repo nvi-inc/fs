@@ -426,6 +426,11 @@ afterward for that. Additionally, messages for some errors recommend ways to
 use '-C'/'-R' for recovering. Other approaches may work better depending on
 your needs, but the recommended ones fit most situations.
 
+Some protections are built into '-R'. It will stop before making any changes,
+if: any of the files to be updated (.vex, .skd, .txt) are newer than their
+replacements; the most recent '-C' was more than 30 minutes ago; and if drudg
+would be run, any of the drudg output files are open in the FS.
+
 Please see the end of this message about handling optional 'skedf.ctl'
 specified prompting for 'drudg'.
 
@@ -838,6 +843,14 @@ if [[ -n "$replace_files" ]]; then
     action=
     if [[ "$FESH_DATA_CENTER" =~ vlbeer ]]; then
        if [[ -e "$tmp/$sched.vex" ]]; then
+           if [[ "$SCHED_DIR/$sched.vex" -nt "$tmp/$sched.vex" ]]; then
+               echo "" >&2
+               echo "    $SCHED_DIR/$sched.vex is newer than the file that would replace it." >&2
+               echo "" >&2
+               echo "ERROR: The file in $SCHED_DIR is newer than the file that would replace it." >&2
+               echo "ERROR: Rerun with '-C' to check again." >&2
+               exit 1
+           fi
            echo "Updating $SCHED_DIR/$sched.vex" >&2
            cp -f "$tmp/$sched.vex" "$SCHED_DIR"
            echo -e "\nBEWARE: Any drudg output is older than $SCHED_DIR/$sched.vex."
@@ -863,6 +876,27 @@ if [[ -n "$replace_files" ]]; then
            force=1
            unlink "$tmp/$run_drudg_file"
            action=1
+       fi
+       old_files=
+       if [[ -e "$tmp/$sched.skd" && "$SCHED_DIR/$sched.skd" -nt "$tmp/$sched.skd" ]]; then
+           if [[ -z "$old_files" ]]; then
+               echo "" >&2
+           fi
+           echo "    $SCHED_DIR/$sched.skd is newer than the file that would replace it." >&2
+           old_files=1
+       fi
+       if [[ -e "$tmp/$sched.txt" && "$SCHED_DIR/$sched.txt" -nt "$tmp/$sched.txt" ]]; then
+           if [[ -z "$old_files" ]]; then
+               echo "" >&2
+           fi
+           echo "    $SCHED_DIR/$sched.txt is newer than the file that would replace it." >&2
+           old_files=1
+       fi
+       if [[ -n "$old_files" ]]; then
+           echo "" >&2
+           echo "ERROR: At least one file in $SCHED_DIR is newer than the file that would" >&2
+           echo "ERROR: replace it. Rerun with '-C' to check again." >&2
+           exit 1
        fi
        if [[ -e "$tmp/$sched.skd" ]]; then
            echo "Updating $SCHED_DIR/$sched.skd" >&2
