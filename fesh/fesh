@@ -60,13 +60,15 @@ download_files() {
                 fatal "Downloading $sched.skd failed"
             fi
 
-            echo "Fetching $sched.txt ..." >&2
-            if wget $WGET_VERBOSE "ftp://ftp@cddis.gsfc.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.txt"; then
-                echo Done >&2
-            elif [[ -n "$txt" ]]; then
-               fatal "Download of $sched.txt, required by '-x', failed."
-            else
-                echo "Failed, but continuing since $sched.txt was not required by using '-x'." >&2
+            if [[ -z "$no_txt" ]]; then
+                echo "Fetching $sched.txt ..." >&2
+                if wget $WGET_VERBOSE "ftp://ftp@cddis.gsfc.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.txt"; then
+                    echo Done >&2
+                elif [[ -n "$txt" ]]; then
+                    fatal "Download of $sched.txt, required by '-x', failed."
+                else
+                    echo "Failed, but continuing since $sched.txt was not required by using '-x'." >&2
+                fi
             fi
         elif [[ "$FESH_CDDIS_METHOD" =~ ^https$ ]]; then
             if [[ ! -e "$NETRC_DIR/.netrc" ]]; then
@@ -84,15 +86,17 @@ download_files() {
                 fatal "Downloading $sched.skd failed"
             fi
 
-            echo "Fetching $sched.txt ..." >&2
-            if curl  -k  -f -c /dev/null $CURL_VERBOSE -n \
-                $CURL_NETRC_FILE_OPTION \
-                -L -O "https://cddis.nasa.gov/archive/vlbi/ivsdata/aux/$year/$sched/$sched.txt"; then
-                 echo Done >&2
-            elif [[ -n "$txt" ]]; then
-               fatal "Download of $sched.txt, required by '-x', failed."
-            else
-                echo "Failed, but continuing since $sched.txt was not required by using '-x'." >&2
+            if [[ -z "$no_txt" ]]; then
+                echo "Fetching $sched.txt ..." >&2
+                if curl  -k  -f -c /dev/null $CURL_VERBOSE -n \
+                    $CURL_NETRC_FILE_OPTION \
+                    -L -O "https://cddis.nasa.gov/archive/vlbi/ivsdata/aux/$year/$sched/$sched.txt"; then
+                     echo Done >&2
+                elif [[ -n "$txt" ]]; then
+                    fatal "Download of $sched.txt, required by '-x', failed."
+                else
+                    echo "Failed, but continuing since $sched.txt was not required by using '-x'." >&2
+                fi
             fi
         else
             if curl -u "$user" -k -O $CURL_VERBOSE --ftp-ssl "ftp://gdc.cddis.eosdis.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.skd" ; then
@@ -101,13 +105,15 @@ download_files() {
                 fatal "Downloading $sched.skd failed"
             fi
 
-            echo "Fetching $sched.txt ..." >&2
-            if curl -u "$user" -k -O $CURL_VERBOSE --ftp-ssl "ftp://gdc.cddis.eosdis.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.txt"; then
-              echo Done >&2
-            elif [[ -n "$txt" ]]; then
-               fatal "Download of $sched.txt, required by '-x', failed."
-            else
-                echo "Failed, but continuing since $sched.txt was not required by using '-x'." >&2
+            if [[ -z "$no_txt" ]]; then
+                echo "Fetching $sched.txt ..." >&2
+                if curl -u "$user" -k -O $CURL_VERBOSE --ftp-ssl "ftp://gdc.cddis.eosdis.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.txt"; then
+                    echo Done >&2
+                elif [[ -n "$txt" ]]; then
+                    fatal "Download of $sched.txt, required by '-x', failed."
+                else
+                    echo "Failed, but continuing since $sched.txt was not required by using '-x'." >&2
+                fi
             fi
         fi
     elif [[ "$FESH_DATA_CENTER" =~ opar ]]; then
@@ -117,14 +123,16 @@ download_files() {
             fatal "Downloading $sched.skd failed"
         fi
 
-        echo "Fetching $sched.txt ..." >&2
-        if wget $WGET_VERBOSE "ftp://ftp@ivsopar.obspm.fr/vlbi/ivsdata/aux/$year/$sched/$sched.txt"; then
-            echo Done >&2
+        if [[ -z "$no_txt" ]]; then
+            echo "Fetching $sched.txt ..." >&2
+            if wget $WGET_VERBOSE "ftp://ftp@ivsopar.obspm.fr/vlbi/ivsdata/aux/$year/$sched/$sched.txt"; then
+                echo Done >&2
             elif [[ -n "$txt" ]]; then
-               fatal "Download of $sched.txt, required by '-x', failed."
+                fatal "Download of $sched.txt, required by '-x', failed."
             else
                 echo "Failed, but continuing since $sched.txt was not required by using '-x'." >&2
             fi
+        fi
     elif [[ "$FESH_DATA_CENTER" =~ bkg ]]; then
         if [[ "$FESH_BKG_METHOD" =~ ^ftp$ ]]; then
             if wget $WGET_VERBOSE "ftp://ftp@ivs.bkg.bund.de/pub/vlbi/ivsdata/aux/$year/$sched/$sched.skd"; then
@@ -133,13 +141,15 @@ download_files() {
                 fatal "Downloading $sched.skd failed"
             fi
 
-            echo "Fetching $sched.txt ..." >&2
-            if wget $WGET_VERBOSE "ftp://ftp@ivs.bkg.bund.de/pub/vlbi/ivsdata/aux/$year/$sched/$sched.txt"; then
-              echo Done >&2
-            elif [[ -n "$txt" ]]; then
-               fatal "Download of $sched.txt, required by '-x', failed."
-            else
-                echo "Failed, but continuing since $sched.txt was not required by using '-x'." >&2
+            if [[ -z "$no_txt" ]]; then
+                echo "Fetching $sched.txt ..." >&2
+                if wget $WGET_VERBOSE "ftp://ftp@ivs.bkg.bund.de/pub/vlbi/ivsdata/aux/$year/$sched/$sched.txt"; then
+                  echo Done >&2
+                elif [[ -n "$txt" ]]; then
+                   fatal "Download of $sched.txt, required by '-x', failed."
+                else
+                    echo "Failed, but continuing since $sched.txt was not required by using '-x'." >&2
+                fi
             fi
         else
             if curl --ssl-reqd $CURL_VERBOSE -u anonymous:anonymous -O "ftp://ivs.bkg.bund.de/pub/vlbi/ivsdata/aux/$year/$sched/$sched.skd"; then
@@ -148,13 +158,15 @@ download_files() {
                 fatal "Downloading $sched.skd failed"
             fi
 
-            echo "Fetching $sched.txt ..." >&2
-            if curl --ssl-reqd $CURL_VERBOSE -u anonymous:anonymous -O "ftp://ivs.bkg.bund.de/pub/vlbi/ivsdata/aux/$year/$sched/$sched.txt"; then
-              echo Done >&2
-            elif [[ -n "$txt" ]]; then
-               fatal "Download of $sched.txt, required by '-x', failed."
-            else
-                echo "Failed, but continuing since $sched.txt was not required by using '-x'." >&2
+            if [[ -z "$no_txt" ]]; then
+                echo "Fetching $sched.txt ..." >&2
+                if curl --ssl-reqd $CURL_VERBOSE -u anonymous:anonymous -O "ftp://ivs.bkg.bund.de/pub/vlbi/ivsdata/aux/$year/$sched/$sched.txt"; then
+                  echo Done >&2
+                elif [[ -n "$txt" ]]; then
+                   fatal "Download of $sched.txt, required by '-x', failed."
+                else
+                    echo "Failed, but continuing since $sched.txt was not required by using '-x'." >&2
+                fi
             fi
         fi
     fi
@@ -401,6 +413,7 @@ Options:
           files will not be replaced
  -x       require downloading corresponding .txt file (geo only), otherwise it
           is skipped if not available
+ -X       don't attempt downloading corresponding .txt file (geo only)
  -s xx    Override STATION environment variable
  -a val   Override drudg VSI_ALIGN answer to val
  -c val   Override drudg CONT_CAL answer to val
@@ -568,11 +581,12 @@ run_drudg=
 force=
 verbose=
 txt=
+no_txt=
 print=
 download=1
 check_new=
 replace_files=
-while getopts 'a:Cc:nfdD:hHm:p:PRs:St:T:u:vVxy:' opt; do
+while getopts 'a:Cc:nfdD:hHm:p:PRs:St:T:u:vVxXy:' opt; do
     case $opt in
         n)
             echo "'next' not implemented."
@@ -640,7 +654,18 @@ while getopts 'a:Cc:nfdD:hHm:p:PRs:St:T:u:vVxy:' opt; do
             exit 0
             ;;
         x)
+            if [[ -n "$no_txt" ]] ; then
+                echo "Can't use '-X' and '-x' together."
+                exit 1
+            fi
             txt=1
+            ;;
+        X)
+            if [[ -n "$txt" ]] ; then
+                echo "Can't use '-x' and '-X' together."
+                exit 1
+            fi
+            no_txt=1
             ;;
         P)
             print=1
@@ -694,6 +719,10 @@ if [[ "$FESH_DATA_CENTER" =~ vlbeer ]]; then
     if [[ -n "$txt" ]]; then
         echo "Option -x (.txt) is not supported for the vlbeer data center."
         echo "To fetch the schedule, rerun without -x."
+        exit 1
+    elif [[ -n "$no_txt" ]]; then
+        echo "Option -X (NO .txt) is not supported for the vlbeer data center."
+        echo "To fetch the schedule, rerun without -X."
         exit 1
     elif [[ -n "$run_drudg" ]]; then
         echo "Option -d (drudg) is not supported for the vlbeer data center."
