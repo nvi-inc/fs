@@ -304,6 +304,10 @@ check_open_drudg_files() {
     fi
     echo "$open_drudg_files"
 }
+fatal(){
+    echo -e "ERROR: fesh:" "$*" >&2
+    exit 1
+}
 
 version
 
@@ -368,11 +372,6 @@ fi
 if [[ ! -z "${STATION:-}" ]]; then
     station=$STATION
 fi
-
-fatal(){
-    echo -e "ERROR: fesh:" "$*" >&2
-    exit 1
-}
 
 year=$(date +%Y)
 month=$(LANG=C date +%b%y|tr [:upper:] [:lower:])
