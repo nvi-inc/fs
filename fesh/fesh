@@ -552,8 +552,15 @@ read the follow four NOTEs:
   obvious indication. Use at your own risk. Simple use with single mode
   schedules should be fine.
 
-  NOTE: If there is more than mode in the schedule, it is not possible to
-  supply answers in this way. 'drudg' will have to be run manually.
+  NOTE: If there is more than mode in a schedule and they require different
+  answers, it is not possible to supply answers in this way. 'drudg' will have
+  to be run manually. It is possible to handle schedules with a single set of
+  answers for all modes within the schedule, but it is complicated to setup
+  (you can ask for suggestions). This issue of needing different answers for
+  different modes is the reason that 'fesh' does not support running 'drudg'
+  for schedules from 'vlbeer' yet. However, it would be possible to add
+  support for such schedules if they have one set of answers for all modes
+  within a schedule, if that would be useful.
 
   NOTE: If any of these environment variables or options are used, the
   corresponding prompts must be enabled in 'skedf.ctl'. If there isn't
