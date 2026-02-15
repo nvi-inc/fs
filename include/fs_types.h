@@ -19,6 +19,7 @@
  */
 /* general header file for all fs data structure definations */
 
+#include <time.h>
 #include "../rclco/rcl/rcl.h"
 #include "bbc_ds.h"
 #include "cmd_ds.h"

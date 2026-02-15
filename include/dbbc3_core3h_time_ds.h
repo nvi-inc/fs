@@ -25,6 +25,6 @@ struct dbbc3_core3h_time_mon {
      int seconds;
      int days;
      char time[20];
-     int seconds_fm;
-     int seconds_fs;
+     time_t seconds_fm;
+     time_t seconds_fs;
     };

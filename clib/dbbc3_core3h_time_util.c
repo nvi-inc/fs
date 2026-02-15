@@ -81,7 +81,7 @@ int irec;
 struct dbbc3_core3h_time_mon *lclm;
 char *buff;
 {
-    int month,day,it[6],centisec[6];
+    int month,day,it[6],centisec[6],time32;
     switch(irec) {
         case 1:
         case 6:
@@ -111,7 +111,8 @@ char *buff;
             it[4]=daymy(it[5],month,day);
             it[0]=0;
             memcpy(lclm->time,buff+1,sizeof(lclm->time));
-            rte2secs(it,&lclm->seconds_fm);
+            rte2secs(it,&time32);
+            lclm->seconds_fm=time32;
 #ifdef DEBUG
             printf(" get_core3htime: fm_time decode %d %d %d %d %d %d doy %d\n",
                     it[5],month,day,it[3],it[2],it[1],it[4]);
@@ -119,7 +120,8 @@ char *buff;
             break;
         case 7:
             memcpy(centisec,buff,sizeof(centisec));
-            rte_fixt(&lclm->seconds_fs,&centisec[0]);
+            rte_fixt(&time32,&centisec[0]);
+            lclm->seconds_fs=time32;
 #ifdef DEBUG
             printf(" get_core3htime: centisecs %d %d %d %d %d %d\n",
                     centisec[0],centisec[1],centisec[2],centisec[3],centisec[4],
