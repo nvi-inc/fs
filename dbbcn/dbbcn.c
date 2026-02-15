@@ -753,12 +753,8 @@ int ip[5];
           }
           if(mode==4 || 10 == mode) {
               rte_cmpt(centisec+2,centisec+4);
-              if(mode == 4)
-                rte_ticks (centisec);
-              else
-                rte_rawt (centisec);
-           //all devices except DBBC3 use _ticks, it is not clear why it is diffent}
-           }
+              rte_ticks (centisec);
+          }
 
           if(dbbc3) {
               /* increment when starting and ending command */
@@ -788,11 +784,7 @@ read:
                   fila10g, newline, dbbc3);
 
           if(mode==4 || 10 == mode)  {
-              if(mode == 4)
-                rte_ticks (centisec+1);
-              else
-                rte_rawt (centisec+1);
-           //all devices except DBBC3 use _ticks, it is not clear why it is diffent
+              rte_ticks (centisec+1);
               rte_cmpt(centisec+3,centisec+5);
           }
 
