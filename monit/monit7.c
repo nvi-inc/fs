@@ -297,6 +297,33 @@ main(int argc, char *argv[])
                 while (TRUE) {
                     int ch;
                     int irow=0;
+                    int rows_needed=14;
+                    int cols_needed=23;
+                    if(rows_needed>win_rows || cols_needed >win_cols ) {
+                        move(0,0);
+                        printw("Win. too small for help");
+                        move(1,0);
+                        printw("Resize window to at");
+                        move(2,0);
+                        printw(" at least:");
+                        move(3,0);
+                        printw(" Columns %d Rows %d.",cols_needed,rows_needed);
+                        move(4,0);
+                        printw("Current:");
+                        move(5,0);
+                        printw(" Columns %d Rows %d.",win_cols,win_rows);
+                        move(6,0);
+                        printw("Use any key to leave");
+                        move(7,0);
+                        printw(" help.");
+                        while(ERR==(ch=filter_escapes()))
+                            ;
+                        if(KEY_RESIZE == ch)
+                            handle_resize();
+                        else if (isprint(ch))
+                             break;
+                        continue;
+                    }
                     move(irow++,0);
                     printw("Single key inputs:");
                     move(irow++,0);
