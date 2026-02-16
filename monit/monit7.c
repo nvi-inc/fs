@@ -250,7 +250,7 @@ main(int argc, char *argv[])
                 continue;
             }
 
-            if(!isprint(ch))
+            if(!isprint(ch) && !iscntrl(ch))
                 continue;
 
             char *num=strchr(numbers,ch);
