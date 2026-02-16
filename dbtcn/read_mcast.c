@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2025 NVI, Inc.
+ * Copyright (c) 2020-2026 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -21,6 +21,7 @@
 #include <errno.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <netinet/in.h>
 #include <sys/select.h>
 #include <sys/types.h>
@@ -59,6 +60,8 @@ ssize_t read_mcast(int sock, char buf[], size_t buf_size, int it[6],
 
     static unsigned was_count_next = 0;
     unsigned was_count;
+
+    static int kfirst=TRUE;
 
     int it_start[6];
 
@@ -196,13 +199,17 @@ ssize_t read_mcast(int sock, char buf[], size_t buf_size, int it[6],
         if (*hsecs<0)
             *hsecs+=6000;
     }
-     if(*hsecs/100 != shm_addr->dbbc3_mcast_arrival) {
-        char buff[128];
-        int diff=*hsecs/100-shm_addr->dbbc3_mcast_arrival;
-        sprintf(buff," INFO: multicast arrived %d second(s) later than expected",diff);
+    if(!kfirst) { /* The timing of the first try is not reliable, so ignore */
+        if(*hsecs/100 != shm_addr->dbbc3_mcast_arrival) {
+            char buff[128];
+            int diff=*hsecs/100-shm_addr->dbbc3_mcast_arrival;
+            sprintf(buff," INFO: multicast arrived %d second(s) later than expected",diff);
 
 //            logite(buff,0,NULL);
             logit_nd(buff,0,NULL);
-    }
+        }
+    } else
+        kfirst=FALSE;
+
     return n;
 }
