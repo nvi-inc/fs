@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020, 2026 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -48,6 +48,11 @@ int rte_secs(int *usec_off,unsigned int *ticks_off,int *error, int *perrno)
   *error=0;
   *perrno=0;
   *ticks_off=(unsigned int) ticks;
+  int centisecs=tv.tv_usec/10000;
+  if(0!=centisecs) { /* for what it is worth, align ticks_off with secs_off */
+     tv.tv_sec++;
+     *ticks_off+=(100-centisecs);
+  }
   *usec_off=tv.tv_usec;
   return tv.tv_sec;
 
