@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2022, 2023 NVI, Inc.
+ * Copyright (c) 2021, 2022, 2023, 2026 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -53,7 +53,8 @@ int *iold;
     memcpy(centisec,shm_addr->dbbc3_tsys_data.data[iping].centisec,
        6*sizeof(centisec[0]));
     secs2rte(&secs,fm_tim);
-    fm_tim[0]=shm_addr->dbbc3_mcdelay;
+    fm_tim[0]=0;
+    iadt(fm_tim,shm_addr->dbbc3_mcdelay,1);
 
     return 0;
 }

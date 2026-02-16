@@ -20,7 +20,7 @@
   v125 0
 * DDC_V firmware version (v121 or later, but DDC_V starts at v124)
   v124 0
-* mcast delay 0-99 centiseconds
+* mcast delay 0-499 centiseconds
   57
 * setcl board
   1

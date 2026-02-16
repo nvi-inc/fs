@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020-2021, 2023, 2025 NVI, Inc.
+* Copyright (c) 2020-2021, 2023, 2025-2026 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -338,7 +338,7 @@ c
       endif
 
       dbbc3_mcdelay = ias2b(ibuf,ic1,ic2-ic1+1)
-      if (dbbc3_mcdelay.lt.0 .or. dbbc3_mcdelay.ge.100) then
+      if (dbbc3_mcdelay.lt.0 .or. dbbc3_mcdelay.ge.500) then
         call logit7ci(0,0,0,1,-186,'bo',iline)
         goto 990
       endif
