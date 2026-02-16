@@ -313,14 +313,14 @@ main(int argc, char *argv[])
                         move(5,0);
                         printw(" Columns %d Rows %d.",win_cols,win_rows);
                         move(6,0);
-                        printw("Use any key to leave");
+                        printw("Use space key to");
                         move(7,0);
-                        printw(" help.");
+                        printw(" leave help.");
                         while(ERR==(ch=filter_escapes()))
                             ;
                         if(KEY_RESIZE == ch)
                             handle_resize();
-                        else if (isprint(ch))
+                        else if (' ' == ch)
                              break;
                         continue;
                     }
@@ -349,14 +349,14 @@ main(int argc, char *argv[])
                     move(irow++,0);
                     printw("Any other: resume cycle");
                     move(irow++,0);
-                    printw("   Use any key now to");
+                    printw(" Use space key to");
                     move(irow++,0);
-                    printw("       leave help");
+                    printw("  leave help.");
                     while(ERR==(ch=filter_escapes()))
                         ;
                     if(KEY_RESIZE == ch)
                         handle_resize();
-                    else if (isprint(ch))
+                    else if (' '==ch)
                         break;
                 }
                 clear();
