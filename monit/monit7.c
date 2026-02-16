@@ -167,7 +167,7 @@ main(int argc, char *argv[])
             } else
               pol=pol_default=strchr(pol_options,polc)-pol_options;
         } else if(0==strcmp(argv[i],"-h")) {
-            fprintf(stderr,"Usage: %s [-b n] [-p] [-r] [-z c] [-h]\n", argv[0]);
+            fprintf(stderr,"Usage: %s [-b n] [-i n] [-p] [-r] [-z c] [-h]\n", argv[0]);
             fprintf(stderr,"Options:\n");
             fprintf(stderr," -b n  Minimum BBCs to display per IF (defaults to dbbc3.ctl value)\n");
             fprintf(stderr," -i n  Minimum IFs to display in Panel (defaults to dbbc3.ctl value)\n");
