@@ -136,6 +136,8 @@ main(int argc, char *argv[])
     int bbcs_to_display_per_if=fs->dbbc3_ddc_bbcs_per_if;
     int ifs_to_display=fs->dbbc3_ddc_ifs;
 
+    signal(SIGINT, die);
+
     while (++i<argc) {
         if(0==strcmp(argv[i],"-r")) {
             reverse = 1;
@@ -199,7 +201,6 @@ main(int argc, char *argv[])
     }
 
     initscr();
-    signal(SIGINT, die);
     noecho ();
     nodelay(stdscr, TRUE);
     ioctl(0, TIOCGWINSZ, &ws);
