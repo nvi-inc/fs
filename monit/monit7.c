@@ -302,21 +302,19 @@ main(int argc, char *argv[])
                     int cols_needed=23;
                     if(rows_needed>win_rows || cols_needed >win_cols ) {
                         move(0,0);
-                        printw("Win. too small for help");
+                        printw("Too small for help.");
                         move(1,0);
-                        printw("Resize window to at");
+                        printw("Resize to at least:");
                         move(2,0);
-                        printw(" at least:");
-                        move(3,0);
                         printw(" Columns %d Rows %d.",cols_needed,rows_needed);
-                        move(4,0);
+                        move(3,0);
                         printw("Current:");
-                        move(5,0);
+                        move(4,0);
                         printw(" Columns %d Rows %d.",win_cols,win_rows);
+                        move(5,0);
+                        printw("Use space key/bar to");
                         move(6,0);
-                        printw("Use space key to");
-                        move(7,0);
-                        printw(" leave help.");
+                        printw(" leave help now.");
                         while(ERR==(ch=filter_escapes()))
                             ;
                         if(KEY_RESIZE == ch)
@@ -350,9 +348,9 @@ main(int argc, char *argv[])
                     move(irow++,0);
                     printw("Any other: resume cycle");
                     move(irow++,0);
-                    printw(" Use space key to");
+                    printw(" Use space key/bar to");
                     move(irow++,0);
-                    printw("  leave help.");
+                    printw("  leave help now.");
                     while(ERR==(ch=filter_escapes()))
                         ;
                     if(KEY_RESIZE == ch)

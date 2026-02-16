@@ -276,23 +276,21 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
         move(0,0);
         printw("Window too small.");
         move(2,0);
-        printw("Resize window to at");
+        printw("Resize to at least:");
         move(3,0);
-        printw(" least:");
-        move(4,0);
         printw(" Columns %d Rows %d",cols_needed,rows_needed);
-        move(5,0);
+        move(4,0);
         printw(" (.Xresources: %dx%d).",cols_needed,rows_needed);
-        move(7,0);
+        move(6,0);
         printw("Current:");
-        move(8,0);
+        move(7,0);
         printw(" Columns %d Rows %d.",win_cols,win_rows);
         if(panel && rows_needed_np <= win_rows && cols_needed_np <= win_cols) {
-            move(10,0);
+            move(9,0);
             printw("You could use 't' to");
-            move(11,0);
+            move(10,0);
             printw(" toggle to non-panel,");
-            move(12,0);
+            move(11,0);
             printw(" which will fit.");
         }
         return;
