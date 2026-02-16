@@ -251,35 +251,51 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
     if(ifs_to_display <ifs_to_display0)
        ifs_to_display=ifs_to_display0;
 
+    int rows_needed_p, cols_needed_p;
+    rows_needed_p=2+5+bbcs_to_display_per_if;
+    if(ifs_to_display >4 )
+        rows_needed_p+=1+5+bbcs_to_display_per_if;
+    cols_needed_p=24+25*3;
+    if(ifs_to_display <4)
+        cols_needed_p=24+25*(ifs_to_display-1);
+
+    int rows_needed_np, cols_needed_np;
+    rows_needed_np=1+6+bbcs_to_display_per_if;
+    cols_needed_np=24;
+
     int rows_needed, cols_needed;
     if(panel) {
-     rows_needed=2+5+bbcs_to_display_per_if;
-     if(ifs_to_display >4 )
-         rows_needed+=1+5+bbcs_to_display_per_if;
-     cols_needed=24+25*3;
-     if(ifs_to_display <4)
-        cols_needed=24+25*(ifs_to_display-1);
+        rows_needed=rows_needed_p;
+        cols_needed=cols_needed_p;
     } else {
-       rows_needed=1+6+bbcs_to_display_per_if;
-       cols_needed=24;
+        rows_needed=rows_needed_np;
+        cols_needed=cols_needed_np;
     }
+
     if(rows_needed >win_rows || cols_needed >win_cols ) {
-       clear();
-       move(0,0);
-       printw("Window too small.");
-       move(1,0);
-       printw("Resize window to at");
-       move(2,0);
-       printw(" least:");
-       move(3,0);
-       printw(" Columns %d Rows %d",cols_needed,rows_needed);
-       move(4,0);
-       printw(" (.Xresources: %dx%d).",cols_needed,rows_needed);
-       move(5,0);
-       printw("Current:");
-       move(6,0);
-       printw(" Columns %d Rows %d.",win_cols,win_rows);
-       return;
+        move(0,0);
+        printw("Window too small.");
+        move(2,0);
+        printw("Resize window to at");
+        move(3,0);
+        printw(" least:");
+        move(4,0);
+        printw(" Columns %d Rows %d",cols_needed,rows_needed);
+        move(5,0);
+        printw(" (.Xresources: %dx%d).",cols_needed,rows_needed);
+        move(7,0);
+        printw("Current:");
+        move(8,0);
+        printw(" Columns %d Rows %d.",win_cols,win_rows);
+        if(panel && rows_needed_np <= win_rows && cols_needed_np <= win_cols) {
+            move(10,0);
+            printw("You could use 't' to");
+            move(11,0);
+            printw(" toggle to non-panel,");
+            move(12,0);
+            printw(" which will fit.");
+        }
+        return;
     }
 
     for(k=0;k<rows;k++) {

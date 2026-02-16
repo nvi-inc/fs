@@ -122,6 +122,7 @@ main(int argc, char *argv[])
     int reverse=0;
     int pol=0;
     int pol_default=0;
+    int panel_default=0;
 
     int i=0;
     int okay=1;
@@ -139,7 +140,7 @@ main(int argc, char *argv[])
         if(0==strcmp(argv[i],"-r")) {
             reverse = 1;
         } else if(0==strcmp(argv[i],"-p")) {
-            panel = 1;
+            panel = panel_default = 1;
         } else if(0==strcmp(argv[i],"-b")) {
             bbcs_to_display_per_if=atoi(argv[++i]);
             if(bbcs_to_display_per_if<=0 || bbcs_to_display_per_if> (MAX_DBBC3_BBC)/(MAX_DBBC3_IF)) {
@@ -273,11 +274,18 @@ main(int argc, char *argv[])
             } else if ('i' == ch) {
                 krf=1-krf;
                 ifc=ifc_before;
+            } else if ('t' == ch) {
+                panel=1-panel;
+                ifc=ifc_before;
+                clear();
             } else if ('0' == ch) {
                 krf=1;
                 all=0;
                 ifc=0;
                 pol=pol_default;
+                if(panel!=panel_default)
+                    clear();
+                panel=panel_default;
                 dwell=DWELL_SECONDS;
             } else if ('z' == ch) {
                 static int next_pol[ ] ={ 2, 0, 1};
@@ -301,6 +309,8 @@ main(int argc, char *argv[])
                     printw("i - toggle RF/IF");
                     move(irow++,0);
                     printw("l - toggle all/rec(def)");
+                    move(irow++,0);
+                    printw("t - toggle panel mode");
                     move(irow++,0);
                     printw("z - cycle pol. all/L/R");
                     move(irow++,0);
