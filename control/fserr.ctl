@@ -1512,19 +1512,19 @@ BO -299
 More than ?WWW RDBEs requires mods to binit.f (plus fspgm.ctl, fserr.ctl, fmset.c, and rdbcn.c).
 ""
 BO -300
-There must be two character error mnemonic for TNX.
+There must be two character error mnemonic or 'list' as the first parameter for TNX.
 ""
 BO -301
 Error decoding error number in TNX.
 ""
 BO -302
-TNX action parameter must be 'on' or 'off'.
+TNX action parameter must be 'on', 'off', 'force', or 'unforce'.
 ""
 BO -303
-This error has not occurred yet, so its state can't be changed (trying to turn 'off').
+This error has not occurred yet (or been set with 'force'), so its state can't be changed (trying to turn 'off').
 ""
 BO -304
-This error has not occurred yet, so its state can't be changed (trying to turn 'on').
+This error has not occurred yet (or been set with 'force'), so its state can't be changed (trying to turn 'on').
 ""
 BO -305
 TNX=... command cannot be executed from a procedure.
@@ -1561,6 +1561,12 @@ Unknown condition in IF command.
 ""
 BO -316
 Spaces are not allowed in the schedule name for IF command condition.
+""
+BO -317
+Error was not set with 'force', can't 'unforce'.
+""
+BO -318
+Error not found, can't 'unforce'.
 ""
 BO -390
 setup procedure name must be 12 characters or less.

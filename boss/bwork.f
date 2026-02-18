@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020, 2023, 2025 NVI, Inc.
+* Copyright (c) 2020, 2023, 2025, 2026 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -1227,11 +1227,13 @@ c
         nchar = min0(ireg(2),iblen*2)
         ich = 1+iscn_ch(ibuf,1,nchar,'=')
         if (ich.eq.1) then
-             call put_buf(iclbox,ibuf,-1,'fs','tl')
+             call put_buf(iclbox,ibuf,-1,'fs','ta')
         else
            call gtprm2(ibuf,ich,nchar,0,parm,ierr)
            if(ierr.ne.0) then
               call logit7ci(0,0,0,0,-300,'bo',0)
+           else if(0.eq.ichcm_ch(parm,1,'list')) then
+             call put_buf(iclbox,ibuf,-1,'fs','tl')
            else if(cjchar(lsor,1).eq.'$') then
               call logit7ci(0,0,0,0,-305,'bo',0)
            else if(cjchar(lsor,1).eq.'@') then
@@ -1254,10 +1256,14 @@ c
                  else if(0.eq.ichcm_ch(parm,1,'off').or.
      &                   ierr.eq.2) then
                     ioffon=0
-                 else   
+                 else if(0.eq.ichcm_ch(parm,1,'forc')) then
+                    ioffon=2
+                 else if(0.eq.ichcm_ch(parm,1,'unfo')) then
+                    ioffon=3
+                 else
                     call logit7ci(0,0,0,0,-302,'bo',0)
                  endif
-                 if(iffon.ne.-1) then
+                 if(ioffon.ne.-1.) then
                     call gtprm2(ibuf,ich,nchar,0,parm,ierr)
                     if(ierr.lt.0.or.ierr.eq.1) then
                        call logit7ci(0,0,0,0,-310,'bo',0)
@@ -1277,6 +1283,10 @@ c
                           call put_buf(iclbox,ibufd,-6,'fs','tn')
                        else if(ioffon.eq.0) then
                           call put_buf(iclbox,ibufd,-6,'fs','tf')
+                       else if(ioffon.eq.2) then
+                          call put_buf(iclbox,ibufd,-6,'fs','te')
+                       else if(ioffon.eq.3) then
+                          call put_buf(iclbox,ibufd,-6,'fs','tu')
                        endif
                     endif
                  endif

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2022 NVI, Inc.
+ * Copyright (c) 2020-2022, 2026 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -42,6 +42,120 @@
 
 extern struct fscom *shm_addr;
 
+struct list {
+      char ch[2];
+      int num;
+      struct list *next;
+      struct list *previous;
+      char *string;
+      char *example;
+      int on;
+      int count;
+    } ;
+static void add_error(struct list *ptr_in, char ierrch[2],int ierrnum,
+    int count, struct list **last, struct list **first, char ibur[150],
+    char buf[MAX_BUF+2])
+{
+/* if ptr_in is NULL allocate a new list element and link into chain
+             and count is less than zero set element count to zero
+             otherwise increment count by 1
+   if bur (fserr found error) is an empty string, then use the
+           string actually passed in ibuf for example
+
+   always use bur so there is a string there for later use
+
+   if ptr_in  is not NULL, install example and simple if npt
+           already set
+*/
+
+  struct list *ptr;
+  if(ptr_in==NULL) {
+    ptr= (struct list *)malloc(sizeof(struct list));
+    if(ptr!=NULL) {
+      memcpy(ptr->ch,ierrch,2);
+      ptr->num=ierrnum;
+      ptr->previous=*last;
+      ptr->next=NULL;
+      ptr->example=NULL;
+      ptr->string=NULL;
+      ptr->on=1;
+      if(count < 0) {
+        ptr->on=0;
+        ptr->count=0;
+      } else
+        ptr->count=count+1;
+    } else {
+      shm_addr->abend.other_error=1;
+      perror("!! help! ** getting tnx structure, ddout");
+      play_wav(1);
+      return;
+    }
+  } else {
+    ptr=ptr_in;
+  }
+
+  int new_example=0;
+  if(ptr->example == NULL) {
+    if(buf!= NULL && strlen(ibur) == 0) {
+      new_example=1;
+      ptr->example=strdup(buf+FIRST_CHAR+14);
+      if(ptr->example == NULL) {  /* ptr->example is NULL */
+        new_example=0;
+        shm_addr->abend.other_error=1;
+        perror("!! help! ** getting tnx structure example, ddout");
+        play_wav(1);
+      }
+    } else
+      ptr->example=NULL;
+  }
+
+  if(ptr_in!=NULL && 0==strlen(ptr->string)) {
+    free(ptr->string);
+    ptr->string = NULL;
+  }
+
+  if(ptr->string == NULL) {
+    ptr->string=strdup(ibur);
+    if(ptr->string != NULL && ptr_in == NULL) {
+      if(*first == NULL)
+        *first=ptr;
+      else
+        (*last)->next=ptr;
+      *last=ptr;
+    } else if(ptr->string == NULL){  /* get rid of it since we can't add it */
+      if(new_example) {
+        free(ptr->example);
+        ptr->example=NULL;
+      }
+      if(ptr_in==NULL) {
+        free(ptr);
+      }
+      shm_addr->abend.other_error=1;
+      perror("!! help! ** getting tnx structure string, ddout");
+      play_wav(1);
+    }
+  }
+}
+
+static void unlink_error(struct list *ptr, struct list **last, struct list **first)
+{
+  if(ptr==*first)
+    *first=ptr->next;
+  if(ptr==*last)
+    *last=ptr->previous;
+
+  if(ptr->previous!=NULL)
+    ptr->previous->next=ptr->next;
+  if(ptr->next!=NULL)
+    ptr->next->previous=ptr->previous;
+
+  if(ptr->example!=NULL)
+    free(ptr->example);
+  if(ptr->string!=NULL)
+    free(ptr->string);
+  free(ptr);
+}
+
 main()
 {
     int i;
@@ -70,16 +184,7 @@ main()
     int kpcald;
     char ierrch[2];
     int ierrnum;
-    struct list {
-      char ch[2];
-      int num;
-      struct list *next;
-      struct list *previous;
-      char *string;
-      char *example;
-      int on;
-      int count;
-    } *last = NULL;
+    struct list *last = NULL;
     struct list *first=NULL;
     struct list *ptr;
     int display, count;
@@ -179,7 +284,7 @@ Messenger:
       for(ptr=last;ptr!=NULL;ptr=ptr->previous) {
 	if(ptr->num == ix && memcmp(ptr->ch,buf,2)==0) {
 	  if(iy == 0) {
-	    if(ptr->count==1) {
+	    if(ptr->count<=1) {
 	      if(ptr->on == 1) {
 		logit(NULL,-311,"bo");
 		goto Messenger;
@@ -227,8 +332,8 @@ Messenger:
       memcpy(&iy,buf+4,2);
       for(ptr=last;ptr!=NULL;ptr=ptr->previous) {
 	if(ptr->num == ix && memcmp(ptr->ch,buf,2)==0) {
-	  if(iy == 0) {     
-	    if(ptr->count==1) {
+	  if(iy == 0) {
+	    if(ptr->count<=1) {
 	      if(ptr->on == 0) {
 		logit(NULL,-312,"bo");
 		goto Messenger;
@@ -265,21 +370,20 @@ Messenger:
 	}
       }
       if(ptr == NULL) { /* not found */
-	logit(NULL,-303,"bo");
-	goto Messenger;
+          logit(NULL,-303,"bo");
       }
       goto Messenger;
     }
-    if (memcmp(cp2,"tl",2)==0) {  /* TNX list */
+    if (memcmp(cp2,"ta",2)==0 || memcmp(cp2,"tl",2)==0) {  /* TNX active or list */
       int some=0;
       for(ptr=first;ptr!=NULL;ptr=ptr->next) {
-	if(ptr->on == 0) {
+	if(memcmp(cp2,"tl",2)==0 || memcmp(cp2,"ta",2)==0 && ptr->on == 0) {
 	  if(ptr->example==NULL)
-	    sprintf(buf,"tnx/%2.2s,%d,%s,#%d,%s",
+	    sprintf(buf,"tnx/%2.2s,%d,%s,#%d,{%s},{}",
 		    ptr->ch,ptr->num,offon[ptr->on],
 		    ptr->count,ptr->string);
 	  else
-	    sprintf(buf,"tnx/%2.2s,%d,%s,#%d,%s,%s",
+	    sprintf(buf,"tnx/%2.2s,%d,%s,#%d,{%s},{%s}",
 		    ptr->ch,ptr->num,offon[ptr->on],
 		    ptr->count,ptr->string,ptr->example);
 	  logitf(buf);
@@ -287,11 +391,42 @@ Messenger:
 	}
       }
       if(some==0)
-	logitf("tnx/disabled");
+	logitf("tnx/none");
 
       goto Messenger;
     }
-   
+    if (memcmp(cp2,"tu",2)==0) {  /* TNX unforce */
+      short ix;
+      memcpy(&ix,buf+2,2);
+      for(ptr=first;ptr!=NULL;ptr=ptr->next) {
+        if(ptr->num == ix && memcmp(ptr->ch,buf,2)==0) {
+          if(ptr->count!=0) {
+            logit(NULL,-317,"bo");
+            goto Messenger;
+          }
+          unlink_error(ptr, &last, &first);
+          break;
+        }
+      }
+      if(ptr==NULL)
+        logit(NULL,-318,"bo");
+      goto Messenger;
+    }
+    if (memcmp(cp2,"te",2)==0) {  /* TNX force */
+      short ix;
+      char empty[]= {0};
+      memcpy(&ix,buf+2,2);
+      for(ptr=first;ptr!=NULL;ptr=ptr->next) {
+        if(ptr->num == ix && memcmp(ptr->ch,buf,2)==0)
+          unlink_error(ptr, &last, &first);
+      }
+      memcpy(ierrch,buf,2);
+      count=-1;
+      add_error(NULL,ierrch,ix,count,&last,&first,empty,NULL);
+
+      goto Messenger;
+    }
+
 /* SECTION 3 */
 
     if(memcmp(cp2,"nl",2)==0 || rtn2 == -1){
@@ -550,52 +685,15 @@ Ack:    ich = strtok(NULL, ",");
 	  if(ptr->num == ierrnum && memcmp(ptr->ch,ierrch,2)==0) {
 	    if(count ==0)
 	      count=ptr->count;
-	    if(strcmp(ptr->string,ibur)==0) {
+	    if(count==0 || (strlen(ibur)!=0 && strcmp(ptr->string,ibur)==0 || strlen(ibur)==0 && strcmp(ptr->string,buf)==0)) {
 	      display=ptr->on;
+              if(count == 0)
+                 add_error(ptr,ierrch,ierrnum,count,&last,&first,ibur,buf);
 	      break;
 	    }
 	  }
-	if(ptr == NULL) { /* not found, add it */
-	  ptr= (struct list *)malloc(sizeof(struct list));
-	  if(ptr!=NULL) {
-	    memcpy(ptr->ch,ierrch,2);
-	    ptr->num=ierrnum;
-	    ptr->previous=last;
-	    ptr->next=NULL;
-	    ptr->on=1;
-	    ptr->count=count+1;
-	    
-	    if(strlen(ibur) == 0) {
-	      ptr->example=strdup(buf+FIRST_CHAR+14);
-	      if(ptr->example == NULL) {  /* ptr->example is NULL */
-		shm_addr->abend.other_error=1;
-		perror("!! help! ** getting tnx structure example, ddout");
-		play_wav(1);
-	      }
-	    } else
-	      ptr->example=NULL;
-	    
-	    ptr->string=strdup(ibur);
-	    if(ptr->string != NULL) {
-	      if(first == NULL)
-		first=ptr;
-	      else
-		last->next=ptr;
-	      last=ptr;
-	    } else {  /* get rid of it since we can't add it */
-	      if(ptr->example!=NULL)
-		free(ptr->example);
-	      free(ptr);
-	      shm_addr->abend.other_error=1;
-	      perror("!! help! ** getting tnx structure string, ddout");
-            play_wav(1);
-	    }
-	  } else {
-	    shm_addr->abend.other_error=1;
-	    perror("!! help! ** getting tnx structure, ddout");
-            play_wav(1);
-	  }
-	}
+	if(ptr == NULL) /* not found, add it */
+          add_error(NULL,ierrch,ierrnum,count,&last,&first,ibur,buf);
 
 	/* send message to station error program */
 	if(display && *cp2 == 'b' && shm_addr->sterp !=0) {
