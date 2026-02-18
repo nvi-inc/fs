@@ -19,7 +19,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-VERSION=2026-02-11
+VERSION=2026-02-18
 
 version(){
     echo "[fesh $VERSION]"
@@ -171,23 +171,20 @@ download_files() {
         fi
     fi
 }
-# Find latest temporary directory
-get_latest_tmp() {
-    local tmp=$(ls -t /tmp\
-        | grep "^fesh_${sched}_...$"\
-        | head -1)
-
-    if [[ -z "$tmp" ]]; then
-        echo "No '-C' temporary directory for ${sched} found." >&2
-        echo "Rerun with '-C' to check for any needed updates." >&2
-        exit 1
+# Delete any tmp files
+remove_tmp_files() {
+    if [[ -e "$FESH_TEMP_DIR/$sched.vex" ]]; then
+       unlink "$FESH_TEMP_DIR/$sched.vex"
     fi
-    if [ -n "$(find "/tmp/$tmp" -mmin +30 -print -quit 2>/dev/null)" ]; then
-        echo "Most recent '-C' temporary directory for ${sched} is more than 30 minutes old." >&2
-        echo "Rerun with '-C' to make a fresh check for updates." >&2
-        exit 1
+    if [[ -e "$FESH_TEMP_DIR/$sched.skd" ]]; then
+       unlink "$FESH_TEMP_DIR/$sched.skd"
     fi
-    echo "/tmp/$tmp"
+    if [[ -e "$FESH_TEMP_DIR/$sched.txt" ]]; then
+       unlink "$FESH_TEMP_DIR/$sched.txt"
+    fi
+    if [[ -e "$FESH_TEMP_DIR" ]]; then
+       rmdir "$FESH_TEMP_DIR"
+    fi
 }
 check_station() {
     set +u
@@ -385,13 +382,9 @@ Fetch schedule file (and .txt file, if available, for geo)
 
 Options:
  -n       Fetch next schedule in master file (not supported yet)
- -C       check for changed schedule file (and .txt file if previously
-          download) on server; if there were any changes, new versions
-          are left on /tmp and a hint for how proceed is printed
- -R       Update files that were found to be changed with '-C; the latest
-          versions less than 10 minutes old on /tmp are used; for geo, drudg
-          will be run automatically if the schedule file is updated or if the
-          drudg output was stale when '-C' was used
+ -C       Check for changed schedule file (and .txt file if geo) If there
+          are any changes, or the drudg output is stale, the user will
+          promoted for whether to proceed and update the files.
  -d       drudg schedule with default settings, not supported for vlbeer
           (needs STATION environment variable or -s set with station code)
  -D dc    Use alternate data center; dc=bkg, cddis, opar, or vlbeer. Upper
@@ -435,15 +428,13 @@ If both are set, -s overrides STATION. In any event, the value is mapped to
 lower case, if it isn't already, for agreement with drudg.
 
 The '-C' option allows checking that already downloaded files and drudg output
-are up-to-date. If files need to updated, the '-R' option should be used
-afterward for that. Additionally, messages for some errors recommend ways to
-use '-C'/'-R' for recovering. Other approaches may work better depending on
-your needs, but the recommended ones fit most situations.
-
-Some protections are built into '-R'. It will stop before making any changes,
-if: any of the files to be updated (.vex, .skd, .txt) are newer than their
-replacements; the most recent '-C' was more than 30 minutes ago; and if drudg
-would be run, any of the drudg output files are open in the FS.
+are up-to-date. If the downloaded files need to updated, or the drudg output
+is stale for geo, the user will be prompted for whether to proceed. If the
+user chooses to proceed, the files will be updated. For geo, drudg will be run
+automatically if needed. For non-geo, if the drudg output is stale, the user
+will be reminded to run drudg manually. Some errors messages recommend using
+'-C' to recover; other approaches may work better depending on your needs, but
+the recommended ones fit most situations and are afe.
 
 Please see the end of this message about handling optional 'skedf.ctl'
 specified prompting for 'drudg'.
@@ -591,42 +582,22 @@ no_txt=
 print=
 download=1
 check_new=
-replace_files=
-while getopts 'a:Cc:nfdD:hHm:p:PRs:St:T:u:vVxXy:' opt; do
+while getopts 'a:Cc:nfdD:hHm:p:Ps:St:T:u:vVxXy:' opt; do
     case $opt in
         n)
             echo "'next' not implemented."
             exit 1
             ;;
         C)
-            if [[ -n "$replace_files" ]] ; then
-                echo "Can't use '-R' and '-C' together."
-                exit 1
-            fi
             if [[ -n "$run_drudg" ]] ; then
                 echo "Can't use '-d' and '-C' together."
                 exit 1
             fi
             check_new=1
             ;;
-        R)
-            if [[ -n "$check_new" ]] ; then
-                echo "Can't use '-C' and '-R' together."
-                exit 1
-            fi
-            if [[ -n "$run_drudg" ]] ; then
-                echo "Can't use '-d' and '-R' together."
-                exit 1
-            fi
-            replace_files=1
-            ;;
         d)
             if [[ -n "$check_new" ]] ; then
                 echo "Can't use '-C' and '-d' together."
-                exit 1
-            fi
-            if [[ -n "$replace_files" ]] ; then
-                echo "Can't use '-R' and '-d' together."
                 exit 1
             fi
             run_drudg=1
@@ -838,12 +809,12 @@ if [[ "$cont_cal_answer" =~ off  ]]; then
 fi
 
 ## Conflict check
-if [[ -z "$check_new" && -z "$replace_files" ]]; then
+if [[ -z "$check_new" ]]; then
     if [[ "$FESH_DATA_CENTER" =~ vlbeer ]]; then
 	if [[ -e $SCHED_DIR/$sched.vex ]]; then
 	    if [[ -z "$force" ]]; then
-		echo "$SCHED_DIR/$sched.vex exists. Rerun with '-C' to check it (and then" >&2
-		echo "with '-R', if appropriate, to replace it)." >&2
+		echo "$SCHED_DIR/$sched.vex exists. Rerun with '-C' to check it (and" >&2
+		echo "possibly replace it)." >&2
 		echo "Or rerun adding '-f' to force deleting all conflicting files." >&2
 		exit 1
 	    fi
@@ -852,8 +823,8 @@ if [[ -z "$check_new" && -z "$replace_files" ]]; then
     elif [[ -n "$download" ]]; then
 	if [[ -e $SCHED_DIR/$sched.skd ]]; then
 	    if [[ -z "$force" ]]; then
-		echo "$SCHED_DIR/$sched.skd exists. Rerun with '-C' to check it (and then " >&2
-		echo "with '-R', if appropriate, to replace it and drudg it)." >&2
+		echo "$SCHED_DIR/$sched.skd exists. Rerun with '-C' to check it (and" >&2
+		echo "possibly replace it and drudg it)." >&2
 		echo "Or rerun adding '-f' to force deleting all conflicting files." >&2
 		exit 1
 	    fi
@@ -861,136 +832,13 @@ if [[ -z "$check_new" && -z "$replace_files" ]]; then
 	fi
 	if [[ -e $SCHED_DIR/$sched.txt ]]; then
 	    if [[ -z "$force" ]]; then
-		echo "$SCHED_DIR/$sched.txt exists. Rerun with '-C' to check it (and then " >&2
-		echo "with '-R', if appropriate, to replace it; that will also update the schedule if" >&2
-		echo "that is needed, and run drudg if that is needed)." >&2
+		echo "$SCHED_DIR/$sched.txt exists. Rerun with '-C' to check it (and" >&2
+		echo "possibly replace it and, if needed, re-drudg the schedule)." >&2
 		echo "Or rerun adding '-f' to force deleting all conflicting files." >&2
 		exit 1
 	    fi
 	    rm "$SCHED_DIR/$sched.txt"
 	 fi
-    fi
-fi
-
-if [[ -n "$replace_files" ]]; then
-    download=
-    run_drudg=
-    tmp=$(get_latest_tmp)
-    echo "Found '-C' temporary directory $tmp" >&2
-    action=
-    if [[ "$FESH_DATA_CENTER" =~ vlbeer ]]; then
-       if [[ -e "$tmp/$sched.vex" ]]; then
-           if [[ "$SCHED_DIR/$sched.vex" -nt "$tmp/$sched.vex" ]]; then
-               echo "" >&2
-               echo "    $SCHED_DIR/$sched.vex is newer than the file that would replace it." >&2
-               echo "" >&2
-               echo "ERROR: The file in $SCHED_DIR is newer than the file that would replace it." >&2
-               echo "ERROR: Rerun with '-C' to check again." >&2
-               exit 1
-           fi
-           echo "Updating $SCHED_DIR/$sched.vex" >&2
-           cp -f "$tmp/$sched.vex" "$SCHED_DIR"
-           echo -e "\nBEWARE: Any drudg output is older than $SCHED_DIR/$sched.vex."
-           echo      "        You should run drudg manually to update any files you need." >&2
-           unlink "$tmp/$sched.vex"
-           action=1
-       fi
-    else
-       if [[ -e "$tmp/$run_drudg_file" ]] ; then
-# check station, open drudg files, and skedf.ctl here, so we don't overwrite files if we need to abort
-           check_station
-           open_drudg_files=$(check_open_drudg_files)
-           if [[ -n "$open_drudg_files" ]]; then
-               echo "" >&2
-               echo "ERROR: Can't run drudg because the above files are open in the FS." >&2
-               echo "ERROR: Try again after the files are closed in the FS." >&2
-               exit 1
-           fi
-           if [[ ! -e $CONTROL_DIR/skedf.ctl ]]; then
-               fatal "$CONTROL_DIR/skedf.ctl doesn't exist, can't run drudg with '-R'"
-           fi
-           run_drudg=1
-           force=1
-           unlink "$tmp/$run_drudg_file"
-           action=1
-       fi
-       old_files=
-       if [[ -e "$tmp/$sched.skd" && "$SCHED_DIR/$sched.skd" -nt "$tmp/$sched.skd" ]]; then
-           if [[ -z "$old_files" ]]; then
-               echo "" >&2
-           fi
-           echo "    $SCHED_DIR/$sched.skd is newer than the file that would replace it." >&2
-           old_files=1
-       fi
-       if [[ -e "$tmp/$sched.txt" && "$SCHED_DIR/$sched.txt" -nt "$tmp/$sched.txt" ]]; then
-           if [[ -z "$old_files" ]]; then
-               echo "" >&2
-           fi
-           echo "    $SCHED_DIR/$sched.txt is newer than the file that would replace it." >&2
-           old_files=1
-       fi
-       if [[ -n "$old_files" ]]; then
-           echo "" >&2
-           echo "ERROR: At least one file in $SCHED_DIR is newer than the file that would" >&2
-           echo "ERROR: replace it. Rerun with '-C' to check again." >&2
-           exit 1
-       fi
-       if [[ -e "$tmp/$sched.skd" ]]; then
-           echo "Updating $SCHED_DIR/$sched.skd" >&2
-           cp -f "$tmp/$sched.skd" "$SCHED_DIR"
-           unlink "$tmp/$sched.skd"
-           action=1
-       fi
-       if [[ -e "$tmp/$sched.txt" ]]; then
-          echo "Updating $SCHED_DIR/$sched.txt" >&2
-          cp -f "$tmp/$sched.txt" "$SCHED_DIR"
-          unlink "$tmp/$sched.txt"
-          action=1
-       fi
-    fi
-    if [[ -n "$action" ]]; then
-       rmdir "$tmp"
-    else
-       echo "No updates were found. Maybe the download for the previous '-C' failed." >&2
-       echo "Rerun with '-C' to make a fresh check for updates." >&2
-       exit 1
-    fi
-fi
-
-if [[ -n "$run_drudg" && -z "$check_new" ]]; then
-    if [[ ! -n "$download" ]]; then
-        if [[ ! -e $SCHED_DIR/$sched.skd ]]; then
-            echo "$SCHED_DIR/$sched.skd doesn't exist. Download it first. Rerun without '-S'." >&2
-            exit 1
-        fi
-    fi
-
-    if [[ -e $SNAP_DIR/$sched$station.snp ]]; then
-        if [[ -z "$force" ]]; then
-            echo "$SNAP_DIR/$sched$station.snp exists. Rerun with '-C' to check it" >&2
-            echo "(and then follow the directions)." >&2
-            echo "Or rerun adding '-f' to force deleting all conflicting files." >&2
-            exit 1
-        fi
-        rm "$SNAP_DIR/$sched$station.snp"
-    fi
-    if [[ -e $PROC_DIR/$sched$station.prc ]]; then
-        if [[ -z "$force" ]]; then
-            echo "$PROC_DIR/$sched$station.prc exists. Rerun with '-C' to check it" >&2
-            echo "(and then follow the directions)." >&2
-            echo "Or rerun adding '-f' to force deleting all conflicting files." >&2
-            exit 1
-        fi
-        rm "$PROC_DIR/$sched$station.prc"
-    fi
-    if [[ -e $LIST_DIR/$sched$station.lst ]]; then
-        if [[ -z "$force" ]]; then
-            echo "$LIST_DIR/$sched$station.lst exists. Rerun with '-C' to check it" >&2
-            echo "(and then follow the directions)." >&2
-            echo "Or rerun adding '-f' to force deleting all conflicting files." >&2
-            exit 1
-        fi
-        rm "$LIST_DIR/$sched$station.lst"
     fi
 fi
 
@@ -1007,7 +855,7 @@ if [[ -n "$check_new" ]]; then
         fi
     fi
 
-#check here so nothing is created unless drudg check can work
+#check here so nothing is created unless the drudg check can work
     check_station
     if [[ ! -e $CONTROL_DIR/skedf.ctl ]]; then
         fatal "$CONTROL_DIR/skedf.ctl doesn't exist, can't check drudg output"
@@ -1100,7 +948,7 @@ if [[ -n "$check_new" ]]; then
         elif [[ ! -e "$sched.txt" ]]; then
             echo "    The server doesn't have a $sched.txt file, but $SCHED_DIR does." >&2
             echo "" >&2
-            echo "        BEWARE: $SCHED_DIR/$sched.txt will not be removed by '-R'." >&2
+            echo "        BEWARE: $SCHED_DIR/$sched.txt will not be removed." >&2
         elif [[ ! -e "$SCHED_DIR/$sched.txt" ]]; then
             echo "    The server has a $sched.txt file, but $SCHED_DIR does not." >&2
             update_needed=1
@@ -1108,7 +956,7 @@ if [[ -n "$check_new" ]]; then
             unlink "$sched.txt"
             echo "    $SCHED_DIR/$sched.txt agrees with the server." >&2
         else
-            echo "    $FESH_TEMP_DIR/$sched.txt from the server is different" >&2
+            echo "    $FESH_TEMP_DIR/$sched.txt from the server is different." >&2
             update_needed=1
         fi
     fi
@@ -1127,53 +975,131 @@ if [[ -n "$check_new" ]]; then
        if [[ -e "$sched.skd" ]]; then
            drudg_needed=1
        fi
-       if [[ -n "$drudg_needed" ]] ; then
-           touch "$FESH_TEMP_DIR/$run_drudg_file"
-       fi
     fi
     if [[ -z "$update_needed" && -z "$drudg_needed" ]] ; then
-        rmdir $FESH_TEMP_DIR
-        echo -e "\nNo action needed. Do NOT rerun with '-R'." >&2
+        rmdir "$FESH_TEMP_DIR"
+        echo -e "\nEverything appears to be up-to-date." >&2
+        exit 0
     elif [[ "$FESH_DATA_CENTER" =~ vlbeer ]]; then
         if [[ -n "$update_needed" ]]; then
             cat <<EOF >&2
 
-Rerun with '-R' to update $SCHED_DIR with
-$FESH_TEMP_DIR/$sched.$ext. You should run drudg
+Proceeding will update $SCHED_DIR with with the file
+$FESH_TEMP_DIR/$sched.$ext from the server. You should run drudg
 manually afterward to update/create any drudg output you need.
 EOF
         elif [[ -n "$drudg_needed" ]]; then
             rmdir $FESH_TEMP_DIR
             cat <<EOF >&2
 
-Do NOT rerun with '-R'. You should run drudg manually to update/create
-any drudg output you need.
+You should run drudg manually to update/create any drudg output you need.
 EOF
+        exit 0
         fi
     else
        if [[ -n "$update_needed" ]]; then
            cat <<EOF >&2
 
-Rerun with '-R' to update $SCHED_DIR with the different files in
-$FESH_TEMP_DIR. Drudg will be run automatically if needed.
+Proceeding will update $SCHED_DIR with the different files from the
+server in $FESH_TEMP_DIR. Drudg will be run automatically if needed.
 EOF
        elif [[ -n "$drudg_needed" ]]; then
            cat <<EOF >&2
 
-Rerun with '-R' to update the drudg output.
+Proceeding will run drudg to update its output.
 EOF
        fi
-       if [[ -n "$drudg_needed" ]]; then
-           open_drudg_files=$(check_open_drudg_files)
-           if [[ -n "$open_drudg_files" ]]; then
-               echo "">&2
-               echo "WARNING: '-R' will be blocked because it will run drudg and the above files," >&2
-               echo "WARNING: that it will recreate, are open in the FS." >&2
-           fi
+    fi
+
+    echo -en "\nAre you sure you wish to proceed (y=yes, n=no)? "
+    badans=true
+    while [ "$badans" = "true" ]; do
+       read ans
+       case "$ans" in
+       y|yes)  badans=false
+               if [[ ! "$FESH_DATA_CENTER" =~ vlbeer && -n "$drudg_needed" ]]; then
+                   open_drudg_files=$(check_open_drudg_files)
+                   if [[ -n "$open_drudg_files" ]]; then
+                       echo "" >&2
+                       echo "ERROR: Can't run drudg because the above files are open in the FS." >&2
+                       echo "ERROR: Try again after the files are closed or answer 'n' to abort." >&2
+                       echo "ERROR: If you abort, you can rerun with '-C' again after the files are closed." >&2
+                       badans=true
+                       echo -e "\nPlease answer with y=yes or n=no : \c"
+                   fi
+               fi
+               ;;
+       n|no)   echo -e "Aborting."
+               remove_tmp_files
+               exit 0
+               ;;
+       *)      echo -e "Please answer with y=yes or n=no : \c"
+               ;;
+       esac
+    done
+
+    download=
+    if [[ "$FESH_DATA_CENTER" =~ vlbeer ]]; then
+       if [[ -e "$sched.vex" ]]; then
+           echo "Updating $SCHED_DIR/$sched.vex" >&2
+           cp -f "$sched.vex" "$SCHED_DIR"
+           echo -e "\nBEWARE: Any drudg output is older than $SCHED_DIR/$sched.vex."
+           echo      "        You should run drudg manually to create/update any files you need." >&2
+           unlink "$sched.vex"
+       fi
+    else
+       if [[ -n "$drudg_needed" ]] ; then
+           run_drudg=1
+           force=1
+       fi
+       if [[ -e "$sched.skd" ]]; then
+           echo "Updating $SCHED_DIR/$sched.skd" >&2
+           cp -f "$sched.skd" "$SCHED_DIR"
+           unlink "$sched.skd"
+       fi
+       if [[ -e "$sched.txt" ]]; then
+          echo "Updating $SCHED_DIR/$sched.txt" >&2
+          cp -f "$sched.txt" "$SCHED_DIR"
+          unlink "$sched.txt"
        fi
     fi
     popd >/dev/null
-    exit 0
+
+    rmdir "$FESH_TEMP_DIR"
+fi
+
+if [[ -n "$run_drudg" ]]; then
+    if [[ ! -n "$download" ]]; then
+        if [[ ! -e $SCHED_DIR/$sched.skd ]]; then
+            echo "$SCHED_DIR/$sched.skd doesn't exist. Download it first. Rerun without '-S'." >&2
+            exit 1
+        fi
+    fi
+
+    if [[ -e $SNAP_DIR/$sched$station.snp ]]; then
+        if [[ -z "$force" ]]; then
+            echo "$SNAP_DIR/$sched$station.snp exists. Rerun with '-C' to check it." >&2
+            echo "Or rerun adding '-f' to force deleting all conflicting files." >&2
+            exit 1
+        fi
+        rm "$SNAP_DIR/$sched$station.snp"
+    fi
+    if [[ -e $PROC_DIR/$sched$station.prc ]]; then
+        if [[ -z "$force" ]]; then
+            echo "$PROC_DIR/$sched$station.prc exists. Rerun with '-C' to check it." >&2
+            echo "Or rerun adding '-f' to force deleting all conflicting files." >&2
+            exit 1
+        fi
+        rm "$PROC_DIR/$sched$station.prc"
+    fi
+    if [[ -e $LIST_DIR/$sched$station.lst ]]; then
+        if [[ -z "$force" ]]; then
+            echo "$LIST_DIR/$sched$station.lst exists. Rerun with '-C' to check it." >&2
+            echo "Or rerun adding '-f' to force deleting all conflicting files." >&2
+            exit 1
+        fi
+        rm "$LIST_DIR/$sched$station.lst"
+    fi
 fi
 
 if [[ -n "$download" ]]; then
