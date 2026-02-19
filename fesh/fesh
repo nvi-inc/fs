@@ -46,6 +46,7 @@ download_files() {
         else
             echo "Downloading $sched.vex failed" >&2
             echo "Use -H to try getting a PRELIMINARY schedule (not in .latest) only if you must." >&2
+            remove_tmp_files
             exit 1
         fi
         return
@@ -57,6 +58,7 @@ download_files() {
             if wget $WGET_VERBOSE "ftp://ftp@cddis.gsfc.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.skd"; then
                 echo Done >&2
             else
+                remove_tmp_files
                 fatal "Downloading $sched.skd failed"
             fi
 
@@ -65,6 +67,7 @@ download_files() {
                 if wget $WGET_VERBOSE "ftp://ftp@cddis.gsfc.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.txt"; then
                     echo Done >&2
                 elif [[ -n "$txt" ]]; then
+                    remove_tmp_files
                     fatal "Download of $sched.txt, required by '-x', failed."
                 else
                     echo "Failed, but continuing since $sched.txt was not required by using '-x'." >&2
@@ -72,10 +75,12 @@ download_files() {
             fi
         elif [[ "$FESH_CDDIS_METHOD" =~ ^https$ ]]; then
             if [[ ! -e "$NETRC_DIR/.netrc" ]]; then
+                remove_tmp_files
                 fatal "$NETRC_DIR/.netrc not found, see usage"
             fi
 
             if ! grep -q urs.earthdata.nasa.gov "$NETRC_DIR/.netrc"; then
+                remove_tmp_files
                 fatal "$NETRC_DIR/.netrc does not contain CDDIS login information, see usage"
             fi
             if curl  -k  -f -c /dev/null $CURL_VERBOSE -n \
@@ -83,6 +88,7 @@ download_files() {
                 -L -O "https://cddis.nasa.gov/archive/vlbi/ivsdata/aux/$year/$sched/$sched.skd"; then
                 echo Done >&2
             else
+                remove_tmp_files
                 fatal "Downloading $sched.skd failed"
             fi
 
@@ -93,6 +99,7 @@ download_files() {
                     -L -O "https://cddis.nasa.gov/archive/vlbi/ivsdata/aux/$year/$sched/$sched.txt"; then
                      echo Done >&2
                 elif [[ -n "$txt" ]]; then
+                    remove_tmp_files
                     fatal "Download of $sched.txt, required by '-x', failed."
                 else
                     echo "Failed, but continuing since $sched.txt was not required by using '-x'." >&2
@@ -102,6 +109,7 @@ download_files() {
             if curl -u "$user" -k -O $CURL_VERBOSE --ftp-ssl "ftp://gdc.cddis.eosdis.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.skd" ; then
                 echo Done >&2
             else
+                remove_tmp_files
                 fatal "Downloading $sched.skd failed"
             fi
 
@@ -110,6 +118,7 @@ download_files() {
                 if curl -u "$user" -k -O $CURL_VERBOSE --ftp-ssl "ftp://gdc.cddis.eosdis.nasa.gov/vlbi/ivsdata/aux/$year/$sched/$sched.txt"; then
                     echo Done >&2
                 elif [[ -n "$txt" ]]; then
+                    remove_tmp_files
                     fatal "Download of $sched.txt, required by '-x', failed."
                 else
                     echo "Failed, but continuing since $sched.txt was not required by using '-x'." >&2
@@ -120,6 +129,7 @@ download_files() {
         if wget $WGET_VERBOSE "ftp://ftp@ivsopar.obspm.fr/vlbi/ivsdata/aux/$year/$sched/$sched.skd"; then
             echo Done >&2
         else
+            remove_tmp_files
             fatal "Downloading $sched.skd failed"
         fi
 
@@ -128,6 +138,7 @@ download_files() {
             if wget $WGET_VERBOSE "ftp://ftp@ivsopar.obspm.fr/vlbi/ivsdata/aux/$year/$sched/$sched.txt"; then
                 echo Done >&2
             elif [[ -n "$txt" ]]; then
+                remove_tmp_files
                 fatal "Download of $sched.txt, required by '-x', failed."
             else
                 echo "Failed, but continuing since $sched.txt was not required by using '-x'." >&2
@@ -138,6 +149,7 @@ download_files() {
             if wget $WGET_VERBOSE "ftp://ftp@ivs.bkg.bund.de/pub/vlbi/ivsdata/aux/$year/$sched/$sched.skd"; then
                 echo Done >&2
             else
+                remove_tmp_files
                 fatal "Downloading $sched.skd failed"
             fi
 
@@ -146,6 +158,7 @@ download_files() {
                 if wget $WGET_VERBOSE "ftp://ftp@ivs.bkg.bund.de/pub/vlbi/ivsdata/aux/$year/$sched/$sched.txt"; then
                   echo Done >&2
                 elif [[ -n "$txt" ]]; then
+                   remove_tmp_files
                    fatal "Download of $sched.txt, required by '-x', failed."
                 else
                     echo "Failed, but continuing since $sched.txt was not required by using '-x'." >&2
@@ -155,6 +168,7 @@ download_files() {
             if curl --ssl-reqd $CURL_VERBOSE -u anonymous:anonymous -O "ftp://ivs.bkg.bund.de/pub/vlbi/ivsdata/aux/$year/$sched/$sched.skd"; then
                 echo Done >&2
             else
+                remove_tmp_files
                 fatal "Downloading $sched.skd failed"
             fi
 
@@ -163,6 +177,7 @@ download_files() {
                 if curl --ssl-reqd $CURL_VERBOSE -u anonymous:anonymous -O "ftp://ivs.bkg.bund.de/pub/vlbi/ivsdata/aux/$year/$sched/$sched.txt"; then
                   echo Done >&2
                 elif [[ -n "$txt" ]]; then
+                   remove_tmp_files
                    fatal "Download of $sched.txt, required by '-x', failed."
                 else
                     echo "Failed, but continuing since $sched.txt was not required by using '-x'." >&2
@@ -173,6 +188,9 @@ download_files() {
 }
 # Delete any tmp files
 remove_tmp_files() {
+    if [[ -z "FESH_TEMP_DIR" ]]; then
+        return
+    fi
     if [[ -e "$FESH_TEMP_DIR/$sched.vex" ]]; then
        unlink "$FESH_TEMP_DIR/$sched.vex"
     fi
@@ -336,6 +354,8 @@ else
     echo "WARNING: '$CONTROL_DIR/skedf.ctl' doesn't exist,"  >&2
     echo "WARNING: 'using '$SCHED_DIR' for schedule directory"  >&2
 fi
+
+FESH_TEMP_DIR=
 
 FESH_DATA_CENTER=${FESH_DATA_CENTER:-'cddis'}
 
