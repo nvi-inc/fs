@@ -69,7 +69,7 @@ $count{"monit7*geometry"} = 0;
 
 while(<BAK>) {
     if (/^(monit7\*geometry:.*\d+x)(\d+)(.*)$/) {
-        $out=$2+1;
+        $out=$2+2;
         $_ = "$1$out$3\n";
         ++$count{"monit7*geometry"};
     }
