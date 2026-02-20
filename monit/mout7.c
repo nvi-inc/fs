@@ -138,18 +138,13 @@ static void arrival_age(char buf[128],struct dbbc3_tsys_cycle *tsys_cycle,int ag
     printw(" Age");
     if(tsys_cycle->no_mcast_since_restart && time <= 0)
         age=seconds-tsys_cycle->no_mcast_since_restart;
-    int days=age/86400;
-    int hours=age%86400/3600;
-    int minutes=age%86400%3600/60;
-    int secs=age%86400%3600%60;
-    if(days>=999)
-        snprintf(buf,10," >999days");
-    else if(days>=100)
-        snprintf(buf,10," >%dd%02dh",days,hours);
-    else if(days>=10)
-        snprintf(buf,10,"  >%dd%02dh",days,hours);
-    else if(days>=1)
-        snprintf(buf,10,"   >%dd%02dh",days,hours);
+    int hours=age/3600;
+    int minutes=age%3600/60;
+    int secs=age%3600%60;
+    if(hours>=1000)
+        snprintf(buf,10,"   >1000h");
+    else if(hours>=100)
+        snprintf(buf,10," >%3dh%02dm",hours,minutes);
     else if(hours>=1)
         snprintf(buf,10," %2d:%02d:%02d",hours,minutes,secs);
     else if(minutes>=1)
