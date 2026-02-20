@@ -42,6 +42,9 @@ int *iold;
     if(!shm_addr->dbbc3_tsys_data.data[iping].ifc[shm_addr->dbbc3_iscboard-1].time_included)
       return -1;
 
+    if(0==shm_addr->dbbc3_mcast_arrival)
+      return -3;
+
     /* trap 1 for in case time_included is incorrectly TRUE
        multiple tries will get a better value if it is included */
     if (1>=shm_addr->dbbc3_tsys_data.data[iping].ifc[shm_addr->dbbc3_iscboard-1].raw_timestamp)

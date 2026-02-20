@@ -313,7 +313,10 @@ C             two return buffers with imode = -53
               goto 50
            endif
            call logit7ci(idum,idum,idum,-1,-29,'sc',0)
-           goto 998
+           goto 1
+        else if(idum.eq.-3) then
+           call logit7ci(idum,idum,idum,-1,-30,'sc',0)
+           goto 1
         endif
         centisec(2)=centisec(1)
         unixsec(2)=unixsec(1)
