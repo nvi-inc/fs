@@ -54,7 +54,7 @@ int *iold;
        6*sizeof(centisec[0]));
     secs2rte(&secs,fm_tim);
     fm_tim[0]=0;
-    iadt(fm_tim,shm_addr->dbbc3_mcdelay,1);
+    iadt(fm_tim,shm_addr->dbbc3_mcast_arrival,1);
 
     return 0;
 }

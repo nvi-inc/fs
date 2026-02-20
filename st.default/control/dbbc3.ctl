@@ -23,8 +23,8 @@
   v125 0
 * DDC_V firmware version (v121 or later, but DDC_V starts at v124)
   v124 0
-* mcast delay 0-499 centiseconds
-  57
+* placeholder, 0-499, not used
+  0
 * setcl board
   1
 * DBBC3 clock rate, >= 0, but DDC only supports 128
