@@ -200,9 +200,9 @@ ssize_t read_mcast(int sock, char buf[], size_t buf_size, int it[6],
             *hsecs+=6000;
     }
     if(!kfirst) { /* The timing of the first try is not reliable, so ignore */
-        if(*hsecs/100 != shm_addr->dbbc3_mcast_arrival) {
+        int diff=*hsecs/100-shm_addr->dbbc3_mcast_arrival/100;
+        if(diff!=0) {
             char buff[128];
-            int diff=*hsecs/100-shm_addr->dbbc3_mcast_arrival;
             sprintf(buff," INFO: multicast arrived %d second(s) later than expected",diff);
 
 //            logite(buff,0,NULL);

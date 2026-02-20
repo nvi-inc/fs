@@ -5,14 +5,17 @@
 * Two fields: BBCs/IF (8, 12, 16 or nominal (U:16,EV:8)), IFs (1-8)
   nominal 8
 *
-*   Each firmware version (below) can be followed on the same line with
-*     an integer [0,4] that is the second after the 1 PPS to expect the
-*     multicast:  0=same second, 1=next second, etc. The value may vary
-*     with DBBC3 CPU speed, number of Core3H boards, and firmware version.
-*     If not present, the default is 0.
-*   The value should typically be the digit before the decimal point in
-*     the Arrival field of monit7 (DBBC3 Tsys display), if  the digit
-*     is stable. If not stable, use the largest value.
+*   Each firmware version (below) can be followed on the same line with an
+*     integer [0,499] that is the centisecond after the 1 PPS to expect the
+*     multicast: [0,99]=same second, [100,199]=next second, etc. The value
+*     depends on the DBBC3 CPU speed, number of Core3H boards, and firmware
+*     version. If not present, the default is '0', i.e., same second.
+*   The value should typically be the Arrival field of the DBBC3 Tsys
+*     display (monit7), or the 'hsecs' field of 'mcast_time', when the
+*     system is using, and synced, to NTP or is using a good 'setcl'
+*     calibration. If you are using a 'computer' model in 'time.ctl', then
+*     Using '0' initially is acceptable. If the Arrival time varies a
+*     a little between one second and the next, use the larger value.
 *
 * DDC_E firmware version (v121 or later, but DDC_E starts at v126)
   v126 0

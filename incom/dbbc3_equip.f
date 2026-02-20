@@ -154,7 +154,7 @@ c
       if (ic1.eq.0) goto 200
 c
       dbbc3_mcast_arrival = ias2b(ibuf,ic1,ic2-ic1+1)
-      if (dbbc3_mcast_arrival.lt.0 .or. dbbc3_mcast_arrival.gt.4) then
+      if (dbbc3_mcast_arrival.lt.0 .or. dbbc3_mcast_arrival.gt.499) then
         call logit7ci(0,0,0,1,-186,'bo',iline)
         goto 990
       endif
@@ -217,7 +217,7 @@ c
       if (ic1.eq.0) goto 300
 C
       dbbc3_mcast_arrival = ias2b(ibuf,ic1,ic2-ic1+1)
-      if (dbbc3_mcast_arrival.lt.0 .or. dbbc3_mcast_arrival.gt.4) then
+      if (dbbc3_mcast_arrival.lt.0 .or. dbbc3_mcast_arrival.gt.499) then
         call logit7ci(0,0,0,1,-186,'bo',iline)
         goto 990
       endif
@@ -281,7 +281,7 @@ c
       if (ic1.eq.0) goto 400
 c
       dbbc3_mcast_arrival = ias2b(ibuf,ic1,ic2-ic1+1)
-      if (dbbc3_mcast_arrival.lt.0 .or. dbbc3_mcast_arrival.gt.4) then
+      if (dbbc3_mcast_arrival.lt.0 .or. dbbc3_mcast_arrival.gt.499) then
         call logit7ci(0,0,0,1,-186,'bo',iline)
         goto 990
       endif

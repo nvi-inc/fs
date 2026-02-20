@@ -126,15 +126,12 @@ static void arrival_age(char buf[128],struct dbbc3_tsys_cycle *tsys_cycle,int ag
     if(tsys_cycle->no_mcast_since_restart) {
         printw("    ");
     } else {
-        if(tsys_cycle->hsecs/100>shm_addr->dbbc3_mcast_arrival)
+        if(tsys_cycle->hsecs/100>shm_addr->dbbc3_mcast_arrival/100)
             standout();
         buf[0]=0;
-        int2str(buf,tsys_cycle->hsecs/100,1,0);
-        printw("%1s.",buf);
-        buf[0]=0;
-        int2str(buf,tsys_cycle->hsecs%100,-2,1);
+        int2str(buf,tsys_cycle->hsecs,-3,0);
         printw("%2s",buf);
-        if(tsys_cycle->hsecs/100>shm_addr->dbbc3_mcast_arrival)
+        if(tsys_cycle->hsecs/100>shm_addr->dbbc3_mcast_arrival/100)
             standend();
     }
 
@@ -145,33 +142,33 @@ static void arrival_age(char buf[128],struct dbbc3_tsys_cycle *tsys_cycle,int ag
     int hours=age%86400/3600;
     int minutes=age%86400%3600/60;
     int secs=age%86400%3600%60;
-    if(days>=99)
-        snprintf(buf,9," >99days");
+    if(days>=999)
+        snprintf(buf,10," >999days");
+    else if(days>=100)
+        snprintf(buf,10," >%dd%02dh",days,hours);
     else if(days>=10)
-        snprintf(buf,9," >%dd%02dh",days,hours);
+        snprintf(buf,10,"  >%dd%02dh",days,hours);
     else if(days>=1)
-        snprintf(buf,9,"  >%dd%02dh",days,hours);
-    else if(hours>=10)
-        snprintf(buf,9," >%dh%02dm",hours,minutes);
+        snprintf(buf,10,"   >%dd%02dh",days,hours);
     else if(hours>=1)
-        snprintf(buf,9," %d:%02d:%02d",hours,minutes,secs);
+        snprintf(buf,10," %2d:%02d:%02d",hours,minutes,secs);
     else if(minutes>=1)
-        snprintf(buf,9,"   %2d:%02d",minutes,secs);
+        snprintf(buf,10,"    %2d:%02d",minutes,secs);
     else
-        snprintf(buf,9,"      %2d",secs);
+        snprintf(buf,10,"       %2d",secs);
 
     int i;
-    for(i=0;i<8;i++) {
+    for(i=0;i<9;i++) {
         if(buf[i]==' ')
             printw(" ");
         else {
-            if(age>shm_addr->dbbc3_mcast_arrival)
+            if(age>shm_addr->dbbc3_mcast_arrival/100)
                 standout();
             printw("%s",buf+i);
             break;
         }
     }
-    if(age>shm_addr->dbbc3_mcast_arrival)
+    if(age>shm_addr->dbbc3_mcast_arrival/100)
         standend();
 }
 static void display_version(struct dbbc3_tsys_cycle *tsys_cycle,int ifs_to_display,int it1)
@@ -363,9 +360,9 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
 
             if(ifc.time > 0) {
               disp_time=ifc.time+1;
-              if(ifc.time_error>=-shm_addr->dbbc3_mcast_arrival && ifc.time_error <=0)
+              if(ifc.time_error>=-shm_addr->dbbc3_mcast_arrival/100 && ifc.time_error <=0)
                   disp_time-=ifc.time_error;
-              if(age <= shm_addr->dbbc3_mcast_arrival)
+              if(age <= shm_addr->dbbc3_mcast_arrival/100)
                   disp_time+=age;
               ptr=gmtime(&disp_time);
             }
@@ -374,8 +371,8 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
                 printw("%17s"," ");
             } else {
                 int time_error=ifc.time_error;
-                int tm_bad = time_error<-shm_addr->dbbc3_mcast_arrival || time_error>0;
-                tm_bad = tm_bad || age >shm_addr->dbbc3_mcast_arrival;
+                int tm_bad = time_error<-shm_addr->dbbc3_mcast_arrival/100 || time_error>0;
+                tm_bad = tm_bad || age >shm_addr->dbbc3_mcast_arrival/100;
 
                 if(tm_bad)
                     standout();
@@ -410,8 +407,8 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
                 printw("%5s"," ");
             } else {
                 int time_error=ifc.time_error;
-                int tm_bad = time_error<-shm_addr->dbbc3_mcast_arrival || time_error>0;
-                if(time_error>=-shm_addr->dbbc3_mcast_arrival && time_error<0)
+                int tm_bad = time_error<-shm_addr->dbbc3_mcast_arrival/100 || time_error>0;
+                if(time_error>=-shm_addr->dbbc3_mcast_arrival/100 && time_error<0)
                     time_error=0;
                 buf[0]=0;
                 int2str(buf,time_error,-5,0);

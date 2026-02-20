@@ -1,4 +1,4 @@
-* Copyright (c) 2020-2021, 2023, 2025 NVI, Inc.
+* Copyright (c) 2020-2021, 2023, 2025-2026 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -533,7 +533,7 @@ c
           if(rack.ne.DBBC3.or.rack_type.ne.DBBC3_DDCE) goto 1110
 c
           nch=mcoma(ib,nch)
-          nch = nch + ib2as(dbbc3_mcast_arrival,ib,nch,zcp8002)
+          nch = nch + ib2as(dbbc3_mcast_arrival,ib,nch,zcp8003)
 c
 1110      continue
           nch=mcoma(ib,nch)
@@ -548,7 +548,7 @@ c
           if(rack.ne.DBBC3.or.rack_type.ne.DBBC3_DDCU) goto 1120
 c
           nch=mcoma(ib,nch)
-          nch = nch + ib2as(dbbc3_mcast_arrival,ib,nch,zcp8002)
+          nch = nch + ib2as(dbbc3_mcast_arrival,ib,nch,zcp8003)
 c
 1120      continue
           nch=mcoma(ib,nch)
@@ -563,7 +563,7 @@ c
           if(rack.ne.DBBC3.or.rack_type.ne.DBBC3_DDCV) goto 1130
 c
           nch=mcoma(ib,nch)
-          nch = nch + ib2as(dbbc3_mcast_arrival,ib,nch,zcp8002)
+          nch = nch + ib2as(dbbc3_mcast_arrival,ib,nch,zcp8003)
 c
 1130      continue
           nch=mcoma(ib,nch)
