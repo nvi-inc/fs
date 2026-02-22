@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 NVI, Inc.
+ * Copyright (c) 2020-2021, 2026 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -101,7 +101,11 @@ struct dbbc3_ifx_cmd *lcl;
 
     switch (*count) {
       case 1:
-	sprintf(output,"%d",lcl->input);
+        ivalue = lcl->input;
+        if (ivalue >=1 && ivalue <=2)
+	  sprintf(output,"%d",lcl->input);
+        else
+          strcpy(output,BAD_VALUE);
         break;
       case 2:
         ivalue = lcl->agc;

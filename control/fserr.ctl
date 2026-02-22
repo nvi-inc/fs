@@ -2693,6 +2693,87 @@ Core3H board?W time VDIF epoch differs from that of the previous board sampled.
 DL -408
 See above time errors for Core3H board?W.
 ""
+DM -101
+No default for synthesizer IF.
+""
+DM -111
+Can't use '*' (previous value) for synthesizer IF.
+""
+DM -201
+Synthesizer LO must 'next' or 'loa', 'lob', ... 'loh' up to the number of IFs defined in dbbc3.ctl.
+""
+DM -102
+No default for synthesizer frequency if corresponding 'ifX=2' and 'lo=loX' has not be setup.
+""
+DM -202
+Unable to decode synthesizer frequency, must be positive.
+""
+DM -103
+No default for synthesizer enable if corresponding 'ifX' has not been setup.
+""
+DM -203
+Synthesizer enable must be 'off' or 'on'. If previously undefined, '*' can't be used.
+""
+DM -204
+The 'check' parameter must be 'check' or 'force'.
+""
+DM -213
+Can't enable synthesizer if no frequency is set.
+""
+DM -300
+Can't use '*' with 'force' for a synthesizer that hasn't already been setup.
+""
+DM -301
+No parameters are allowed after '?'.
+""
+DM -302
+'?' is not permitted after 'next'.
+""
+DM -303
+'force' cannot be used with 'next'.
+""
+DM -304
+No synthesizer configuration has been defined to select with 'next'.
+""
+DM -401
+Class buffer error from monitor response.
+""
+DM -402 Placeholder for string not decoded from DBBC3 synthesizer
+
+""
+DM -403
+Error decoding DBBC3 synth response, see error DN -402 for text.
+""
+DM -404
+Too many responses from DBBC synth
+""
+DM -406 Place holder unknown lock response
+
+""
+DM -451
+Class buffer error from command response.
+""
+DM -600
+Synthesizer configuration for l?W is not correct. Please see the preceding 'DM -61x' errors for details.
+""
+DM -611
+Synthesizer frequency for l?W is not correct.
+""
+DM -612
+Synthesizer enable for l?W is not correct.
+""
+DM -613
+Synthesizer mode for l?W is not correct.
+""
+DM -614
+Synthesizer status for l?W is not locked.
+""
+DM -615 Place holder for unknown synthesizer mode message
+
+""
+DM -616 Place holder for known synthesizer lock status message
+
+""
 DN   30
 DBBC3 multicast: version/personality issue resolved
 ""

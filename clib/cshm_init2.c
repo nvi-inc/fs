@@ -92,5 +92,15 @@ void cshm_init2()
   shm_addr->dbbc3_core3h_time.previous_board=0;
   shm_addr->dbbc3_core3h_time.previous_epoch=-1;
 
+  shm_addr->dbbc3_synthesizer_previous_lo=-1;
+
+  for(j=0;j<MAX_DBBC3_IF;j++) {
+      shm_addr->dbbc3_synthesizer[j].setup=0;
+      shm_addr->dbbc3_synthesizer[j].freq.freq=-1;
+      m5state_init(&shm_addr->dbbc3_synthesizer[j].freq.state);
+      shm_addr->dbbc3_synthesizer[j].enable.enable=-1;
+      m5state_init(&shm_addr->dbbc3_synthesizer[j].enable.state);
+  }
+
   return;
 }

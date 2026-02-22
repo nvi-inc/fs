@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2025 NVI, Inc.
+ * Copyright (c) 2020-2026 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -507,9 +507,9 @@ void cshm_init()
     shm_addr->rdbe_sync[i]=0;
 
   for (i=0;i<MAX_DBBC3_IF;i++) {
-    shm_addr->dbbc3_ifx[i].input=1;
+    shm_addr->dbbc3_ifx[i].input=-1;
     shm_addr->dbbc3_ifx[i].att=-1;
-    shm_addr->dbbc3_ifx[i].agc=1;
+    shm_addr->dbbc3_ifx[i].agc=-1;
     shm_addr->dbbc3_ifx[i].target_null=1;
     shm_addr->dbbc3_ifx[i].target=0;
   }

@@ -564,4 +564,7 @@ typedef struct fscom {
     int previous_epoch;
   } dbbc3_core3h_time;
 
+  struct dbbc3_synthesizer_cmd dbbc3_synthesizer[MAX_DBBC3_IF];
+  int dbbc3_synthesizer_previous_lo;
+
 } Fscom;

@@ -1,0 +1,181 @@
+          synth - IF synthesizer (DBBC3 racks)
+
+            Syntax:     synth=loX,freq,enable,check
+                        synth=
+                        synth=loX
+            Response:   synth/loX,freq,enable,att,mode,lock
+
+Settable Parameters:
+
+            loX       Synthesizer for the LO (IF) to set/read: 'loa', 'lob',
+                      ..., up to the last IF in the system ('loh' is the last
+                      possible), or "next' to read the synthesizer after the
+                      previous one read (wrapping after the last). 'next'
+                      cannot be used with 'force' (for the 'check' parameter).
+                      No default.
+
+            freq      frequency in MHZ for the synthesizer. No default unless
+                      'ifX' and 'lo=loX,...' have been setup or 'enable' is
+                      'off'. If 'ifX' input '2' is selected and 'loX' has been
+                      defined with 'lo=...' the frequency set for 'lo=loX,...'
+                      is the default. If 'ifX' input '1' or enable is 'off'),
+                      the default is "undefined." For Monitoring and Checking
+                      (see below in Comments), the value is shown in
+                      parentheses if 'enable' is 'off'.
+
+            enable    'off' or 'on'. No default unless 'ifX' has been setup.
+                      If 'ifX' input '2' is selected the default is 'on';
+                      input '1', 'off'.
+
+            check     Either 'check' or 'force'. Default is 'check'. 'force'
+                      cannot used with 'next' (for the 'loX' parameter). If
+                      'check', the device is checked to see of it it agrees
+                      with the commanded parameters and that 'mode' is 'CW"
+                      and that the status is 'locked'.
+
+Monitor-only Parameters:
+
+            att       attenuation, '0.0' to '31.5' dB in '0.5' dB steps.
+
+            mode      'CW', 'SWEEP', or 'LIST' (or 'unknown', if not one of
+                      three preceding values). For 'check', any value except
+                      'CW' will generate an error report.
+
+            lock      'locked' or 'unlocked' (or 'unknown', if not one of two
+                      preceding values). For 'check', an error report will be
+                      generated if the value is not 'locked'.
+
+Comments:
+CAUTION: This command takes about two seconds per IF to execute and will
+interfere with multicast transmission.
+
+In addition to the normal 'setting' and 'monitoring' forms of most commands,
+this one has an additional 'checking' form. The details of these forms are
+summarized below.
+
+  Setting -- The setting form is invoked by using a literal 'force' for the
+             'check' parameter and will command the device. The values of
+             'freq' and 'enable' also set the FS model (and hence the values
+             for '*' in subsequent commands) for that IF. Using '*' if the
+             synthesizer values for that IF has not previously been defined is
+             an error for setting. Using 'next' is not permitted.
+
+  Checking -- The 'checking' form, which is the default, is invoked by using a
+              literal 'check' (or null value, i.e., the default) for the
+              'check' parameter. In this case, the values of 'freq' and
+              'enable' are compared to the device's configuration. The value
+              for 'freq' is not checked if the device state of 'enable' is
+              'off'. Additionally, the mode and lock status are checked. Any
+              deviations from what is expected are reported as errors. Just
+              like for setting, the values of 'freq' and 'enable' set the FS
+              model for that IF.
+
+              With care, 'next' can be specified for the IF for checking,
+              typically with '*' for 'freq' and 'enable'.
+
+              If a specific IF is used, the corresponding LO value
+              ('lo=loX,...'), has not been set, and the 'freq' and 'enable'
+              parameters are default (null), the command is a no-op.
+
+              Similarly, if a specific IF is used and the synthesizer values
+              have not been set, using '*' for any other parameter makes the
+              command a no-op. See comments below about using a specific IF.
+
+  Monitoring -- The monitor forms are 'synth' (for all IFs) or 'synth=loX'
+                (with no following parameters). This form does not set the FS
+                model or report errors in the device configuration. Using
+                'next' in place of 'loX' is permitted.
+
+Using 'synth=' clears the FS model for all synthesizers. It should be used
+before setting the synthesizers for a mode so that unused synthesizers don't
+have their definitions carried over from a previous mode.
+
+The IF for 'next' is the next one after the last IF monitored or checked
+command. In other words, it is shared between monitor and checking. It
+advances even if there is an communication error so that it doesn't become
+stuck on one IF.
+
+For a specific IF, i.e., not 'next', if the 'freq' and 'mode' parameters are
+null (default) and the LO frequency has not been defined for this IF
+('lo=...'), the command is a no-op. This allows which synthesizer are used to
+be controlled by which IFs are in use without modifying the commands in the
+setup procedure. The synthesizer setup should start with a 'synth=' command,
+followed by commands similar to:
+
+  synth=loa,,,check
+
+should be used all IFs in the system, whether being used or not. See more
+about the 'dbbc3_synth' procedure below.
+
+For a specific IF, i.e., not 'next', if synthesizer values have not been
+previously set and '*' is used for any of them, the command is a no-op. This
+allows a fixed procedure to check all the synthesizers in use. Commands
+similar to
+
+  synth=loa,*,*,check
+
+should be used for all IFs in the system. There will only be output for
+synthesizers with defined setups. If no synthesizer have been defined, there
+will be no output. You can add a command at the end of the procedure to get
+some feedback when it is done:
+
+  op_stream="Synthesizer checking complete. Only defined synthesizers were checked."
+
+An example 'synth_check' procedure for eight IFs is included in the example
+procedure libraries 'd3fbstation.prc' and 'dbbc3tt.prc' in
+'/usr2/fs/st,default/proc'.
+
+You can also monitor (not check) all the synthesizers with a
+'synth' command or a specific one with 'synth=loX'
+
+If 'next' is used with 'check', IFs that have not been setup will be skipped.
+This allows the use of:
+
+  synth=next,*,*,check
+
+to cyclically check each setup IF, one at time. See more about the 'checkXXX'
+procedure below.
+
+If 'enable' is 'off' no freq value is sent to the device.
+
+The frequency sent to, and read from, the device is half the value set/shown
+in this command, 'freq'. The latter is the effective frequency of the device.
+
+The 'att' value is set in the boot configuration files and should have been
+determined in the laboratory before shipping.
+
+The 'synth' command is intended to be used in the 'dbbc3_synth' SNAP procedure
+in the 'station' library to check that the configuration of the synthesizer
+agrees with the settings of the 'lo=loX,...' and 'ifX=...' commands for each
+IF. It is called by drudg generated setup procedure for DBBC3 racks. The
+procedure should contain:
+
+  synth=
+  synth=loa,,,check
+
+With the 'loa' command repeated for each additional IF up to the number of IFs
+that your system has (as set in the 'dbbc3.ctl' control file). For IFs that
+don't have a first LO defined (with 'lo=...'), the command for that
+synthesizer will be a no-op.
+
+If appropriate, you can use non-default values for 'freq' and 'enable'. If
+need be, you can use 'force' to command instead of just checking. In that
+case, you should follow that group of commands with 'check' commands for all
+the IFs in your system. For example for 'loa' you would use:
+
+   synth=loa,*,*,check
+
+Because this command takes about two seconds to monitor/check each IF and
+interferes with multicast transmission, the IF can be specified as 'next' to
+provide progressive checking of one IF at a time in, for example, your station
+'checkXXX' procedure (which normally includes the scan check) to check the
+synthesizers cyclically. The form should be:
+
+  synth=next,*,*,check
+
+Only IFs with defined synthesizer setups will be checked. Using asterisks
+(using '*' is recommended to allow it to work for previously set (or checked)
+values of 'freq' and 'enable', whether defaults or not.
+
+If you use this command in 'checkxxx', you should verify first that the two
+seconds required doesn't delay schedule execution.

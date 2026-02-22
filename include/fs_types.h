@@ -113,3 +113,4 @@
 #include "dbbcvsi_clk_ds.h"
 #include "dbbc3_core3h_modex_ds.h"
 #include "dbbc3_core3h_time_ds.h"
+#include "dbbc3_synthesizer_ds.h"

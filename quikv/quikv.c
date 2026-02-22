@@ -481,6 +481,9 @@ loop:
       case 133:
 	dbbc3_core3h_time(&command,itask,ip);
 	break;
+      case 134:
+	dbbc3_synthesizer(&command,itask,ip);
+	break;
 /* end modified mb */
       default:
 	ierr=-4;

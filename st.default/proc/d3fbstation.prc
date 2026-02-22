@@ -227,6 +227,8 @@ enddef
 define  checkfb       00000000000x
 scan_check
 fb_status
+core3h_time=next
+synth=next,*,*,check
 enddef
 define  clock         00000000000x
 "gps-maser=cb
@@ -373,4 +375,26 @@ core3h_time=next
 core3h_time=next
 core3h_time=next
 core3h_time=next
+enddef
+define  synth_check   00000000000x
+synth=loa,*,*,check
+synth=lob,*,*,check
+synth=loc,*,*,check
+synth=lod,*,*,check
+synth=loe,*,*,check
+synth=lof,*,*,check
+synth=log,*,*,check
+synth=loh,*,*,check
+op_stream="Synthesizer checking complete. Only defined synthesizers were checked."
+enddef
+define  dbbc3_synth   00000000000x
+synth=
+synth=loa,,,check
+synth=lob,,,check
+synth=loc,,,check
+synth=lod,,,check
+synth=loe,,,check
+synth=lof,,,check
+synth=log,,,check
+synth=loh,,,check
 enddef
