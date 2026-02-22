@@ -23,9 +23,14 @@
   v125 0
 * DDC_V firmware version (v121 or later, but DDC_V starts at v124)
   v124 0
-* placeholder, 0-499, not used
-  0
-* setcl board
-  1
+*
+* Correction for board time in setcl, multiples of 100 up to the arrival
+*  time for the firmware version selected: 0, 100, 200, ...
+* Usually 0 but if the setcl board is late in the multicast packet it may
+*  have a later time if the firmware version has an arrival time >=100.
+* Beware of boards times that vary near the edge of a second boundary.
+     0
+* setcl board number, usually 1
+     1
 * DBBC3 clock rate, >= 0, but DDC only supports 128
   128
