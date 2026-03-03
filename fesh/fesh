@@ -403,9 +403,11 @@ Fetch schedule file (and .txt file, if available, for geo)
 Options:
  -n       Fetch next schedule in master file (not supported yet)
  -C       Check for changed schedule file (and .txt file if geo) If there
-          are any changes, or the drudg output is stale, the user will
-          promoted for whether to proceed and update the files.
- -d       drudg schedule with default settings, not supported for vlbeer
+          are any changes, or the drudg output is stale. The user will be
+          prompted for whether to proceed and update the files. Cannot be used
+          with '-d'. Please review the additional explanation of '-C' below.
+ -d       drudg schedule with default settings, not supported for vlbeer.
+          Cannot be used with '-C'.
           (needs STATION environment variable or -s set with station code)
  -D dc    Use alternate data center; dc=bkg, cddis, opar, or vlbeer. Upper
           and lower case are accepted. (see more below about setting the
@@ -448,13 +450,15 @@ If both are set, -s overrides STATION. In any event, the value is mapped to
 lower case, if it isn't already, for agreement with drudg.
 
 The '-C' option allows checking that already downloaded files and drudg output
-are up-to-date. If the downloaded files need to updated, or the drudg output
-is stale for geo, the user will be prompted for whether to proceed. If the
-user chooses to proceed, the files will be updated. For geo, drudg will be run
-automatically if needed. For non-geo, if the drudg output is stale, the user
-will be reminded to run drudg manually. Some errors messages recommend using
-'-C' to recover; other approaches may work better depending on your needs, but
-the recommended ones fit most situations and are afe.
+are up-to-date. When using '-C', all other options that are normally used
+should be included (but don't include '-d', which is implied if needed). If
+the downloaded files need to updated, or the drudg output is stale for geo,
+the user will be prompted for whether to proceed. If the user chooses to
+proceed, the files will be updated. For geo, drudg will be run automatically
+if needed. For non-geo, if the drudg output is stale, the user will be
+reminded to run drudg manually. Some error messages recommend using '-C' to
+recover; other approaches may work better depending on your needs, but the
+recommended ones fit most situations and are safe.
 
 Please see the end of this message about handling optional 'skedf.ctl'
 specified prompting for 'drudg'.
