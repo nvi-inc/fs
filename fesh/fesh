@@ -184,6 +184,27 @@ download_files() {
                 fi
             fi
         fi
+    elif [[ "$FESH_DATA_CENTER" =~ vcc ]]; then
+            if curl  -k  -f $CURL_VERBOSE -n \
+                -L -O "https://ivscc-vcc.org/vlbi/ivsdata/aux/$year/$sched/$sched.skd"; then
+                echo Done >&2
+            else
+                remove_tmp_files
+                fatal "Downloading $sched.skd failed"
+            fi
+
+            if [[ -z "$no_txt" ]]; then
+                echo "Fetching $sched.txt ..." >&2
+                if curl  -k  -f $CURL_VERBOSE -n \
+                    -L -O "https://ivscc-vcc.org/vlbi/ivsdata/aux/$year/$sched/$sched.txt"; then
+                     echo Done >&2
+                elif [[ -n "$txt" ]]; then
+                    remove_tmp_files
+                    fatal "Download of $sched.txt, required by '-x', failed."
+                else
+                    echo "Failed, but continuing since $sched.txt was not required by using '-x'." >&2
+                fi
+            fi
     fi
 }
 # Delete any tmp files
@@ -409,9 +430,9 @@ Options:
  -d       drudg schedule with default settings, not supported for vlbeer.
           Cannot be used with '-C'.
           (needs STATION environment variable or -s set with station code)
- -D dc    Use alternate data center; dc=bkg, cddis, opar, or vlbeer. Upper
-          and lower case are accepted. (see more below about setting the
-          default data center)
+ -D dc    Use alternate data center; dc=bkg, cddis, opar, vcc, or vlbeer. Upper
+          and lower case are accepted. (Please see more information below about
+          setting the default data center.)
  -v       Verbose mode: curl/wget verbose and drudg output printed to stdout
  -V       Print version and exit.
  -P       With -d, use drudg to send the schedule summary to the printer
@@ -466,9 +487,10 @@ specified prompting for 'drudg'.
 The '-d' option is not supported for data center 'vlbeer'.
 
 The default data center is CDDIS but can be changed by setting the
-FESH_DATA_CENTER environment variable. Accepted values are bkg, cddis, opar
-(the three 'geo' centers) or vlbeer. The value is mapped to lower case, if it
-isn't already. For example, to make the default bkg, use:
+FESH_DATA_CENTER environment variable. Accepted values are bkg, cddis, opar,
+vcc (the for "geo" data centers) or vlbeer. (Currently vcc is not an official
+data center but may be available for geo downloads.) The value is mapped to
+lower case, if it isn't already. For example, to make the default bkg, use:
 
     setenv FESH_DATA_CENTER bkg #in ~/.login for tcsh or
     export FESH_DATA_CENTER=bkg #in ~/.profile for bash
@@ -712,7 +734,7 @@ fi
 sched=$1
 
 FESH_DATA_CENTER=$(echo "$FESH_DATA_CENTER" | tr '[:upper:]' '[:lower:]')
-if [[ ! "$FESH_DATA_CENTER" =~ ^(cddis|opar|bkg|vlbeer)$ ]]; then
+if [[ ! "$FESH_DATA_CENTER" =~ ^(cddis|opar|bkg|vlbeer|vcc)$ ]]; then
    echo "Unknown data center: $FESH_DATA_CENTER."
    exit 1
 fi
