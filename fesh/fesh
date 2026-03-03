@@ -1040,7 +1040,13 @@ EOF
 
 You should run drudg manually to update/create any drudg output you need.
 EOF
-        exit 0
+            open_drudg_files=$(check_open_drudg_files)
+            if [[ -n "$open_drudg_files" ]]; then
+                echo "" >&2
+                echo "WARNING: The above files are open in the FS. You must should close them before" >&2
+                echo "WARNING: running drudg or the FS will malfunction." >&2
+            fi
+            exit 0
         fi
     else
        if [[ -n "$update_needed" ]]; then
@@ -1076,6 +1082,14 @@ EOF
                fi
                ;;
        n|no)   echo -e "Aborting."
+               if [[ "$FESH_DATA_CENTER" =~ vlbeer && -n "$drudg_needed" ]]; then
+                   open_drudg_files=$(check_open_drudg_files)
+                   if [[ -n "$open_drudg_files" ]]; then
+                       echo "" >&2
+                       echo "WARNING: The above files are open in the FS. If you run drudg now to recreate" >&2
+                       echo "WARNING: them, you must close them first or the FS will malfunction." >&2
+                   fi
+               fi
                remove_tmp_files
                exit 0
                ;;
@@ -1086,13 +1100,19 @@ EOF
 
     download=
     if [[ "$FESH_DATA_CENTER" =~ vlbeer ]]; then
-       if [[ -e "$sched.vex" ]]; then
-           echo "Updating $SCHED_DIR/$sched.vex" >&2
-           cp -f "$sched.vex" "$SCHED_DIR"
-           echo -e "\nBEWARE: Any drudg output is older than $SCHED_DIR/$sched.vex."
-           echo      "        You should run drudg manually to create/update any files you need." >&2
-           unlink "$sched.vex"
-       fi
+        if [[ -e "$sched.vex" ]]; then
+            echo "Updating $SCHED_DIR/$sched.vex" >&2
+            cp -f "$sched.vex" "$SCHED_DIR"
+            echo -e "\nBEWARE: Any drudg output is older than $SCHED_DIR/$sched.vex."
+            echo      "        You should run drudg manually to create/update any files you need." >&2
+            open_drudg_files=$(check_open_drudg_files)
+            if [[ -n "$open_drudg_files" ]]; then
+                echo "" >&2
+                echo "WARNING: The above files are open in the FS. You must close them before running" >&2
+                echo "WARNING: drudg or the FS will malfunction." >&2
+            fi
+            unlink "$sched.vex"
+        fi
     else
        if [[ -n "$drudg_needed" ]] ; then
            run_drudg=1
