@@ -421,13 +421,15 @@ Fetch schedule file (and .txt file, if available, for geo)
 
 Options:
  -n       Fetch next schedule in master file (not supported yet)
- -C       Check for changed schedule file (and .txt file if geo) If there
-          are any changes, or the drudg output is stale. The user will be
-          prompted for whether to proceed and update the files. Cannot be used
-          with '-d'. Please review the additional explanation of '-C' below.
+ -C       Check for changed schedule file (and .txt file if geo). If there are
+          any changes, or the drudg output is stale, the user will be prompted
+          for whether to proceed and update the files. Please review the
+          additional explanation of '-C' below. This option requires the
+          STATION environment variable or -s option set with the station code.
  -d       drudg schedule with default settings, not supported for vlbeer.
-          Cannot be used with '-C'.
-          (needs STATION environment variable or -s set with station code)
+          Cannot be used if the output .prc and/or .snp file are open in the
+          FS. This option requires the STATION environment variable or -s
+          option set with the station code.
  -D dc    Use alternate data center; dc=bkg, cddis, opar, vcc, or vlbeer. Upper
           and lower case are accepted. (Please see more information below about
           setting the default data center.)
@@ -468,21 +470,27 @@ be set with the two character station code. For example, for STATION:
 If both are set, -s overrides STATION. In any event, the value is mapped to
 lower case, if it isn't already, for agreement with drudg.
 
-The '-C' option allows checking that already downloaded files and drudg output
-are up-to-date. When using '-C', all other options that are normally used
-should be included (but don't include '-d', which is implied if needed). If
-the downloaded files need to updated, or the drudg output is stale for geo,
-the user will be prompted for whether to proceed. If the user chooses to
-proceed, the files will be updated. For geo, drudg will be run automatically
-if needed. For non-geo, if the drudg output is stale, the user will be
-reminded to run drudg manually. Some error messages recommend using '-C' to
-recover; other approaches may work better depending on your needs, but the
-recommended ones fit most situations and are safe.
+The '-d' option cannot be used if the output '.prc' and/or '.snp' file are
+open in the FS (BEWARE: other programs may have them open, but that is not
+checked since it cannot be reliably detected). The '-d' option is not
+supported for data center 'vlbeer'.
 
 Please see the end of this message about handling optional 'skedf.ctl'
 specified prompting for 'drudg'.
 
-The '-d' option is not supported for data center 'vlbeer'.
+The '-C' option allows checking that already downloaded files and the drudg
+output are up-to-date. This requires the STATION environment variable or -s
+option set with station code. When using '-C', all other options that are
+normally used should be included ('-d' is ignored; but for geo, drudg will be
+run automatically if it is needed). If the downloaded files need to updated,
+or the drudg output is stale for geo, the user will be prompted for whether to
+proceed. If the user chooses to proceed, the files will be updated. For geo,
+drudg will be run automatically if needed. For non-geo, if the drudg output is
+stale, the user will be reminded to run drudg manually. If the '.prc' and/or
+'.snp' files are open in the FS, proceeding will blocked (geo) or a warning
+issued (non-geo). Some error messages recommend using '-C' to recover; other
+approaches may work better depending on your needs, but the recommended ones
+fit most situations and should be safe.
 
 The default data center is CDDIS but can be changed by setting the
 FESH_DATA_CENTER environment variable. Accepted values are bkg, cddis, opar,
@@ -634,17 +642,14 @@ while getopts 'a:Cc:nfdD:hHm:p:Ps:St:T:u:vVxXy:' opt; do
             ;;
         C)
             if [[ -n "$run_drudg" ]] ; then
-                echo "Can't use '-d' and '-C' together."
-                exit 1
+                run_drudg=
             fi
             check_new=1
             ;;
         d)
-            if [[ -n "$check_new" ]] ; then
-                echo "Can't use '-C' and '-d' together."
-                exit 1
+            if [[ -z "$check_new" ]] ; then
+                run_drudg=1
             fi
-            run_drudg=1
             ;;
         D)
             FESH_DATA_CENTER=$OPTARG
