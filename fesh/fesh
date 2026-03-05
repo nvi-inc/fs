@@ -314,7 +314,7 @@ check_open_drudg_files() {
         if fuser -v $SNAP_DIR/$sched$station.snp 2>&1 | grep -q " boss$" ; then
             if [[ -z "$open_drudg_files" ]]; then
                 echo "" >&2
-                echo "    File(s) open in the FS:" >&2
+                echo "    $sched file(s) open in the FS:" >&2
             fi
             echo "        $SNAP_DIR/$sched$station.snp (boss)." >&2
             open_drudg_files=1
@@ -324,7 +324,7 @@ check_open_drudg_files() {
         if fuser -v $PROC_DIR/$sched$station.prc 2>&1 | grep -q " boss$" ; then
             if [[ -z "$open_drudg_files" ]]; then
                 echo "" >&2
-                echo "    File(s) open in the FS:" >&2
+                echo "    $sched file(s) open in the FS:" >&2
             fi
             echo "        $PROC_DIR/$sched$station.prc (boss)." >&2
             open_drudg_files=1
@@ -332,7 +332,7 @@ check_open_drudg_files() {
         if fuser -v $PROC_DIR/$sched$station.prc 2>&1 | grep -q " pfmed$" ; then
             if [[ -z "$open_drudg_files" ]]; then
                 echo "" >&2
-                echo "    File(s) open in the FS:" >&2
+                echo "    $sched file(s) open in the FS:" >&2
             fi
             echo "        $PROC_DIR/$sched$station.prc (pfmed)." >&2
             open_drudg_files=1
