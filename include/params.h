@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, 2022, 2023, 2025 NVI, Inc.
+ * Copyright (c) 2020, 2022, 2023, 2025, 2026 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -87,6 +87,7 @@
 #define MAX_DBBC3_BBC   128
 #define MAX_DBBC3_IF    8     
 #define MAX_DBBC3_DET    (2*MAX_DBBC3_BBC+MAX_DBBC3_IF)
+#define MAX_DBBC3_SUB_LO_TABLE 40
 
 /* must be the largest number of detectors possible */
 #define MAX_GLOBAL_DET    MAX_DBBC3_DET

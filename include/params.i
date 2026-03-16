@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020, 2022, 2023 NVI, Inc.
+* Copyright (c) 2020, 2022, 2023, 2026 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -92,6 +92,7 @@ c
       integer MAX_DBBC3_BBC
       integer MAX_DBBC3_IF
       integer MAX_DBBC3_DET
+      integer MAX_DBBC3_SUB_LO_TABLE
       integer MAX_GLOBAL_DET
       integer CH_PRIOR      ! chekr        realtime priority
       integer CL_PRIOR      ! clock func.  realtime priority
@@ -190,6 +191,7 @@ C
       parameter ( MAX_DBBC3_BBC  =128)
       parameter ( MAX_DBBC3_IF   = 8)
       parameter ( MAX_DBBC3_DET  = 2*MAX_DBBC3_BBC+MAX_DBBC3_IF)
+      parameter ( MAX_DBBC3_SUB_LO_TABLE = 40)
       parameter ( MAX_GLOBAL_DET = MAX_DBBC3_DET)
 C
       parameter ( CH_PRIOR=-04)

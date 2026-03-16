@@ -2873,6 +2873,57 @@ DBBC3 multicast: DBBC3 personality should be DBBC_E (equip.ctl), but it is DBBC_
 DN  -43
 DBBC3 multicast: DBBC3 personality should be DBBC_E (equip.ctl), but it is DBBC_V, see DN -30 error above
 ""
+DO -111
+Can't use '*' (previous value) for sub-LO IF.
+""
+DO -201
+Sub-LO IF must be 'loa', 'lob', ... 'loh' up to the number of IFs defined in dbbc3.ctl.
+""
+DO -102
+No default for sub-LO frequency.
+""
+DO -112
+Can't use '*' (previous value) for sub-LO frequency.
+`""
+DO -202
+Unable to decode sub-LO frequency, must be positive.
+""
+DO -103
+No default for sub-LO side-band.
+""
+DO -113
+Can't use '*' (previous value) for sub-LO side-band.
+""
+DO -203
+Sub-LO side-band must be 'usb' or 'lsb'.
+""
+DO -114
+Can't use '*' (previous value) for LO frequency range minimum.
+""
+DO -204
+Minimum for LO frequency range must be positive.
+""
+DO -115
+Can't use '*' (previous value) for LO frequency range maximum.
+""
+DO -205
+Maximum for LO frequency range can't be negative (or zero), less than minimum, or set if the minimum is not set.
+""
+DO -116
+Can't use '*' (previous value) for LO side-band.
+""
+DO -206
+Side-band for LO side-band must be 'all', 'usb' of 'lsb'
+""
+DO -301
+No parameters are allowed after '?'.
+""
+DO -302
+DBBC3 sub-LO table is full. The maximum number of entries is 40.
+""
+DO -303
+Internal error in sub_lo command for DBBC3, incorrect IF number, ?WWWW.
+""
 DP -301
 No command form of pfbX command.
 ""

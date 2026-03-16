@@ -484,6 +484,9 @@ loop:
       case 134:
 	dbbc3_synthesizer(&command,itask,ip);
 	break;
+      case 135:
+	dbbc3_sub_lo(&command,itask,ip);
+	break;
 /* end modified mb */
       default:
 	ierr=-4;

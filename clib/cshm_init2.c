@@ -102,5 +102,7 @@ void cshm_init2()
       m5state_init(&shm_addr->dbbc3_synthesizer[j].enable.state);
   }
 
+  shm_addr->dbbc3_sub_lo.count=0;
+
   return;
 }

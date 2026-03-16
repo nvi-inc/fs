@@ -567,4 +567,6 @@ typedef struct fscom {
   struct dbbc3_synthesizer_cmd dbbc3_synthesizer[MAX_DBBC3_IF];
   int dbbc3_synthesizer_previous_lo;
 
+  struct dbbc3_sub_lo_cmd dbbc3_sub_lo;
+
 } Fscom;
