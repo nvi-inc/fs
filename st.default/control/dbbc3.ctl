@@ -28,7 +28,7 @@
 *  time for the firmware version selected: 0, 100, 200, ...
 * Usually 0 but if the setcl board is late in the multicast packet it may
 *  have a later time if the firmware version has an arrival time >=100.
-* Beware of boards times that vary near the edge of a second boundary.
+* Beware of board times that vary near the edge of a second boundary.
      0
 * setcl board number, usually 1
      1

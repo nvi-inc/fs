@@ -338,7 +338,7 @@ c
       endif
 
       dbbc3_mcdelay = ias2b(ibuf,ic1,ic2-ic1+1)
-      if (dbbc3_mcdelay.lt.0 .or. dbbc3_mcdelay.ge.dbbc3_mcast_arrival
+      if (dbbc3_mcdelay.lt.0 .or. dbbc3_mcdelay.gt.dbbc3_mcast_arrival
      &  .or. 100*(dbbc3_mcdelay/100).ne.dbbc3_mcdelay) then
         call logit7ci(0,0,0,1,-186,'bo',iline)
         goto 990
