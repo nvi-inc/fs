@@ -70,6 +70,13 @@ frequencies for that IF. If 'lo_sb' is null or 'all', it applies to a total LO
 for either side-band. If 'loX' is null or 'all', the entry applies
 (conditionally, based on LO parameters) to all IFs.
 
+Generally speaking, it is recommended to make the 'lo_min', 'lo_max', and
+'lo_sb' parameters as restrictive as possible to reduce the risk of having a
+table entry apply when it is not wanted. Multiple table entries for a given
+sub-LO can used if necessary. A maximum of 40 table entries are supported. A
+warning is given by the 'synth' command if an entry would apply when the
+corresponding 'ifx' input is '1'.
+
 Multiple table entries may cover a given total LO. The first in the table that
 matches applies. Therefore you should enter the table with the most specific
 entries before less specific ones. For example:

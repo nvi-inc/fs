@@ -31,6 +31,7 @@
 
 static char *enable_key[ ]={"off","on"};
 static char *check_key[ ]={"force","check"};
+static char *sb_key[ ]={"all","usb","lsb"};
 
 static char *atten_key[ ]=
   { "0.0", "0.5", "1.0", "1.5", "2.0", "2.5", "3.0", "3.5", "4.0", "4.5",
@@ -44,6 +45,7 @@ static char *atten_key[ ]=
 static char *mode_key[ ]={"CW","SWEEP","LIST","unknown"};
 static char *lock_key[ ]={"unlocked","locked","unknown"};
 
+#define SB_KEY  sizeof(sb_key)/sizeof( char *)
 #define NENABLE_KEY sizeof(enable_key)/sizeof( char *)
 #define NCHECK_KEY sizeof(check_key)/sizeof( char *)
 #define NATTEN_KEY sizeof(atten_key)/sizeof( char *)
@@ -71,7 +73,7 @@ int ilo;
            if(shm_addr->lo.lo[ilo] > 0.0) {
              kdefault=TRUE;
              ddefault=shm_addr->lo.lo[ilo];
-            }
+          }
         } else if(1==shm_addr->dbbc3_ifx[ilo].input) {
           kdefault=TRUE;
           ddefault=-1.0;
@@ -85,12 +87,33 @@ int ilo;
         }
         ierr=arg_dble(ptr,&lcl->freq.freq,0.0,FALSE);
         m5state_init(&lcl->freq.state);
+        m5state_init(&lcl->sub_lo_freq.state);
+        m5state_init(&lcl->sub_lo_sb.state);
         if(-100==ierr) {
-          if(kdefault)
-             lcl->freq.freq=ddefault;
-          else
-             lcl->freq.freq=-1.0;
-          ierr=0;
+            if(kdefault) {
+                double freq;
+                int sb;
+                int itable=find_sub_lo(ilo, &freq, &sb);
+                lcl->freq.freq=ddefault;
+                if(itable>=0) {
+                    lcl->sub_lo_freq.sub_lo_freq=freq;
+                    lcl->sub_lo_freq.state.known=1;
+                    lcl->sub_lo_sb.sub_lo_sb=sb;
+                    lcl->sub_lo_sb.state.known=1;
+                    if(2==shm_addr->dbbc3_ifx[ilo].input) {
+                        if(freq >= lcl->freq.freq) {
+                            ierr=-220;
+                            break;
+                        } else {
+                            lcl->freq.freq-=freq;
+                        }
+                    } else if(1==shm_addr->dbbc3_ifx[ilo].input) {
+                        logit(NULL,232,"dm");
+                    }
+                }
+            } else
+                lcl->freq.freq=-1.0;
+            ierr=0;
         }
 
         if(ierr==0 && lcl->freq.freq >0.0) {
@@ -114,8 +137,10 @@ int ilo;
             ierr=-200;
         else if(ierr==0 && 1==lcl->enable.enable && lcl->freq.freq <= 0.0)
             ierr=-210;
+        else if(ierr==0 && 0==lcl->enable.enable && lcl->freq.freq > 0.0)
+            ierr=-220;
         if(ierr==0) {
-            lcl->enable.state.known=1;
+          lcl->enable.state.known=1;
         } else {
             lcl->enable.state.error=1;
         }
@@ -169,6 +194,29 @@ struct dbbc3_synthesizer_cmd *lcl;
             strcpy(output,enable_key[ivalue]);
           else
             strcpy(output,BAD_VALUE);
+        }
+        break;
+      case 4:
+        if(lcl->sub_lo_freq.state.known) {
+          strcpy(output++,"(");
+          sprintf(output,"%f",lcl->sub_lo_freq.sub_lo_freq);
+          int len=strlen(output);
+          while(len-->0 && '0' == output[len])
+            output[len]=0;
+          if(len>=0 && '.'==output[len])
+            output[len]=0;
+          strcat(output,")");
+        }
+        break;
+      case 5:
+        if(lcl->sub_lo_sb.state.known) {
+          strcpy(output++,"(");
+          ivalue=lcl->sub_lo_sb.sub_lo_sb;
+          if (ivalue >0 && ivalue <SB_KEY)
+            strcpy(output,sb_key[ivalue]);
+          else
+            strcpy(output,BAD_VALUE);
+          strcat(output,")");
         }
         break;
       default:

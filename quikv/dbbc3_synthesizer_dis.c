@@ -101,6 +101,7 @@ int kcheck;
                   ierr=0;
                   break;
               case 3:
+                  memcpy(&lclc,shm_addr->dbbc3_synthesizer+ilo,sizeof(lclc));
                   ierr=dbbc3_2_synthesizer_freq(&lclc,inbuf);
                   break;
               case 5:

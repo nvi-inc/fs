@@ -3,7 +3,7 @@
             Syntax:     synth=loX,freq,enable,check
                         synth=
                         synth=loX
-            Response:   synth/loX,freq,enable,att,mode,lock
+            Response:   synth/loX,freq,enable,sub_lo_freq,sub_lo_sb,att,mode,lock
 
 Settable Parameters:
 
@@ -12,7 +12,7 @@ Settable Parameters:
                       possible), or "next' to read the synthesizer after the
                       previous one read (wrapping after the last). 'next'
                       cannot be used with 'force' (for the 'check' parameter).
-                      No default.
+                      No default. No previous value ('*') available.
 
             freq      frequency in MHZ for the synthesizer. No default unless
                       'ifX' and 'lo=loX,...' have been setup or 'enable' is
@@ -34,6 +34,21 @@ Settable Parameters:
                       and that the status is 'locked'.
 
 Monitor-only Parameters:
+
+            sub_lo_freq  The frequency in MHz of the corresponding sub-LO, if
+                         one applies. If so, the value is shown in parenthesis
+                         because it is not read from the device; it is
+                         determined when the synthesizer state is defined with
+                         a default frequency and the corresponding 'ifX' input
+                         is '2'. If no sub-LO applies, the parameter is null.
+
+            sub_lo_sb    The side-band ('usb' or 'lsb') of the corresponding
+                         sub-LO if one applies. If so, the value is shown in
+                         parenthesis because it is not read from the device;
+                         it is determined when the synthesizer state is
+                         defined with a default frequency and the
+                         corresponding 'ifX' input is '2'. If no sub-LO
+                         applies, the parameter is null.
 
             att       attenuation, '0.0' to '31.5' dB in '0.5' dB steps.
 

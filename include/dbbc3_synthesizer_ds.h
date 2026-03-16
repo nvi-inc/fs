@@ -33,6 +33,14 @@ struct dbbc3_synthesizer_cmd {
     int check;
     struct m5state state;
   } check;
+  struct {
+    double sub_lo_freq;
+    struct m5state state;
+  } sub_lo_freq;
+  struct {
+    double sub_lo_sb;
+    struct m5state state;
+  } sub_lo_sb;
 };
 
 struct dbbc3_synthesizer_mon {

@@ -2693,6 +2693,9 @@ Core3H board?W time VDIF epoch differs from that of the previous board sampled.
 DL -408
 See above time errors for Core3H board?W.
 ""
+DM  232
+WARNING: There is a matching sub-LO, but the corresponding 'ifX' input is 1.
+""
 DM -101
 No default for synthesizer IF.
 ""
@@ -2708,17 +2711,23 @@ No default for synthesizer frequency if corresponding 'ifX=2' and 'lo=loX' has n
 DM -202
 Unable to decode synthesizer frequency, must be positive.
 ""
+DM -222
+Sub-LO frequency is greater than or equal to LO frequency.
+""
 DM -103
 No default for synthesizer enable if corresponding 'ifX' has not been setup.
 ""
 DM -203
 Synthesizer enable must be 'off' or 'on'. If previously undefined, '*' can't be used.
 ""
-DM -204
-The 'check' parameter must be 'check' or 'force'.
-""
 DM -213
 Can't enable synthesizer if no frequency is set.
+""
+DM -223
+Must enable synthesizer if a frequency is set.
+""
+DM -204
+The 'check' parameter must be 'check' or 'force'.
 ""
 DM -300
 Can't use '*' with 'force' for a synthesizer that hasn't already been setup.
