@@ -208,14 +208,6 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
     seconds-=1;
     int age=seconds-tsys_cycle->last;
 
-    int cols=1;
-    int rows=1;
-    if(panel) {
-        next=0;
-        cols=4;
-        rows=2;
-    }
-
     int itpis[MAX_DBBC3_DET] = {};
     mk5dbbc3d(itpis);
 
@@ -247,16 +239,26 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
     rows_needed_p=2+5+bbcs_to_display_per_if;
     if(ifs_to_display >4 )
         rows_needed_p+=1+5+bbcs_to_display_per_if;
-    cols_needed_p=24+25*3;
-    if(ifs_to_display <4)
+    if(ifs_to_display <=4)
         cols_needed_p=24+25*(ifs_to_display-1);
+    else if(ifs_to_display <=6)
+        cols_needed_p=24+25*2;
+    else
+        cols_needed_p=24+25*3;
 
     int rows_needed_np, cols_needed_np;
     rows_needed_np=1+6+bbcs_to_display_per_if;
     cols_needed_np=24;
 
     int rows_needed, cols_needed;
+    int cols=1;
+    int rows=1;
     if(panel) {
+        next=0;
+        cols=4;
+        rows=2;
+        if(5==ifs_to_display || 6==ifs_to_display)
+          cols=3;
         rows_needed=rows_needed_p;
         cols_needed=cols_needed_p;
     } else {
