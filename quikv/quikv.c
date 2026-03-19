@@ -487,6 +487,9 @@ loop:
       case 135:
 	dbbc3_sub_lo(&command,itask,ip);
 	break;
+      case 136:
+	rxg_reload(&command,itask,ip);
+	break;
 /* end modified mb */
       default:
 	ierr=-4;

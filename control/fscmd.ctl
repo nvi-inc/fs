@@ -611,6 +611,7 @@ mcast_time   qkr 13201 01 4000FFFFFFFF
 core3h_time  qkr 13301 01 4000FFFFFFFF
 synth        qkr 13401 01 4000FFFFFFFF
 sub_lo       qkr 13501 01 4000FFFFFFFF
+rxg_reload   qkr 13601 01 4000FFFFFFFF
 * boss internal
 cont         *xx 00000 02 FFFFFFFFFFFF
 halt         *xx 00000 03 FFFFFFFFFFFF

@@ -7091,6 +7091,12 @@ error closing an .rxg file.
 RG  -13
 extra trailing non-comment line found in an .rxg file
 ""
+RG  -19
+Failed to reload .rxg files, old file contents still in use.
+""
+RG  -20 Placeholder for failing .rxg file name
+
+""
 RG  -21
 .rxg file name too long, maximum is 128 characters
 ""
@@ -7348,6 +7354,9 @@ spillover table line: does not have at least two fields
 ""
 RG -912
 too many spillover table lines, maximum is 20
+""
+RG -999
+Command does not have settable parameters.
 ""
 RL -131
 Operation failed (non-specific error) on device ?W

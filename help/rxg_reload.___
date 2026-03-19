@@ -1,0 +1,57 @@
+             rxg_reload - reload '.rxg' files (all racks)
+
+Syntax:    rxg_reload
+
+Response:  rxg_reload/rxg,chan,freq,pol,file,type,lo1,lo2,year,month,day,pol1,dpfu1,pol2,dpfu2
+
+Monitor-only Parameters:
+
+  rxg    literal text, 'rxg', to indicate this line has '.rxg' file
+         information for the LO 'chan'
+  chan   loX, where X is one of:
+            1, 2, or 3 for Mark III/IV/5 and K-4,
+            a, b, c, or d for VLBA/4/5
+            1, 2, 3, or 4 for LBA/4,
+            a, b, c, d, 2a, 2b, 2c, or 2d for DBBC
+            a0, a1, b0, b1, c0, c1, d0, or d1 for RDBE
+            a, b, c, d, e, f, g, or h for DBBC3
+            1-8 for all others.
+  freq   LO frequency for this channel, MHz.
+  pol    Polarization for this channel, unknown, rcp, or lcp.
+  file   name of the '.rxg' file that matched the LO value; 'undefined' if
+         there was no match, in that case the remaining fields are omitted
+  type   LO type from '.rxg' file: 'fixed' or 'range'
+  lo1    first LO value from '.rxg' file, MHz
+  lo2    second LO value from '.rxg' file, if present, MHz
+  year   the year from the date in the '.rxg' file
+  month  the month from the date in the '.rxg' file
+  day    the day from the date in the '.rxg' file
+  pol1   first polarization from the '.rxg' file
+  dpfu1  DPFU of the first polarization in the '.rxg' file
+  pol2   second polarization from the '.rxg' file, if present
+  dpfu2  DPFU of the second polarization in the '.rxg' file, if present
+
+Comments:
+This command attempts to read the '.rxg' files in the
+'/usr2/control/rxg_files' directory. It is useful for updating the '.rxg' file
+information in the FS without restarting. (Note that the directory may be a
+symbolic link that may have been changed since the FS started.) It is
+recommended to only use this command when there is no active schedule and the
+FS is quiescent.
+
+If there is no error, the "rxg summary response" for each currently defined LO
+is displayed and the contents of each referenced '.rxg' file is recorded in
+the log file (but not displayed). All previous '.rxg' file information in the
+FS is removed/replaced. The result is the same as if the FS was restarted.
+
+If there is an error in reading any of the files, all the new '.rxg' file
+information is discarded. All previous '.rxg' file information in the FS is
+retained. The result is the same as if the 'rxg_reload' command had not been
+used.
+
+It may happen that an '.rxg' that is not currently needed has a error that is
+preventing an urgently needed '.rxg' from being loaded. In that case, the bad
+file can temporarily be renamed to not end in '.rxg'. For example another
+extension, like '.BAD' can be appended. The bad file should be repaired as
+soon as possible, certainly before it is needed, its name restored, and
+reloaded either with 'rxg_reload' or by restarting the FS.

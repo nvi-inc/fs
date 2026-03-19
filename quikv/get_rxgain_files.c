@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021, 2026 NVI, Inc.
+ * Copyright (c) 2026 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -29,11 +29,13 @@
 
 int get_rxgain();
 
-void get_rxgain_files(ierr)
-     int *ierr;
+void get_rxgain_files(ierr,rxgain,rxgain_files)
+int *ierr;
+struct rxgain_ds *rxgain;
+struct rxgain_files_ds *rxgain_files;
 {
-  char outbuf[513], logbuf[513];
-  int freq, icount, i;
+  char outbuf[513],logbuf[513];
+  int freq, icount;
   int dirlen;
   FILE *idum;
 
@@ -54,13 +56,13 @@ void get_rxgain_files(ierr)
   icount=-1;
   while(-1!=fscanf(idum,"%s",outbuf)){
     if(++icount < MAX_RXGAIN)
-      *ierr=get_rxgain(outbuf,&shm_addr->rxgain[icount]);
+      *ierr=get_rxgain(outbuf,rxgain+icount);
     else
       *ierr=-22;
     if(*ierr==0) {
         if(strlen(outbuf)-dirlen<-1+sizeof(((struct rxgain_files_ds *) 0)->file)) {
-            strcpy(shm_addr->rxgain_files[icount].file,outbuf+dirlen);
-            shm_addr->rxgain_files[icount].logged=FALSE;
+            strcpy(rxgain_files[icount].file,outbuf+dirlen);
+            rxgain_files[icount].logged=FALSE;
         } else
             *ierr=-21;
     }
