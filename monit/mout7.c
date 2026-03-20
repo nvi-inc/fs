@@ -191,8 +191,8 @@ static void display_version(struct dbbc3_tsys_cycle *tsys_cycle,int ifs_to_displ
     }
 }
 void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
-        int def, int rec, int reverse, int panel, int bbcs_to_display_per_if0,
-        int ifs_to_display0)
+        int def, int rec, int reverse, int panel, int interleave,
+         int bbcs_to_display_per_if0, int ifs_to_display0)
 {
     struct dbbc3_tsys_ifc ifc;
     struct dbbc3_tsys_bbc bbc[MAX_DBBC3_BBC];
@@ -207,6 +207,12 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
     rte2secs(it,&seconds);
     seconds-=1;
     int age=seconds-tsys_cycle->last;
+    static int interleave_order2[]={0,1};
+    static int interleave_order4[]={0,2,1,3};
+    static int interleave_order6[]={0,2,4,1,3,5};
+    static int interleave_order8[]={0,2,4,6,1,3,5,7};
+    static int     normal_order8[]={0,1,2,3,4,5,6,7};
+    int *order, count;
 
     int itpis[MAX_DBBC3_DET] = {};
     mk5dbbc3d(itpis);
@@ -261,6 +267,18 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
           cols=3;
         rows_needed=rows_needed_p;
         cols_needed=cols_needed_p;
+        if(!interleave)
+             order=    normal_order8;
+        else if(2>=ifs_to_display)
+             order=interleave_order2;
+        else if(4>=ifs_to_display)
+             order=interleave_order4;
+        else if(6>=ifs_to_display)
+             order=interleave_order6;
+        else
+             order=interleave_order8;
+        count=0;
+        next=order[count];
     } else {
         rows_needed=rows_needed_np;
         cols_needed=cols_needed_np;
@@ -495,9 +513,9 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
                     printw(" %5s"," ");
             }
             if(panel) {
-                next++;
-                if(next>ifs_to_display-1)
+                if(++count>ifs_to_display-1)
                   return;
+                next=order[count];
             }
         }
     }
