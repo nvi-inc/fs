@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, 2026 NVI, Inc.
+ * Copyright (c) 2020 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -18,14 +18,38 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 /* rte_rawt.c - return raw system time in clock HZ */
-/*              used when when only approximate relative time is needeed */
-/*              over the history, this has converged to be rte_ticks() */
+
+#include <sys/types.h>
+#include <sys/times.h>
+#include <sys/time.h>
+#include <unistd.h>
+#include <stdlib.h>
+
+#include "../include/params.h"
+#include "../include/fs_types.h"
+#include "../include/fscom.h"
+#include "../include/shm_addr.h"
 
 void rte_rawt(lRawTime)
 int *lRawTime;
 {
+     struct tms buffer;
+     struct timeval tv;
+     int index;
 
-  rte_ticks(lRawTime);
+     index=01 & shm_addr->time.index;
+     if(shm_addr->time.model!='c'
+	&& shm_addr->time.epoch[index]!=0
+	&& shm_addr->time.icomputer[index]==0 ) {
+       rte_ticks(lRawTime);
+     } else {
+       if(0!= gettimeofday(&tv, NULL)) {
+	 perror("getting timeofday, fatal\n");
+	 exit(-1);
+       }
+       *lRawTime=(tv.tv_sec-shm_addr->time.secs_off)*100
+	 +tv.tv_usec/10000;
+     }
 
-  return;
+     return;
 }

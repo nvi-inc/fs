@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, 2026 NVI, Inc.
+ * Copyright (c) 2020 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -18,7 +18,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 /* rte_ticks.c - return raw system ticks in clock HZ */
-/*               used when rte_fixt() will be used aftrerwards to get the real time */
 
 #include <stdlib.h>
 #include <sys/times.h>
@@ -34,26 +33,14 @@ int *lRawTicks;
 {
      struct tms buffer;
      clock_t ticks;
-
-     int index=01 & shm_addr->time.index;
-     if(shm_addr->time.model!='c'
-             && shm_addr->time.epoch[index]!=0
-             && shm_addr->time.icomputer[index]==0 ) {
-         ticks=times(&buffer);
-         if(ticks == (clock_t) -1) {
-             perror("using times()");
-             exit(-1);
-         }
-         *lRawTicks=(signed) ((unsigned int) ticks - shm_addr->time.ticks_off);
-     } else {
-        struct timeval tv;
-         if(0!= gettimeofday(&tv, NULL)) {
-             perror("getting timeofday, fatal\n");
-             exit(-1);
-         }
-         *lRawTicks=(tv.tv_sec-shm_addr->time.secs_off)*100+
-             +tv.tv_usec/10000;
+     
+     ticks=times(&buffer);
+     if(ticks == (clock_t) -1) {
+       perror("using times()");
+       exit(-1);
      }
+     *lRawTicks=(signed) ((unsigned int) ticks - shm_addr->time.ticks_off);
 
      return;
 }
+     
