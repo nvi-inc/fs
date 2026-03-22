@@ -123,10 +123,12 @@ main(int argc, char *argv[])
     int pol=0;
     int pol_default=0;
     int panel_default=0;
+    int interleave_default=0;
 
     int i=0;
     int okay=1;
     int panel=0;
+    int interleave=0;
 
     struct winsize ws;
 
@@ -143,6 +145,8 @@ main(int argc, char *argv[])
             reverse = 1;
         } else if(0==strcmp(argv[i],"-p")) {
             panel = panel_default = 1;
+        } else if(0==strcmp(argv[i],"-v")) {
+            interleave = interleave_default = 1;
         } else if(0==strcmp(argv[i],"-b")) {
             bbcs_to_display_per_if=atoi(argv[++i]);
             if(bbcs_to_display_per_if<=0 || bbcs_to_display_per_if> (MAX_DBBC3_BBC)/(MAX_DBBC3_IF)) {
@@ -173,7 +177,8 @@ main(int argc, char *argv[])
             fprintf(stderr," -i n  Minimum IFs to display in Panel (defaults to dbbc3.ctl value)\n");
             fprintf(stderr," -p    panel display (all IFs)\n");
             fprintf(stderr," -r    reverse some foreground colors\n");
-            fprintf(stderr," -z c  set default polarization\n");
+            fprintf(stderr," -v    interleave IFs (aceg/bdfh) in Panel\n");
+            fprintf(stderr," -z c  set default polarization for Non-panel\n");
             fprintf(stderr,"    c  'b'=both, 'l'=1st, 'r'=2nd\n");
             fprintf(stderr," -h    this help output\n");
             exit(0);
@@ -279,6 +284,10 @@ main(int argc, char *argv[])
                 panel=1-panel;
                 ifc=ifc_before;
                 clear();
+            } else if ('v' == ch) {
+                interleave=1-interleave;
+                ifc=ifc_before;
+                clear();
             } else if ('0' == ch) {
                 krf=1;
                 all=0;
@@ -287,6 +296,7 @@ main(int argc, char *argv[])
                 if(panel!=panel_default)
                     clear();
                 panel=panel_default;
+                interleave=interleave_default;
                 dwell=DWELL_SECONDS;
             } else if ('z' == ch) {
                 static int next_pol[ ] ={ 2, 0, 1};
@@ -298,7 +308,7 @@ main(int argc, char *argv[])
                 while (TRUE) {
                     int ch;
                     int irow=0;
-                    int rows_needed=14;
+                    int rows_needed=15;
                     int cols_needed=23;
                     if(rows_needed>win_rows || cols_needed >win_cols ) {
                         move(0,0);
@@ -337,6 +347,8 @@ main(int argc, char *argv[])
                     printw("l - toggle all/rec(def)");
                     move(irow++,0);
                     printw("t - toggle panel mode");
+                    move(irow++,0);
+                    printw("v - toggle interleave");
                     move(irow++,0);
                     printw("z - cycle pol. all/L/R");
                     move(irow++,0);
@@ -444,7 +456,7 @@ main(int argc, char *argv[])
 //            exit(0);
 //        }
         mout7(next,&shm_addr->dbbc3_tsys_data.data[iping],krf,all,!undef,record,
-             reverse, panel,bbcs_to_display_per_if,ifs_to_display);
+             reverse, panel, interleave, bbcs_to_display_per_if,ifs_to_display);
         move(ROW_HOLD,COL_HOLD);  /* place cursor at consistent location */
         standend();
         printw("");
