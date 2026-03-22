@@ -1,0 +1,455 @@
+/*
+ * Copyright (c) 2020-2023, 2025, 2026 NVI, Inc.
+ *
+ * This file is part of VLBI Field System
+ * (see http://github.com/nvi-inc/fs).
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+/* monit7 -- DBBC3 monitor program
+ */
+#include <ncurses.h>
+#include <stdlib.h>
+#include <signal.h>
+#include <math.h>
+#include <sys/types.h>
+#include <string.h>
+#include <sys/ioctl.h>
+#include <ctype.h>
+
+#include "../include/dpi.h"
+#include "../include/params.h"
+#include "../include/fs_types.h"
+#include "../include/fscom.h"
+#include "../include/shm_addr.h"
+
+#include "mon7.h"
+
+struct fscom *fs;
+
+#define DWELL_SECONDS 2
+
+int win_cols;
+int win_rows;
+
+static void handle_resize()
+{
+    struct winsize ws;
+
+    endwin();
+    refresh();
+    resize_term(0,0);
+    ioctl(0, TIOCGWINSZ, &ws);
+    win_rows=ws.ws_row;
+    win_cols=ws.ws_col;
+    clear();
+    refresh();
+}
+static int filter_escapes()
+{
+/* Filter out ANSI escape codes. We are primarily concerned with Control
+ * Sequence Introducers (CSI) that may come from a desktop manager. If other
+ * escape sequences, such as Operating System Commands, are discovered to cause
+ * problems, they may need to be filtered as well.
+ */
+
+  static int is_escape=0;
+  static int is_lb=0;
+  static int is_inter=0;
+  int ch;
+
+start:
+  if(ERR==(ch=getch()))
+    return ch;
+
+  if(is_escape) { /* filter escape sequences */
+    if (!is_lb) {
+      if('[' != ch) { /* not CSI */
+        is_inter=is_lb=is_escape=0;
+        goto next;
+      } else {  /* CSI */
+        is_lb=1;
+        goto start;
+      }
+    } else if(0x30 <= ch && ch <= 0x3F) { /* CSI parameter */
+      if(is_inter) { /* not after intermediate */
+        is_inter=is_lb=is_escape=0;
+        goto next;
+      } else {
+        goto start;
+      }
+    } else if(0x20 <= ch && ch <= 0x2F) { /* CSI intermediate */
+      is_inter=1;
+      goto start;
+    } else if(0x40 <= ch && ch <= 0x7E) { /* CSI final */
+      is_inter=is_lb=is_escape=0;
+      goto start;
+    } else {
+      goto start;
+    }
+  }
+
+next:
+  if ('\e' ==ch) {
+    is_escape=1;
+    goto start;
+  } else
+    return ch;
+}
+main(int argc, char *argv[])
+{
+    int it[6], seconds, isleep;
+    void m7init();
+    void m7out( int next, int iping);
+    void die();
+    void resize();
+    unsigned rte_sleep();
+    int ch;
+    char numbers[]  = "123456789";
+    char letters[]  = "abcdefgh";
+    char lettersu[] = "ABCDEFGH";
+    int reverse=0;
+    int pol=0;
+    int pol_default=0;
+    int panel_default=0;
+
+    int i=0;
+    int okay=1;
+    int panel=0;
+
+    struct winsize ws;
+
+    setup_ids();
+    fs = shm_addr;
+
+    int bbcs_to_display_per_if=fs->dbbc3_ddc_bbcs_per_if;
+    int ifs_to_display=fs->dbbc3_ddc_ifs;
+
+    signal(SIGINT, die);
+
+    while (++i<argc) {
+        if(0==strcmp(argv[i],"-r")) {
+            reverse = 1;
+        } else if(0==strcmp(argv[i],"-p")) {
+            panel = panel_default = 1;
+        } else if(0==strcmp(argv[i],"-b")) {
+            bbcs_to_display_per_if=atoi(argv[++i]);
+            if(bbcs_to_display_per_if<=0 || bbcs_to_display_per_if> (MAX_DBBC3_BBC)/(MAX_DBBC3_IF)) {
+                fprintf(stderr,"BBCs to display per IF must be in the range [1,%d]\n",(MAX_DBBC3_BBC)/(MAX_DBBC3_IF));
+                okay=0;
+            }
+        } else if(0==strcmp(argv[i],"-i")) {
+            ifs_to_display=atoi(argv[++i]);
+            if(ifs_to_display<=0 || ifs_to_display> MAX_DBBC3_IF) {
+                fprintf(stderr,"IFs to display  must be in the range [1,%d]\n",MAX_DBBC3_IF);
+                okay=0;
+            }
+        } else if(0==strcmp(argv[i],"-z")) {
+            char dumc, polc;
+            char pol_options[ ]= "brl";
+            if(++i >= argc || 1!=sscanf(argv[i],"%c%c",&polc,&dumc) || NULL==strchr(pol_options,polc)) {
+                if (i >= argc)
+                    fprintf(stderr,"Parameter required for '-z'\n");
+                else
+                    fprintf(stderr,"Could not decode '-z' parameter, must be 'b', 'l', or 'r', was: '%s'\n",argv[i]);
+                okay=0;
+            } else
+              pol=pol_default=strchr(pol_options,polc)-pol_options;
+        } else if(0==strcmp(argv[i],"-h")) {
+            fprintf(stderr,"Usage: %s [-b n] [-i n] [-p] [-r] [-z c] [-h]\n", argv[0]);
+            fprintf(stderr,"Options:\n");
+            fprintf(stderr," -b n  Minimum BBCs to display per IF (defaults to dbbc3.ctl value)\n");
+            fprintf(stderr," -i n  Minimum IFs to display in Panel (defaults to dbbc3.ctl value)\n");
+            fprintf(stderr," -p    panel display (all IFs)\n");
+            fprintf(stderr," -r    reverse some foreground colors\n");
+            fprintf(stderr," -z c  set default polarization\n");
+            fprintf(stderr,"    c  'b'=both, 'l'=1st, 'r'=2nd\n");
+            fprintf(stderr," -h    this help output\n");
+            exit(0);
+        } else {
+            fprintf(stderr,"Unknown option: '%s', try '%s -h'\n",argv[i],argv[0]);
+            okay = 0;
+        }
+    }
+    if(!okay) {
+        fprintf(stderr,"Pausing 10 seconds\n");
+        sleep(10);
+        exit(-1);
+    }
+
+    /*  First check to see if the field system is running */
+
+    if (nsem_test("fs   ") != 1) {
+        printf("Field System not running, pausing 10 seconds then monit7 will terminate.\n");
+        sleep(10);
+        exit(-1);
+    } else if (shm_addr->equip.rack != DBBC3 ) {
+        printf("Non-DBBC3 rack, pausing 10 seconds then monit7 will terminate.\n");
+        sleep(10);
+        exit(-1);
+    }
+
+    initscr();
+    noecho ();
+    nodelay(stdscr, TRUE);
+    ioctl(0, TIOCGWINSZ, &ws);
+    win_rows=ws.ws_row;
+    win_cols=ws.ws_col;
+
+    curs_set(0);
+    clear();
+    refresh();
+
+    if(has_colors()) {
+      start_color();
+      use_default_colors();
+      init_pair(DEFAULT,-1,-1);
+      init_pair(GREEN,COLOR_BLACK,COLOR_GREEN);
+      init_pair(YELLOW,COLOR_BLACK,COLOR_YELLOW);
+      init_pair(RED,COLOR_WHITE,COLOR_RED);
+      init_pair(BLUE,COLOR_WHITE,COLOR_BLUE);
+      init_pair(CYAN,COLOR_BLACK,COLOR_CYAN);
+      init_pair(GREENI,COLOR_WHITE,COLOR_GREEN);
+      init_pair(YELLOWI,COLOR_WHITE,COLOR_YELLOW);
+      init_pair(REDI,COLOR_BLACK,COLOR_RED);
+      init_pair(BLUEI,COLOR_BLACK,COLOR_BLUE);
+      init_pair(CYANI,COLOR_WHITE,COLOR_CYAN);
+    }
+    int next=0;
+    int dwell=DWELL_SECONDS;
+    int ifc=0;
+    int krf=1;
+    int all=0;
+
+    for(;;) {
+        rte_time(it,it+5);
+        isleep=100-it[0];
+        isleep=isleep>100?100:isleep;
+        isleep=isleep<1?100:isleep;
+        rte_sleep((unsigned) isleep);
+
+        if (nsem_test("fs   ") != 1) {
+            printf("Field System terminated\n");
+            die();
+            exit(0);
+        }
+        while(ERR!=(ch=filter_escapes())) {  /* handle inputs */
+            if(KEY_RESIZE == ch) {
+                handle_resize();
+                continue;
+            }
+
+            if(!isprint(ch) && !iscntrl(ch))
+                continue;
+
+            char *num=strchr(numbers,ch);
+            if(NULL != num) {
+                dwell=num-numbers+1;
+                continue;
+            }
+            char *ptr=strchr(letters,ch);
+            int ifc_before=ifc;
+            ifc = -1;
+            if (NULL != ptr) {
+                ifc=ptr-letters+1;
+            } else if (NULL != (ptr=strchr(lettersu,ch))) {
+                ifc=ptr-lettersu+1;
+            } else if ('n' == ch) {
+                ifc=1+(next+1)%fs->dbbc3_ddc_ifs;
+            } else if ('p' == ch) {
+                ifc=1+(next+fs->dbbc3_ddc_ifs-1)%fs->dbbc3_ddc_ifs;
+            } else if ('l' == ch) {
+                all=1-all;
+                ifc=ifc_before;
+            } else if ('i' == ch) {
+                krf=1-krf;
+                ifc=ifc_before;
+            } else if ('t' == ch) {
+                panel=1-panel;
+                ifc=ifc_before;
+                clear();
+            } else if ('0' == ch) {
+                krf=1;
+                all=0;
+                ifc=0;
+                pol=pol_default;
+                if(panel!=panel_default)
+                    clear();
+                panel=panel_default;
+                dwell=DWELL_SECONDS;
+            } else if ('z' == ch) {
+                static int next_pol[ ] ={ 2, 0, 1};
+                if (pol < 0 || pol >= sizeof(next_pol)/sizeof(int))
+                    pol=1;
+                pol=next_pol[pol];
+            } else if ( '?' == ch || '/' == ch) {
+                clear();
+                while (TRUE) {
+                    int ch;
+                    int irow=0;
+                    int rows_needed=14;
+                    int cols_needed=23;
+                    if(rows_needed>win_rows || cols_needed >win_cols ) {
+                        move(0,0);
+                        printw("Too small for help.");
+                        move(1,0);
+                        printw("Resize to at least:");
+                        move(2,0);
+                        printw(" Columns %d Rows %d.",cols_needed,rows_needed);
+                        move(3,0);
+                        printw("Current:");
+                        move(4,0);
+                        printw(" Columns %d Rows %d.",win_cols,win_rows);
+                        move(5,0);
+                        printw("Use space key/bar to");
+                        move(6,0);
+                        printw(" leave help now.");
+                        while(ERR==(ch=filter_escapes()))
+                            ;
+                        if(KEY_RESIZE == ch)
+                            handle_resize();
+                        else if (' ' == ch)
+                             break;
+                        continue;
+                    }
+                    move(irow++,0);
+                    printw("Single key inputs:");
+                    move(irow++,0);
+                    printw("a-h - that IF");
+                    move(irow++,0);
+                    printw("n/p - next/previous IF");
+                    move(irow++,0);
+                    printw("1-9 - dwell seconds");
+                    move(irow++,0);
+                    printw("i - toggle RF/IF");
+                    move(irow++,0);
+                    printw("l - toggle all/rec(def)");
+                    move(irow++,0);
+                    printw("t - toggle panel mode");
+                    move(irow++,0);
+                    printw("z - cycle pol. all/L/R");
+                    move(irow++,0);
+                    printw("0 reset all to defaults");
+                    move(irow++,0);
+                    printw("? or / - help");
+                    move(irow++,0);
+                    printw("Control-C to exit");
+                    move(irow++,0);
+                    printw("Any other: resume cycle");
+                    move(irow++,0);
+                    printw(" Use space key/bar to");
+                    move(irow++,0);
+                    printw("  leave help now.");
+                    while(ERR==(ch=filter_escapes()))
+                        ;
+                    if(KEY_RESIZE == ch)
+                        handle_resize();
+                    else if (' '==ch)
+                        break;
+                }
+                clear();
+                ifc=ifc_before;
+            }
+            if(-1==ifc || ifc>fs->dbbc3_ddc_ifs)
+                ifc=0;
+        }
+
+        /* update display */
+        int iping=shm_addr->dbbc3_tsys_data.iping;
+        int undef;
+        int record;
+        int i;
+        int ndisplay=0;
+        int display[MAX_DBBC3_IF];
+
+// logic states
+//
+// not recording a/r  action           show        states
+// ------------- ---  -----            ---- -------------------
+// all undef          cycle all        All   undef !record !all
+// all undef     all  cycle all        All   undef !record  all
+// some defs          cylce defs       Def  !undef !record !all
+// some defs     all  cycle all        All  !undef !record  all
+//
+// recording     a/r  action           show        states
+// ------------- ---  -----            ---- -------------------
+// all undef          cycle recording  Rec   undef  record !all
+// all undef     all  cycle all        All   undef  record  all
+// some defs          cycle recording  Rec  !undef  record !all
+// some defs     all  cycle all        All  !undef  record  all
+//
+
+// what state are we in?
+
+        record=FALSE;
+        for(i=0;i<fs->dbbc3_ddc_ifs;i++)
+            record=record ||
+                shm_addr->dbbc3_core3h_modex[i].mask1.state.known &&
+                shm_addr->dbbc3_core3h_modex[i].mask1.mask1 ||
+                shm_addr->dbbc3_core3h_modex[i].mask2.state.known &&
+                shm_addr->dbbc3_core3h_modex[i].mask2.mask2;
+
+        undef=TRUE;
+        for(i=0;i<fs->dbbc3_ddc_ifs;i++)
+            undef=undef &&
+                fs->dbbc3_tsys_data.data[iping].ifc[i].lo<0;
+
+// what IFs should be displayed?
+
+        if(all || !record && undef) {
+            for(i=0;i<fs->dbbc3_ddc_ifs;i++)
+                display[ndisplay++]=i;
+        } else if (!record) {  // just def
+            for (i=0;i<fs->dbbc3_ddc_ifs;i++) {
+                if(fs->dbbc3_tsys_data.data[iping].ifc[i].lo>=0 &&
+                        (pol==0 || pol==fs->dbbc3_tsys_data.data[iping].ifc[i].pol))
+                    display[ndisplay++]=i;
+            }
+        } else { // just rec
+            for (i=0;i<fs->dbbc3_ddc_ifs;i++) {
+                if((shm_addr->dbbc3_core3h_modex[i].mask1.state.known &&
+                            shm_addr->dbbc3_core3h_modex[i].mask1.mask1 ||
+                            shm_addr->dbbc3_core3h_modex[i].mask2.state.known &&
+                            shm_addr->dbbc3_core3h_modex[i].mask2.mask2) &&
+                        (pol==0 || pol==fs->dbbc3_tsys_data.data[iping].ifc[i].pol))
+                    display[ndisplay++]=i;
+            }
+        }
+        if(0==ndisplay)  // just for safety, probably can't trigger this
+            display[ndisplay++]=0;
+
+/* find next IF to display */
+
+        if (0==ifc) {
+            rte_time(it,it+5);
+            rte2secs(it,&seconds);
+            next=display[(seconds%(dwell*ndisplay))/dwell];
+        } else
+            next=ifc-1;
+
+//        if(idebug++>0) {
+//            printf(" iping %d\n",iping);
+//            die();
+//            exit(0);
+//        }
+        mout7(next,&shm_addr->dbbc3_tsys_data.data[iping],krf,all,!undef,record,
+             reverse, panel,bbcs_to_display_per_if,ifs_to_display);
+        move(ROW_HOLD,COL_HOLD);  /* place cursor at consistent location */
+        standend();
+        printw("");
+
+        refresh();
+    }
+
+}  /* end main of monit6 */
