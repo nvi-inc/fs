@@ -49,7 +49,7 @@ int rte_secs(int *usec_off,unsigned int *ticks_off,int *error, int *perrno)
   *perrno=0;
   *ticks_off=(unsigned int) ticks;
   int centisecs=tv.tv_usec/10000;
-  if(0!=centisecs) { /* for what it is worth, align ticks_off with secs_off */
+  if(0!=centisecs) { /* align ticks_off with secs_off */
      tv.tv_sec++;
      *ticks_off+=(100-centisecs);
   }
