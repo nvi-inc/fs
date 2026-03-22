@@ -1,4 +1,4 @@
-core3h_time - Core3H board time (DBBC3 rack)
+                 core3h_time - Core3H board time (DBBC3 rack)
 
 Syntax:   core3h_time=board
 
@@ -6,70 +6,70 @@ Response: core3h_time/board,epoch,seconds,days,time,(nominal),difference
 
 Settable parameters:
 
-board:      board to read, 1 to the number of IFs specified in
-            'dbbc3.ctl. (nominal maximum 8) or 'next' (see comments).
-            No default. The previous value is not available with '*'.
+board:      board to read, 1 to the number of IFs specified in 'dbbc3.ctl.
+            (nominal maximum 8) or 'next' (see comments).  No default. The
+            previous value is not available with '*'.
 
 Monitor only parameter:
 
-epoch       VDIF epoch (halfYearsSince2000); the value for January
-            1-June 30, 2020 should be '0'
+epoch       VDIF epoch (halfYearsSince2000); the value for January 1-June 30,
+            2020 should be '0'
 
 seconds     seconds since epoch
 
 days        full days since the start of 2000 until the epoch date
-            (daysSince2000); the value for January 1-June 30, 2020
-            should be '0'
+            (daysSince2000); the value for January 1-June 30, 2020 should be
+            '0'
 
 time        board date/time in format YYYY-MM-DDThh:mm:ss
 
 nominal     nominal VDIF epoch for board 'time', shown in parentheses
 
-difference  board time minus FS time in seconds, positive if the board
-            leads the FS
+difference  board time minus FS time in seconds, positive if the board leads
+            the FS
 
 Comments:
+This command samples the 'time' of Core3H 'board' at the start of the next FS
+UTC second.
+
+If the 'difference' parameter is '0' ,the board's time aligns with the FS time
+at the one second level. A value of '0' should only be expected if (i) he
+'computer' FS time model is being used and the computer is accurately synced
+to NTP or (ii) the 'rete; model is being and has been synced to the formatter
+and has an accurate rate. If one of those two conditions is met and the value
+is not '0', the Core3H board probably has the wrong time.
+
+If 'board' is specified as 'next', the board requested is one greater than the
+previous board requested (wrapping back to '1' after the last board specified
+by the number of IFs in 'dbbc3.ctl').  This applies regardless of whether the
+previous request used 'next' or specified a board explicitly. The board for
+'next' is determined by the previous request and not the previous board that
+had a successful response; this prevents' 'next' from getting stuck on a board
+with a problem.  After a FS restart, the 'next' board is '1'.
+
+It may take more than one second for the board to respond. As a result, the
+board 'time' shown may not match the FS log time stamp.  However, 'difference'
+is calculated as the board time returned minus the FS time when the request
+was made. If it is '0', they agree at the one second level.
+
+Another consequence of the board sometimes taking more than one second to
+respond is that consecutive 'core3H_mode=...' commands may not return board
+times that are consecutive.
+
+The '(nominal)' VDIF epoch value is not returned by the board. It is
+calculated based on the board 'time' and displayed for informational purposes
+in parentheses.
+
+The VDIF epoch is described by this section from the VDIF specification:
+
+  Reference epoch: [It is] ... the 6-month period in which the VDIF clock was
+  set, with an origin of at 00UTC 1 Jan 2000, such that ‘0’ corresponds to the
+  first 6 months of 2000, ‘1’ corresponds to the 6 months starting 00H 1 July
+  2000, etc. After setting, [it] ... is static and is not incremented. [It]
+  ... rolls over to 0 again when the reference epoch corresponds to the
+  6-month period starting 00H 1 Jan 2032.
+
+NOTE: Some DBBC3 firmware versions may automatically increment the epoch value
+at the start of a new 6-month period.
 
 All dates and times are UTC.
-
-This command samples the 'time' of Core3H 'board' at the start of the
-next UTC second.
-
-If 'board' is specified as 'next', the board requested is one greater
-than the previous board requested (wrapping back to '1' after the last
-board specified by the number of IFs in 'dbbc3.ctl').  This applies
-regardless of whether the previous request used 'next' or specified a
-board explicitly. The board for 'next' is determined by the previous
-request and not the previous board that had a successful response;
-this prevents' 'next' from getting stuck on a board with a problem.
-After a FS restart, the 'next' board is '1'.
-
-It may take more than one second for the board to respond. As a
-result, the board 'time' shown may not match the FS log time stamp.
-However, 'difference' is calculated as the FS time when the request
-was made and the board time returned. If it is zero, they agree at the
-one second level.
-
-Another consequence of the board sometimes taking more than one second
-to respond is that consecutive 'core3H_mode=...' commands may not
-return board times that are consecutive.
-
-The Core3H board's labels for 'epoch' and 'days' are shown in the
-Monitor only parameters list in parentheses.
-
-The 'nominal' value is not returned by the board. It is calculated
-based on the board 'time' and displayed for informational purposes.
-
-The VDIF epoch is described by this section from the VDIF
-specification:
-
-  Reference epoch: [It is] ... the 6-month period in which the VDIF
-  clock was set, with an origin of at 00UTC 1 Jan 2000, such that ‘0’
-  corresponds to the first 6 months of 2000, ‘1’ corresponds to the 6
-  months starting 00H 1 July 2000, etc. After setting, [it] ... is
-  static and is not incremented. [It] ... rolls over to 0 again when
-  the reference epoch corresponds to the 6-month period starting 00H 1
-  Jan 2032.
-
-NOTE: Some DBBC3 firmware versions may automatically increment the
-epoch value at the start of a new 6-month period.
