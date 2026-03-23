@@ -1079,6 +1079,9 @@ Only 1 processor is available. A minimum of 2 is required for the FS server.
 BO  250
 Internal warning: opnpf.f lprcl too small, needs length of?WW, okay this time
 ""
+BO  186
+WARNING: Multicast Arrival time for this firmware version in 'dbbc3.ctl' is zero; set an accurate value and restart.
+""
 BO -101
 Error getting next command, UNIX ?FFF
 ""
