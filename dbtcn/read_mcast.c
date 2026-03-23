@@ -40,6 +40,8 @@ extern struct fscom *shm_addr;
 #define TIME_OUT        500
 #define ERROR_PERIOD   2000
 
+#define MAX_RECV   60
+
 ssize_t read_mcast(int sock, char buf[], size_t buf_size, int it[6],
         int centisec[6],int data_valid, int *hsecs)
 {
@@ -60,10 +62,18 @@ ssize_t read_mcast(int sock, char buf[], size_t buf_size, int it[6],
 
     static unsigned was_count_next = 0;
     unsigned was_count;
+    static unsigned was_count_recv = 0;;
 
     static int kfirst=TRUE;
 
     int it_start[6];
+
+    static int recv[MAX_RECV];
+    static int irecv;
+    static int recv_start;
+
+    if(!recv_start)
+       rte_ticks(&recv_start);
 
 /* use the command count before the PREVIOUS select() to decide
  * if there has been DBBC3 activity that could interfere
@@ -157,6 +167,44 @@ ssize_t read_mcast(int sock, char buf[], size_t buf_size, int it[6],
         return -1;
     }
 
+    int percent=10;
+    if(percent >= 0 && percent < 100) {
+        //    int debug_ticks;
+        //    rte_ticks(&debug_ticks);
+        //    if(debug_ticks%6000 > 1500) {
+        //    printf(" debug_ticks%6000 %4d\n", debug_ticks%6000);
+        irecv=(irecv+1)%MAX_RECV;
+        rte_ticks(recv+irecv);
+        if(shm_addr->dbbc3_command_active ||
+                shm_addr->dbbc3_command_count != was_count_recv)
+            rte_ticks(&recv_start);
+        if(recv_start<=recv[irecv]-60*100) {
+            int i;
+            int icount_recv=0;
+            for(i=0;i<MAX_RECV;i++) {
+                //             printf(" i %2d recv[i] %d irecv %2d recv[irecv] %d recv[irecv]-60*10 %d \n",
+                //                      i,recv[i],recv,recv[irecv],recv[irecv]-60*10);
+                if(recv[i] > recv[irecv]-60*100)
+                    icount_recv++;
+            }
+            int expected=60/(shm_addr->dbbc3_mcast_arrival/100+1);
+            float factor=1-percent/100.0;
+            int limit=expected*factor;
+            if(limit<1)
+                limit=1;
+            //          printf(" icount_recv %d max counr %d\n", icount_recv,limit);
+            if(icount_recv<limit && to_count < 0) {
+                if(data_valid)
+                    logitn(NULL,-29,"dn",100*(expected-icount_recv)/expected);
+                else
+                    logitn(NULL,29,"dn",100*(expected-icount_recv)/expected);
+                rte_ticks(&recv_start);
+            }
+        }
+        was_count_recv=shm_addr->dbbc3_command_count;
+        //    }
+    }
+
     if(to_try > -1) { /* summary if NOT a time-out */
         rte_time(it,it+5);
         seconds=it[1]+60*it[2];
@@ -167,6 +215,7 @@ ssize_t read_mcast(int sock, char buf[], size_t buf_size, int it[6],
                 logit(NULL,20,"dn");
                 to_count=-1;
                 to_try=-1;
+                rte_ticks(&recv_start);
             } else {
                 if(12==to_count)
                     logit(NULL,-28,"dn");

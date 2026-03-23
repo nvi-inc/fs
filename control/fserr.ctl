@@ -2810,6 +2810,9 @@ Synthesizer reference frequency (for l?W) is not 10 MHz.
 DN   30
 DBBC3 multicast: version/personality issue resolved
 ""
+DN   29
+DBBC3 multicast: WARNING: Lost?WW% of the expected messages in the last minute (data_valid=off).
+""
 DN   21
 DBBC3 multicast: error from select() cleared
 ""
@@ -2866,6 +2869,9 @@ DBBC3 multicast: You should AVOID using DBBC3 commands (and FMSET) while recordi
 ""
 DN  -28
 DBBC3 multicast: No messages were received in the last minute; continuing to count time-outs.
+""
+DN  -29
+DBBC3 multicast: Lost?WW% of the expected messages in the last minute (data_valid=on).
 ""
 DN  -30 Place holder for version string
 
