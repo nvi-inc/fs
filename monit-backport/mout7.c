@@ -130,7 +130,7 @@ static void arrival_age(char buf[128],struct dbbc3_tsys_cycle *tsys_cycle,int ag
 {
     printw("Arrival ");
     if(no_mcast_since_restart) {
-        printw("    ");
+        printw("   ");
     } else {
         if(tsys_cycle->hsecs/100>dbbc3_mcast_arrival/100)
             standout();
