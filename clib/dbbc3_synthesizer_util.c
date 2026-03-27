@@ -246,7 +246,6 @@ struct dbbc3_synthesizer_mon *lcl;
         break;
       case 2:
         ivalue=lcl->mode.mode;
-        if (ivalue >=0 && ivalue <NATTEN_KEY)
         if (ivalue >=0 && ivalue <NMODE_KEY)
           strcpy(output,mode_key[ivalue]);
         else
