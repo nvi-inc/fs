@@ -53,6 +53,14 @@ struct dbbc3_synthesizer_mon {
     struct m5state state;
   } mode;
   struct {
+    int ref_source;
+    struct m5state state;
+  } ref_source;
+  struct {
+    double ref_freq;
+    struct m5state state;
+  } ref_freq;
+  struct {
     int lock;
     struct m5state state;
   } lock;

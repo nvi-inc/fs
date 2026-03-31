@@ -61,6 +61,14 @@ static void add_check_queries( out_recs, out_class, ilo)
     cls_snd(out_class, outbuf, strlen(outbuf) , 0, 0);
     ++*out_recs;
 
+    sprintf(outbuf,"synth=%d,refs?",1+ilo/2);
+    cls_snd(out_class, outbuf, strlen(outbuf) , 0, 0);
+    ++*out_recs;
+
+    sprintf(outbuf,"synth=%d,ref?",1+ilo/2);
+    cls_snd(out_class, outbuf, strlen(outbuf) , 0, 0);
+    ++*out_recs;
+
     return;
 }
 void dbbc3_synthesizer(command,itask,ip)

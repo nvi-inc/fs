@@ -2775,7 +2775,7 @@ DM -612
 Synthesizer enable for l?W is not correct.
 ""
 DM -613
-Synthesizer mode for l?W is not correct.
+Synthesizer mode for l?W is not CW.
 ""
 DM -614
 Synthesizer status for l?W is not locked.
@@ -2785,6 +2785,12 @@ DM -615 Place holder for unknown synthesizer mode message
 ""
 DM -616 Place holder for known synthesizer lock status message
 
+""
+DM -617
+Synthesizer reference source for l?W is not external.
+""
+DM -618
+Synthesizer reference frequency for l?W is not 10 MHz.
 ""
 DN   30
 DBBC3 multicast: version/personality issue resolved

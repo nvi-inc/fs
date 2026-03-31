@@ -98,6 +98,8 @@ int kcheck;
               case 8:
               case 10:
               case 12:
+              case 13:
+              case 15:
                   ierr=0;
                   break;
               case 3:
@@ -115,6 +117,12 @@ int kcheck;
                   break;
               case 11:
                   ierr=dbbc3_2_synthesizer_lock(&lclm,inbuf);
+                  break;
+              case 14:
+                  ierr=dbbc3_2_synthesizer_ref_source(&lclm,inbuf);
+                  break;
+              case 16:
+                  ierr=dbbc3_2_synthesizer_ref_freq(&lclm,inbuf);
                   break;
               default:
                   ierr=-404;
@@ -184,15 +192,26 @@ send:
                   ierr=-600;
               }
           }
-          if(lclm.mode.mode) {
-              logita(NULL,-613,"dm",lo3_key[ilo]+1);
-              ierr=-600;
-          }
-          if(1!=lclm.lock.lock) {
-              logita(NULL,-614,"dm",lo3_key[ilo]+1);
-              ierr=-600;
-          }
+          if(shm_addr->dbbc3_synthesizer[ilo].enable.state.known &&
+                  shm_addr->dbbc3_synthesizer[ilo].enable.enable==1) {
+              if(lclm.mode.mode) {
+                  logita(NULL,-613,"dm",lo3_key[ilo]+1);
+                  ierr=-600;
+              }
+              if(1!=lclm.ref_source.ref_source) {
+                  logita(NULL,-617,"dm",lo3_key[ilo]+1);
+                  ierr=-600;
+              }
+              if(10.0 != lclm.ref_freq.ref_freq) {
+                  logita(NULL,-618,"dm",lo3_key[ilo]+1);
+                  ierr=-600;
+              }
+              if(1!=lclm.lock.lock) {
+                  logita(NULL,-614,"dm",lo3_key[ilo]+1);
+                  ierr=-600;
+              }
 
+          }
           if(-600==ierr) {
               memcpy(ip+4,lo3_key[ilo]+1,2);
               goto error2;

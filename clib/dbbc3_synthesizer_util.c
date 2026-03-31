@@ -43,6 +43,7 @@ static char *atten_key[ ]=
    "30.0","30.5","31.0","31.5"
   };
 static char *mode_key[ ]={"CW","SWEEP","LIST","unknown"};
+static char *ref_source_key[ ]={"internal","external"};
 static char *lock_key[ ]={"unlocked","locked","unknown"};
 
 #define SB_KEY  sizeof(sb_key)/sizeof( char *)
@@ -50,6 +51,7 @@ static char *lock_key[ ]={"unlocked","locked","unknown"};
 #define NCHECK_KEY sizeof(check_key)/sizeof( char *)
 #define NATTEN_KEY sizeof(atten_key)/sizeof( char *)
 #define NMODE_KEY sizeof(mode_key)/sizeof( char *)
+#define NREF_SOURCE_KEY sizeof(lock_key)/sizeof( char *)
 #define NLOCK_KEY sizeof(lock_key)/sizeof( char *)
 
 int dbbc3_synthesizer_dec(lcl,count,ptr,itask,ilo)
@@ -179,9 +181,9 @@ struct dbbc3_synthesizer_cmd *lcl;
                 strcpy(output++,"(");
             sprintf(output,"%f",lcl->freq.freq);
             int len=strlen(output);
-            while(len-->0 && '0' == output[len])
+            while(--len>0 && '0' == output[len])
                 output[len]=0;
-            if(len>=0 && '.'==output[len])
+            if(len>0 && '.'==output[len])
                 output[len]=0;
             if(lcl->enable.state.known && 0==lcl->enable.enable)
                 strcat(output,")");
@@ -252,6 +254,23 @@ struct dbbc3_synthesizer_mon *lcl;
           strcpy(output,BAD_VALUE);
         break;
       case 3:
+        ivalue=lcl->ref_source.ref_source;
+        if (ivalue >=0 && ivalue <NLOCK_KEY)
+          strcpy(output,ref_source_key[ivalue]);
+        else
+          strcpy(output,BAD_VALUE);
+        break;
+      case 4:
+        if(lcl->ref_freq.state.known) {
+            sprintf(output,"%f",lcl->ref_freq.ref_freq);
+            int len=strlen(output);
+            while(--len>0 && '0' == output[len])
+                output[len]=0;
+            if(len>0 && '.'==output[len])
+                output[len]=0;
+        }
+        break;
+      case 5:
         ivalue=lcl->lock.lock;
         if (ivalue >=0 && ivalue <NLOCK_KEY)
           strcpy(output,lock_key[ivalue]);
@@ -365,6 +384,36 @@ char *buff;
       logite(buf,-616,"dm");
       lclm->lock.lock=2;
   }
+
+  return 0;
+}
+
+int dbbc3_2_synthesizer_ref_source(lclm,buff)
+struct dbbc3_synthesizer_mon *lclm;
+char *buff;
+{
+  m5state_init(&lclm->ref_source.state);
+
+  if(1!=sscanf(buff,"REFS %d",&lclm->ref_source.ref_source))
+     return -1;
+  if(0!=lclm->ref_source.ref_source && 1!=lclm->ref_source.ref_source)
+     return -1;
+
+  lclm->ref_source.state.known=1;
+
+  return 0;
+}
+int dbbc3_2_synthesizer_ref_freq(lclm,buff)
+struct dbbc3_synthesizer_mon *lclm;
+char *buff;
+{
+
+  m5state_init(&lclm->ref_freq.state);
+
+  if(1!=sscanf(buff,"REF %lf",&lclm->ref_freq.ref_freq))
+      return -1;
+
+  lclm->ref_freq.state.known=1;
 
   return 0;
 }
