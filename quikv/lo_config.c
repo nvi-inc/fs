@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020, 2026 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -41,7 +41,7 @@ int ip[5];                           /* ipc parameters */
 
       ip[0]=ip[1]=ip[2]=ierr=0;
 
-      antcn_mode_st=getenv("FS_LO_CONFIG_ANTCN_MODE");
+      antcn_mode_st=getenv("FS_ANTCN_LO_MODE");
       if (antcn_mode_st && *antcn_mode_st) {
           antcn_mode = atoi(antcn_mode_st);
           if(antcn_mode > 99) {

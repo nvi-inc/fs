@@ -1,0 +1,21 @@
+                 antcn_lo - Use antcn to configure local LOs
+
+  Syntax:     antcn_lo
+
+  Response:   none
+
+Settable parameters: none
+
+Monitor-only Parameters: none
+
+Comments:
+
+This command is a no-op unless the environment variable FS_ANTCN_LO_MODE is
+set. That variable provides the local 'antcn' mode (greater than 99) that will
+be triggered to configure the LOs based on the settings in shared memory.
+
+This command is intended to provided a way to implement configuring the LOs
+without having to write a local SNAP command. It can be used in the
+'ifd_local' procedure, usually found the 'station' SNAP procedure library. As
+of FS 10.3, 'drudg' inserts a call to 'ifd_local' at the end of IF setup
+procedure ('ifdXX') for each mode.
