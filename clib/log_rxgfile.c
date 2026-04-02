@@ -120,12 +120,12 @@ void log_rxgfile(lo)
         strcat(output,"constant,");
         snprintf(output+strlen(output),
                 sizeof(output)-strlen(output),
-                "%.6f",shm_addr->rxgain[ir].fwhm.coeff*RAD2DEG);
+                "%g",shm_addr->rxgain[ir].fwhm.coeff*RAD2DEG);
     } else if(shm_addr->rxgain[ir].fwhm.model=='f') {
         strcat(output,"frequency,");
         snprintf(output+strlen(output),
                 sizeof(output)-strlen(output),
-                "%.6f",shm_addr->rxgain[ir].fwhm.coeff);
+                "%g",shm_addr->rxgain[ir].fwhm.coeff);
     }
 
     logit_nds(output,0,NULL,':');
@@ -150,11 +150,11 @@ void log_rxgfile(lo)
     output[start]=0;
     snprintf(output+strlen(output),
             sizeof(output)-strlen(output),
-            "%.6e",shm_addr->rxgain[ir].dpfu[0]);
+            "%g",shm_addr->rxgain[ir].dpfu[0]);
     if(shm_addr->rxgain[ir].pol[1]!=0)
         snprintf(output+strlen(output),
                 sizeof(output)-strlen(output),
-                ",%.6e",shm_addr->rxgain[ir].dpfu[1]);
+                ",%g",shm_addr->rxgain[ir].dpfu[1]);
 
     logit_nds(output,0,NULL,':');
 
@@ -174,7 +174,7 @@ void log_rxgfile(lo)
     for (i=0;i<iend;i++)
         snprintf(output+strlen(output),
                 sizeof(output)-strlen(output),
-                ",%.6e",shm_addr->rxgain[ir].gain.coeff[i]);
+                ",%g",shm_addr->rxgain[ir].gain.coeff[i]);
 
     if(shm_addr->rxgain[ir].gain.opacity=='y')
         strcat(output,",opacity_corrected");
@@ -195,11 +195,11 @@ void log_rxgfile(lo)
 
         snprintf(output+strlen(output),
                 sizeof(output)-strlen(output),
-                ",%.6e",shm_addr->rxgain[ir].tcal[i].freq);
+                ",%.7g",shm_addr->rxgain[ir].tcal[i].freq);
 
         snprintf(output+strlen(output),
                 sizeof(output)-strlen(output),
-                ",%.6e",shm_addr->rxgain[ir].tcal[i].tcal);
+                ",%g",shm_addr->rxgain[ir].tcal[i].tcal);
 
         logit_nds(output,0,NULL,':');
     }
@@ -215,11 +215,11 @@ void log_rxgfile(lo)
     if(shm_addr->rxgain[ir].trec[0]>0.0) {
         snprintf(output+strlen(output),
                 sizeof(output)-strlen(output),
-                "%.6e",shm_addr->rxgain[ir].trec[0]);
+                "%g",shm_addr->rxgain[ir].trec[0]);
         if(shm_addr->rxgain[ir].pol[1]!=0)
             snprintf(output+strlen(output),
                     sizeof(output)-strlen(output),
-                    ",%.6e",shm_addr->rxgain[ir].trec[1]);
+                    ",%g",shm_addr->rxgain[ir].trec[1]);
         logit_nds(output,0,NULL,':');
 
         iend=shm_addr->rxgain[ir].spill_ntable;
@@ -230,11 +230,11 @@ void log_rxgfile(lo)
 
             snprintf(output+strlen(output),
                     sizeof(output)-strlen(output),
-                    ",%.6e",shm_addr->rxgain[ir].spill[i].el);
+                    ",%g",shm_addr->rxgain[ir].spill[i].el);
 
             snprintf(output+strlen(output),
                     sizeof(output)-strlen(output),
-                    ",%.6e",shm_addr->rxgain[ir].spill[i].tk);
+                    ",%g",shm_addr->rxgain[ir].spill[i].tk);
 
             logit_nds(output,0,NULL,':');
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 NVI, Inc.
+ * Copyright (c) 2020-2021, 2026 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -398,7 +398,7 @@ void lo_rxg_enc(output,lo,lcl)
         else if(shm_addr->rxgain[ir].pol[0]=='r')
             strcat(output,"rcp");
         strcat(output,",");
-        sprintf(output+strlen(output),"%.5e",
+        sprintf(output+strlen(output),"%g",
                 shm_addr->rxgain[ir].dpfu[0]);
 
         if(0!=shm_addr->rxgain[ir].pol[1] &&
@@ -409,7 +409,7 @@ void lo_rxg_enc(output,lo,lcl)
             else if(shm_addr->rxgain[ir].pol[1]=='r')
                 strcat(output,"rcp");
             strcat(output,",");
-            sprintf(output+strlen(output),"%.5e",
+            sprintf(output+strlen(output),"%g",
                     shm_addr->rxgain[ir].dpfu[1]);
         }
     }
