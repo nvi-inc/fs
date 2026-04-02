@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 NVI, Inc.
+ * Copyright (c) 2020-2021, 2026 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -163,7 +163,7 @@ void log_rxgfile(lo)
     output[start]=0;
     if(shm_addr->rxgain[ir].gain.form=='e')
         strcat(output,"elevation");
-    else if(shm_addr->rxgain[ir].pol[0]=='a')
+    else if(shm_addr->rxgain[ir].gain.form=='a')
         strcat(output,"altaz");
 
     strcat(output,",poly");
