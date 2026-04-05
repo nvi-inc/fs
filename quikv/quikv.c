@@ -485,7 +485,7 @@ loop:
 	dbbc3_synthesizer(&command,itask,ip);
 	break;
       case 135:
-	dbbc3_sub_lo(&command,itask,ip);
+	dbbc3_ext_lo(&command,itask,ip);
 	break;
       case 136:
 	rxg_reload(&command,itask,ip);

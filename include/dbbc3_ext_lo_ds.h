@@ -17,16 +17,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-/* DBBC3 sub_lo data structures */
+/* DBBC3 ext_lo data structures */
 
-struct dbbc3_sub_lo_cmd {
+struct dbbc3_ext_lo_cmd {
   int count;
-  struct dbbc3_sub_lo_table {
+  struct dbbc3_ext_lo_table {
     int ifc;
     double freq;
     int sb;
     double lo_min;
     double lo_max;
     int lo_sb;
-  } table[MAX_DBBC3_SUB_LO_TABLE];
+  } table[MAX_DBBC3_EXT_LO_TABLE];
 };

@@ -3,7 +3,7 @@
  Syntax:     synth=loX,freq,enable,check
              synth=
              synth=loX
- Response:   synth/loX,freq,enable,sub_lo_freq,sub_lo_sb,att,mode,ref_source,ref_freq,lock
+ Response:   synth/loX,freq,enable,ext_lo_freq,ext_lo_sb,att,mode,ref_source,ref_freq,lock
 
 Settable Parameters:
 
@@ -39,19 +39,19 @@ Settable Parameters:
 
 Monitor-only Parameters:
 
-  sub_lo_freq  The frequency in MHz of the corresponding sub-LO (from the
-               'sub_lo' command), if one applies. If so, the value is shown in
+  ext_lo_freq  The frequency in MHz of the corresponding external-LO (from the
+               'ext_lo' command), if one applies. If so, the value is shown in
                parenthesis because it is not read from the device; it is
                determined when the synthesizer state is defined with a default
                frequency and the corresponding 'ifX' input is '2'. If no
-               sub-LO applies, the parameter is null.
+               external-LO applies, the parameter is null.
 
-  sub_lo_sb    The side-band ('usb' or 'lsb') of the corresponding sub-LO
-               (from the 'sub_lo' command) ,if one applies. If so, the value
+  ext_lo_sb    The side-band ('usb' or 'lsb') of the corresponding external-LO
+               (from the 'ext_lo' command) ,if one applies. If so, the value
                is shown in parenthesis because it is not read from the device;
                it is determined when the synthesizer state is defined with a
                default frequency and the corresponding 'ifX' input is '2'. If
-               no sub-LO applies, the parameter is null.
+               no external-LO applies, the parameter is null.
 
   att          attenuation, '0.0' through '31.5' dB in '0.5' dB steps.
 

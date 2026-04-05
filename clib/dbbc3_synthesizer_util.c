@@ -89,19 +89,19 @@ int ilo;
         }
         ierr=arg_dble(ptr,&lcl->freq.freq,0.0,FALSE);
         m5state_init(&lcl->freq.state);
-        m5state_init(&lcl->sub_lo_freq.state);
-        m5state_init(&lcl->sub_lo_sb.state);
+        m5state_init(&lcl->ext_lo_freq.state);
+        m5state_init(&lcl->ext_lo_sb.state);
         if(-100==ierr) {
             if(kdefault) {
                 double freq;
                 int sb;
-                int itable=find_sub_lo(ilo, &freq, &sb);
+                int itable=find_ext_lo(ilo, &freq, &sb);
                 lcl->freq.freq=ddefault;
                 if(itable>=0) {
-                    lcl->sub_lo_freq.sub_lo_freq=freq;
-                    lcl->sub_lo_freq.state.known=1;
-                    lcl->sub_lo_sb.sub_lo_sb=sb;
-                    lcl->sub_lo_sb.state.known=1;
+                    lcl->ext_lo_freq.ext_lo_freq=freq;
+                    lcl->ext_lo_freq.state.known=1;
+                    lcl->ext_lo_sb.ext_lo_sb=sb;
+                    lcl->ext_lo_sb.state.known=1;
                     if(2==shm_addr->dbbc3_ifx[ilo].input) {
                         if(freq >= lcl->freq.freq) {
                             ierr=-220;
@@ -199,9 +199,9 @@ struct dbbc3_synthesizer_cmd *lcl;
         }
         break;
       case 4:
-        if(lcl->sub_lo_freq.state.known) {
+        if(lcl->ext_lo_freq.state.known) {
           strcpy(output++,"(");
-          sprintf(output,"%f",lcl->sub_lo_freq.sub_lo_freq);
+          sprintf(output,"%f",lcl->ext_lo_freq.ext_lo_freq);
           int len=strlen(output);
           while(len-->0 && '0' == output[len])
             output[len]=0;
@@ -211,9 +211,9 @@ struct dbbc3_synthesizer_cmd *lcl;
         }
         break;
       case 5:
-        if(lcl->sub_lo_sb.state.known) {
+        if(lcl->ext_lo_sb.state.known) {
           strcpy(output++,"(");
-          ivalue=lcl->sub_lo_sb.sub_lo_sb;
+          ivalue=lcl->ext_lo_sb.ext_lo_sb;
           if (ivalue >0 && ivalue <SB_KEY)
             strcpy(output,sb_key[ivalue]);
           else

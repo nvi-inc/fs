@@ -46,7 +46,7 @@ dbbc3_ifx_dis.o logmsg_dbbc3.o dbbc3_bbcnn.o dbbc3_bbcnn_dis.o\
 dbbc3_cont_cal.o dbbc3_cont_cal_dis.o dbbc3_iftpx.o dbbc3_iftpx_dis.o\
 lo_config.o dbbc3_core3h_modex.o dbbc3_core3h_modex_dis.o\
 dbbc3_mcast_time.o dbbc3_core3h_time.o dbbc3_core3h_time_dis.o\
-dbbc3_synthesizer.o dbbc3_synthesizer_dis.o dbbc3_sub_lo.o dbbc3_sub_lo_dis.o\
+dbbc3_synthesizer.o dbbc3_synthesizer_dis.o dbbc3_ext_lo.o dbbc3_ext_lo_dis.o\
 rxg_reload.o get_rxgain_files.o
 #mk6_record.o mk6_record_dis.o 
 

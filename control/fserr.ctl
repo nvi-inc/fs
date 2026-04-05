@@ -2697,7 +2697,7 @@ DL -408
 See above time errors for Core3H board?W.
 ""
 DM  232
-WARNING: There is a matching sub-LO, but the corresponding 'ifX' input is 1.
+WARNING: There is a matching external-LO, but the corresponding 'ifX' input is 1.
 ""
 DM -101
 No default for synthesizer IF.
@@ -2715,7 +2715,7 @@ DM -202
 Unable to decode synthesizer frequency, must be positive.
 ""
 DM -222
-Sub-LO frequency is greater than or equal to LO frequency.
+External-LO frequency is greater than or equal to LO frequency.
 ""
 DM -103
 No default for synthesizer enable if corresponding 'ifX' has not been setup.
@@ -2895,28 +2895,28 @@ DN  -43
 DBBC3 multicast: DBBC3 personality should be DBBC_E (equip.ctl), but it is DBBC_V, see DN -30 error above
 ""
 DO -111
-Can't use '*' (previous value) for sub-LO IF.
+Can't use '*' (previous value) for external-LO IF.
 ""
 DO -201
-Sub-LO IF must be 'loa', 'lob', ... 'loh' up to the number of IFs defined in dbbc3.ctl.
+Ext-LO IF must be 'loa', 'lob', ... 'loh' up to the number of IFs defined in dbbc3.ctl.
 ""
 DO -102
-No default for sub-LO frequency.
+No default for external-LO frequency.
 ""
 DO -112
-Can't use '*' (previous value) for sub-LO frequency.
+Can't use '*' (previous value) for external-LO frequency.
 `""
 DO -202
-Unable to decode sub-LO frequency, must be positive.
+unable to decode external-LO frequency, must be positive.
 ""
 DO -103
-No default for sub-LO side-band.
+No default for external-LO side-band.
 ""
 DO -113
-Can't use '*' (previous value) for sub-LO side-band.
+Can't use '*' (previous value) for external-LO side-band.
 ""
 DO -203
-Sub-LO side-band must be 'usb' or 'lsb'.
+Ext-LO side-band must be 'usb' or 'lsb'.
 ""
 DO -114
 Can't use '*' (previous value) for LO frequency range minimum.
@@ -2940,10 +2940,10 @@ DO -301
 No parameters are allowed after '?'.
 ""
 DO -302
-DBBC3 sub-LO table is full. The maximum number of entries is 40.
+DBBC3 external-LO table is full. The maximum number of entries is 40.
 ""
 DO -303
-Internal error in sub_lo command for DBBC3, incorrect IF number, ?WWWW.
+Internal error in ext_lo command for DBBC3, incorrect IF number, ?WWWW.
 ""
 DP -301
 No command form of pfbX command.

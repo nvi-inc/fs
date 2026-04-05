@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-/* dbbc3 sub_lo display */
+/* dbbc3 ext_lo display */
 
 #include <stdio.h>
 #include <string.h>
@@ -33,7 +33,7 @@
 
 int logmsg_dbbc3();
 
-void dbbc3_sub_lo_dis(command,itask,ip,itable,options)
+void dbbc3_ext_lo_dis(command,itask,ip,itable,options)
 struct cmd_ds *command;
 int itask;
 int ip[5];
@@ -53,8 +53,8 @@ int options;
 
       strcpy(output,command->name);
       strcat(output,"/");
-      if(itable>=0 && itable <shm_addr->dbbc3_sub_lo.count) {
-          int ilo=shm_addr->dbbc3_sub_lo.table[itable].ifc;
+      if(itable>=0 && itable <shm_addr->dbbc3_ext_lo.count) {
+          int ilo=shm_addr->dbbc3_ext_lo.table[itable].ifc;
           if (ilo >=0 && ilo <NLO3_KEY)
               strcat(output,lo3_key[ilo]);
           else if(-1==ilo)
@@ -65,7 +65,7 @@ int options;
       while( count>= 0) {
           if (count > 0) strcat(output,",");
           count++;
-          dbbc3_sub_lo_enc(output,&count,&shm_addr->dbbc3_sub_lo.table,itable);
+          dbbc3_ext_lo_enc(output,&count,&shm_addr->dbbc3_ext_lo.table,itable);
       }
       if(strlen(output)>0) output[strlen(output)-1]='\0';
 

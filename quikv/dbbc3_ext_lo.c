@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-/* dbbc3 sub_lo snap command */
+/* dbbc3 ext_lo snap command */
 
 #include <stdio.h>
 #include <string.h>
@@ -30,21 +30,21 @@
 
 #define BUFSIZE 512
 
-void dbbc3_sub_lo(command,itask,ip)
+void dbbc3_ext_lo(command,itask,ip)
 struct cmd_ds *command;                /* parsed command structure */
 int itask;                            /* sub-task, ifd number +1  */
 int ip[5];                           /* ipc parameters */
 {
       int ilast, ierr, ind, count, i;
       char *ptr;
-      struct dbbc3_sub_lo_table lcl;     /* local instance of table struct */
+      struct dbbc3_ext_lo_table lcl;     /* local instance of table struct */
       int out_recs, out_class;
       char outbuf[BUFSIZE];
 
-      int dbbc3_sub_lo_dec();               /* parsing utilities */
+      int dbbc3_ext_lo_dec();               /* parsing utilities */
       char *arg_next();
 
-      void dbbc3_sub_lo_dis();
+      void dbbc3_ext_lo_dis();
       void skd_run(), skd_par();      /* program scheduling utilities */
       static char *synth[]={" ","1","2","3","4"};
 
@@ -61,22 +61,22 @@ int ip[5];                           /* ipc parameters */
               ierr=-301;
               goto error;
           }
-          if(!shm_addr->dbbc3_sub_lo.count) {
+          if(!shm_addr->dbbc3_ext_lo.count) {
               ip[0]=ip[1]=ip[2]=ip[3]=ip[4]=0;
               return;
           }
           int options=1;
-          for (i=0;i<shm_addr->dbbc3_sub_lo.count;i++) {
-              if(i==shm_addr->dbbc3_sub_lo.count-1)
+          for (i=0;i<shm_addr->dbbc3_ext_lo.count;i++) {
+              if(i==shm_addr->dbbc3_ext_lo.count-1)
                   options=0;
 
-              dbbc3_sub_lo_dis(command,itask,ip,i,options);
+              dbbc3_ext_lo_dis(command,itask,ip,i,options);
               if(ip[2]!=0)
                   return;
           }
           return;
       } else if(NULL==command->argv[0]) {
-          shm_addr->dbbc3_sub_lo.count=0;
+          shm_addr->dbbc3_ext_lo.count=0;
           ip[0]=ip[1]=ip[2]=ip[3]=ip[4]=0;
           return;
       }
@@ -87,7 +87,7 @@ int ip[5];                           /* ipc parameters */
               int sb;
               int options=1;
               for (i=0;i<shm_addr->dbbc3_ddc_ifs;i++) {
-                  int itable=find_sub_lo(i, &freq, &sb);
+                  int itable=find_ext_lo(i, &freq, &sb);
                   if(itable<-1) {
                       ierr=-303;
                       ip[4]=ilo;
@@ -95,7 +95,7 @@ int ip[5];                           /* ipc parameters */
                   }
                   if(i==shm_addr->dbbc3_ddc_ifs-1)
                       options=0;
-                  dbbc3_sub_lo_dis(command,itask,ip,itable,options);
+                  dbbc3_ext_lo_dis(command,itask,ip,itable,options);
               }
               return;
           } else
@@ -115,13 +115,13 @@ int ip[5];                           /* ipc parameters */
           } else if(NULL == command->argv[1]) {
               double freq;
               int sb;
-              int itable=find_sub_lo(ilo, &freq, &sb);
+              int itable=find_ext_lo(ilo, &freq, &sb);
               if(itable<-1) {
                   ierr=-303;
                   ip[4]=ilo;
                   goto error;
               }
-              dbbc3_sub_lo_dis(command,itask,ip,itable,0);
+              dbbc3_ext_lo_dis(command,itask,ip,itable,0);
               return;
           } else if(NULL != command->argv[1] && *command->argv[1] == '?') {
               if(NULL != command->argv[2]) {
@@ -129,19 +129,19 @@ int ip[5];                           /* ipc parameters */
                   goto error;
               }
               int thislo=0;
-              for (i=0;i<shm_addr->dbbc3_sub_lo.count;i++)
-                  if(shm_addr->dbbc3_sub_lo.table[i].ifc==-1 || shm_addr->dbbc3_sub_lo.table[i].ifc==ilo)
+              for (i=0;i<shm_addr->dbbc3_ext_lo.count;i++)
+                  if(shm_addr->dbbc3_ext_lo.table[i].ifc==-1 || shm_addr->dbbc3_ext_lo.table[i].ifc==ilo)
                       thislo++;
               if(!thislo) {
-                  dbbc3_sub_lo_dis(command,itask,ip,-1,0);
+                  dbbc3_ext_lo_dis(command,itask,ip,-1,0);
                   return;
               }
               int options=1;
-              for (i=0;i<shm_addr->dbbc3_sub_lo.count;i++)
-                  if(shm_addr->dbbc3_sub_lo.table[i].ifc==-1 || shm_addr->dbbc3_sub_lo.table[i].ifc==ilo) {
+              for (i=0;i<shm_addr->dbbc3_ext_lo.count;i++)
+                  if(shm_addr->dbbc3_ext_lo.table[i].ifc==-1 || shm_addr->dbbc3_ext_lo.table[i].ifc==ilo) {
                       if(i==thislo-1)
                           options=0;
-                      dbbc3_sub_lo_dis(command,itask,ip,i,options);
+                      dbbc3_ext_lo_dis(command,itask,ip,i,options);
                   }
               return;
           }
@@ -150,7 +150,7 @@ int ip[5];                           /* ipc parameters */
 /* if we arrive here, it is a set-up command so parse it */
 
 parse:
-      if(shm_addr->dbbc3_sub_lo.count>=MAX_DBBC3_SUB_LO_TABLE) {
+      if(shm_addr->dbbc3_ext_lo.count>=MAX_DBBC3_EXT_LO_TABLE) {
           ierr=-302;
           goto error;
       }
@@ -160,12 +160,12 @@ parse:
       count=2;
       while( count>= 0) {
         ptr=arg_next(command,&ilast);
-        ierr=dbbc3_sub_lo_dec(&lcl,&count,ptr,itask);
+        ierr=dbbc3_ext_lo_dec(&lcl,&count,ptr,itask);
         if(ierr !=0 ) goto error;
       }
 
       lcl.ifc=ilo;
-      memcpy(shm_addr->dbbc3_sub_lo.table+shm_addr->dbbc3_sub_lo.count++,&lcl,sizeof(lcl));
+      memcpy(shm_addr->dbbc3_ext_lo.table+shm_addr->dbbc3_ext_lo.count++,&lcl,sizeof(lcl));
 
       ip[0]=ip[1]=ip[2]=ip[3]=ip[4]=0;
       return;

@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-/* dbbc3 sub_lo buffer parsing utilities */
+/* dbbc3 ext_lo buffer parsing utilities */
 
 #include <stdio.h>
 #include <string.h>
@@ -35,8 +35,8 @@ static char *star_key[ ]={"*"};
 #define SB_KEY  sizeof(sb_key)/sizeof( char *)
 #define STAR_KEY sizeof(star_key)/sizeof( char *)
 
-int dbbc3_sub_lo_dec(lcl,count,ptr,itask)
-struct dbbc3_sub_lo_table *lcl;
+int dbbc3_ext_lo_dec(lcl,count,ptr,itask)
+struct dbbc3_ext_lo_table *lcl;
 int *count;
 char *ptr;
 {
@@ -115,17 +115,17 @@ char *ptr;
    return ierr;
 }
 
-void dbbc3_sub_lo_enc(output,count,lcl,itable)
+void dbbc3_ext_lo_enc(output,count,lcl,itable)
 char *output;
 int *count;
-struct dbbc3_sub_lo_table *lcl;
+struct dbbc3_ext_lo_table *lcl;
 int itable;
 {
     int ivalue;
 
     output=output+strlen(output);
 
-    int valid=itable>=0 && itable<shm_addr->dbbc3_sub_lo.count;
+    int valid=itable>=0 && itable<shm_addr->dbbc3_ext_lo.count;
     if(valid)
       lcl+=itable;
     switch (*count) {
@@ -186,7 +186,7 @@ int itable;
    if(*count>0) *count++;
    return;
 }
-int find_sub_lo(ilo,freq,sb)
+int find_ext_lo(ilo,freq,sb)
 int ilo;
 double *freq;
 int *sb;
@@ -199,19 +199,19 @@ int *sb;
     if (shm_addr->lo.lo[ilo]<0)
         return -1;
     
-    for (i=0;i<shm_addr->dbbc3_sub_lo.count;i++) {
-        if(shm_addr->dbbc3_sub_lo.table[i].ifc!=-1 && shm_addr->dbbc3_sub_lo.table[i].ifc!=ilo)
+    for (i=0;i<shm_addr->dbbc3_ext_lo.count;i++) {
+        if(shm_addr->dbbc3_ext_lo.table[i].ifc!=-1 && shm_addr->dbbc3_ext_lo.table[i].ifc!=ilo)
             continue;
-        if(shm_addr->dbbc3_sub_lo.table[i].lo_min>=0.0 && shm_addr->lo.lo[ilo] < shm_addr->dbbc3_sub_lo.table[i].lo_min-0.001)
+        if(shm_addr->dbbc3_ext_lo.table[i].lo_min>=0.0 && shm_addr->lo.lo[ilo] < shm_addr->dbbc3_ext_lo.table[i].lo_min-0.001)
             continue;
-        if(shm_addr->dbbc3_sub_lo.table[i].lo_max>=0.0 && shm_addr->lo.lo[ilo] > shm_addr->dbbc3_sub_lo.table[i].lo_max+0.001)
+        if(shm_addr->dbbc3_ext_lo.table[i].lo_max>=0.0 && shm_addr->lo.lo[ilo] > shm_addr->dbbc3_ext_lo.table[i].lo_max+0.001)
             continue;
-        if(shm_addr->dbbc3_sub_lo.table[i].lo_sb!=0  && shm_addr->lo.sideband[ilo] != shm_addr->dbbc3_sub_lo.table[i].lo_sb)
+        if(shm_addr->dbbc3_ext_lo.table[i].lo_sb!=0  && shm_addr->lo.sideband[ilo] != shm_addr->dbbc3_ext_lo.table[i].lo_sb)
             continue;
-        if(shm_addr->dbbc3_sub_lo.table[i].lo_sb!=0  && shm_addr->lo.sideband[ilo] != shm_addr->dbbc3_sub_lo.table[i].lo_sb)
+        if(shm_addr->dbbc3_ext_lo.table[i].lo_sb!=0  && shm_addr->lo.sideband[ilo] != shm_addr->dbbc3_ext_lo.table[i].lo_sb)
             continue;
-        *freq=shm_addr->dbbc3_sub_lo.table[i].freq;
-        *sb=shm_addr->dbbc3_sub_lo.table[i].sb;
+        *freq=shm_addr->dbbc3_ext_lo.table[i].freq;
+        *sb=shm_addr->dbbc3_ext_lo.table[i].sb;
         return i;
     }
 
