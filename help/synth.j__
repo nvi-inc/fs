@@ -3,7 +3,7 @@
  Syntax:     synth=loX,freq,enable,check
              synth=
              synth=loX
- Response:   synth/loX,freq,enable,ext_lo_freq,ext_lo_sb,att,mode,ref_source,ref_freq,lock
+ Response:   synth/loX,freq,enable,ext_lo_freq,ext_lo_sb,input_sb,att,mode,ref_source,ref_freq,lock
 
 Settable Parameters:
 
@@ -52,6 +52,17 @@ Monitor-only Parameters:
                it is determined when the synthesizer state is defined with a
                default frequency and the corresponding 'ifX' input is '2'. If
                no external-LO applies, the parameter is null.
+
+  input_sb     The inferred input side-band filter ('usb' or 'lsb'), relative,
+               to 'freq' that should be used with the GCoMo 'RF-in' for the
+               corresponding external-LO (from the 'ext_lo' command) ,if one
+               applies. If so, the value is shown in parenthesis because it is
+               not read from the device; it is determined when the synthesizer
+               state is defined with a default frequency and the corresponding
+               'ifX' input is '2'. If no external-LO applies, the parameter is
+               null. A null value implies that the external-LO, or direct
+               receiver, output should be connected to the GCoMo 'IF-in'. See
+               Comments for more detail on "Input Side-band Filter."
 
   att          attenuation, '0.0' through '31.5' dB in '0.5' dB steps.
 
@@ -170,6 +181,55 @@ synthesizer.
 
 The 'att' value is set in the boot configuration files and should have been
 determined in the laboratory before shipping.
+
+                            Input Side-band Filter
+
+The signal from the receiver, direct RF or an IF generated from an LO external
+to the DBBC3, can either be directly fed into GCoMo 'IF-in' connector or
+through the DBBC3 double-side-band mixer for further down-conversion. In the
+former case, the incoming signal is either USB or LSB and the 'ifX=1,...'
+command is used. In the latter case, it is connected through an USB or LSB
+filter, relative to the DBBC3 synthesizer frequency, to the 'RF-in' connector;
+the 'RF-out' connector is jumpered to the 'IF-in' connector. For this case,
+the 'ifX=2,...' is used.
+
+The FS 'lo=...' command describes the net-LO frequency, and net-side-band,
+before the BBCs. This includes the effect of any external-LO and the DBBC3
+synthesizer, if used. The FS 'ext_lo' command describes the external-LO
+frequency, and output side-band, of the mixing steps before the DBBC3. Note
+that the external-LO may be the result, zero, one, or multiple mixing steps.
+The only thing that matters is the cumulative effect, which is what the
+'ext_lo=...' command describes. The FS 'synth=..' command describes the DBBC3
+synthesizer frequency and input side-band filter.
+
+The following table identifies the filter side-band (sb) required before DBBC3
+synthesizer depending on the relationship of external-LO and net-LO
+frequencies and their output side-bands. Only some cases are useful. Those
+that are not are included for completeness with 'NO' and an explanation in the
+input filter column.
+
+               ext_lo sb  LO sb     synth input filter
+                                 (relative to |ext_lo-lo|)
+  ext_lo < lo     USB      USB            USB
+  ext_lo < lo     USB      LSB            LSB
+  ext_lo < lo     LSB      USB     NO: no side-band overlap
+  ext_lo < lo     LSB      LSB   NO: up-conversion unavailable
+
+  ext_lo = lo     USB      USB       synthesizer not used
+  ext_lo = lo     USB      LSB     NO: no side-band overlap
+  ext_lo = lo     LSB      USB     NO: no side-band overlap
+  ext_lo = lo     LSB      LSB       synthesizer not used
+
+  ext_lo > lo     USB      USB   NO: up-conversion unavailable
+  ext_lo > lo     USB      LSB     NO: no side-band overlap
+  ext_lo > lo     LSB      USB            LSB
+  ext_lo > lo     LSB      LSB            USB
+
+  If the synthesizer is used, its frequency is always positive, that is,
+  |lo - ext_lo|; an input filter is used before 'RF-in', 'RF-out' is jumpered
+  to 'IF-in' and FS command 'ifX=2,...' is used. If the synthesizer is not
+  used, that is, 'ext_lo and 'lo' are equal or there is no external-LO, the
+  signal is connected directly to 'IF-in' and FS command 'if=1,...' is used.
 
                          'dbbc3_synth' SNAP procedure
 

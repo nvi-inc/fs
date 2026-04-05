@@ -2696,9 +2696,6 @@ Core3H board?W time VDIF epoch differs from that of the previous board sampled.
 DL -408
 See above time errors for Core3H board?W.
 ""
-DM  232
-WARNING: There is a matching external-LO, but the corresponding 'ifX' input is 1.
-""
 DM -101
 No default for synthesizer IF.
 ""
@@ -2714,8 +2711,23 @@ No default for synthesizer frequency if corresponding 'ifX=2' and 'lo=loX' has n
 DM -202
 Unable to decode synthesizer frequency, must be positive.
 ""
+DM -212
+LO side-band not defined in 'synth'
+""
 DM -222
-External-LO frequency is greater than or equal to LO frequency.
+External-LO and LO have the same frequency, but IF input is 2.
+""
+DM -232
+External-LO and LO have the same frequency, but external-LO and LO have different side-bands.
+""
+DM -242
+External-LO and LO have different frequencies, but IF input is 1.
+""
+DM -252
+External-LO frequency is less than LO frequency, but external-LO side-band is not upper.
+""
+DM -262
+External-LO frequency is more than LO frequency, but external-LO side-band is not lower.
 ""
 DM -103
 No default for synthesizer enable if corresponding 'ifX' has not been setup.

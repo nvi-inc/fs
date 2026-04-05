@@ -91,6 +91,7 @@ int ilo;
         m5state_init(&lcl->freq.state);
         m5state_init(&lcl->ext_lo_freq.state);
         m5state_init(&lcl->ext_lo_sb.state);
+        m5state_init(&lcl->input_sb.state);
         if(-100==ierr) {
             if(kdefault) {
                 double freq;
@@ -98,20 +99,43 @@ int ilo;
                 int itable=find_ext_lo(ilo, &freq, &sb);
                 lcl->freq.freq=ddefault;
                 if(itable>=0) {
+                    if(shm_addr->lo.sideband[ilo]<1  || 2<shm_addr->lo.sideband[ilo]) {
+                            ierr=-210;
+                            break;
+                    } else if(shm_addr->lo.lo[ilo] < freq+0.001 &&
+                            shm_addr->lo.lo[ilo] > freq-0.001) {  /* ext_lo == lo */
+                        if(2==shm_addr->dbbc3_ifx[ilo].input) {
+                            ierr=-220;
+                            break;
+                        } else if(shm_addr->lo.sideband[ilo]!=sb) {
+                            ierr=-230;
+                            break;
+                        }
+                    } else {  /* ext_lo != lo */
+                        if(1==shm_addr->dbbc3_ifx[ilo].input) {
+                            ierr=-240;
+                            break;
+                        } else if(freq<shm_addr->lo.lo[ilo]) { /* ext_lo < lo */
+                            if(1!=sb) {
+                                ierr=-250;
+                                break;
+                            }
+                            lcl->input_sb.input_sb=shm_addr->lo.sideband[ilo];
+                            lcl->input_sb.state.known=1;
+                        } else { /* ext_lo > lo */
+                            if(2!=sb) {
+                                ierr=-260;
+                                break;
+                            }
+                            lcl->input_sb.input_sb=3-shm_addr->lo.sideband[ilo];
+                            lcl->input_sb.state.known=1;
+                        }
+                        lcl->freq.freq=fabs(shm_addr->lo.lo[ilo]-freq);
+                    }
                     lcl->ext_lo_freq.ext_lo_freq=freq;
                     lcl->ext_lo_freq.state.known=1;
                     lcl->ext_lo_sb.ext_lo_sb=sb;
                     lcl->ext_lo_sb.state.known=1;
-                    if(2==shm_addr->dbbc3_ifx[ilo].input) {
-                        if(freq >= lcl->freq.freq) {
-                            ierr=-220;
-                            break;
-                        } else {
-                            lcl->freq.freq-=freq;
-                        }
-                    } else if(1==shm_addr->dbbc3_ifx[ilo].input) {
-                        logit(NULL,232,"dm");
-                    }
                 }
             } else
                 lcl->freq.freq=-1.0;
@@ -214,6 +238,17 @@ struct dbbc3_synthesizer_cmd *lcl;
         if(lcl->ext_lo_sb.state.known) {
           strcpy(output++,"(");
           ivalue=lcl->ext_lo_sb.ext_lo_sb;
+          if (ivalue >0 && ivalue <SB_KEY)
+            strcpy(output,sb_key[ivalue]);
+          else
+            strcpy(output,BAD_VALUE);
+          strcat(output,")");
+        }
+        break;
+      case 6:
+        if(lcl->input_sb.state.known) {
+          strcpy(output++,"(");
+          ivalue=lcl->input_sb.input_sb;
           if (ivalue >0 && ivalue <SB_KEY)
             strcpy(output,sb_key[ivalue]);
           else

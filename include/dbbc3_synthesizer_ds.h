@@ -41,6 +41,10 @@ struct dbbc3_synthesizer_cmd {
     double ext_lo_sb;
     struct m5state state;
   } ext_lo_sb;
+  struct {
+    double input_sb;
+    struct m5state state;
+  } input_sb;
 };
 
 struct dbbc3_synthesizer_mon {
