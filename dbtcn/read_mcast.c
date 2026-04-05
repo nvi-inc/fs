@@ -133,7 +133,10 @@ ssize_t read_mcast(int sock, char buf[], size_t buf_size, int it[6],
                 if(seconds<seconds0)
                      seconds+=3600;
                 if(seconds-seconds0 >= time_out_summary_period) { /* summary if a time-out */
-                    logitn(NULL,-25,"dn",to_count);
+                    if(12==to_count)
+                       logit(NULL,-28,"dn");
+                    else
+                       logitn(NULL,-25,"dn",to_count);
                     to_count=0;
                     to_try=0;
                     seconds0=it[1]+60*it[2];
@@ -165,7 +168,10 @@ ssize_t read_mcast(int sock, char buf[], size_t buf_size, int it[6],
                 to_count=-1;
                 to_try=-1;
             } else {
-                logitn(NULL,-25,"dn",to_count);
+                if(12==to_count)
+                    logit(NULL,-28,"dn");
+                else
+                    logitn(NULL,-25,"dn",to_count);
                 to_count=0;
                 to_try=0;
                 seconds0=it[1]+60*it[2];
