@@ -234,7 +234,7 @@ struct dbbc3_synthesizer_cmd *lcl;
                     output[len]=0;
             }
 
-            strcat(output,":");
+            strcat(output,"/");
 
             if(lcl->ext_lo_sb.state.known) {
                 ivalue=lcl->ext_lo_sb.ext_lo_sb;

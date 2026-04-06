@@ -42,8 +42,8 @@ Monitor-only Parameters:
   ext_lo        The frequency in MHz and the side-band ('usb' or 'lsb') of the
                 corresponding external-LO (from the 'ext_lo' command), if one
                 applies. If so, the information is shown in parenthesis
-                because it is not read from the device with a colon between
-                the frequency and side-band, for example, '(38100:usb)'. The
+                because it is not read from the device with a slash between
+                the frequency and side-band, for example, '(38100/usb)'. The
                 external-LO is determined when the synthesizer state is
                 defined with a default frequency when the corresponding 'ifX'
                 input is '2'. If no external-LO applies, the parameter is
