@@ -202,37 +202,34 @@ The only thing that matters here is the cumulative effect, which is what the
 'ext_lo=...' command describes. The FS 'synth=..' command describes the DBBC3
 synthesizer frequency and pre-filter side-band.
 
-The following table identifies the pre-filter side-band (sb) required before
-DBBC3 synthesizer depending on the relationship of external-LO and net-LO
-frequencies and their output side-bands. Most cases are not useful. Those that
-are not are included for completeness with 'NO' and an explanation in the
-pre-filter sb column.
+The following table identifies the side-band (SB) of the pre-filter required
+before the DBBC3 synthesizer depending on the relationship of the external-LO
+and net-LO frequencies and their output side-bands. Some cases are not useful.
+Those that are not are included for completeness with 'NO' and an explanation
+in the Pre-filter SB column.
 
-  ext_lo sb  frequencies   LO sb        pre-filter sb
-                                  (relative to |ext_lo-lo|)
-      USB    ext_lo < lo    USB            USB
-      USB    ext_lo < lo    LSB            LSB
+    Frequencies  ext_lo SB  LO SB        Pre-filter SB
+                                    (relative to |ext_lo-lo|)
+    ext_lo < lo     USB      USB            USB
+    ext_lo < lo     USB      LSB            LSB
+    ext_lo < lo     LSB      USB     NO: no side-band overlap
+    ext_lo < lo     LSB      LSB   NO: up-conversion unavailable
 
-      USB    ext_lo = lo    USB       synthesizer not used
-      USB    ext_lo = lo    LSB     NO: no side-band overlap
+    ext_lo = lo     USB      USB       synthesizer not used
+    ext_lo = lo     USB      LSB     NO: no side-band overlap
+    ext_lo = lo     LSB      USB     NO: no side-band overlap
+    ext_lo = lo     LSB      LSB       synthesizer not used
 
-      USB    ext_lo > lo    USB   NO: up-conversion unavailable
-      USB    ext_lo > lo    LSB     NO: no side-band overlap
+    ext_lo > lo     USB      USB   NO: up-conversion unavailable
+    ext_lo > lo     USB      LSB     NO: no side-band overlap
+    ext_lo > lo     LSB      USB            LSB
+    ext_lo > lo     LSB      LSB            USB
 
-      LSB    ext_lo < lo    USB     NO: no side-band overlap
-      LSB    ext_lo < lo    LSB   NO: up-conversion unavailable
-
-      LSB    ext_lo = lo    USB     NO: no side-band overlap
-      LSB    ext_lo = lo    LSB       synthesizer not used
-
-      LSB    ext_lo > lo    USB            LSB
-      LSB    ext_lo > lo    LSB            USB
-
-  If the synthesizer is used, its frequency is always positive, that is,
-  |lo - ext_lo|; a pre-filter is used before 'RF-in', 'RF-out' is jumpered to
-  'IF-in' and FS command 'ifX=2,...' is used. If the synthesizer is not used,
-  that is, 'ext_lo and 'lo' are equal, or there is no external-LO, the signal
-  is connected directly to 'IF-in' and FS command 'if=1,...' is used.
+    If the synthesizer is used, its frequency is always positive, that is,
+    |lo - ext_lo|, a pre-filter is used before 'RF-in', 'RF-out' is jumpered
+    to 'IF-in' and FS command 'ifX=2,...' is used. If the synthesizer is not
+    used, that is, 'ext_lo and 'lo' are equal, or there is no external-LO, the
+    signal is connected directly to 'IF-in' and FS command 'if=1,...' is used.
 
                          'dbbc3_synth' SNAP procedure
 
