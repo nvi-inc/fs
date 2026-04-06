@@ -223,29 +223,30 @@ struct dbbc3_synthesizer_cmd *lcl;
         }
         break;
       case 4:
-        if(lcl->ext_lo_freq.state.known) {
-          strcpy(output++,"(");
-          sprintf(output,"%f",lcl->ext_lo_freq.ext_lo_freq);
-          int len=strlen(output);
-          while(len-->0 && '0' == output[len])
-            output[len]=0;
-          if(len>=0 && '.'==output[len])
-            output[len]=0;
-          strcat(output,")");
+        if(lcl->ext_lo_freq.state.known || lcl->ext_lo_sb.state.known) {
+            strcpy(output++,"(");
+            if(lcl->ext_lo_freq.state.known) {
+                sprintf(output,"%f",lcl->ext_lo_freq.ext_lo_freq);
+                int len=strlen(output);
+                while(len-->0 && '0' == output[len])
+                    output[len]=0;
+                if(len>=0 && '.'==output[len])
+                    output[len]=0;
+            }
+
+            strcat(output,":");
+
+            if(lcl->ext_lo_sb.state.known) {
+                ivalue=lcl->ext_lo_sb.ext_lo_sb;
+                if (ivalue >0 && ivalue <SB_KEY)
+                    strcat(output,sb_key[ivalue]);
+                else
+                    strcat(output,BAD_VALUE);
+            }
+            strcat(output,")");
         }
         break;
       case 5:
-        if(lcl->ext_lo_sb.state.known) {
-          strcpy(output++,"(");
-          ivalue=lcl->ext_lo_sb.ext_lo_sb;
-          if (ivalue >0 && ivalue <SB_KEY)
-            strcpy(output,sb_key[ivalue]);
-          else
-            strcpy(output,BAD_VALUE);
-          strcat(output,")");
-        }
-        break;
-      case 6:
         if(lcl->input_sb.state.known) {
           strcpy(output++,"(");
           ivalue=lcl->input_sb.input_sb;
