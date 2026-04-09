@@ -2744,9 +2744,6 @@ Must enable synthesizer if a frequency is set.
 DM -204
 The 'check' parameter must be 'check' or 'force'.
 ""
-DM -300
-Can't use '*' with 'force' for a synthesizer that hasn't already been setup.
-""
 DM -301
 No parameters are allowed after '?'.
 ""

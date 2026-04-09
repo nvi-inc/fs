@@ -98,6 +98,16 @@ summarized below.
 
              If 'enable' is 'off', no 'freq' value is sent to the device.
 
+             If a specific IF is used (not 'next'), the corresponding LO value
+             ('lo=loX,...'), has not been set, and the 'freq' and 'enable'
+             parameters are default (null), the command is a no-op.  See
+             comments below about using a specific IF.
+
+             Similarly, if a specific IF is used (not 'next') and the
+             synthesizer parameters have not been set, using '*' for any
+             parameter makes the command a no-op. See comments below about
+             using a specific IF.
+
   Checking -- The 'checking' form, which is the default, is invoked by using a
               literal 'check' (or null value, i.e., the default) for the
               'check' parameter.
@@ -164,7 +174,15 @@ when it is done:
   op_stream="Synthesizer checking complete. Only defined synthesizers were checked."
 
 An example 'synth_check' procedure for eight IFs is included in the example
-procedure libraries 'd3fbstation.prc' and 'dbbc3tt.prc' in
+procedure libraries 'd3fbstation.prc' and 'dbbc3st.prc' in
+'/usr2/fs/st.default/proc'.
+
+Similiarly, all the synthesizers with defined setups can be set with commands similar to:
+
+  synth=loa,*,*,force
+
+An example 'synth_force' procedure for eight IFs is included in the example
+procedure libraries 'd3fbstation.prc' and 'dbbc3st.prc' in
 '/usr2/fs/st.default/proc'.
 
 If 'next' is used with 'check', IFs that have not been setup will be skipped.
@@ -249,7 +267,7 @@ in the Pre-filter SB column.
   synthesizer will be a no-op.
 
   An example 'dbbc3_synth' procedure for eight IFs is included in the example
-  procedure libraries 'd3fbstation.prc' and 'dbbc3tt.prc' in
+  procedure libraries 'd3fbstation.prc' and 'dbbc3st.prc' in
   '/usr2/fs/st.default/proc'.
 
   If appropriate, you can use non-default values for 'freq' and 'enable' in

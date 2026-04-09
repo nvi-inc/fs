@@ -490,6 +490,17 @@ synth=log,*,*,check
 synth=loh,*,*,check
 op_stream="Synthesizer checking complete. Only defined synthesizers were checked."
 enddef
+define  synth_force   00000000000x
+synth=loa,*,*,force
+synth=lob,*,*,force
+synth=loc,*,*,force
+synth=lod,*,*,force
+synth=loe,*,*,force
+synth=lof,*,*,force
+synth=log,*,*,force
+synth=loh,*,*,force
+op_stream="Synthesizer setting complete. Only defined synthesizers were set."
+enddef
 define  dbbc3_synth   00000000000x
 synth=
 synth=loa,,,check

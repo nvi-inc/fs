@@ -195,7 +195,8 @@ int ip[5];                           /* ipc parameters */
                       (NULL == command->argv[2] ||
                       (0==strlen(command->argv[2]) &&
                       (NULL == command->argv[3] ||
-                      0==strcmp(command->argv[3],"check"))))) { /* defaults is a no-op */
+                      0==strcmp(command->argv[3],"force") ||
+                      0==strcmp(command->argv[3],"check"))))) { /* defaults is a no-op for force/check */
                   ip[0]=ip[1]=ip[2]=ip[3]=ip[4]=0;
                   return;
               }
@@ -206,11 +207,12 @@ int ip[5];                           /* ipc parameters */
                   if(NULL==command->argv[i])
                       break;
                   else if(0==strcmp(command->argv[i],"*")) {
-                      if(NULL != command->argv[2] && NULL != command->argv[3] && 0==strcmp(command->argv[3],"force")) {
-                          ierr=-300;
+                      if(NULL != command->argv[2] && NULL != command->argv[3] &&
+                         0!=strcmp(command->argv[3],"force") && 0!=strcmp(command->argv[3],"check")) {
+                          ierr=-204;
                           goto error;
                       }
-                      ip[0]=ip[1]=ip[2]=ip[3]=ip[4]=0; /* a previous value is a no-op for check */
+                      ip[0]=ip[1]=ip[2]=ip[3]=ip[4]=0; /* a previous value is a no-op for check/force */
                       return;
                   }
      }
