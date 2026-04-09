@@ -72,7 +72,7 @@ int ilo;
       case 2:
         kdefault=FALSE;
         if(2==shm_addr->dbbc3_ifx[ilo].input) {
-           if(shm_addr->lo.lo[ilo] > 0.0) {
+           if(shm_addr->lo.lo[ilo] >= 0.0) {
              kdefault=TRUE;
              ddefault=shm_addr->lo.lo[ilo];
           }
@@ -125,6 +125,9 @@ int ilo;
                         } else { /* ext_lo > lo */
                             if(2!=sb) {
                                 ierr=-260;
+                                break;
+                            } else  if(shm_addr->lo.lo[ilo] == 0.0 && 2==shm_addr->lo.sideband[ilo]) {
+                                ierr=-270;
                                 break;
                             }
                             lcl->input_sb.input_sb=3-shm_addr->lo.sideband[ilo];

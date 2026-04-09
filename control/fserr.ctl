@@ -2729,6 +2729,9 @@ External-LO frequency is less than LO frequency, but external-LO side-band is no
 DM -262
 External-LO frequency is more than LO frequency, but external-LO side-band is not lower.
 ""
+DM -272
+LO frequency is zero and LO side-band is lower.
+""
 DM -103
 No default for synthesizer enable if corresponding 'ifX' has not been setup.
 ""
@@ -2931,13 +2934,13 @@ DO -114
 Can't use '*' (previous value) for LO frequency range minimum.
 ""
 DO -204
-Minimum for LO frequency range must be positive.
+Minimum for LO frequency range can't be negative.
 ""
 DO -115
 Can't use '*' (previous value) for LO frequency range maximum.
 ""
 DO -205
-Maximum for LO frequency range can't be negative (or zero), less than minimum, or set if the minimum is not set.
+Maximum for LO frequency range can't be negative, less than minimum, or set if the minimum is not set.
 ""
 DO -116
 Can't use '*' (previous value) for LO side-band.

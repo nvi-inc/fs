@@ -76,7 +76,7 @@ char *ptr;
         }
         ddum=1.0;
         ierr=arg_dble(ptr,&ddum,0.0,FALSE);
-        if(ierr==0 && ddum <=0.0) {
+        if(ierr==0 && ddum < 0.0) {
           ierr=-200;
           break;
         }
@@ -90,7 +90,7 @@ char *ptr;
         }
         ddum=1.0;
         ierr=arg_dble(ptr,&ddum,0.0,FALSE);
-        if(ierr==0 && ddum <=0.0) {
+        if(ierr==0 && ddum < 0.0) {
           ierr=-200;
           break;
         }

@@ -224,7 +224,7 @@ The following table identifies the side-band (SB) of the pre-filter required
 before the DBBC3 synthesizer depending on the relationship of the external-LO
 and net-LO frequencies and their output side-bands. Some cases are not useful.
 Those that are not are included for completeness with 'NO' and an explanation
-in the Pre-filter SB column.
+in the Pre-filter SB column. Note the footnote for the last row.
 
     Frequencies  ext_lo SB  LO SB        Pre-filter SB
                                     (relative to |ext_lo-lo|)
@@ -241,7 +241,9 @@ in the Pre-filter SB column.
     ext_lo > lo     USB      USB   NO: up-conversion unavailable
     ext_lo > lo     USB      LSB     NO: no side-band overlap
     ext_lo > lo     LSB      USB            LSB
-    ext_lo > lo     LSB      LSB            USB
+    ext_lo > lo     LSB      LSB            USB*
+
+    * USB pre-filter for LO frequency zero is not useful: no side-band overlap
 
     If the synthesizer is used, its frequency is always positive, that is,
     |lo - ext_lo|, a pre-filter is used before 'RF-in', 'RF-out' is jumpered
