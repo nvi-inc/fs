@@ -198,15 +198,13 @@ int *sb;
 
     if (shm_addr->lo.lo[ilo]<0)
         return -1;
-    
+
     for (i=0;i<shm_addr->dbbc3_ext_lo.count;i++) {
         if(shm_addr->dbbc3_ext_lo.table[i].ifc!=-1 && shm_addr->dbbc3_ext_lo.table[i].ifc!=ilo)
             continue;
         if(shm_addr->dbbc3_ext_lo.table[i].lo_min>=0.0 && shm_addr->lo.lo[ilo] < shm_addr->dbbc3_ext_lo.table[i].lo_min-0.001)
             continue;
         if(shm_addr->dbbc3_ext_lo.table[i].lo_max>=0.0 && shm_addr->lo.lo[ilo] > shm_addr->dbbc3_ext_lo.table[i].lo_max+0.001)
-            continue;
-        if(shm_addr->dbbc3_ext_lo.table[i].lo_sb!=0  && shm_addr->lo.sideband[ilo] != shm_addr->dbbc3_ext_lo.table[i].lo_sb)
             continue;
         if(shm_addr->dbbc3_ext_lo.table[i].lo_sb!=0  && shm_addr->lo.sideband[ilo] != shm_addr->dbbc3_ext_lo.table[i].lo_sb)
             continue;
