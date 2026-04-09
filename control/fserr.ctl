@@ -2838,7 +2838,7 @@ DN  -18
 DBBC3 multicast: retrieving interface address from socket (wrong interface?), UNIX?FFF
 ""
 DN  -20
-DBBC3 multicast: Time-out with no DBBC3 commands while data_valid=off; will now count time-outs in background.
+DBBC3 multicast: Time-out with no DBBC3 commands (data_valid=off); will now count time-outs in background.
 ""
 DN  -21
 DBBC3 multicast: error from select(), UNIX?FFF
@@ -2853,16 +2853,16 @@ DN  -24
 DBBC3 multicast: Core3H boards have different times.
 ""
 DN  -25
-DBBC3 multicast: For the last 60 seconds, there were?WW time-out(s) (12 is the most possible); continuing to count.
+DBBC3 multicast: There were?WW time-out(s) in the last minute (12 is the most possible); continuing to count.
 ""
 DN  -26
-DBBC3 multicast: Time-out with no DBBC3 commands while data_valid=on; will now count time-outs in background.
+DBBC3 multicast: Time-out with no DBBC3 commands (data_valid=on); will now count time-outs in background.
 ""
 DN  -27
 DBBC3 multicast: You should AVOID using DBBC3 commands (and FMSET) while recording, calibration data will be lost.
 ""
 DN  -28
-DBBC3 multicast: For the last 60 seconds, no messages were received; continuing to count time-outs.
+DBBC3 multicast: No messages were received in the last minute; continuing to count time-outs.
 ""
 DN  -30 Place holder for version string
 
