@@ -832,9 +832,15 @@ read:
           int i, is;
           char *failed =strstr(outbuf,"Failed");
 
-          if(8==mode)
+          if(8==mode) {
+              if(strncmp(inbuf,"synth=",6)==0) {
+                  if(NULL==failed && 0==strncmp(outbuf,"*** ",4))
+                      failed=strstr(outbuf,"*** ");
+                  if(NULL==failed && 0==strncmp(outbuf,"**** ",5))
+                      failed=strstr(outbuf,"**** ");
+              }
               strcpy(lbuf,"dbbc3/");
-          else
+          } else
               strcpy(lbuf,"fila10g/");
           is=strlen(lbuf);
           for(i=0;outbuf[i]!=0;i++)
@@ -880,7 +886,8 @@ read:
       } else if ((7==mode || 6==mode || 8==mode || 9==mode || 10 == mode) &&
               (strstr(outbuf,"Failed")!=NULL
                ||strstr(outbuf,"ERROR")!=NULL
-               ||strstr(outbuf,"WARNING")!=NULL)
+               ||strstr(outbuf,"WARNING")!=NULL
+               ||(strncmp(outbuf,"*** ",4)==0 && 8<=mode && mode <=10 && strncmp(inbuf,"synth=",6)==0))
               ) {
           char *failed=strstr(outbuf,"Failed");
           char *warning=strstr(outbuf,"WARNING");
@@ -888,6 +895,8 @@ read:
 
           if(NULL==failed)
               failed=strstr(outbuf,"ERROR");
+          if(NULL==failed)
+              failed=strstr(outbuf,"*** ");
           if(NULL!=failed) {
               for(i=0;failed[i]!=0;i++)
                   if(index("\r\n",failed[i])!=NULL) {
