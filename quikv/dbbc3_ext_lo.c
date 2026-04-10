@@ -38,7 +38,8 @@ int ip[5];                           /* ipc parameters */
       int ilast, ierr, ind, count, i;
       char *ptr;
       struct dbbc3_ext_lo_table lcl;     /* local instance of table struct */
-      int out_recs, out_class;
+      int out_recs=0;
+      int out_class=0;
       char outbuf[BUFSIZE];
 
       int dbbc3_ext_lo_dec();               /* parsing utilities */
@@ -62,7 +63,13 @@ int ip[5];                           /* ipc parameters */
               goto error;
           }
           if(!shm_addr->dbbc3_ext_lo.count) {
-              ip[0]=ip[1]=ip[2]=ip[3]=ip[4]=0;
+              strcpy(outbuf,command->name);
+              strcat(outbuf,"/undefined");
+              cls_snd(&out_class,outbuf,strlen(outbuf),0,0);
+              out_recs++;
+              ip[0]=out_class;
+              ip[1]=out_recs;
+              ip[2]=ip[3]=ip[4]=0;
               return;
           }
           int options=1;
