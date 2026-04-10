@@ -215,16 +215,20 @@ The FS 'lo=...' command describes the net-LO frequency, and net-side-band,
 before the BBCs. This includes the effect of any external-LO and the DBBC3
 synthesizer, if used. The FS 'ext_lo' command describes the external-LO
 frequency, and output side-band, of the mixing steps before the DBBC3. Note
-that the external-LO may be the result of zero, one, or multiple mixing steps.
-The only thing that matters here is the cumulative effect, which is what the
-'ext_lo=...' command describes. The FS 'synth=..' command describes the DBBC3
-synthesizer frequency and pre-filter side-band.
+that the external-LO may be the result of one or more mixing steps.  The only
+thing that matters is the cumulative effect, which is what the 'ext_lo=...'
+command describes. The FS 'synth=..' command describes the DBBC3 synthesizer
+frequency and pre-filter side-band.
 
 The following table identifies the side-band (SB) of the pre-filter required
-before the DBBC3 synthesizer depending on the relationship of the external-LO
-and net-LO frequencies and their output side-bands. Some cases are not useful.
-Those that are not are included for completeness with 'NO' and an explanation
-in the Pre-filter SB column. Note the footnote for the last row.
+before the DBBC3 synthesizer depending on the relationship of the 'ext_lo'
+(external-LO) and the 'lo' (net-LO) frequencies and their output side-bands.
+Only some cases are possible. Even for cases that are possible, the bandpasses
+of the external-LO output and the pre-filter must be commensurate to get a
+useful result. Cases that are not possible are included for completeness with
+'NO' and an explanation (either external-LO and LO side-bands can't overlap or
+no up-conversion is available from the synthesizer) in the Pre-filter SB
+column. Please note the footnote for the last row.
 
     Frequencies  ext_lo SB  LO SB        Pre-filter SB
                                     (relative to |ext_lo-lo|)
@@ -243,7 +247,8 @@ in the Pre-filter SB column. Note the footnote for the last row.
     ext_lo > lo     LSB      USB            LSB
     ext_lo > lo     LSB      LSB            USB*
 
-    * USB pre-filter for LO frequency zero is not useful: no side-band overlap
+    * USB pre-filter for LO frequency zero is not possible: no side-band
+      overlap
 
     If the synthesizer is used, its frequency is always positive, that is,
     |lo - ext_lo|, a pre-filter is used before 'RF-in', 'RF-out' is jumpered
