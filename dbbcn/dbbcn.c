@@ -597,6 +597,7 @@ int ip[5];
   int fila10g;
   int newline;
   int dbbc3;
+  int had_asterisk_error=0;
 
   struct tms tms_buff;
   int first, changed;
@@ -887,7 +888,8 @@ read:
               (strstr(outbuf,"Failed")!=NULL
                ||strstr(outbuf,"ERROR")!=NULL
                ||strstr(outbuf,"WARNING")!=NULL
-               ||(strncmp(outbuf,"*** ",4)==0 && 8<=mode && mode <=10 && strncmp(inbuf,"synth=",6)==0))
+               ||(strncmp(outbuf,"*** ",4)==0 || strncmp(outbuf,"**** ",5)==0)
+                  && 8<=mode && mode <=10 && strncmp(inbuf,"synth=",6)==0)
               ) {
           char *failed=strstr(outbuf,"Failed");
           char *warning=strstr(outbuf,"WARNING");
@@ -895,8 +897,16 @@ read:
 
           if(NULL==failed)
               failed=strstr(outbuf,"ERROR");
-          if(NULL==failed)
-              failed=strstr(outbuf,"*** ");
+          if(strncmp(inbuf,"synth=",6)==0) {
+              if(NULL==failed && 0==strncmp(outbuf,"*** ",4)) {
+                  failed=strstr(outbuf,"*** ");
+                  had_asterisk_error=1;
+              }
+              if(NULL==failed && 0==strncmp(outbuf,"**** ",5)) {
+                  failed=strstr(outbuf,"**** ");
+                  had_asterisk_error=1;
+              }
+          }
           if(NULL!=failed) {
               for(i=0;failed[i]!=0;i++)
                   if(index("\r\n",failed[i])!=NULL) {
@@ -913,11 +923,18 @@ read:
               logite(warning,-200,"db");
           } else
               logite(outbuf,-200,"db"); /* for safety, just in case */
-          ip[2]=-201;
-          goto error;
+          if(!had_asterisk_error) { /* need to check for others until read terminates */
+              ip[2]=-201;
+              goto error;
+          }
       }
       if(1==ip[2] && (9 == mode || 10 == mode))
           goto read;
+
+      if(had_asterisk_error) {
+          ip[2]=-201;
+          goto error;
+       }
 
   } /* End of for loop  */
 

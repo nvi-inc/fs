@@ -2265,7 +2265,7 @@ DB -114
 dbb?W: re-open after pre-drain error was okay, proceeding to transaction.
 ""
 DB -201
-dbb?W: ERROR response from DBBC, see db -200 error for text.
+dbb?W: ERROR response from DBBC, see above db -200 error(s) for text.
 ""
 DC -101
 No default for frequency
