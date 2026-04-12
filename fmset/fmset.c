@@ -476,14 +476,6 @@ do 	{
 	}
 
 	if(formtime >= 0) {
-	  index=01 & shm_addr->time.index;
-	  epoch=shm_addr->time.epoch[index];
-	  icomputer=shm_addr->time.icomputer[index];
-	  if(shm_addr->time.model == 'c'||epoch==0 || icomputer!=0) {
-	    fstime=unixtime;
-	    fshs=unixhs;
-	  }
-
 	  disptime=fstime;
 	  disphs=fshs+5;
 	  
@@ -492,6 +484,10 @@ do 	{
 	    disptime++;
 	  }
 	  
+	  index=01 & shm_addr->time.index;
+	  epoch=shm_addr->time.epoch[index];
+	  icomputer=shm_addr->time.icomputer[index];
+
 	  if(shm_addr->time.model == 'c'||epoch==0||icomputer!=0)
 	    model="computer";
 	  else if(shm_addr->time.model=='n')
