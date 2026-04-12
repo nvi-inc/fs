@@ -2759,6 +2759,9 @@ DM -303
 DM -304
 No synthesizer configuration has been defined to select with 'next'.
 ""
+DM -305
+'check' can only be used with 'next' if all settable parameters are '*'s (previous values).
+""
 DM -401
 Class buffer error from monitor response.
 ""

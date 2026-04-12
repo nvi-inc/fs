@@ -130,7 +130,14 @@ int ip[5];                           /* ipc parameters */
           } else if(NULL != command->argv[2] && NULL != command->argv[3] && 0==strcmp(command->argv[3],"force")) {
               ierr=-303;
               goto error;
+          } else if(NULL != command->argv[2] && NULL != command->argv[3] && 0!=strcmp(command->argv[3],"check")) {
+              ierr=-204;
+              goto error;
           } else { /* must be checking */
+              if(0!=strcmp(command->argv[1],"*") || NULL == command->argv[2] || 0!=strcmp(command->argv[2],"*")) {
+                ierr=-305;
+                goto error;
+              }
               ilo=shm_addr->dbbc3_synthesizer_previous_lo;
               for(i=0;i<shm_addr->dbbc3_ddc_ifs;i++) {
                   ilo=(1+ilo)%shm_addr->dbbc3_ddc_ifs;
