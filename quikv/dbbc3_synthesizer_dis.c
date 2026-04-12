@@ -94,34 +94,40 @@ int kcheck;
               case 1:
               case 2:
               case 4:
-              case 6:
+              case 5:
+              case 7:
               case 8:
               case 10:
-              case 12:
+              case 11:
               case 13:
-              case 15:
+              case 14:
+              case 16:
+              case 17:
+              case 19:
+              case 20:
+              case 22:
                   ierr=0;
                   break;
               case 3:
                   memcpy(&lclc,shm_addr->dbbc3_synthesizer+ilo,sizeof(lclc));
                   ierr=dbbc3_2_synthesizer_freq(&lclc,inbuf);
                   break;
-              case 5:
+              case 6:
                   ierr=dbbc3_2_synthesizer_enable(&lclc,inbuf);
                   break;
-              case 7:
+              case 9:
                   ierr=dbbc3_2_synthesizer_atten(&lclm,inbuf);
                   break;
-              case 9:
+              case 12:
                   ierr=dbbc3_2_synthesizer_mode(&lclm,inbuf);
                   break;
-              case 11:
+              case 15:
                   ierr=dbbc3_2_synthesizer_lock(&lclm,inbuf);
                   break;
-              case 14:
+              case 18:
                   ierr=dbbc3_2_synthesizer_ref_source(&lclm,inbuf);
                   break;
-              case 16:
+              case 21:
                   ierr=dbbc3_2_synthesizer_ref_freq(&lclm,inbuf);
                   break;
               default:

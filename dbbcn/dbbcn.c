@@ -95,7 +95,7 @@ int is_init=FALSE;
 static char control_file[65];
 
 static void close_socket();
-static int read_response(char*, int, FILE*, int, int, int, int);
+static int read_response(char*, int, FILE*, int, int, int, int, int);
 static int drain_input_stream(FILE*);
 
 int main(int argc, char * argv[])
@@ -597,6 +597,7 @@ int ip[5];
   int fila10g;
   int newline;
   int dbbc3;
+  int synth=0;
   int had_asterisk_error=0;
 
   struct tms tms_buff;
@@ -709,9 +710,10 @@ int ip[5];
       else
           fila10g=FALSE;
 
-      if(8 == mode || 9 == mode || 10 == mode)
+      if(8 == mode || 9 == mode || 10 == mode) {
           dbbc3=TRUE;
-      else
+          synth=0==strncmp(inbuf,"synth=",6);
+      } else
           dbbc3=FALSE;
 
       newline = 7 == mode || 8 == mode || 9 == mode || 10 == mode;
@@ -782,7 +784,7 @@ int ip[5];
           /* * Read reply * */
 read:
           ip[2] = read_response(outbuf, sizeof(outbuf), fsock, time_out_local,
-                  fila10g, newline, dbbc3);
+                  fila10g, newline, dbbc3 ,synth);
 
           if(mode==4 || 10 == mode)  {
               rte_ticks (centisec+1);
@@ -1074,7 +1076,7 @@ static void close_socket()
 
 static int read_response(char *str, int num, FILE* stream,
 			 int time_out_local, int fila10g, int newline,
-                         int dbbc3)
+                         int dbbc3, int synth)
 {
   int c, iret;
     char* cs = str;
@@ -1084,6 +1086,9 @@ static int read_response(char *str, int num, FILE* stream,
     char fila10g_term[ ]= "FiLa10G % ";
     int term_count;
     char term_start;
+    int old_c=0;
+    int old_old_c=0;
+    int old_old_old_c=0;
 
     term_count=0;
     iret=0;
@@ -1153,11 +1158,19 @@ static int read_response(char *str, int num, FILE* stream,
 	if(c=='\n')
 	  goto done;
       } else if (dbbc3) {
-	if(c=='\n' && newline) {
-          iret=1;
-          goto done;
-	} else if (c==';')
-          goto done;
+        if(!synth) {
+          if(c=='\n' && newline) {
+            iret=1;
+            goto done;
+          } else if (c==';')
+             goto done;
+        } else if(c=='\n') {
+          if( old_old_old_c != '-'|| old_old_c != '>' || old_c !=  ';' ) {
+            iret=1;
+            goto done;
+          } else
+            goto done;
+        }
       }	else { /* fila10g comm ends with a string rather than a \n */
 	if(c=='\n' && newline) {
 	  iret=1;
@@ -1169,6 +1182,9 @@ static int read_response(char *str, int num, FILE* stream,
 	} else /* start over */
 	  term_count=0;
       }
+       old_old_old_c=old_old_c;
+       old_old_c=old_c;
+       old_c=c;
     }
     iret = -109; /* ended before newline */
    
