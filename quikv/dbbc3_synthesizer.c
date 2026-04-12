@@ -37,35 +37,7 @@ static void add_check_queries( out_recs, out_class, ilo)
 {
     char outbuf[BUFSIZE];
 
-    sprintf(outbuf,"synth=%d,s%d",1+ilo/2,1+ilo%2);
-    cls_snd(out_class, outbuf, strlen(outbuf) , 0, 0);
-    ++*out_recs;
-
-    sprintf(outbuf,"synth=%d,f?",1+ilo/2);
-    cls_snd(out_class, outbuf, strlen(outbuf) , 0, 0);
-    ++*out_recs;
-
-    sprintf(outbuf,"synth=%d,oen?",1+ilo/2);
-    cls_snd(out_class, outbuf, strlen(outbuf) , 0, 0);
-    ++*out_recs;
-
-    sprintf(outbuf,"synth=%d,att?",1+ilo/2);
-    cls_snd(out_class, outbuf, strlen(outbuf) , 0, 0);
-    ++*out_recs;
-
-    sprintf(outbuf,"synth=%d,mod?",1+ilo/2);
-    cls_snd(out_class, outbuf, strlen(outbuf) , 0, 0);
-    ++*out_recs;
-
-    sprintf(outbuf,"synth=%d,lk%d?",1+ilo/2,1+ilo%2);
-    cls_snd(out_class, outbuf, strlen(outbuf) , 0, 0);
-    ++*out_recs;
-
-    sprintf(outbuf,"synth=%d,refs?",1+ilo/2);
-    cls_snd(out_class, outbuf, strlen(outbuf) , 0, 0);
-    ++*out_recs;
-
-    sprintf(outbuf,"synth=%d,ref?",1+ilo/2);
+    sprintf(outbuf,"synth=%d,s%d;f?;oen?;att?;mod?;lk%d?;refs?;ref?",1+ilo/2,1+ilo%2,1+ilo%2);
     cls_snd(out_class, outbuf, strlen(outbuf) , 0, 0);
     ++*out_recs;
 
