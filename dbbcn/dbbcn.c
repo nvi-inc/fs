@@ -1160,10 +1160,12 @@ static int read_response(char *str, int num, FILE* stream,
       } else if (dbbc3) {
         if(!synth) {
           if(c=='\n' && newline) {
-            iret=1;
-            goto done;
-          } else if (c==';')
-             goto done;
+             if( old_c !=  ';' ) {
+               iret=1;
+               goto done;
+             } else
+               goto done;
+          }
         } else if(c=='\n') {
           if( old_old_old_c != '-'|| old_old_c != '>' || old_c !=  ';' ) {
             iret=1;
