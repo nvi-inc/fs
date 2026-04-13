@@ -270,5 +270,7 @@ error:
       ip[1]=0;
       ip[2]=ierr;
       memcpy(ip+3,"dm",2);
+      if(-102==ierr || -103==ierr || (-300 < ierr && ierr < -201 && -204 != ierr))
+        memcpy(ip+4,lo3_key[ilo]+1,2);
       return;
 }
