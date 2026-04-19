@@ -2865,7 +2865,7 @@ DN  -26
 DBBC3 multicast: Time-out with no DBBC3 commands (data_valid=on); will now count time-outs in background.
 ""
 DN  -27
-DBBC3 multicast: You should AVOID using DBBC3 commands (and FMSET) while recording, calibration data will be lost.
+DBBC3 multicast: You should AVOID using DBBC3 commands (and FMSET) while recording, calibration data is being lost.
 ""
 DN  -28
 DBBC3 multicast: No messages were received in the last minute; continuing to count time-outs.
