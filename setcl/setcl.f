@@ -525,11 +525,6 @@ c and computer compared to the formatter?
 c
       diffunix=(secs_fm-unixsec(1))*100+it(1)-unixhs(1)
       difffs2unix=(secs_fs-unixsec(1))*100+centifs-unixhs(1)
-      if(epochti_fs.eq.0.or.cjchar(modelti_fs,1).eq.'c'
-     &     .or.icomputer.ne.0) then
-         diff=diffunix
-         difffs2unix=0
-      endif
 c
       inxtc=ichmv_ch(ibuf,1,'time/')
       inxtc=inxtc+ib2as(centiavg,ibuf,inxtc,ocp100000+12)
@@ -617,18 +612,19 @@ c
       endif
       call logit2(ibuf,inxtc-1)
 c
-      if(set.eq.'fs'.or.ibaseold.ne.ibase.or.set.eq.'computer'
-     &     .or.(kfm
-     &     .and.((set.eq.'offset'.and.icomputer.eq.0)
-     &     .or.(set.eq.'rate'.and.spanti_fs.le.centiavg-epochti_fs
-     &          .and.epochti_fs.ne.0.and.icomputer.eq.0
-     &          .and.cjchar(modelti_fs,1).eq.'r')
-     &     .or.(set.eq.'adapt'.and.cjchar(modelti_fs,1).eq.'r'
-     &          .and.abs(diff-ibase).le.50.and.epochti_fs.ne.0
-     &          .and.(centiavg-epochti_fs.gt.360000
-     &                .or.spanti_fs.le.centiavg-epochti_fs))
-     &       .or.(set.eq.' '.and.epochti_fs.eq.0
-     &     .and.icomputer.eq.0)))) then            !update model
+      if(
+     & ((cjchar(modelti_fs,1).ne.'c'.and.
+     &   (icomputer.eq.0).or.(icomputer.eq.1.and.set.eq.'fs')))
+     & .and.
+     & (set.eq.'fs'.or.ibaseold.ne.ibase.or.set.eq.'computer' .or.
+     &  (kfm .and.
+     &   (set.eq.'offset'.or.(set.eq.' '.and.epochti_fs.eq.0) .or.
+     &    (epochti_fs.ne.0.and.cjchar(modelti_fs,1).eq.'r' .and.
+     &     (set.eq.'rate'.and.spanti_fs.le.centiavg-epochti_fs) .or.
+     &     (set.eq.'adapt'.and.abs(diff-ibase).le.50.and.
+     &      (centiavg-epochti_fs.gt.360000.or.
+     &       spanti_fs.le.centiavg-epochti_fs))))))
+     &  ) then            !update model
         if(set.eq.' ') set='offset'
         if(ibase.ne.ibaseold) then
            ibaseold=ibase
