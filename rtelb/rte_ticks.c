@@ -33,30 +33,14 @@
 void rte_ticks(lRawTicks)
 int *lRawTicks;
 {
-     struct tms buffer;
-     clock_t ticks;
-
-     int index=01 & shm_addr->time.index;
-     if(shm_addr->time.model!='c'
-             && shm_addr->time.epoch[index]!=0
-             && shm_addr->time.icomputer[index]==0 ) {
-         ticks=times(&buffer);
-         if(ticks == (clock_t) -1) {
-             perror("using times()");
-             exit(-1);
-         }
-         /* limit about 248 days */
-         *lRawTicks=(signed) ((unsigned int) ticks - shm_addr->time.ticks_off);
-     } else {
-        struct timeval tv;
-         if(0!= gettimeofday(&tv, NULL)) {
-             perror("getting timeofday, fatal\n");
-             exit(-1);
-         }
-         /* limit about 497 days */
-         *lRawTicks=(tv.tv_sec-shm_addr->time.secs_off)*100+
-             +tv.tv_usec/10000;
-     }
+    struct timeval tv;
+    if(0!= gettimeofday(&tv, NULL)) {
+        perror("getting timeofday, fatal\n");
+        exit(-1);
+    }
+    /* limit about 497 days */
+    *lRawTicks=(tv.tv_sec-shm_addr->time.secs_off)*100+
+        +tv.tv_usec/10000;
 
      return;
 }
