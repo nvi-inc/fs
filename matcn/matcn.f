@@ -1,5 +1,5 @@
 *
-* Copyright (c) 2020, 2023, 2024  NVI, Inc.
+* Copyright (c) 2020, 2023, 2024, 2026 NVI, Inc.
 *
 * This file is part of VLBI Field System
 * (see http://github.com/nvi-inc/fs).
@@ -556,7 +556,7 @@ C
       ip(2) = nclrer
       ip(3) = ierr
       call char2hol('ma',ip(4),1,2)
-      ip(5) = modtbl(1,idev)
+      ip(5)=0
 C                   SUSPEND HERE *********************************
       if(kclear) call clrcl( iclass)
       goto 1
