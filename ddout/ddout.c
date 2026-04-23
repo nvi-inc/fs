@@ -278,18 +278,21 @@ Messenger:
       goto Messenger;
     }
     if (memcmp(cp2,"tn",2)==0) { /* TNX on */
-      short ix, iy;
+      int found=FALSE;
+      short ix, iy, df;
       memcpy(&ix,buf+2,2);
       memcpy(&iy,buf+4,2);
+      memcpy(&df,buf+6,2);
       for(ptr=last;ptr!=NULL;ptr=ptr->previous) {
-	if(ptr->num == ix && memcmp(ptr->ch,buf,2)==0) {
-	  if(iy == 0) {
+        if(ptr->num == ix && memcmp(ptr->ch,buf,2)==0) {
+	  if(df==1) {
 	    if(ptr->count<=1) {
 	      if(ptr->on == 1) {
 		logit(NULL,-311,"bo");
 		goto Messenger;
 	      }
 	      ptr->on=1;
+              found=TRUE;
 	      break;
 	    } else {
 	      sprintf(buf2,"tnx/more than one %2.2s,%d occurred, use 'tnx=%2.2s,%d,on,#num' to select from list below",ptr->ch,ix,ptr->ch,ix);
@@ -310,35 +313,39 @@ Messenger:
 	      goto Messenger;
 	    }
 	  } else if(ptr->count == iy || iy < 0) {
-	      if(iy > 0 && ptr->on == 1) {
+	      if(iy >= 0 && ptr->on == 1) {
 		logit(NULL,-311,"bo");
 		goto Messenger;
 	      }
 	      ptr->on=1;
-	      if(iy > 0 || ptr->count <= 1)
+              found=TRUE;
+	      if(iy >= 0 )
 		break;
 	  }
 	}
       }
-      if(ptr == NULL) { /* not found */
+      if(!found) { /* not found */
 	logit(NULL,-304,"bo");
 	goto Messenger;
       }
       goto Messenger;
     }
     if (memcmp(cp2,"tf",2)==0) { /* TNX off */
-      short ix, iy;
+      int found=FALSE;
+      short ix, iy, df;
       memcpy(&ix,buf+2,2);
       memcpy(&iy,buf+4,2);
+      memcpy(&df,buf+6,2);
       for(ptr=last;ptr!=NULL;ptr=ptr->previous) {
-	if(ptr->num == ix && memcmp(ptr->ch,buf,2)==0) {
-	  if(iy == 0) {
+        if(ptr->num == ix && memcmp(ptr->ch,buf,2)==0) {
+	  if(df==1) {
 	    if(ptr->count<=1) {
 	      if(ptr->on == 0) {
 		logit(NULL,-312,"bo");
 		goto Messenger;
 	      }
 	      ptr->on=0;
+              found=TRUE;
 	      break;
 	    } else {
 	      sprintf(buf2,"tnx/more than one %2.2s,%d, exists, use 'tnx=%2.2s,%d,off,#num' to select from list below",ptr->ch,ix,ptr->ch,ix);
@@ -364,12 +371,13 @@ Messenger:
 		goto Messenger;
 	      }
 	      ptr->on=0;
-	      if(iy > 0 || ptr->count <= 1)
+              found=TRUE;
+	      if(iy >= 0)
 		break;
 	  }
 	}
       }
-      if(ptr == NULL) { /* not found */
+      if(!found) { /* not found */
           logit(NULL,-303,"bo");
       }
       goto Messenger;
@@ -667,6 +675,7 @@ Ack:    ich = strtok(NULL, ",");
       /* append returned info (if not empty) to output message for display, 
 	 otherwise we jumped to Append
       */
+
       if(strlen(ibur)!=0) {
          strcat(buf, " ");
          strcat(buf, ibur);
@@ -679,23 +688,34 @@ Ack:    ich = strtok(NULL, ",");
 			   or from inside block for non-error, we don't want those
 			*/
 	
-	/* tnx command error filtering */
+	/* tnx error filtering */
 	
 	count=0;
         for(ptr=last;ptr!=NULL;ptr=ptr->previous)  /* look for it */
           if(ptr->num == ierrnum && memcmp(ptr->ch,ierrch,2)==0) {
             if(count ==0)
               count=ptr->count;
-            if(count==0 || (strlen(ibur)!=0 && strcmp(ptr->string,ibur)==0 ||
-                            strlen(ibur)==0 && ptr->example != NULL && strcmp(ptr->example,buf+FIRST_CHAR+14)==0)) {
-              display=ptr->on;
-              if(count == 0)
-                add_error(ptr,ierrch,ierrnum,count,&last,&first,ibur,buf+FIRST_CHAR+14);
-              break;
+	    if(strlen(ibur)!=0 && strcmp(ptr->string,ibur)==0 ||
+               strlen(ibur)==0 && ptr->example != NULL && strcmp(ptr->example,buf+FIRST_CHAR+14)==0) {
+	      display=ptr->on;
+	      break;
+	    }
+	  }
+
+        if(ptr == NULL) { /* not found, add it */
+          for(ptr=first;ptr!=NULL;ptr=ptr->next)  /* look for it as force */
+            if(ptr->num == ierrnum && memcmp(ptr->ch,ierrch,2)==0) {
+              if(ptr->count == 0) {
+                add_error(NULL,ierrch,ierrnum,count,&last,&first,ibur,buf+FIRST_CHAR+14);
+                last->on=ptr->on;
+	        display=last->on;
+                break;
+              }
             }
+          if(ptr == NULL) { /* not found as force, add it */
+            add_error(NULL,ierrch,ierrnum,count,&last,&first,ibur,buf+FIRST_CHAR+14);
           }
-	if(ptr == NULL) /* not found, add it */
-          add_error(NULL,ierrch,ierrnum,count,&last,&first,ibur,buf+FIRST_CHAR+14);
+        }
 
 	/* send message to station error program */
 	if(display && *cp2 == 'b' && shm_addr->sterp !=0) {
