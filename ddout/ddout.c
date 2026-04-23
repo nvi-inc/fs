@@ -98,7 +98,7 @@ static void add_error(struct list *ptr_in, char ierrch[2],int ierrnum,
   if(ptr->example == NULL) {
     if(buf!= NULL && strlen(ibur) == 0) {
       new_example=1;
-      ptr->example=strdup(buf+FIRST_CHAR+14);
+      ptr->example=strdup(buf);
       if(ptr->example == NULL) {  /* ptr->example is NULL */
         new_example=0;
         shm_addr->abend.other_error=1;
@@ -297,11 +297,11 @@ Messenger:
 	      for(ptr=first;ptr!=NULL;ptr=ptr->next) {
 		if(ptr->num == ix && memcmp(ptr->ch,buf,2)==0) {
 		  if(ptr->example==NULL)
-		    sprintf(buf2,"tnx/%2.2s,%d,%s,#%d,%s",
+		    sprintf(buf2,"tnx/%2.2s,%d,%s,#%d,{%s},{}",
 			    ptr->ch,ptr->num,offon[ptr->on],
 			    ptr->count,ptr->string);
 		  else
-		    sprintf(buf2,"tnx/%2.2s,%d,%s,#%d,%s,%s",
+		    sprintf(buf2,"tnx/%2.2s,%d,%s,#%d,{%s},{%s}",
 			    ptr->ch,ptr->num,offon[ptr->on],
 			    ptr->count,ptr->string,ptr->example);
 		  logitf(buf2);
@@ -315,7 +315,7 @@ Messenger:
 		goto Messenger;
 	      }
 	      ptr->on=1;
-	      if(iy > 0 || ptr->count == 1)
+	      if(iy > 0 || ptr->count <= 1)
 		break;
 	  }
 	}
@@ -346,11 +346,11 @@ Messenger:
 	      for(ptr=first;ptr!=NULL;ptr=ptr->next) {
 		if(ptr->num == ix && memcmp(ptr->ch,buf,2)==0) {
 		  if(ptr->example==NULL)
-		    sprintf(buf2,"tnx/%2.2s,%d,%s,#%d,%s",
+		    sprintf(buf2,"tnx/%2.2s,%d,%s,#%d,{%s},{}",
 			    ptr->ch,ptr->num,offon[ptr->on],
 			    ptr->count,ptr->string);
 		  else
-		    sprintf(buf2,"tnx/%2.2s,%d,%s,#%d,%s,%s",
+		    sprintf(buf2,"tnx/%2.2s,%d,%s,#%d,{%s},{%s}",
 			    ptr->ch,ptr->num,offon[ptr->on],
 			    ptr->count,ptr->string,ptr->example);
 		  logitf(buf2);
@@ -364,7 +364,7 @@ Messenger:
 		goto Messenger;
 	      }
 	      ptr->on=0;
-	      if(iy > 0 || ptr->count == 1)
+	      if(iy > 0 || ptr->count <= 1)
 		break;
 	  }
 	}
@@ -667,10 +667,11 @@ Ack:    ich = strtok(NULL, ",");
       /* append returned info (if not empty) to output message for display, 
 	 otherwise we jumped to Append
       */
-      
-      strcat(buf, " ");
-      strcat(buf, ibur);
-      
+      if(strlen(ibur)!=0) {
+         strcat(buf, " ");
+         strcat(buf, ibur);
+      }
+
     Append:
       display=1;  /* always display unless tnx overrides for errors */
       
@@ -681,19 +682,20 @@ Ack:    ich = strtok(NULL, ",");
 	/* tnx command error filtering */
 	
 	count=0;
-	for(ptr=last;ptr!=NULL;ptr=ptr->previous)  /* look for it */
-	  if(ptr->num == ierrnum && memcmp(ptr->ch,ierrch,2)==0) {
-	    if(count ==0)
-	      count=ptr->count;
-	    if(count==0 || (strlen(ibur)!=0 && strcmp(ptr->string,ibur)==0 || strlen(ibur)==0 && strcmp(ptr->string,buf)==0)) {
-	      display=ptr->on;
+        for(ptr=last;ptr!=NULL;ptr=ptr->previous)  /* look for it */
+          if(ptr->num == ierrnum && memcmp(ptr->ch,ierrch,2)==0) {
+            if(count ==0)
+              count=ptr->count;
+            if(count==0 || (strlen(ibur)!=0 && strcmp(ptr->string,ibur)==0 ||
+                            strlen(ibur)==0 && ptr->example != NULL && strcmp(ptr->example,buf+FIRST_CHAR+14)==0)) {
+              display=ptr->on;
               if(count == 0)
-                 add_error(ptr,ierrch,ierrnum,count,&last,&first,ibur,buf);
-	      break;
-	    }
-	  }
+                add_error(ptr,ierrch,ierrnum,count,&last,&first,ibur,buf+FIRST_CHAR+14);
+              break;
+            }
+          }
 	if(ptr == NULL) /* not found, add it */
-          add_error(NULL,ierrch,ierrnum,count,&last,&first,ibur,buf);
+          add_error(NULL,ierrch,ierrnum,count,&last,&first,ibur,buf+FIRST_CHAR+14);
 
 	/* send message to station error program */
 	if(display && *cp2 == 'b' && shm_addr->sterp !=0) {
