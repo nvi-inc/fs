@@ -1270,23 +1270,25 @@ c
                     else
                        ibufd(3)=-32768
                        if(ierr.eq.2) then
-                          ibufd(3)=0
+                          ibufd(3)=1
+                          ibufd(4)=1
                        else if(0.ne.ichcm_ch(parm,1,'#')) then
                           call logit7ci(0,0,0,0,-310,'bo',0)
                        else
                           ic1=iscn_ch(ibuf,1,nchar,'#')
                           ibufd(3) = ias2b(ibuf,ic1+1,nchar-ic1)
+                          ibufd(4)=0
                        endif
                        if(ibufd(3).eq.-32768) then
                           call logit7ci(0,0,0,0,-310,'bo',0)
                        else if(ioffon.eq.1) then
-                          call put_buf(iclbox,ibufd,-6,'fs','tn')
+                          call put_buf(iclbox,ibufd,-8,'fs','tn')
                        else if(ioffon.eq.0) then
-                          call put_buf(iclbox,ibufd,-6,'fs','tf')
+                          call put_buf(iclbox,ibufd,-8,'fs','tf')
                        else if(ioffon.eq.2) then
-                          call put_buf(iclbox,ibufd,-6,'fs','te')
+                          call put_buf(iclbox,ibufd,-8,'fs','te')
                        else if(ioffon.eq.3) then
-                          call put_buf(iclbox,ibufd,-6,'fs','tu')
+                          call put_buf(iclbox,ibufd,-8,'fs','tu')
                        endif
                     endif
                  endif
