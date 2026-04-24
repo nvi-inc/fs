@@ -1571,6 +1571,9 @@ Error not found, can't 'unforce'.
 BO -319
 Error was already set with 'force'.
 ""
+BO -320
+ddout: internal FS error, incorrectly formed error message.
+""
 BO -390
 setup procedure name must be 12 characters or less.
 ""
