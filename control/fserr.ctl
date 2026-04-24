@@ -1568,6 +1568,9 @@ Error was not set with 'force', can't 'unforce'.
 BO -318
 Error not found, can't 'unforce'.
 ""
+BO -319
+Error was already set with 'force'.
+""
 BO -390
 setup procedure name must be 12 characters or less.
 ""

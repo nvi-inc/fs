@@ -52,6 +52,70 @@ struct list {
       int on;
       int count;
     } ;
+
+static void insert_error(struct list *ptr_in, char ierrch[2],int ierrnum,
+    int count, struct list **last, struct list **first, char ibur[150],
+    char buf[MAX_BUF+2])
+{
+  struct list *ptr;
+
+  ptr= (struct list *)malloc(sizeof(struct list));
+  if(ptr!=NULL) {
+    memcpy(ptr->ch,ierrch,2);
+    ptr->num=ierrnum;
+    if(ptr_in->previous == NULL) {
+      ptr_in->previous = ptr;
+      ptr->next=*first;
+      ptr->previous=NULL;
+      *first=ptr;
+    } else {
+      ptr->previous=ptr_in->previous;
+      ptr_in->previous=ptr;
+      ptr->next=ptr_in;
+      ptr->previous->next=ptr;
+    }
+    ptr->example=NULL;
+    ptr->string=NULL;
+    ptr->on=1;
+
+    if(count < 0) {
+      ptr->on=0;
+      ptr->count=0;
+    } else
+      ptr->count=count+1;
+  } else {
+    shm_addr->abend.other_error=1;
+    perror("!! help! ** getting tnx structure to insert, ddout");
+    play_wav(1);
+    return;
+  }
+
+  int new_example=0;
+  if(buf!= NULL && strlen(ibur) == 0) {
+    new_example=1;
+    ptr->example=strdup(buf);
+    if(ptr->example == NULL) {  /* ptr->example is NULL */
+      new_example=0;
+      shm_addr->abend.other_error=1;
+      perror("!! help! ** getting tnx structure example to insert, ddout");
+      play_wav(1);
+    }
+  } else
+    ptr->example=NULL;
+
+  ptr->string=strdup(ibur);
+  if(ptr->string == NULL){  /* get rid of it since we can't add it */
+    if(new_example) {
+      free(ptr->example);
+      ptr->example=NULL;
+    }
+    free(ptr);
+    shm_addr->abend.other_error=1;
+    perror("!! help! ** getting tnx structure string to insert, ddout");
+    play_wav(1);
+  }
+}
+
 static void add_error(struct list *ptr_in, char ierrch[2],int ierrnum,
     int count, struct list **last, struct list **first, char ibur[150],
     char buf[MAX_BUF+2])
@@ -424,14 +488,22 @@ Messenger:
       short ix;
       char empty[]= {0};
       memcpy(&ix,buf+2,2);
-      for(ptr=first;ptr!=NULL;ptr=ptr->next) {
-        if(ptr->num == ix && memcmp(ptr->ch,buf,2)==0)
-          unlink_error(ptr, &last, &first);
-      }
       memcpy(ierrch,buf,2);
       count=-1;
-      add_error(NULL,ierrch,ix,count,&last,&first,empty,NULL);
-
+      for(ptr=first;ptr!=NULL;ptr=ptr->next) {
+        if(ptr->num == ix && memcmp(ptr->ch,buf,2)==0) {
+          if(ptr->count==0) {
+            logit(NULL,-319,"bo");
+            goto Messenger;
+          }
+          else if(ptr->count==1) {
+            insert_error(ptr,ierrch,ix,count,&last,&first,empty,NULL);
+            break;
+          }
+        }
+      }
+      if(ptr==NULL)
+        add_error(NULL,ierrch,ix,count,&last,&first,empty,NULL);
       goto Messenger;
     }
 
@@ -677,6 +749,8 @@ Ack:    ich = strtok(NULL, ",");
       */
 
       if(strlen(ibur)!=0) {
+         if(strlen(buf) > FIRST_CHAR+13)
+	   fprintf(stderr,"ddout: internal error, incorrectly formed error message\n");
          strcat(buf, " ");
          strcat(buf, ibur);
       }
