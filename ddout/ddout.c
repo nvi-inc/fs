@@ -359,19 +359,18 @@ Messenger:
               found=TRUE;
 	      break;
 	    } else {
-	      sprintf(buf2,"tnx/more than one %2.2s,%d occurred, use 'tnx=%2.2s,%d,on,#num' to select from list below",ptr->ch,ix,ptr->ch,ix);
-	      logitf(buf2);
+	      printf("  tnx: more than one %2.2s,%d occurred, use 'tnx=%2.2s,%d,on,#num' to select from the list below\a\a\n",ptr->ch,ix,ptr->ch,ix);
+              play_wav(1);
 	      for(ptr=first;ptr!=NULL;ptr=ptr->next) {
 		if(ptr->num == ix && memcmp(ptr->ch,buf,2)==0) {
 		  if(ptr->example==NULL)
-		    sprintf(buf2,"tnx/%2.2s,%d,%s,#%d,{%s},{}",
+		    printf("    tnx/%2.2s,%d,%s,#%d,{%s},{}\n",
 			    ptr->ch,ptr->num,offon[ptr->on],
 			    ptr->count,ptr->string);
 		  else
-		    sprintf(buf2,"tnx/%2.2s,%d,%s,#%d,{%s},{%s}",
+		    printf("    tnx/%2.2s,%d,%s,#%d,{%s},{%s}\n",
 			    ptr->ch,ptr->num,offon[ptr->on],
 			    ptr->count,ptr->string,ptr->example);
-		  logitf(buf2);
 		}
 	      }
 	      goto Messenger;
@@ -412,19 +411,18 @@ Messenger:
               found=TRUE;
 	      break;
 	    } else {
-	      sprintf(buf2,"tnx/more than one %2.2s,%d, exists, use 'tnx=%2.2s,%d,off,#num' to select from list below",ptr->ch,ix,ptr->ch,ix);
-	      logitf(buf2);
+	      printf("  tnx: more than one %2.2s,%d, exists, use 'tnx=%2.2s,%d,off,#num' to select from the list below\a\a\n",ptr->ch,ix,ptr->ch,ix);
+              play_wav(1);
 	      for(ptr=first;ptr!=NULL;ptr=ptr->next) {
 		if(ptr->num == ix && memcmp(ptr->ch,buf,2)==0) {
 		  if(ptr->example==NULL)
-		    sprintf(buf2,"tnx/%2.2s,%d,%s,#%d,{%s},{}",
+		    printf("    tnx/%2.2s,%d,%s,#%d,{%s},{}\n",
 			    ptr->ch,ptr->num,offon[ptr->on],
 			    ptr->count,ptr->string);
 		  else
-		    sprintf(buf2,"tnx/%2.2s,%d,%s,#%d,{%s},{%s}",
+		    printf("    tnx/%2.2s,%d,%s,#%d,{%s},{%s}\n",
 			    ptr->ch,ptr->num,offon[ptr->on],
 			    ptr->count,ptr->string,ptr->example);
-		  logitf(buf2);
 		}
 	      }
 	      goto Messenger;
@@ -451,19 +449,18 @@ Messenger:
       for(ptr=first;ptr!=NULL;ptr=ptr->next) {
 	if(memcmp(cp2,"tl",2)==0 || memcmp(cp2,"ta",2)==0 && ptr->on == 0) {
 	  if(ptr->example==NULL)
-	    sprintf(buf,"tnx/%2.2s,%d,%s,#%d,{%s},{}",
+	    printf("  tnx/%2.2s,%d,%s,#%d,{%s},{}\n",
 		    ptr->ch,ptr->num,offon[ptr->on],
 		    ptr->count,ptr->string);
 	  else
-	    sprintf(buf,"tnx/%2.2s,%d,%s,#%d,{%s},{%s}",
+	    printf("  tnx/%2.2s,%d,%s,#%d,{%s},{%s}\n",
 		    ptr->ch,ptr->num,offon[ptr->on],
 		    ptr->count,ptr->string,ptr->example);
-	  logitf(buf);
 	  some=1;
 	}
       }
       if(some==0)
-	logitf("tnx/none");
+	printf("  tnx/none\n");
 
       goto Messenger;
     }
@@ -749,10 +746,10 @@ Ack:    ich = strtok(NULL, ",");
       */
 
       if(strlen(ibur)!=0) {
-         if(strlen(buf) > FIRST_CHAR+13)
-	   fprintf(stderr,"ddout: internal error, incorrectly formed error message\n");
-         strcat(buf, " ");
-         strcat(buf, ibur);
+        if(strlen(buf) > FIRST_CHAR+13)
+          logit(NULL,-320,"bo");
+        strcat(buf, " ");
+        strcat(buf, ibur);
       }
 
     Append:
