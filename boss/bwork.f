@@ -564,6 +564,17 @@ C
 C     5.5 SCHEDULE command section.
 C
       else if (mbranch.eq.5) then
+         call fc_rte_check(iErr_time)
+         if(iErr_time.eq.-5) then
+            call logit7ci(idum,idum,idum,-1,-25,'sc',0)
+         else if(iErr_time.eq.-7) then
+            call logit7ci(idum,idum,idum,-1,-33,'sc',0)
+         else if(iErr_time.eq.-6) then
+            call logit7ci(idum,idum,idum,-1,-32,'sc',0)
+         else if(iErr_time.ne.0) then
+            call logit7ci(idum,idum,idum,-1,-5+iErr_time,'sc',0)
+         endif
+c
          ich = 1+iscn_ch(ibuf,1,nchar,'=')
 C  User requested schedule name, format response and log it.
          if (ich.eq.1) then
@@ -1052,6 +1063,16 @@ C
 C     5.15 PROC command: new schedule procedure library
 C
       else if (mbranch.eq.15) then
+        call fc_rte_check(iErr_time)
+        if(iErr_time.eq.-5) then
+           call logit7ci(idum,idum,idum,-1,-25,'sc',0)
+        else if(iErr_time.eq.-7) then
+           call logit7ci(idum,idum,idum,-1,-33,'sc',0)
+        else if(iErr_time.eq.-6) then
+           call logit7ci(idum,idum,idum,-1,-32,'sc',0)
+        else if(iErr_time.ne.0) then
+           call logit7ci(idum,idum,idum,-1,-5+iErr_time,'sc',0)
+        endif
         ireg(2) = get_buf(iclass,ibuf,-iblen*2,idum,idum)
         nchar = min0(ireg(2),iblen*2)
         ich = 1+iscn_ch(ibuf,1,nchar,'=')

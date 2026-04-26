@@ -454,11 +454,23 @@ C
 C
       call run_prog('flagr','wait',ip(1),ip(2),ip(3),ip(4),ip(5))
       call fc_putln('flagr initialized')
-c    
+c
       call fs_get_dbbc3_mcast_arrival(dbbc3_mcast_arrival)
       if (dbbc3_mcast_arrival.eq.0) then
          call logit7ci(0,0,0,1, 186,'bo',iline)
       endif
+c
+      call fc_rte_check(iErr_time)
+      if(iErr_time.eq.-5) then
+         call logit7ci(idum,idum,idum,-1,-25,'sc',0)
+      else if(iErr_time.eq.-7) then
+         call logit7ci(idum,idum,idum,-1,-33,'sc',0)
+      else if(iErr_time.eq.-6) then
+         call logit7ci(idum,idum,idum,-1,-32,'sc',0)
+      else if(iErr_time.ne.0) then
+         call logit7ci(idum,idum,idum,-1,-5+iErr_time,'sc',0)
+      endif
+c
       icloprx=0
       call put_buf_ch(icloprx,'"Boss Initialization Complete','  ','  ')
       call put_buf_ch(icloprx,'initi','  ','  ')
