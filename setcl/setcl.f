@@ -565,10 +565,15 @@ c
       call fc_rte_check(iErr)
       if(iErr.eq.-5) then
          call logit7ci(idum,idum,idum,-1,-25,'sc',0)
+      else if(iErr.eq.-7) then
+         call logit7ci(idum,idum,idum,-1,-33,'sc',0)
+      else if(iErr.eq.-6) then
+         call logit7ci(idum,idum,idum,-1,-32,'sc',0)
       else if(iErr.ne.0) then
          call logit7ci(idum,idum,idum,-1,-5+iErr,'sc',0)
+          if(iErr.eq.-1.or.iErr.eq.-3.or.iErr.eq.-4) goto 999
       endif
-c and computer compared to the formatter?
+c and computer boot compared to the formatter?
       if(kfm) then
          if(abs(dble(secsoffti_fs)-dble(secs_fm)).gt.86400*248) then
            call logit7ci(idum,idum,idum,-1,-4,'sc',0)

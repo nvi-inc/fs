@@ -31,27 +31,41 @@
 void rte_check(iErr)
 int *iErr;
 {
-     struct tms buffer;
-     clock_t ticks;
+    int iIndex;
+    iIndex = 01 & shm_addr->time.index;
 
-     ticks=times(&buffer);
+    *iErr=0;
 
-     if(ticks == -1) {
-       logit(NULL,errno,"un");
-       *iErr=-5;
-     } else if(((unsigned int) ticks - shm_addr->time.ticks_off)
-	     /(86400L*100*248) > 0)
-       *iErr = -1;  /* already passed 248 days */
-     else if(ticks > -1 && ticks < shm_addr->time.ticks_off)
-       *iErr = -2;   /* already passed -1 */
-     else if(((unsigned int) ticks - shm_addr->time.ticks_off)
-	     /(86400L*100*219) > 0)
-       *iErr = -3;  /* less than 30 days to go */
-     else if(ticks < -1 && -ticks/(100*86400*30) < 1)
-       *iErr = -4;  /* less than 30 days to -1 */
-     else
-       *iErr = 0;
+    if(shm_addr->time.model != 'n' && shm_addr->time.model != 'c' &&
+            shm_addr->time.epoch[iIndex]!=0 && shm_addr->time.icomputer[iIndex]==0) {
+        struct timespec tvt;
+        if(0!= clock_gettime(CLOCK_MONOTONIC,&tvt)) {
+            perror("rte_check, using clock_getttime()");
+            *iErr=-5;
+            return;
+        }
+        /* limit about 248.55 days */
+        int diff=tvt.tv_sec-shm_addr->time.ticks_off;
+        if(diff>=248*86400)
+            *iErr=-1;
+        else if(diff>=218*86400)
+            *iErr=-2;
 
-     return;
+    }  else {
+        struct timeval tv;
+        if(0!= gettimeofday(&tv, NULL)) {
+            perror("rte_check, using gettimeofday()");
+            *iErr=-7;
+            return;
+        }
+        /* limit about 248.55 days */
+        int diff=tv.tv_sec-shm_addr->time.secs_off;
+        if(diff>=248*86400)
+            *iErr=-3;
+        else if(diff <=-248*86400)
+            *iErr=-4;
+        else if(diff>=218*86400)
+            *iErr=-6;
+    }
+    return;
 }
-     

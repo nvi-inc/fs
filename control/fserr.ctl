@@ -7806,13 +7806,13 @@ SC   -6
 setcl: more than 248 days since last boot, reboot required
 ""
 SC   -7
-setcl: times() has passed -1, reboot required
+setcl: less than 30 days until time error (more than 218 days since boot), reboot as soon as possible
 ""
 SC   -8
-setcl: less than 30 days until time error, reboot as soon as possible
+setcl: computer time is >248 days after boot time, you probably need to reboot (and/or fix CMOS clock)
 ""
 SC   -9
-setcl: less than 30 days until times() returns -1, reboot as soon as possible
+setcl: computer time is >248 days before from boot time, you probably need to reboot (and/or fix CMOS clock)
 ""
 SC  -10
 setcl: failed too many times, couldn't check formatter time
@@ -7860,7 +7860,7 @@ SC  -24
 setcl: Mark 5B syncerr_gt_3, CONSIDER using fmset 's' option to fix.
 ""
 SC  -25
-setcl: rte_check got error from times(), see above for error
+setcl: rte_check, error from clock_gettime(), see above for error
 ""
 SC  -26
 setcl: DBBC3 multicast time must be available to set time, check FS_DBBC3_MULTICAST_TIME_INCLUDED
@@ -7873,6 +7873,12 @@ setcl: DBBC3 multicast arrival time for this firmware version from dbbc3.ctl is 
 ""
 SC  -31
 setcl: DBBC3 multicast not received after at least three expected arrivals.
+""
+SC  -32
+setcl: less than 30 days until time error ('computer' model), reboot as soon as possible (or fix CMOS clock)
+""
+SC  -33
+setcl: rte_check, error from clock_gettime(), see above for error
 ""
 SC -401
 Program error: prematurely out of rclcn response_buffer for device ?W
