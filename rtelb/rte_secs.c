@@ -26,18 +26,15 @@
 
 int rte_secs(int *usec_off,unsigned int *ticks_off,int *error, int *perrno)
 {
-  struct tms buf;
   struct timeval tv;
-  clock_t ticks;
+  struct timespec tvt;
 
-  ticks=times(&buf);
-  if(ticks == (clock_t) -1) {
-    perror("rte_secs, using times()");
+  if(0!= clock_gettime(CLOCK_MONOTONIC,&tvt)) {
+    perror("rte_secs, using clock_getttime()");
     *error = -1;
     *perrno=errno;
     return 0;
   }
-
   if(0!= gettimeofday(&tv, NULL)) {
     perror("rte_secs, using gettimeofday()");
     *error = -2;
@@ -47,7 +44,7 @@ int rte_secs(int *usec_off,unsigned int *ticks_off,int *error, int *perrno)
 
   *error=0;
   *perrno=0;
-  *ticks_off=(unsigned int) ticks;
+  *ticks_off=tvt.tv_sec;
   *usec_off=tv.tv_usec;
   return tv.tv_sec;
 

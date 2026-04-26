@@ -33,14 +33,34 @@
 void rte_ticks(lRawTicks)
 int *lRawTicks;
 {
-    struct timeval tv;
-    if(0!= gettimeofday(&tv, NULL)) {
-        perror("getting timeofday, fatal\n");
-        exit(-1);
-    }
-    /* limit about 497 days */
-    *lRawTicks=(tv.tv_sec-shm_addr->time.secs_off)*100+
-        +tv.tv_usec/10000;
+    int iIndex;
+    iIndex = 01 & shm_addr->time.index;
 
-     return;
+    if(shm_addr->time.model != 'n' && shm_addr->time.model != 'c' &&
+            shm_addr->time.epoch[iIndex]!=0 && shm_addr->time.icomputer[iIndex]==0) {
+
+        struct timespec tvt;
+        if(0!= clock_gettime(CLOCK_MONOTONIC,&tvt)) {
+            perror("rte_ticks, using clock_getttime(), fatal");
+            exit(-1);
+        }
+        /* limit about 248.55 days */
+        *lRawTicks=(tvt.tv_sec-shm_addr->time.ticks_off)*100+
+            +tvt.tv_nsec/10000000;
+//            printf("tvt.tv_sec %d ticks_off %d diff %d raw %d\n",
+//            tvt.tv_sec,shm_addr->time.ticks_off,tvt.tv_sec-shm_addr->time.ticks_off,*lRawTicks);
+    }  else {
+
+        struct timeval tv;
+        if(0!= gettimeofday(&tv, NULL)) {
+            perror("rte_ticks, using gettimeofday(), fatal\n");
+            exit(-1);
+        }
+        /* limit about 248.55 days */
+        *lRawTicks=(tv.tv_sec-shm_addr->time.secs_off)*100+
+            +tv.tv_usec/10000;
+//            printf("tv.tv_sec %d secs_off %d diff %d raw %d\n",
+//            tv.tv_sec,shm_addr->time.secs_off,tv.tv_sec-shm_addr->time.secs_off,*lRawTicks);
+    }
+  return;
 }

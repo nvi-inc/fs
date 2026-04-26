@@ -61,6 +61,7 @@ C
       integer idum,fc_rte_prior,rn_take,fc_ntp_synch,ntp_synch
       character*13 crate
       integer fc_get_dbbc3time
+      logical kinitial
 c
       include '../include/time_arrays.i'
 C
@@ -90,7 +91,15 @@ C
         return
       endif
 c
+      kinitial=.false.
  1    continue
+      if(kinitial) then
+        call fs_set_time_coeff(secsoffti_fs,epochti_fs,offsetti_fs,
+     &         rateti_fs,spanti_fs,modelti_fs,icomputer)
+        epochti_fs=0
+        call fs_set_time_coeff(secsoffti_fs,epochti_fs,offsetti_fs,
+     &         rateti_fs,spanti_fs,modelti_fs,icomputer)
+      endif
       call wait_prog('setcl',ip)
       call read_fscom
 c
@@ -154,9 +163,10 @@ c
       set=' '
 
  49   continue
-      if(set.ne." ".and.set.ne."offset".and.set.ne."rate"
-     &     .and.set.ne."adapt".and.set.ne."computer"
-     &     .and.set.ne."fs".and.set.ne."s2das") then
+      if(set.ne.' '.and.set.ne.'offset'.and.set.ne.'rate'
+     &     .and.set.ne.'adapt'.and.set.ne.'computer'
+     &     .and.set.ne.'fs'.and.set.ne.'s2das'
+     &     .and.set.ne.'check') then
          call logit7ci(idum,idum,idum,-1,-17,'sc',0)
          goto 999
       endif
@@ -167,6 +177,49 @@ c
       call fs_get_rack_type(rack_type)
       call fs_get_drive(drive)
       call fs_get_drive_type(drive_type)
+c
+      if (DBBC3.eq.rack) then
+        idum=fc_get_dbbc3time(centisec,it,iold)
+        if(idum.eq.-1) then
+c time not inclded is a no-op
+c           call logit7ci(idum,idum,idum,-1,-26,'sc',0)
+           goto 1
+        else if(idum.eq.-3) then
+c  check for arrival time only if time is included
+           call logit7ci(idum,idum,idum,-1,-30,'sc',0)
+           goto 1
+        endif
+      endif
+c
+      call fs_get_time_coeff(secsoffti_fs,epochti_fs,offsetti_fs,
+     &       rateti_fs,spanti_fs,modelti_fs,icomputer)
+      if(cjchar(modelti_fs,1).ne.'n'.and.cjchar(modelti_fs,1).ne.'c'
+     &    .and.epochti_fs.eq.0.and.icomputer.eq.0
+     &    .and.(set.eq." ".or.set.eq."offset")) then
+        kinitial=.true.
+        epochti_fs=1
+        call fs_set_time_coeff(secsoffti_fs,epochti_fs,offsetti_fs,
+     &         rateti_fs,spanti_fs,modelti_fs,icomputer)
+        call fc_rte_ticks(epochti_fs)
+        call fs_set_time_coeff(secsoffti_fs,epochti_fs,offsetti_fs,
+     &         rateti_fs,spanti_fs,modelti_fs,icomputer)
+        if(DBBC3.eq.rack) then
+          call fs_get_dbbc3_mcast_arrival(dbbc3_mcast_arrival)
+          iwait=(dbbc3_mcast_arrival+100)/100
+          idum=fc_get_dbbc3time(centisec,it,iold_save)
+          call susp(2,iwait)
+          iold=iold_save
+          nerr2=0
+          do while(iold.eq.iold_save.and.nerr2.le.max(2,7-iwait))
+             call susp(2,iwait)
+             nerr2=nerr2+1
+             idum=fc_get_dbbc3time(centisec,it,iold)
+          enddo
+           if(iold.eq.iold_save) then
+             call logit7ci(idum,idum,idum,-1,-31,'sc',0)
+           endif
+        endif
+      endif
 c
 50    continue
 
@@ -304,18 +357,18 @@ C             two return buffers with imode = -53
         if(idum.eq.-1) then
            call logit7ci(idum,idum,idum,-1,-26,'sc',0)
            goto 1
+        else if(idum.eq.-3) then
+           call logit7ci(idum,idum,idum,-1,-30,'sc',0)
+           goto 1
         else if(idum.eq.-2) then
            call fs_get_dbbc3_iscboard(dbbc3_iscboard)
            call logit7ci(idum,idum,idum,1, 27,'sc',dbbc3_iscboard)
            nerr=nerr+1
-           if(nerr.le.3) then
+           if(nerr.le.9) then
               call susp(2,1)
               goto 50
            endif
            call logit7ci(idum,idum,idum,-1,-29,'sc',0)
-           goto 1
-        else if(idum.eq.-3) then
-           call logit7ci(idum,idum,idum,-1,-30,'sc',0)
            goto 1
         endif
         centisec(2)=centisec(1)
@@ -324,11 +377,11 @@ C             two return buffers with imode = -53
         if(iold.gt.20) then
            call logit7ci(idum,idum,idum,-1, 28,'sc',0)
            nerr=nerr+1
-           if(nerr.le.3) then
+           if(nerr.le.4) then
               call susp(2,1)
               goto 50
            endif
-           call logit7ci(idum,idum,idum,-1,-29,'sc',0)
+           call logit7ci(idum,idum,idum,-1,-31,'sc',0)
            goto 998
         endif
         if(nerr.ne.0) call logit7ci(idum,idum,idum,-1, 29,'sc',0)
@@ -543,8 +596,10 @@ c
       inxtc=ichmv_ch(ibuf,inxtc,'.')
       inxtc=inxtc+ib2as(it(1),ibuf,inxtc,ocp40000+ocp400*2+2)
       inxtc = mcoma(ibuf,inxtc)
-      if ((.not.kfm).or.epochti_fs.eq.0.or.icomputer.ne.0
-     &     .or.cjchar(modelti_fs,1).eq.'c') then
+      span=(centiavg-epochti_fs)/3600e2
+      if((.not.kfm).or.epochti_fs.eq.0.or.icomputer.ne.0
+     &   .or.cjchar(modelti_fs,1).eq.'c'.or.cjchar(modelti_fs,1).eq.'n'
+     &   .or.span.le.0.0005) then
         inxtc=inxtc+ir2as(0.0,ibuf,inxtc,10,3)
         inxtc = mcoma(ibuf,inxtc)
         inxtc=inxtc+ir2as(0.0,ibuf,inxtc,8,3)
@@ -556,7 +611,7 @@ c
 c    &     (rateti_fs+(float(diff)/(centiavg-epochti_fs)))*86400.
      &     ,ibuf,inxtc,10,3)
         inxtc = mcoma(ibuf,inxtc)
-        inxtc=inxtc+ir2as((centiavg-epochti_fs)/3600e2,ibuf,inxtc,8,3)
+        inxtc=inxtc+ir2as(span,ibuf,inxtc,8,3)
       endif
       inxtc = mcoma(ibuf,inxtc)
       if(kfm) then
@@ -613,8 +668,8 @@ c
       call logit2(ibuf,inxtc-1)
 c
       if(
-     & ((cjchar(modelti_fs,1).ne.'c'.and.
-     &   (icomputer.eq.0).or.(icomputer.eq.1.and.set.eq.'fs')))
+     & ((cjchar(modelti_fs,1).ne.'c'.and.cjchar(modelti_fs,1).ne.'n'
+     &   .and.(icomputer.eq.0).or.(icomputer.eq.1.and.set.eq.'fs')))
      & .and.
      & (set.eq.'fs'.or.ibaseold.ne.ibase.or.set.eq.'computer' .or.
      &  (kfm .and.
@@ -625,6 +680,7 @@ c
      &      (centiavg-epochti_fs.gt.360000.or.
      &       spanti_fs.le.centiavg-epochti_fs))))))
      &  ) then            !update model
+        kinitial=.false.
         if(set.eq.' ') set='offset'
         if(ibase.ne.ibaseold) then
            ibaseold=ibase

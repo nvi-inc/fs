@@ -7866,10 +7866,13 @@ SC  -26
 setcl: DBBC3 multicast time must be available to set time, check FS_DBBC3_MULTICAST_TIME_INCLUDED
 ""
 SC  -29
-setcl: Core3H multicast time still bad after four tries.
+setcl: Core3H multicast time still bad after 10 tries.
 ""
 SC  -30
 setcl: DBBC3 multicast arrival time for this firmware version from dbbc3.ctl is 0; can't calculate DBBC3 time.
+""
+SC  -31
+setcl: DBBC3 multicast not received after at least three expected arrivals.
 ""
 SC -401
 Program error: prematurely out of rclcn response_buffer for device ?W
