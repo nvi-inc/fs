@@ -467,8 +467,12 @@ c
          call logit7ci(idum,idum,idum,-1,-33,'sc',0)
       else if(iErr_time.eq.-6) then
          call logit7ci(idum,idum,idum,-1,-32,'sc',0)
+         call logit7ci(idum,idum,idum,-1,-36,'sc',0)
       else if(iErr_time.ne.0) then
          call logit7ci(idum,idum,idum,-1,-5+iErr_time,'sc',0)
+          if(iErr_time.eq.-3.or.iErr_time.eq.-4) then
+             call logit7ci(idum,idum,idum,-1,-38,'sc',0)
+          endif
       endif
 c
       icloprx=0

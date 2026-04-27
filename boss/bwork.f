@@ -571,8 +571,12 @@ C
             call logit7ci(idum,idum,idum,-1,-33,'sc',0)
          else if(iErr_time.eq.-6) then
             call logit7ci(idum,idum,idum,-1,-32,'sc',0)
+            call logit7ci(idum,idum,idum,-1,-36,'sc',0)
          else if(iErr_time.ne.0) then
             call logit7ci(idum,idum,idum,-1,-5+iErr_time,'sc',0)
+            if(iErr_time.eq.-3.or.iErr_time.eq.-4) then
+               call logit7ci(idum,idum,idum,-1,-38,'sc',0)
+            endif
          endif
 c
          ich = 1+iscn_ch(ibuf,1,nchar,'=')
@@ -1070,8 +1074,12 @@ C
            call logit7ci(idum,idum,idum,-1,-33,'sc',0)
         else if(iErr_time.eq.-6) then
            call logit7ci(idum,idum,idum,-1,-32,'sc',0)
+           call logit7ci(idum,idum,idum,-1,-36,'sc',0)
         else if(iErr_time.ne.0) then
            call logit7ci(idum,idum,idum,-1,-5+iErr_time,'sc',0)
+            if(iErr_time.eq.-3.or.iErr_time.eq.-4) then
+               call logit7ci(idum,idum,idum,-1,-38,'sc',0)
+            endif
         endif
         ireg(2) = get_buf(iclass,ibuf,-iblen*2,idum,idum)
         nchar = min0(ireg(2),iblen*2)
