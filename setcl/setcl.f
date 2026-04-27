@@ -678,7 +678,7 @@ c
      & .and.
      & (set.eq.'fs'.or.ibaseold.ne.ibase.or.set.eq.'computer' .or.
      &  (kfm .and.
-     &   (set.eq.'offset'.or.(set.eq.' '.and.epochti_fs.eq.0) .or.
+     &   (set.eq.'offset'.or.(set.eq.' '.and.kinitial) .or.
      &    (epochti_fs.ne.0.and.cjchar(modelti_fs,1).eq.'r' .and.
      &     (set.eq.'rate'.and.spanti_fs.le.centiavg-epochti_fs) .or.
      &     (set.eq.'adapt'.and.abs(diff-ibase).le.50.and.
@@ -728,7 +728,7 @@ c
         inxtc=inxtc+ib2as(offsetti_fs,ibuf,inxtc,ocp100000+12)
         inxtc = mcoma(ibuf,inxtc)
         if(epochti_fs.eq.0.or.cjchar(modelti_fs,1).eq.'c'
-     &       .or.icomputer.ne.0) then
+     &     .or.icomputer.ne.0.or.cjchar(modelti_fs,1).eq.'n') then
            inxtc=inxtc+ib2as(0,ibuf,inxtc,ocp100000+12)
         else
            inxtc=inxtc+ib2as(epochti_fs,ibuf,inxtc,ocp100000+12)
