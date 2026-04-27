@@ -228,7 +228,7 @@ define  checkfb       00000000000x
 scan_check
 fb_status
 core3h_time=next
-synth=next,*,*,check
+synth_mode=next,*,*,check
 enddef
 define  clock         00000000000x
 "gps-maser=cb
@@ -377,35 +377,35 @@ core3h_time=next
 core3h_time=next
 enddef
 define  synth_check   00000000000x
-synth=loa,*,*,check
-synth=lob,*,*,check
-synth=loc,*,*,check
-synth=lod,*,*,check
-synth=loe,*,*,check
-synth=lof,*,*,check
-synth=log,*,*,check
-synth=loh,*,*,check
+synth_mode=loa,*,*,check
+synth_mode=lob,*,*,check
+synth_mode=loc,*,*,check
+synth_mode=lod,*,*,check
+synth_mode=loe,*,*,check
+synth_mode=lof,*,*,check
+synth_mode=log,*,*,check
+synth_mode=loh,*,*,check
 op_stream="Synthesizer checking complete. Only defined synthesizers were checked."
 enddef
 define  synth_force   00000000000x
-synth=loa,*,*,force
-synth=lob,*,*,force
-synth=loc,*,*,force
-synth=lod,*,*,force
-synth=loe,*,*,force
-synth=lof,*,*,force
-synth=log,*,*,force
-synth=loh,*,*,force
+synth_mode=loa,*,*,force
+synth_mode=lob,*,*,force
+synth_mode=loc,*,*,force
+synth_mode=lod,*,*,force
+synth_mode=loe,*,*,force
+synth_mode=lof,*,*,force
+synth_mode=log,*,*,force
+synth_mode=loh,*,*,force
 op_stream="Synthesizer setting complete. Only defined synthesizers were set."
 enddef
 define  dbbc3_synth   00000000000x
-synth=
-synth=loa,,,check
-synth=lob,,,check
-synth=loc,,,check
-synth=lod,,,check
-synth=loe,,,check
-synth=lof,,,check
-synth=log,,,check
-synth=loh,,,check
+synth_mode=
+synth_mode=loa,,,check
+synth_mode=lob,,,check
+synth_mode=loc,,,check
+synth_mode=lod,,,check
+synth_mode=loe,,,check
+synth_mode=lof,,,check
+synth_mode=log,,,check
+synth_mode=loh,,,check
 enddef

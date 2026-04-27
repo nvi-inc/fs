@@ -1,9 +1,9 @@
-                     synth - IF synthesizer (DBBC3 racks)
+            synth_mode - IF synthesizer mode (DBBC3 racks)
 
- Syntax:     synth=loX,freq,enable,check
-             synth=
-             synth=loX
- Response:   synth/loX,freq,enable,ext_lo,pre-filer_sb,att,mode,ref_source,ref_freq,lock
+ Syntax:     synth_mode=loX,freq,enable,check
+             synth_mode=
+             synth_mode=loX
+ Response:   synth_mode/loX,freq,enable,ext_lo,pre-filer_sb,att,mode,ref_source,ref_freq,lock
 
 Settable Parameters:
 
@@ -140,14 +140,14 @@ summarized below.
               parameter makes the command a no-op. See comments below about
               using a specific IF.
 
-  Monitoring -- The monitor forms are 'synth' (for all IFs) or 'synth=loX'
-                (with no following parameters). This form does not set the FS
-                model or report errors in the device configuration. Using
-                'next' for 'loX' is permitted.
+  Monitoring -- The monitor forms are 'synth_mode' (for all IFs) or
+                'synth_mode=loX' (with no following parameters). This form
+                does not set the FS model or report errors in the device
+                configuration. Using 'next' for 'loX' is permitted.
 
-Using 'synth=' clears the FS model for all synthesizers. It should be used
-before setting the synthesizers for a mode so that unused synthesizers don't
-have their definitions carried over from a previous mode.
+Using 'synth_mode=' clears the FS model for all synthesizers. It should be
+used before setting the synthesizers for a mode so that unused synthesizers
+don't have their definitions carried over from a previous mode.
 
 The IF for 'next' is the next one after the last IF monitored or checked. In
 other words, it is shared between monitor and checking. It advances even if
@@ -157,10 +157,10 @@ For a specific IF, i.e., not 'next', if the 'freq' and 'mode' parameters are
 null (default) and the LO frequency has not been defined for this IF
 ('lo=...'), the command is a no-op. This allows which synthesizer are used to
 be controlled by which IFs are in use without modifying these commands in the
-setup procedure. The synthesizer setup should start with a 'synth=' command,
-followed by commands similar to:
+setup procedure. The synthesizer setup should start with a 'synth_mode='
+command, followed by commands similar to:
 
-  synth=loa,,,check
+  synth_mode=loa,,,check
 
 for all IFs in the system, whether being used or not. See details the
 'dbbc3_synth' procedure below.
@@ -169,7 +169,7 @@ Also for a specific IF, i.e., not 'next', if synthesizer values have not been
 set and '*' is used for any of them, the command is a no-op. This allows a
 fixed procedure to check only the synthesizers in use. Commands similar to
 
-  synth=loa,*,*,check
+  synth_mode=loa,*,*,check
 
 are used for all IFs in the system. There will only be output for synthesizers
 with defined setups. If no synthesizer have been defined, there will be no
@@ -185,7 +185,7 @@ procedure libraries 'd3fbstation.prc' and 'dbbc3st.prc' in
 Similarly, all the synthesizers with defined setups can be set with commands
 like:
 
-  synth=loa,*,*,force
+  synth_mode=loa,*,*,force
 
 An example 'synth_force' procedure for eight IFs is included in the example
 procedure libraries 'd3fbstation.prc' and 'dbbc3st.prc' in
@@ -194,7 +194,7 @@ procedure libraries 'd3fbstation.prc' and 'dbbc3st.prc' in
 If 'next' is used with 'check', IFs that have not been setup will be skipped.
 This allows the use of:
 
-  synth=next,*,*,check
+  synth_mode=next,*,*,check
 
 to cycle through only the setup IFs. See more about the 'checkXXX' procedure
 below.
@@ -224,9 +224,9 @@ synthesizer, if used. The FS 'ext_lo' command describes the external-LO
 frequency, and output side-band, of the mixing steps before the DBBC3. Note
 that the external-LO may be the result of one or more mixing steps. The only
 thing that matters is the cumulative effect, which is what the 'ext_lo=...'
-command describes. The FS 'synth=..' command describes the DBBC3 synthesizer
-frequency and external pre-filter side-band required. The pre-filter must be
-supplied by the user.
+command describes. The FS 'synth_mode=..' command describes the DBBC3
+synthesizer frequency and external pre-filter side-band required. The
+pre-filter must be supplied by the user.
 
 The following table identifies the side-band (SB) of the external pre-filter
 required before the DBBC3 synthesizer depending on the relationship of the
@@ -268,8 +268,8 @@ Please note the restriction on the last row.
   IF. It is called by 'drudg' generated setup procedure for DBBC3 racks (from
   the 'ifdXX' procedure). The procedure should contain:
 
-    synth=
-    synth=loa,,,check
+    synth_mode=
+    synth_mode=loa,,,check
     ...
 
   With the 'loa' command repeated for each additional IF up to the number of
@@ -278,11 +278,11 @@ Please note the restriction on the last row.
   synthesizer will be a no-op.
 
   Any 'ext_lo=...' commands to define external-LOs that may used should
-  precede the 'synth=' command above. See 'help=ext_lo' for information on the
-  'ext_lo' command.
+  precede the 'synth_mode=' command above. See 'help=ext_lo' for information
+  on the 'ext_lo' command.
 
   You should verify that the 'drudg' generated 'ifdXX' procedure works with
-  the 'synth=...' (and any needed 'ext_lo=...') commands in 'dbbc3_synth'
+  the 'synth_mode=...' (and any needed 'ext_lo=...') commands in 'dbbc3_synth'
   before observing.
 
   An example 'dbbc3_synth' procedure for eight IFs (and no external LOs) is
@@ -297,20 +297,20 @@ Please note the restriction on the last row.
   'check' commands for all the IFs in your system. For example for 'loa' you
   would use:
 
-     synth=loa,*,*,check
+     synth_mode=loa,*,*,check
 
                           'checkXXX' SNAP procedure
 
   You can implement cyclical checking of the synthesizers in the 'checkXXX'
   ('XXX' corresponds to your recorder type) in the 'station' procedure
-  library. This is needed because the 'synth' command: (i) interferes with
-  multicast transmission (so it should not be used during recording), and (2)
-  takes up to about two seconds per IF (so at most one IF should be checked
-  each time 'checkXXX' is used).
+  library. This is needed because the 'synth_mode' command: (i) interferes
+  with multicast transmission (so it should not be used during recording), and
+  (2) takes up to about two seconds per IF (so at most one IF should be
+  checked each time 'checkXXX' is used).
 
   The command that should be used is:
 
-    synth=next,*,*,check
+    synth_mode=next,*,*,check
 
   Only IFs with defined synthesizer setups will be checked. Using asterisks,
   '*', is required and allows it to work with previously set (or checked)

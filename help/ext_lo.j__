@@ -38,7 +38,7 @@ Comments:
 This command specifies the total external-LO, before the DBBC3, for a given
 IF. The total LO before the BBCs is still given by the 'lo=...' commands.
 This command does not set the external-LO; it just describes what is in use.
-The external-LO is used by the 'synth=...' command to calculate the
+The external-LO is used by the 'synth_mode=...' command to calculate the
 synthesizer frequency needed to achieve the total LO if the corresponding
 'ifX' input is '2'.
 
@@ -73,8 +73,8 @@ Generally speaking, it is recommended to make the 'lo_min', 'lo_max', and
 'lo_sb' parameters as restrictive as possible to reduce the risk of having a
 table entry apply when it is not wanted. Multiple table entries for a given
 external-LO can used if necessary. A maximum of 40 table entries are
-supported. A warning is given by the 'synth' command if an entry would apply
-when the corresponding 'ifx' input is '1'.
+supported. A warning is given by the 'synth_mode' command if an entry would
+apply when the corresponding 'ifx' input is '1'.
 
 Multiple table entries may cover a given total LO. The first in the table that
 matches applies. Therefore you should enter the table with the most specific

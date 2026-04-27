@@ -2733,7 +2733,7 @@ DM -204
 The 'check' parameter must be 'check' or 'force'.
 ""
 DM -212
-LO side-band not defined in 'synth' (for l?W)
+LO side-band not defined in 'synth_mode' (for l?W)
 ""
 DM -213
 Can't enable synthesizer if no frequency is set (for l?W).
@@ -2781,10 +2781,10 @@ DM -402 Placeholder for string not decoded from DBBC3 synthesizer
 
 ""
 DM -403
-Error decoding DBBC3 synth response (for l?W), see error DN -402 for text.
+Error decoding DBBC3 synthesizer response (for l?W), see error DN -402 for text.
 ""
 DM -404
-Too many responses from DBBC synth (for l?W)
+Too many responses from DBBC synthesizer (for l?W)
 ""
 DM -406 Place holder unknown lock response
 
