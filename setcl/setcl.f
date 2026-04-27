@@ -569,15 +569,23 @@ c
          call logit7ci(idum,idum,idum,-1,-33,'sc',0)
       else if(iErr.eq.-6) then
          call logit7ci(idum,idum,idum,-1,-32,'sc',0)
+         call logit7ci(idum,idum,idum,-1,-36,'sc',0)
       else if(iErr.ne.0) then
          call logit7ci(idum,idum,idum,-1,-5+iErr,'sc',0)
+          if(iErr.eq.-3.or.iErr.eq.-4) then
+             call logit7ci(idum,idum,idum,-1,-38,'sc',0)
+          endif
           if(iErr.eq.-1.or.iErr.eq.-3.or.iErr.eq.-4) goto 999
       endif
 c and computer boot compared to the formatter?
       if(kfm) then
-         if(abs(dble(secsoffti_fs)-dble(secs_fm)).gt.86400*248) then
-           call logit7ci(idum,idum,idum,-1,-4,'sc',0)
+         if(abs(dble(secs_fm)-dble(secsoffti_fs)).gt.86400*248) then
+           call logit7ci(idum,idum,idum,-1, -4,'sc',0)
+           call logit7ci(idum,idum,idum,-1,-37,'sc',0)
            goto 999
+         else if(dble(secs_fm)-dble(secsoffti_fs).gt.86400*218) then
+           call logit7ci(idum,idum,idum,-1,-34,'sc',0)
+           call logit7ci(idum,idum,idum,-1,-35,'sc',0)
          endif
       endif
 c

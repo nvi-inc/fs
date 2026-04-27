@@ -7797,22 +7797,22 @@ SC   -3
 setcl: setting system time not supported
 ""
 SC   -4
-setcl: formatter time and FS PC boot time differ by more than 248 days, check formatter time and FS PC uptime
+setcl: Formatter time and FS PC boot time differ by more than 248 days. This must be fixed immediately.
 ""
 SC   -5
 setcl: formatter time garbled
 ""
 SC   -6
-setcl: more than 248 days since last boot, reboot required
+More than 248 days since last boot. This must be fixed immediately. Reboot required now.
 ""
 SC   -7
-setcl: less than 30 days until time error (more than 218 days since boot), reboot as soon as possible
+Less than 30 days until time error (more than 218 days since boot). Reboot as soon as convenient.
 ""
 SC   -8
-setcl: computer time is >248 days after boot time, you probably need to reboot (and/or fix CMOS clock)
+Computer time is more than 248 days after boot time. This must be fixed immediately.
 ""
 SC   -9
-setcl: computer time is >248 days before from boot time, you probably need to reboot (and/or fix CMOS clock)
+Computer time is more than 248 days before boot time. This must be fixed immediately.
 ""
 SC  -10
 setcl: failed too many times, couldn't check formatter time
@@ -7860,7 +7860,7 @@ SC  -24
 setcl: Mark 5B syncerr_gt_3, CONSIDER using fmset 's' option to fix.
 ""
 SC  -25
-setcl: rte_check, error from clock_gettime(), see above for error
+rte_check: error from clock_gettime(), see above for error
 ""
 SC  -26
 setcl: DBBC3 multicast time must be available to set time, check FS_DBBC3_MULTICAST_TIME_INCLUDED
@@ -7875,10 +7875,25 @@ SC  -31
 setcl: DBBC3 multicast not received after at least three expected arrivals.
 ""
 SC  -32
-setcl: less than 30 days until time error ('computer' model), reboot as soon as possible (or fix CMOS clock)
+Less than 30 days until time error (computer time is ahead of FS PC boot time by more than 218 days)
 ""
 SC  -33
-setcl: rte_check, error from clock_gettime(), see above for error
+rte_check: error from clock_gettime(), see above for error
+""
+SC  -34
+setcl: Less than 30 days to time error (formatter time is ahead of FS PC boot time by more than 218 days).
+""
+SC  -35
+setcl: Check/fix formatter time. If already correct, reboot as soon as convenient (could also be a CMOS clock issue).
+""
+SC  -36
+Check/fix computer time. If already correct, reboot as soon as convenient (could also be a CMOS clock issue).
+""
+SC  -37
+setcl: Check/fix formatter time. If already correct, you need to reboot now (could also be a CMOS clock issue).
+""
+SC  -38
+Check/fix computer time. If already correct, you need to reboot now (could also be a CMOS clock issue).
 ""
 SC -401
 Program error: prematurely out of rclcn response_buffer for device ?W
