@@ -50,12 +50,9 @@ its use (except for just 'tnx' and 'tnx=list') is blocked if it is executed
 from a procedure, schedule, or time-list. This command must be entered
 interactively (in a pinch, the 'op_stream' command or the 'inject_snap'
 program can be used to workaround this restriction). The list of suppressed
-error messages is cleared every time the FS is started. If you use this
-command to suppress display of any error messages, it is recommended that you
-place 'tnx' as the first command in the station 'sched_initi' procedure to
-record what errors are already being suppressed at the start of each schedule.
-TURNING OFF AN ERROR MESSAGE IS NOT THE SAME AS CORRECTING THE UNDERLYING
-PROBLEM, WHICH IS THE PREFERRED METHOD OF DEALING WITH AN ISSUE.
+error messages is cleared every time the FS is started. TURNING OFF AN ERROR
+MESSAGE IS NOT THE SAME AS CORRECTING THE UNDERLYING PROBLEM, WHICH IS THE
+PREFERRED METHOD OF DEALING WITH AN ISSUE.
 
 Normally, an error must have occurred before its display status can be
 manipulated with 'tnx'. However, for 'force' any previous instances of
