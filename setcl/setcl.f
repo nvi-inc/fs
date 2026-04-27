@@ -612,6 +612,7 @@ c
       span=(centiavg-epochti_fs)/3600e2
       if((.not.kfm).or.epochti_fs.eq.0.or.icomputer.ne.0
      &   .or.cjchar(modelti_fs,1).eq.'c'.or.cjchar(modelti_fs,1).eq.'n'
+     &   .or.cjchar(modelti_fs,1).eq.'o'
      &   .or.span.le.0.0005) then
         inxtc=inxtc+ir2as(0.0,ibuf,inxtc,10,3)
         inxtc = mcoma(ibuf,inxtc)
@@ -736,6 +737,7 @@ c
         inxtc=inxtc+ib2as(offsetti_fs,ibuf,inxtc,ocp100000+12)
         inxtc = mcoma(ibuf,inxtc)
         if(epochti_fs.eq.0.or.cjchar(modelti_fs,1).eq.'c'
+     &     .or.cjchar(modelti_fs,1).eq.'o'
      &     .or.icomputer.ne.0.or.cjchar(modelti_fs,1).eq.'n') then
            inxtc=inxtc+ib2as(0,ibuf,inxtc,ocp100000+12)
         else

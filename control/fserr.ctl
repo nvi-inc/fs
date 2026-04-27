@@ -7785,7 +7785,7 @@ SC   28
 setcl: WARNING: DBBC3 multicast time was older than 20 seconds or not received yet.
 ""
 SC   27
-setcl: WARNING: Core3H board?W (selected in dbbc3.ctl) is not synced (or VDIF epoch seconds is 0 or 1).
+setcl: Multicast not received or Core3H board?W (from dbbc3.ctl) is not synced (or VDIF epoch seconds is 0 or 1).
 ""
 SC   -1
 setcl: incorrect number of class buffers.
