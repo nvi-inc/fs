@@ -300,6 +300,76 @@ Trouble:
     }
     return;
 }
+
+static void write2display( char *cp2, int ierrnum, char *ierrch,
+struct list **last, struct list **first, char *ibur, char *buf)
+{
+  struct list *ptr;
+  int display=1;  /* always display unless tnx overrides for errors */
+  int count;
+  int ip[5]={0};
+
+  if(*cp2 == 'b') { /* could have gotten here from outside block for new log
+                       or from inside block for non-error, we don't want those */
+
+    /* tnx error filtering */
+
+    count=0;
+    for(ptr=*last;ptr!=NULL;ptr=ptr->previous)  /* look for it */
+      if(ptr->num == ierrnum && memcmp(ptr->ch,ierrch,2)==0) {
+        if(count ==0)
+          count=ptr->count;
+        if(strlen(ibur)!=0 && strcmp(ptr->string,ibur)==0 ||
+            strlen(ibur)==0 && ptr->example != NULL && strcmp(ptr->example,buf+FIRST_CHAR+14)==0) {
+          display=ptr->on;
+          break;
+        }
+      }
+
+    if(ptr == NULL) { /* not found, add it */
+      for(ptr=*first;ptr!=NULL;ptr=ptr->next)  /* look for it as force */
+        if(ptr->num == ierrnum && memcmp(ptr->ch,ierrch,2)==0) {
+          if(ptr->count == 0) {
+            add_error(NULL,ierrch,ierrnum,count,last,first,ibur,buf+FIRST_CHAR+14);
+            (*last)->on=ptr->on;
+            display=(*last)->on;
+            break;
+          }
+        }
+      if(ptr == NULL) { /* not found as force, add it */
+        add_error(NULL,ierrch,ierrnum,count,last,first,ibur,buf+FIRST_CHAR+14);
+      }
+    }
+
+    /* send message to station error program */
+    if(display && *cp2 == 'b' && shm_addr->sterp !=0) {
+      skd_run_arg("sterp", 'n', ip,buf);
+    }
+
+    /* send message to station erchk program */
+    if(display && *cp2 == 'b' && shm_addr->erchk !=0) {
+      skd_run_arg("erchk", 'n', ip,buf);
+    }
+  }
+  { /*trim trailing blanks before output*/
+    int iend=strlen(buf+20);
+    while(iend>0 && buf[20+iend-1]==' ')
+      buf[20+(iend--)-1]=0;
+  }
+  if(display) {
+    /* not Y10K compliant */
+    printf("%.8s",buf+9);
+    /* not Y10K compliant */
+    printf("%s",buf+20);
+    /* sound bell if an error */
+    if (*cp2 == 'b' && ierrnum < 0) {
+      printf("\007");
+      play_wav(1);
+    }
+    printf("\n");
+  }
+}
+
 main()
 {
     int i;
@@ -833,68 +903,7 @@ Ack:    ich = strtok(NULL, ",");
       }
 
     Append:
-      display=1;  /* always display unless tnx overrides for errors */
-      
-      if(*cp2 == 'b') { /* could have gotten here from outside block for new log
-			   or from inside block for non-error, we don't want those
-			*/
-	
-	/* tnx error filtering */
-	
-	count=0;
-        for(ptr=last;ptr!=NULL;ptr=ptr->previous)  /* look for it */
-          if(ptr->num == ierrnum && memcmp(ptr->ch,ierrch,2)==0) {
-            if(count ==0)
-              count=ptr->count;
-	    if(strlen(ibur)!=0 && strcmp(ptr->string,ibur)==0 ||
-               strlen(ibur)==0 && ptr->example != NULL && strcmp(ptr->example,buf+FIRST_CHAR+14)==0) {
-	      display=ptr->on;
-	      break;
-	    }
-	  }
-
-        if(ptr == NULL) { /* not found, add it */
-          for(ptr=first;ptr!=NULL;ptr=ptr->next)  /* look for it as force */
-            if(ptr->num == ierrnum && memcmp(ptr->ch,ierrch,2)==0) {
-              if(ptr->count == 0) {
-                add_error(NULL,ierrch,ierrnum,count,&last,&first,ibur,buf+FIRST_CHAR+14);
-                last->on=ptr->on;
-	        display=last->on;
-                break;
-              }
-            }
-          if(ptr == NULL) { /* not found as force, add it */
-            add_error(NULL,ierrch,ierrnum,count,&last,&first,ibur,buf+FIRST_CHAR+14);
-          }
-        }
-
-	/* send message to station error program */
-	if(display && *cp2 == 'b' && shm_addr->sterp !=0) {
-	  skd_run_arg("sterp", 'n', ip,buf); 
-	}
-	
-	/* send message to station erchk program */
-	if(display && *cp2 == 'b' && shm_addr->erchk !=0) {
-	  skd_run_arg("erchk", 'n', ip,buf); 
-	}
-      }
-      { /*trim trailing blanks before output*/
-	int iend=strlen(buf+20);
-	while(iend>0 && buf[20+iend-1]==' ')
-	  buf[20+(iend--)-1]=0;
-      }	
-      if(display) {
-	/* not Y10K compliant */
-	printf("%.8s",buf+9);
-	/* not Y10K compliant */
-	printf("%s",buf+20);
-	/* sound bell if an error */
-	if (*cp2 == 'b' && ierrnum < 0) {
-	  printf("\007");
-	  play_wav(1);
-	}
-	printf("\n");
-      }
+      write2display(cp2,ierrnum,ierrch,&last,&first,ibur,buf);
     }
 
     int kwrite=kxl || !(kp || kack) || memcmp(cp2,"nl",2)==0;
