@@ -370,12 +370,142 @@ struct list **last, struct list **first, char *ibur, char *buf)
   }
 }
 
+static void dxpm(ibur, ipt, ptrs, len)
+  char *ibur, *ipt, **ptrs;
+  int *len;
+  /*input:
+      ibur - raw error message
+      ipt  - substring to find
+    output:
+      ptrs - location of substring in ibur, NULL if not present
+      len  - length of substring in ibur to last repeated end character
+  */
+{
+  char last;
+
+  *len=strlen(ipt);
+  last=ipt[(*len)-1];
+  *ptrs=NULL;
+  while(strlen(ibur) >= *len) {
+    *ptrs=strchr(ibur,ipt[0]);
+    if( *ptrs == NULL)
+      return;
+    ibur=*ptrs+*len;          /* next place to start looking */
+    if(strncmp(*ptrs,ipt,*len) == 0) {  /* if we match */
+      while (*ibur == last){            /*   extend length of match if the */
+        (*len)++;                       /*   last character is repeated    */
+        ibur++;
+      }
+      return;
+    }
+    *ptrs=NULL;
+  }
+  return;
+}
+
+static void format_error(char *ibur, char *buf, int bufl, int *ierrnum, char *ierrch)
+{
+    int iwl,iburl;
+    char *iwhs, *iwhe;
+    char iwhat[5];
+    int ip[5]={0};
+
+      /* does the error log entry have text (additional error info) in parentheses?
+	 no  => iwl == 0
+	 yes => iwl is text length up to 4
+	 iwhs == pointer to '('
+      */
+
+      iwl =  0;
+      iwhs = memchr(buf+FIRST_CHAR, '(', bufl-FIRST_CHAR);
+      if(iwhs != NULL) {
+	iwhe = memchr(iwhs+1, ')',bufl-(iwhs+1-buf));
+	if (iwhe != NULL){
+	  iwl = 4 < iwhe-iwhs+1 ? 4 : iwhe-iwhs-1;
+	  strncpy(iwhat, iwhs+1, iwl);
+	  iwhat[iwl]=0;
+	}
+      }
+
+      strncpy(ibur,buf+FIRST_CHAR+8,5);
+      ibur[5]='\0';
+      sscanf(ibur,"%d",ierrnum);
+      memcpy(ierrch,buf+FIRST_CHAR+6,2);
+      if(strncmp(buf+FIRST_CHAR+6,"un",2)==0) {
+	int ierr;
+	strncpy(ibur,buf+FIRST_CHAR+8,5);
+	ibur[5]='\0';
+	if(1==sscanf(ibur,"%d",&ierr)) {
+	  strncpy(ibur,strerror(ierr),80);
+	  if(strlen(strerror(ierr))>(80-1))
+	    ibur[79]='\0';
+	} else {
+	  ibur[0]='\0';
+          return;
+	}
+      } else {
+	fserr_snd(buf, 80);
+	while (skd_clr_ret(ip)) // clear any old ones from possible time-outs
+	  ;
+	ip[0]=0;
+	if(skd_run_to("fserr", 'w', ip,500)==1) {
+	  strcpy(ibur,"fserr not responding, if this persists, consider restarting the FS");
+	  iburl=strlen(ibur);
+	} else {
+	  iburl=fserr_rcv(ibur, 118);
+	  ibur[iburl]='\0';
+	}
+
+	if((iburl==4) && (strncmp(ibur, "nono", 4) == 0)) {
+	  ibur[0]=0;
+	  return;
+	}
+
+	if(iwl != 0){ /* non-empty "()" */
+          char *ptrs;
+          int irgb, iwm;
+	  dxpm(ibur, "?W", &ptrs, &irgb);
+	  if(ptrs != NULL) { /* replace ?W... in ibur with non-empty "()" */
+            int istart=0;
+            /* strip leading spaces that don't fit */
+            while(irgb<iwl && iwhat[istart]==' ') {
+                istart++;
+                iwl--;
+            }
+	    iwm= irgb < iwl? irgb: iwl;
+	    memcpy(ptrs,iwhat+istart,iwm);
+	  } else {
+	    dxpm(ibur, "?F", &ptrs, &irgb);
+	    if(ptrs != NULL) { /* replace ?F... in ibur with non-empty "()" */
+	      int ierr;
+	      char *minus;
+	      iwm= irgb < iwl? irgb: iwl;
+	      minus=memchr(iwhat,'-',iwm);
+	      if(NULL != minus)
+		*minus=' ';
+	      memcpy(ptrs,iwhat,iwm);
+	      if(1==sscanf(iwhat,"%d",&ierr)) {
+		strcat(ibur,": ");
+		strcat(ibur,strerror(ierr));
+	      }
+	    }
+	  }
+	  if(ptrs!=NULL)
+	     *iwhs=0;   /* get rid of non-empty "()" if "?W"/"?F" found */
+	} else if(NULL!=iwhs) /* get rid of empty "()" */
+	  *iwhs=0;
+
+      }
+      /* append returned info (if not empty) to output message for display,
+	 otherwise we jumped to Append
+      */
+}
+
 main()
 {
     int i;
     int cls_rcv(),fserr_rcv();
     int kp=0, kack=0, kxd=FALSE, kxl=FALSE, fd=-1, kpd=FALSE, knd=FALSE;
-    int iwl, iw1, iwm;
     char *llogndx;
     int irga;
     int ip[5];
@@ -383,16 +513,13 @@ main()
     char ibur[150];
     char buf[MAX_BUF+2];
     char buf2[MAX_BUF+2];
-    char *iwhs, *iwhe;
     char bul[MAX_BUF+2];
     char llog0[MAX_SKD];
     char sllog[MAX_SKD+1], sllog0[MAX_SKD+1];
     int rtn1, rtn2, status, bufl, bull, rtn1f, rtn2f;
-    int irgb, iburl;
-    char *ich, *cp1, *cp2, ch, iwhat[5], *ptrs, *prtn1;
+    char *ich, *cp1, *cp2, ch, *prtn1;
     int class;
     off_t offset;
-    void dxpm();
     int kdebug;
     char *st;
     int kpcald;
@@ -796,110 +923,21 @@ Ack:    ich = strtok(NULL, ",");
 
       /* process log entry for display if conditions are met,
         all errors get processed (needed for logging), but display of errors
-        may be overridden depending on TNX settings,
+        may be overridden depending on TNX settings -- in write2display() --
 	everything else is only available for logging */
 
       /*  error recognition and message expansion */
 
       ierrnum=0;
-      if (*cp2 != 'b') /* then not an error */
-	goto Append;
+      if (*cp2 == 'b') {/*  it is an error or warning */
+        format_error(ibur,buf,bufl,&ierrnum,ierrch);
 
-      /*  else it is an error or warning */
-
-      /* does the error log entry have text (additional error info) in parentheses? 
-	 no  => iwl == 0
-	 yes => iwl is text length up to 4
-	 iwhs == pointer to '('
-      */
-
-      iwl =  0;
-      iwhs = memchr(buf+FIRST_CHAR, '(', bufl-FIRST_CHAR);
-      if(iwhs != NULL) {
-	iwhe = memchr(iwhs+1, ')',bufl-(iwhs+1-buf));
-	if (iwhe != NULL){
-	  iwl = 4 < iwhe-iwhs+1 ? 4 : iwhe-iwhs-1;
-	  strncpy(iwhat, iwhs+1, iwl);
-	  iwhat[iwl]=0;
-	}
-      }
-      
-      strncpy(ibur,buf+FIRST_CHAR+8,5);
-      ibur[5]='\0';
-      sscanf(ibur,"%d",&ierrnum);
-      memcpy(&ierrch,buf+FIRST_CHAR+6,2);
-      if(strncmp(buf+FIRST_CHAR+6,"un",2)==0) {
-	int ierr;
-	strncpy(ibur,buf+FIRST_CHAR+8,5);
-	ibur[5]='\0';
-	if(1==sscanf(ibur,"%d",&ierr)) {
-	  strncpy(ibur,strerror(ierr),80);
-	  if(strlen(strerror(ierr))>(80-1))
-	    ibur[79]='\0';
-	} else {
-	  ibur[0]='\0';
-	  goto Append;
-	}
-      } else {
-	fserr_snd(buf, 80);
-	while (skd_clr_ret(ip)) // clear any old ones from possible time-outs
-	  ;
-	ip[0]=0;
-	if(skd_run_to("fserr", 'w', ip,500)==1) {
-	  strcpy(ibur,"fserr not responding, if this persists, consider restarting the FS");
-	  iburl=strlen(ibur);
-	} else {
-	  iburl=fserr_rcv(ibur, 118);
-	  ibur[iburl]='\0';
-	}
-	
-	if((iburl==4) && (strncmp(ibur, "nono", 4) == 0)) {
-	  ibur[0]=0;
-	  goto Append;
-	}
-	
-	if(iwl != 0){ /* non-empty "()" */
-	  dxpm(ibur, "?W", &ptrs, &irgb); 
-	  if(ptrs != NULL) { /* replace ?W... in ibur with non-empty "()" */
-            int istart=0;
-            /* strip leading spaces that don't fit */
-            while(irgb<iwl && iwhat[istart]==' ') {
-                istart++;
-                iwl--;
-            }
-	    iwm= irgb < iwl? irgb: iwl;
-	    memcpy(ptrs,iwhat+istart,iwm);
-	  } else {
-	    dxpm(ibur, "?F", &ptrs, &irgb); 
-	    if(ptrs != NULL) { /* replace ?F... in ibur with non-empty "()" */
-	      int ierr;
-	      char *minus;
-	      iwm= irgb < iwl? irgb: iwl;
-	      minus=memchr(iwhat,'-',iwm);
-	      if(NULL != minus)
-		*minus=' ';
-	      memcpy(ptrs,iwhat,iwm);
-	      if(1==sscanf(iwhat,"%d",&ierr)) {
-		strcat(ibur,": ");
-		strcat(ibur,strerror(ierr));
-	      } 
-	    }
-	  }
-	  if(ptrs!=NULL)
-	     *iwhs=0;   /* get rid of non-empty "()" if "?W"/"?F" found */
-	} else if(NULL!=iwhs) /* get rid of empty "()" */ 
-	  *iwhs=0;
-
-      }
-      /* append returned info (if not empty) to output message for display, 
-	 otherwise we jumped to Append
-      */
-
-      if(strlen(ibur)!=0) {
-        if(strlen(buf) > FIRST_CHAR+13)
-          logit(NULL,-320,"bo");
-        strcat(buf, " ");
-        strcat(buf, ibur);
+        if(strlen(ibur)!=0) {
+          if(strlen(buf) > FIRST_CHAR+13)
+            logit(NULL,-320,"bo");
+          strcat(buf, " ");
+          strcat(buf, ibur);
+        }
       }
 
     Append:
@@ -923,36 +961,4 @@ Bye:
     skd_run("fserr", 'n', ip); 
 
     exit( -1);
-}
-void dxpm(ibur, ipt, ptrs, len)
-char *ibur, *ipt, **ptrs;
-int *len;
-/*input:
-   ibur - raw error message
-   ipt  - substring to find
-  output:
-   ptrs - location of substring in ibur, NULL if not present
-   len  - length of substring in ibur to last repeated end character
-*/
-{
-  char last;
-
-  *len=strlen(ipt);
-  last=ipt[(*len)-1];
-  *ptrs=NULL;
-  while(strlen(ibur) >= *len) {
-    *ptrs=strchr(ibur,ipt[0]);
-    if( *ptrs == NULL)
-      return;
-    ibur=*ptrs+*len;          /* next place to start looking */
-    if(strncmp(*ptrs,ipt,*len) == 0) {  /* if we match */
-      while (*ibur == last){            /*   extend length of match if the */
-        (*len)++;                       /*   last character is repeated    */
-        ibur++;
-      }
-      return;
-    }
-    *ptrs=NULL;
-  }
-  return;
 }
