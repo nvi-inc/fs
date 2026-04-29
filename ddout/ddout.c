@@ -220,6 +220,86 @@ static void unlink_error(struct list *ptr, struct list **last, struct list **fir
   free(ptr);
 }
 
+static void data2disk(int fd, int serverfd, char *buf, int kwrite,
+    unsigned *last_sync, int knl, char *sllog) {
+
+  unsigned now;
+
+  /* SECTION 6 */
+  /*  write information to the log file if conditions are met */
+
+  if (kwrite) {
+    int ret, i, to, bull;
+    if (fd <0)
+      goto Trouble;
+
+    if(NULL!=strchr(buf,'\e')) { /* remove reverse video escapes */
+      bull=strlen(buf);
+      for (i=to=0;i<=bull;i++) {
+        if(i+3 < bull && !strncmp(buf+i,"\e[7m",4)) {
+          buf[to]='(';
+          i+=3;
+        } else if(i+2 < bull && !strncmp(buf+i,"\e[m",3)) {
+          buf[to]=')';
+          i+=2;
+        } else if (to!=i)
+          buf[to]=buf[i];
+        to++;
+      }
+    }
+    strcat(buf,"\n");
+    bull = strlen(buf);
+
+    if (serverfd >= 0) {
+      write(serverfd, buf, bull);
+    }
+
+    ret = write(fd, buf, bull);
+    if(bull != ret ) {
+      shm_addr->abend.other_error=1;
+      if(ret >= 0)
+        fprintf(stderr,"!! wrong length written, probably the disk is full or the log file is too large\n");
+      else
+        perror("!! help! ** writing file, ddout");
+      play_wav(1);
+      goto Post;
+    }
+  }
+
+  rte_rawt(&now);
+  if(fd >= 0 &&  now-*last_sync>100) {
+    unsigned diff;
+    int ierr;
+    diff=now-*last_sync;
+    rte_rawt(last_sync);
+    ierr=fsync(fd);
+    // printf("synced %u ierr %d '%.40s'\n",diff,ierr,buf);
+    if(ierr < 0) {
+      shm_addr->abend.other_error=1;
+      perror("!! help! ** syncing file, ddout");
+      play_wav(1);
+      goto Post;
+    }
+  }
+
+  /*  posted message to disk, return to caller */
+
+Post:
+  return;
+
+/* SECTION 8 */
+/*  routine called if trouble occurs with log file */
+
+Trouble:
+    if(knl) {
+      shm_addr->abend.other_error=1;
+      fprintf(stderr,
+	      "\007!! help! ** log file '%s' not open, can't write to disk\n",
+	     sllog);
+      play_wav(1);
+    }
+    return;
+}
 main()
 {
     int i;
@@ -254,7 +334,7 @@ main()
     int display, count;
     char *offon[ ]= {"off","on"};
     int knl=FALSE;
-    unsigned last_sync,now;
+    unsigned last_sync;
     int skd_run_to();
     int serverfd;
     char* serverfdst;
@@ -817,80 +897,14 @@ Ack:    ich = strtok(NULL, ",");
       }
     }
 
-/* SECTION 6 */
-/*  write information to the log file if conditions are met */
+    int kwrite=kxl || !(kp || kack) || memcmp(cp2,"nl",2)==0;
+    data2disk(fd,serverfd,buf,kwrite,&last_sync,knl,sllog);
 
-    if (kxl || !(kp || kack) || memcmp(cp2,"nl",2)==0) {
-      int ret, i, to;
-      if (fd <0)
-	goto Trouble;
-      if(NULL!=strchr(buf,'\e')) { /* remove reverse video escapes */
-        bull=strlen(buf);
-        for (i=to=0;i<=bull;i++) {
-          if(i+3 < bull && !strncmp(buf+i,"\e[7m",4)) {
-            buf[to]='(';
-            i+=3;
-          } else if(i+2 < bull && !strncmp(buf+i,"\e[m",3)) {
-            buf[to]=')';
-            i+=2;
-          } else if (to!=i)
-            buf[to]=buf[i];
-	  to++;
-	}
-      }
-      strcat(buf,"\n");
-      bull = strlen(buf);
-
-      if (serverfd >= 0) {
-          write(serverfd, buf, bull);
-      }
-
-      ret = write(fd, buf, bull);
-      if(bull != ret ) {
-	shm_addr->abend.other_error=1;
-	if(ret >= 0)
-	  fprintf(stderr,"!! wrong length written, probably the disk is full or the log file is too large\n");
-        else
-          perror("!! help! ** writing file, ddout");
-        play_wav(1);
-	goto Post;
-      }
-    }
-    rte_rawt(&now);
-    if(now-last_sync>100) {
-      unsigned diff;
-      int ierr;
-      diff=now-last_sync;
-      rte_rawt(&last_sync);
-      ierr=fsync(fd);
-      // printf("synced %u ierr %d '%.40s'\n",diff,ierr,buf);
-      if(ierr < 0) {
-	shm_addr->abend.other_error=1;
-	perror("!! help! ** syncing file, ddout");
-	play_wav(1);
-	goto Post;
-      }
-    }
-
-/* SECTION 7 */
-/*  post message to disk, return to caller or to main loop */
-
-Post:
-    goto Messenger;
-
-/* SECTION 8 */
-/*  routine called if trouble occurs with log file */
-
-Trouble:
-    if(knl) {
-      shm_addr->abend.other_error=1;
-      fprintf(stderr,
-	      "\007!! help! ** log file '%s' not open, can't write to disk\n",
-	     sllog);
-      play_wav(1);
-    }
+      /* SECTION 7 */
+/*  return to caller to main loop */
 
     goto Messenger;
+
 
 /* SECTION 9 */
 /*  exit from program */
