@@ -4379,6 +4379,12 @@ LG   -1 Place Holder for lgerr Error
 LG    1 Place Holder for lgerr Warning
 
 ""
+LH   -1 Place Holder for tnx off
+
+""
+LH   -2 Place Holder for tnx on
+
+""
 LI -101
 No default for frequency.
 ""

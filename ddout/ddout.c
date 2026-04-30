@@ -703,43 +703,44 @@ Messenger:
       memcpy(&df,buf+6,2);
       for(ptr=last;ptr!=NULL;ptr=ptr->previous) {
         if(ptr->num == ix && memcmp(ptr->ch,buf,2)==0) {
-	  if(df==1) {
-	    if(ptr->count<=1) {
-	      if(ptr->on == 1) {
-		ddout_logit(NULL,-311,"bo");
-		goto Messenger;
-	      }
-	      ptr->on=1;
+          if(df==1) {
+            if(ptr->count<=1) {
+              if(ptr->on == 1) {
+                ddout_logit(NULL,-311,"bo");
+                goto Messenger;
+              }
+              ptr->on=1;
               found=TRUE;
-	      break;
-	    } else {
-	      printf("  tnx: more than one %2.2s,%d occurred, use 'tnx=%2.2s,%d,on,#num' to select from the list below\a\a\n",ptr->ch,ix,ptr->ch,ix);
-              play_wav(1);
-	      for(ptr=first;ptr!=NULL;ptr=ptr->next) {
-		if(ptr->num == ix && memcmp(ptr->ch,buf,2)==0) {
-		  if(ptr->example==NULL)
-		    printf("    tnx/%2.2s,%d,%s,#%d,{%s},{}\n",
-			    ptr->ch,ptr->num,offon[ptr->on],
-			    ptr->count,ptr->string);
-		  else
-		    printf("    tnx/%2.2s,%d,%s,#%d,{%s},{%s}\n",
-			    ptr->ch,ptr->num,offon[ptr->on],
-			    ptr->count,ptr->string,ptr->example);
-		}
-	      }
-	      goto Messenger;
-	    }
-	  } else if(ptr->count == iy || iy < 0) {
-	      if(iy >= 0 && ptr->on == 1) {
-		ddout_logit(NULL,-311,"bo");
-		goto Messenger;
-	      }
-	      ptr->on=1;
-              found=TRUE;
-	      if(iy >= 0 )
-		break;
-	  }
-	}
+              break;
+            } else {
+              sprintf(buf2,"more than one %2.2s,%d has occurred, use 'tnx=%2.2s,%d,on,#num' to select from the list below",ptr->ch,ix,ptr->ch,ix);
+              ddout_logite(buf2,-2,"lh");
+              for(ptr=first;ptr!=NULL;ptr=ptr->next) {
+                if(ptr->num == ix && memcmp(ptr->ch,buf,2)==0) {
+                  if(ptr->example==NULL)
+                    sprintf(buf2,"tnx/%2.2s,%d,%s,#%d,{%s},{}",
+                        ptr->ch,ptr->num,offon[ptr->on],
+                        ptr->count,ptr->string);
+                  else
+                    sprintf(buf2,"tnx/%2.2s,%d,%s,#%d,{%s},{%s}",
+                        ptr->ch,ptr->num,offon[ptr->on],
+                        ptr->count,ptr->string,ptr->example);
+                  ddout_logit(buf2,0,"bo");
+                }
+              }
+              goto Messenger;
+            }
+          } else if(ptr->count == iy || iy < 0) {
+            if(iy >= 0 && ptr->on == 1) {
+              ddout_logit(NULL,-311,"bo");
+              goto Messenger;
+            }
+            ptr->on=1;
+            found=TRUE;
+            if(iy >= 0 )
+              break;
+          }
+        }
       }
       if(!found) { /* not found */
 	ddout_logit(NULL,-304,"bo");
@@ -755,66 +756,69 @@ Messenger:
       memcpy(&df,buf+6,2);
       for(ptr=last;ptr!=NULL;ptr=ptr->previous) {
         if(ptr->num == ix && memcmp(ptr->ch,buf,2)==0) {
-	  if(df==1) {
-	    if(ptr->count<=1) {
-	      if(ptr->on == 0) {
-		ddout_logit(NULL,-312,"bo");
-		goto Messenger;
-	      }
-	      ptr->on=0;
+          if(df==1) {
+            if(ptr->count<=1) {
+              if(ptr->on == 0) {
+                ddout_logit(NULL,-312,"bo");
+                goto Messenger;
+              }
+              ptr->on=0;
               found=TRUE;
-	      break;
-	    } else {
-	      printf("  tnx: more than one %2.2s,%d, exists, use 'tnx=%2.2s,%d,off,#num' to select from the list below\a\a\n",ptr->ch,ix,ptr->ch,ix);
-              play_wav(1);
-	      for(ptr=first;ptr!=NULL;ptr=ptr->next) {
-		if(ptr->num == ix && memcmp(ptr->ch,buf,2)==0) {
-		  if(ptr->example==NULL)
-		    printf("    tnx/%2.2s,%d,%s,#%d,{%s},{}\n",
-			    ptr->ch,ptr->num,offon[ptr->on],
-			    ptr->count,ptr->string);
-		  else
-		    printf("    tnx/%2.2s,%d,%s,#%d,{%s},{%s}\n",
-			    ptr->ch,ptr->num,offon[ptr->on],
-			    ptr->count,ptr->string,ptr->example);
-		}
-	      }
-	      goto Messenger;
-	    }
-	  } else if(ptr->count == iy || iy < 0) {
-	      if(iy > 0 && ptr->on == 0) {
-		ddout_logit(NULL,-312,"bo");
-		goto Messenger;
-	      }
-	      ptr->on=0;
-              found=TRUE;
-	      if(iy >= 0)
-		break;
-	  }
-	}
+              break;
+            } else {
+              sprintf(buf2,"more than one %2.2s,%d has occurred, use 'tnx=%2.2s,%d,off,#num' to select from the list below",ptr->ch,ix,ptr->ch,ix);
+              ddout_logite(buf2,-1,"lh");
+              for(ptr=first;ptr!=NULL;ptr=ptr->next) {
+                if(ptr->num == ix && memcmp(ptr->ch,buf,2)==0) {
+                  if(ptr->example==NULL)
+                    sprintf(buf2,"tnx/%2.2s,%d,%s,#%d,{%s},{}",
+                        ptr->ch,ptr->num,offon[ptr->on],
+                        ptr->count,ptr->string);
+                  else
+                    sprintf(buf2,"tnx/%2.2s,%d,%s,#%d,{%s},{%s}",
+                        ptr->ch,ptr->num,offon[ptr->on],
+                        ptr->count,ptr->string,ptr->example);
+                  ddout_logit(buf2,0,"bo");
+                }
+              }
+              goto Messenger;
+            }
+          } else if(ptr->count == iy || iy < 0) {
+            if(iy > 0 && ptr->on == 0) {
+              ddout_logit(NULL,-312,"bo");
+              goto Messenger;
+            }
+            ptr->on=0;
+            found=TRUE;
+            if(iy >= 0)
+              break;
+          }
+        }
       }
       if(!found) { /* not found */
-          ddout_logit(NULL,-303,"bo");
+        ddout_logit(NULL,-303,"bo");
       }
       goto Messenger;
     }
     if (memcmp(cp2,"ta",2)==0 || memcmp(cp2,"tl",2)==0) {  /* TNX active or list */
       int some=0;
       for(ptr=first;ptr!=NULL;ptr=ptr->next) {
-	if(memcmp(cp2,"tl",2)==0 || memcmp(cp2,"ta",2)==0 && ptr->on == 0) {
-	  if(ptr->example==NULL)
-	    printf("  tnx/%2.2s,%d,%s,#%d,{%s},{}\n",
-		    ptr->ch,ptr->num,offon[ptr->on],
-		    ptr->count,ptr->string);
-	  else
-	    printf("  tnx/%2.2s,%d,%s,#%d,{%s},{%s}\n",
-		    ptr->ch,ptr->num,offon[ptr->on],
-		    ptr->count,ptr->string,ptr->example);
-	  some=1;
-	}
+        if(memcmp(cp2,"tl",2)==0 || memcmp(cp2,"ta",2)==0 && ptr->on == 0) {
+          if(ptr->example==NULL)
+            sprintf(buf2,"tnx/%2.2s,%d,%s,#%d,{%s},{}",
+                ptr->ch,ptr->num,offon[ptr->on],
+                ptr->count,ptr->string);
+          else
+            sprintf(buf2,"tnx/%2.2s,%d,%s,#%d,{%s},{%s}",
+                ptr->ch,ptr->num,offon[ptr->on],
+                ptr->count,ptr->string,ptr->example);
+          ddout_logit(buf2,0,"bo");
+          some=1;
+        }
       }
-      if(some==0)
-	printf("  tnx/none\n");
+      if(some==0) {
+        ddout_logit("tnx/none",0,"bo");
+      }
 
       goto Messenger;
     }
