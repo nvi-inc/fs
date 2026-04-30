@@ -53,6 +53,14 @@ struct list {
       int count;
     } ;
 
+static struct list *last = NULL;
+static struct list *first=NULL;
+static unsigned last_sync;
+static int knl=FALSE;
+static char sllog[MAX_SKD+1];
+static int fd=-1;
+static int serverfd;
+
 static void insert_error(struct list *ptr_in, char ierrch[2],int ierrnum,
     int count, struct list **last, struct list **first, char ibur[150],
     char buf[MAX_BUF+2])
@@ -501,11 +509,90 @@ static void format_error(char *ibur, char *buf, int bufl, int *ierrnum, char *ie
       */
 }
 
+static void ddout_logit(msg,ierr,who)
+char *msg;           /* a message to be logged, NULL if none */
+int ierr;            /* error number, 0 if no error          */
+char *who;           /* 2-char string identifying the error  */
+{
+  char buf[1025];    /* Holds the complete log entry */
+  char ibur[150];    /* Holds text, if any returned by fserr */
+  int ip2=0;
+  int ierrnum=0;
+  char ierrch[2];
+  char *cp2;
+  int bufl;
+
+  logen(buf,sizeof(buf),msg,ierr,who,'/');
+
+  /* Send the complete log entry to ddout via class.
+   */
+
+  if (ierr != 0)
+    memcpy(&ip2,"b1",2);
+
+  /* for testing, send to output PLUS class */
+  /*  fprintf(stdout,"%s\n",buf); */
+
+  cp2 = (char *) &ip2;
+  bufl=strlen(buf);
+  if (*cp2 == 'b') { /*  it is an error or warning */
+    format_error(ibur,buf,bufl,&ierrnum,ierrch);
+    if(strlen(ibur)!=0) {
+      /* bo -320 can't occur here -- only in ddout_logite() -- so no need to log it and cause recursion */
+      strcat(buf, " ");
+      strcat(buf, ibur);
+    }
+  }
+
+  write2display(cp2,ierrnum,ierrch,&last,&first,ibur,buf);
+  data2disk(fd,serverfd,buf,TRUE,&last_sync,knl,sllog);
+}
+static void ddout_logite(msg,ierr,who)
+char *msg;           /* a message to be logged, NULL if none */
+int ierr;            /* error number, 0 if no error          */
+char *who;           /* 2-char string identifying the error  */
+{
+  char buf[1025];    /* Holds the complete log entry */
+  char ibur[150];    /* Holds text, if any returned by fserr */
+  int ip2=0;
+  int ierrnum=0;
+  char ierrch[2];
+  char *cp2;
+  int bufl;
+  int bad_ddout_error=FALSE;
+
+  logene(buf,sizeof(buf),msg,ierr,who);
+
+  /* Send the complete log entry to ddout via class.
+   */
+
+  if (ierr != 0)
+    memcpy(&ip2,"b1",2);
+
+  /* for testing, send to output PLUS class */
+  /*  fprintf(stdout,"%s\n",buf); */
+
+  cp2 = (char *) &ip2;
+  bufl=strlen(buf);
+  if (*cp2 == 'b') {/*  it is an error or warning */
+    format_error(ibur,buf,bufl,&ierrnum,ierrch);
+
+    if(strlen(ibur)!=0) {
+      if(strlen(buf) > FIRST_CHAR+13)
+        ddout_logit(NULL,-320,"bo");
+      strcat(buf, " ");
+      strcat(buf, ibur);
+    }
+  }
+  write2display(cp2,ierrnum,ierrch,&last,&first,ibur,buf);
+  data2disk(fd,serverfd,buf,TRUE,&last_sync,knl,sllog);
+
+}
 main()
 {
     int i;
     int cls_rcv(),fserr_rcv();
-    int kp=0, kack=0, kxd=FALSE, kxl=FALSE, fd=-1, kpd=FALSE, knd=FALSE;
+    int kp=0, kack=0, kxd=FALSE, kxl=FALSE, kpd=FALSE, knd=FALSE;
     char *llogndx;
     int irga;
     int ip[5];
@@ -515,7 +602,7 @@ main()
     char buf2[MAX_BUF+2];
     char bul[MAX_BUF+2];
     char llog0[MAX_SKD];
-    char sllog[MAX_SKD+1], sllog0[MAX_SKD+1];
+    char sllog0[MAX_SKD+1];
     int rtn1, rtn2, status, bufl, bull, rtn1f, rtn2f;
     char *ich, *cp1, *cp2, ch, *prtn1;
     int class;
@@ -525,15 +612,10 @@ main()
     int kpcald;
     char ierrch[2];
     int ierrnum;
-    struct list *last = NULL;
-    struct list *first=NULL;
     struct list *ptr;
     int display, count;
     char *offon[ ]= {"off","on"};
-    int knl=FALSE;
-    unsigned last_sync;
     int skd_run_to();
-    int serverfd;
     char* serverfdst;
     long warn_size;
     char warn_size_msg[WARN_SIZE_BUF];
@@ -560,11 +642,6 @@ main()
          warn_size=DEFAULT_WARN_SIZE;
     } else
          warn_size=DEFAULT_WARN_SIZE;
-
-    if(warn_size > 0)
-       snprintf(warn_size_msg,WARN_SIZE_BUF,
-       "WARNING: Log file just opened is already larger than %ld MB.",
-       warn_size);
 
 /* SECTION 2 */
 
@@ -629,7 +706,7 @@ Messenger:
 	  if(df==1) {
 	    if(ptr->count<=1) {
 	      if(ptr->on == 1) {
-		logit(NULL,-311,"bo");
+		ddout_logit(NULL,-311,"bo");
 		goto Messenger;
 	      }
 	      ptr->on=1;
@@ -654,7 +731,7 @@ Messenger:
 	    }
 	  } else if(ptr->count == iy || iy < 0) {
 	      if(iy >= 0 && ptr->on == 1) {
-		logit(NULL,-311,"bo");
+		ddout_logit(NULL,-311,"bo");
 		goto Messenger;
 	      }
 	      ptr->on=1;
@@ -665,7 +742,7 @@ Messenger:
 	}
       }
       if(!found) { /* not found */
-	logit(NULL,-304,"bo");
+	ddout_logit(NULL,-304,"bo");
 	goto Messenger;
       }
       goto Messenger;
@@ -681,7 +758,7 @@ Messenger:
 	  if(df==1) {
 	    if(ptr->count<=1) {
 	      if(ptr->on == 0) {
-		logit(NULL,-312,"bo");
+		ddout_logit(NULL,-312,"bo");
 		goto Messenger;
 	      }
 	      ptr->on=0;
@@ -706,7 +783,7 @@ Messenger:
 	    }
 	  } else if(ptr->count == iy || iy < 0) {
 	      if(iy > 0 && ptr->on == 0) {
-		logit(NULL,-312,"bo");
+		ddout_logit(NULL,-312,"bo");
 		goto Messenger;
 	      }
 	      ptr->on=0;
@@ -717,7 +794,7 @@ Messenger:
 	}
       }
       if(!found) { /* not found */
-          logit(NULL,-303,"bo");
+          ddout_logit(NULL,-303,"bo");
       }
       goto Messenger;
     }
@@ -747,7 +824,7 @@ Messenger:
       for(ptr=first;ptr!=NULL;ptr=ptr->next) {
         if(ptr->num == ix && memcmp(ptr->ch,buf,2)==0) {
           if(ptr->count!=0) {
-            logit(NULL,-317,"bo");
+            ddout_logit(NULL,-317,"bo");
             goto Messenger;
           }
           unlink_error(ptr, &last, &first);
@@ -755,7 +832,7 @@ Messenger:
         }
       }
       if(ptr==NULL)
-        logit(NULL,-318,"bo");
+        ddout_logit(NULL,-318,"bo");
       goto Messenger;
     }
     if (memcmp(cp2,"te",2)==0) {  /* TNX force */
@@ -767,7 +844,7 @@ Messenger:
       for(ptr=first;ptr!=NULL;ptr=ptr->next) {
         if(ptr->num == ix && memcmp(ptr->ch,buf,2)==0) {
           if(ptr->count==0) {
-            logit(NULL,-319,"bo");
+            ddout_logit(NULL,-319,"bo");
             goto Messenger;
           }
           else if(ptr->count==1) {
@@ -868,10 +945,6 @@ Messenger:
 	  read(fd,&ch,1);
 	  if(ch != '\n')
 	    write(fd, "\n", 1);
-          if(warn_size > 0) {
-              if(offset > warn_size*1000L*1000L)
-                  logite(warn_size_msg,-999,"bo");
-          }
 	} else if(offset < 0) {
 	  shm_addr->abend.other_error=1;
 	  perror("finding end of log file, ddout");
@@ -879,7 +952,7 @@ Messenger:
 	}
       } else {
 	fprintf(stderr,"\007!! help! ** no file is now open\n");
-      	play_wav(1);
+          play_wav(1);
       }
       goto Append;  /* always write first message */
     }
@@ -934,7 +1007,7 @@ Ack:    ich = strtok(NULL, ",");
 
         if(strlen(ibur)!=0) {
           if(strlen(buf) > FIRST_CHAR+13)
-            logit(NULL,-320,"bo");
+            ddout_logit(NULL,-320,"bo");
           strcat(buf, " ");
           strcat(buf, ibur);
         }
@@ -948,6 +1021,20 @@ Ack:    ich = strtok(NULL, ",");
     data2disk(fd,serverfd,buf,kwrite,&last_sync,knl,sllog);
 
       /* SECTION 7 */
+
+    if(memcmp(cp2,"nl",2)==0) {
+      if(warn_size > 0) {
+        if(offset > warn_size*1000L*1000L) {
+          snprintf(warn_size_msg,WARN_SIZE_BUF,
+              "WARNING: Log file '%s' is already larger than %ld MB.",
+              sllog,warn_size);
+
+          ddout_logite(warn_size_msg,-999,"bo");
+          offset=-1;
+        }
+      }
+    }
+
 /*  return to caller to main loop */
 
     goto Messenger;
@@ -958,7 +1045,7 @@ Ack:    ich = strtok(NULL, ",");
 
 Bye:
     ip[0]=-1;
-    skd_run("fserr", 'n', ip); 
+    skd_run("fserr", 'n', ip);
 
     exit( -1);
 }

@@ -1572,7 +1572,7 @@ BO -319
 Error was already set with 'force'.
 ""
 BO -320
-ddout: internal FS error, incorrectly formed error message.
+ddout: program error, both internal and external errors are used in the next error message ('tnx' can't manage it).
 ""
 BO -390
 setup procedure name must be 12 characters or less.

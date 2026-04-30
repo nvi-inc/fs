@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020, 2026 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -36,7 +36,7 @@ void pname();
 void rte_time();
 static void logit0( char *msg, int ierr, char *who, char *type, char lsor);
 
-logit_nds(msg,ierr,who,lsor)
+void logit_nds(msg,ierr,who,lsor)
 char *msg;           /* a message to be logged, NULL if none */
 int ierr;            /* error number, 0 if no error          */
 char *who;           /* 2-char string identifying the error  */
@@ -70,17 +70,16 @@ char *who;           /* 2-char string identifying the error  */
 {
   logit0(msg,ierr,who,"nd",'/');
 }
-static void logit0(msg,ierr,who,type,lsor)
+void logen(buf,buf_size,msg,ierr,who,lsor)
+char *buf;           /* output buffer */
+int buf_size;        /* size of buff */
 char *msg;           /* a message to be logged, NULL if none */
 int ierr;            /* error number, 0 if no error          */
 char *who;           /* 2-char string identifying the error  */
-char *type;          /* data type NULL = "fs", "nd" = no display */
 char lsor;           /* char identifying source usually ':' or '/' */
-
 {
-  char buf[1025];    /* Holds the complete log entry */
   char name[5];     /* The name of our main program */
-  int it[6],ip1,ip2,l;
+  int it[6],l;
   char ssor[2];
  
 /* First get the time and put dddhhmmss into the log entry.
@@ -126,7 +125,7 @@ char lsor;           /* char identifying source usually ':' or '/' */
       int n;
       int bufl=strlen(buf);
       int msgl=strlen(msg);
-      n=sizeof(buf)-bufl-1;
+      n=buf_size-bufl-1;
       if(msgl < n)
 	n=msgl;
       memcpy(buf+bufl,msg,n);
@@ -134,6 +133,19 @@ char lsor;           /* char identifying source usually ':' or '/' */
     } else
       strcat(buf,"empty message, program error");
   }
+}
+static void logit0(msg,ierr,who,type,lsor)
+char *msg;           /* a message to be logged, NULL if none */
+int ierr;            /* error number, 0 if no error          */
+char *who;           /* 2-char string identifying the error  */
+char *type;          /* data type NULL = "fs", "nd" = no display */
+char lsor;           /* char identifying source usually ':' or '/' */
+{
+  char buf[1025];    /* Holds the complete log entry */
+  int ip1,ip2;
+
+  logen(buf,sizeof(buf),msg,ierr,who,lsor);
+
 /* Send the complete log entry to ddout via class.
 */
   if(type == NULL)
@@ -141,6 +153,7 @@ char lsor;           /* char identifying source usually ':' or '/' */
   else
     memcpy(&ip1,type,2);
   memcpy(&ip2,"  ",2);
+
   if (ierr != 0) memcpy(&ip2,"b1",2);
 /* for testing, send to output PLUS class */
 /*  fprintf(stdout,"%s\n",buf); */

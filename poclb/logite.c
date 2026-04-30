@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020, 2026 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -33,18 +33,17 @@
 void cls_snd();
 void rte_time();
 
-logite(msg,ierr,who)
+void logene(buf,buf_size,msg,ierr,who)
+char *buf;           /* output buffer */
+int buf_size;        /* size of buff */
 char *msg;           /* a message to be logged, NULL if none */
 int ierr;            /* error number, 0 if no error          */
 char *who;           /* 2-char string identifying the error  */
-
 {
-  char buf[1025];    /* Holds the complete log entry */
-  char name[5];     /* The name of our main program */
-  int it[6],ip1,ip2,l, bytes;
- 
-/* First get the time and put dddhhmmss into the log entry.
-*/
+  int it[6],l;
+
+  /* First get the time and put dddhhmmss into the log entry.  */
+
   rte_time(it,&it[5]);
   buf[0]='\0';
   int2str(buf,it[5],-4,1);
@@ -59,9 +58,9 @@ char *who;           /* 2-char string identifying the error  */
   strcat(buf,".");
   int2str(buf,it[0],-2,1);
 
-/* For error messages, put ?ERROR xx msg into the log entry.
-*/
-  if(ierr!=0) {
+  /* For error messages, put ?ERROR xx nnnn into the log entry.
+   */
+  if (ierr != 0) {
     strcat(buf,"?ERROR ");
     strncat(buf,who,2);
     int2str(buf,ierr,-5,0);
@@ -71,19 +70,31 @@ char *who;           /* 2-char string identifying the error  */
     int n;
     int bufl=strlen(buf);
     int msgl=strlen(msg);
-    n=sizeof(buf)-bufl-1;
+    n=buf_size-bufl-1;
     if(msgl < n)
       n=msgl;
     memcpy(buf+bufl,msg,n);
     buf[bufl+n]=0;
   }
+}
+void logite(msg,ierr,who)
+char *msg;           /* a message to be logged, NULL if none */
+int ierr;            /* error number, 0 if no error          */
+char *who;           /* 2-char string identifying the error  */
+{
+  char buf[1025];    /* Holds the complete log entry */
+  int ip1,ip2;
 
-/* Send the complete log entry to ddout via class.
-*/
+  logene(buf,sizeof(buf),msg,ierr,who);
   memcpy(&ip1,"fs",2);
   memcpy(&ip2,"  ",2);
-  if (ierr != 0) memcpy(&ip2,"b1",2);
-/* for testing, send to output PLUS class */
-/*  fprintf(stdout,"%s\n",buf); */
+  if (ierr != 0)
+    memcpy(&ip2,"b1",2);
+
+  /* Send the complete log entry to ddout via class. */
+
+  /* for testing, send to output PLUS class */
+  /*  fprintf(stdout,"%s\n",buf); */
+
   cls_snd(&shm_addr->iclbox,buf,strlen(buf),ip1,ip2);
 }
