@@ -1536,7 +1536,16 @@ BO -309
 Help not available for that command, maybe your equipment type is wrong.
 ""
 BO -310
-Error decoding error string '#num' for TNX.
+Error decoding '#num' for TNX.
+""
+BO -311
+No current value (*) for #num' for TNX.
+""
+BO -312
+No current value (*) for error number for TNX.
+""
+BO -313
+No default for error number for TNX.
 ""
 BO -390
 setup procedure name must be 12 characters or less.

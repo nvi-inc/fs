@@ -1272,8 +1272,12 @@ c
            else
               ibufd(1)=iparm(1)
               call gtprm2(ibuf,ich,nchar,1,parm,ierr)
-              if (ierr.ne.0) then
+              if (ierr.lt.0) then
                  call logit7ci(0,0,0,0,-301,'bo',0)
+              else if (ierr.eq.1) then
+                 call logit7ci(0,0,0,0,-312,'bo',0)
+              else if (ierr.eq.2) then
+                 call logit7ci(0,0,0,0,-313,'bo',0)
               else 
                  ioffon=-1
                  ibufd(2)=iparm(1)
@@ -1294,19 +1298,22 @@ c
                  endif
                  if(ioffon.ne.-1.) then
                     call gtprm2(ibuf,ich,nchar,0,parm,ierr)
-                    if(ierr.lt.0.or.ierr.eq.1) then
+                    if(ierr.lt.0) then
                        call logit7ci(0,0,0,0,-310,'bo',0)
+                    else if (ierr.eq.1) then
+                       call logit7ci(0,0,0,0,-311,'bo',0)
                     else
                        ibufd(3)=-32768
                        if(ierr.eq.2) then
                           ibufd(3)=1
                           ibufd(4)=1
-                       else if(0.ne.ichcm_ch(parm,1,'#')) then
-                          call logit7ci(0,0,0,0,-310,'bo',0)
-                       else
-                          ic1=iscn_ch(ibuf,1,nchar,'#')
-                          ibufd(3) = ias2b(ibuf,ic1+1,nchar-ic1)
-                          ibufd(4)=0
+                       else if(0.eq.ichcm_ch(parm,1,'#')) then
+                          ic1=iscn_ch(parm,1,4,' ')-2
+                          if(ic1.eq.-2) ic1=3
+                          if(ic1.gt.0) then
+                             ibufd(3) = ias2b(parm,2,ic1)
+                             ibufd(4)=0
+                          endif
                        endif
                        if(ibufd(3).eq.-32768) then
                           call logit7ci(0,0,0,0,-310,'bo',0)
