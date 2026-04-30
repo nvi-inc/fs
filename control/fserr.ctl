@@ -1520,12 +1520,6 @@ Error decoding error number in TNX.
 BO -302
 TNX action parameter must be 'on', 'off', 'force', or 'unforce'.
 ""
-BO -303
-This error has not occurred yet (or been set with 'force'), so its state can't be changed (trying to turn 'off').
-""
-BO -304
-This error has not occurred yet (or been set with 'force'), so its state can't be changed (trying to turn 'on').
-""
 BO -305
 TNX=... command cannot be executed from a procedure.
 ""
@@ -1543,36 +1537,6 @@ Help not available for that command, maybe your equipment type is wrong.
 ""
 BO -310
 Error decoding error string '#num' for TNX.
-""
-BO -311
-Error already "on", for TNX.
-""
-BO -312
-Error already "off", for TNX.
-""
-BO -313
-IF command must have an equals.
-""
-BO -314
-No default for IF command condition.
-""
-BO -315
-Unknown condition in IF command.
-""
-BO -316
-Spaces are not allowed in the schedule name for IF command condition.
-""
-BO -317
-Error was not set with 'force', can't 'unforce'.
-""
-BO -318
-Error not found, can't 'unforce'.
-""
-BO -319
-Error was already set with 'force'.
-""
-BO -320
-ddout: program error, both internal and external errors are used in the next error message ('tnx' can't manage it).
 ""
 BO -390
 setup procedure name must be 12 characters or less.
@@ -1624,9 +1588,6 @@ BO -997 Place holder for bad env variable
 ""
 BO -998
 ANTCN termination mode failed, see above error.
-""
-BO -999 Place holder for log size warning
-
 ""
 CD  -1
 Error from DBBCN in TPICD, see above for error.
@@ -4383,6 +4344,45 @@ LH   -1 Place Holder for tnx off
 
 ""
 LH   -2 Place Holder for tnx on
+
+""
+LH -303
+This error has not occurred yet (or been set with 'force'), so its state can't be changed (trying to turn 'off').
+""
+LH -304
+This error has not occurred yet (or been set with 'force'), so its state can't be changed (trying to turn 'on').
+""
+LH -311
+Error already "on", for TNX.
+""
+LH -312
+Error already "off", for TNX.
+""
+LH -313
+IF command must have an equals.
+""
+LH -314
+No default for IF command condition.
+""
+LH -315
+Unknown condition in IF command.
+""
+LH -316
+Spaces are not allowed in the schedule name for IF command condition.
+""
+LH -317
+Error was not set with 'force', can't 'unforce'.
+""
+LH -318
+Error not found, can't 'unforce'.
+""
+LH -319
+Error was already set with 'force'.
+""
+LH -320
+ddout: program error, both internal and external errors are used in the next error message ('tnx' can't manage it).
+""
+LH -999 Place holder for log size warning
 
 ""
 LI -101

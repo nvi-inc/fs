@@ -579,7 +579,7 @@ char *who;           /* 2-char string identifying the error  */
 
     if(strlen(ibur)!=0) {
       if(strlen(buf) > FIRST_CHAR+13)
-        ddout_logit(NULL,-320,"bo");
+        ddout_logit(NULL,-320,"lh");
       strcat(buf, " ");
       strcat(buf, ibur);
     }
@@ -706,7 +706,7 @@ Messenger:
           if(df==1) {
             if(ptr->count<=1) {
               if(ptr->on == 1) {
-                ddout_logit(NULL,-311,"bo");
+                ddout_logit(NULL,-311,"lh");
                 goto Messenger;
               }
               ptr->on=1;
@@ -725,14 +725,14 @@ Messenger:
                     sprintf(buf2,"tnx/%2.2s,%d,%s,#%d,{%s},{%s}",
                         ptr->ch,ptr->num,offon[ptr->on],
                         ptr->count,ptr->string,ptr->example);
-                  ddout_logit(buf2,0,"bo");
+                  ddout_logit(buf2,0,"lh");
                 }
               }
               goto Messenger;
             }
           } else if(ptr->count == iy || iy < 0) {
             if(iy >= 0 && ptr->on == 1) {
-              ddout_logit(NULL,-311,"bo");
+              ddout_logit(NULL,-311,"lh");
               goto Messenger;
             }
             ptr->on=1;
@@ -743,7 +743,7 @@ Messenger:
         }
       }
       if(!found) { /* not found */
-	ddout_logit(NULL,-304,"bo");
+	ddout_logit(NULL,-304,"lh");
 	goto Messenger;
       }
       goto Messenger;
@@ -759,7 +759,7 @@ Messenger:
           if(df==1) {
             if(ptr->count<=1) {
               if(ptr->on == 0) {
-                ddout_logit(NULL,-312,"bo");
+                ddout_logit(NULL,-312,"lh");
                 goto Messenger;
               }
               ptr->on=0;
@@ -778,14 +778,14 @@ Messenger:
                     sprintf(buf2,"tnx/%2.2s,%d,%s,#%d,{%s},{%s}",
                         ptr->ch,ptr->num,offon[ptr->on],
                         ptr->count,ptr->string,ptr->example);
-                  ddout_logit(buf2,0,"bo");
+                  ddout_logit(buf2,0,"lh");
                 }
               }
               goto Messenger;
             }
           } else if(ptr->count == iy || iy < 0) {
             if(iy > 0 && ptr->on == 0) {
-              ddout_logit(NULL,-312,"bo");
+              ddout_logit(NULL,-312,"lh");
               goto Messenger;
             }
             ptr->on=0;
@@ -796,7 +796,7 @@ Messenger:
         }
       }
       if(!found) { /* not found */
-        ddout_logit(NULL,-303,"bo");
+        ddout_logit(NULL,-303,"lh");
       }
       goto Messenger;
     }
@@ -812,12 +812,12 @@ Messenger:
             sprintf(buf2,"tnx/%2.2s,%d,%s,#%d,{%s},{%s}",
                 ptr->ch,ptr->num,offon[ptr->on],
                 ptr->count,ptr->string,ptr->example);
-          ddout_logit(buf2,0,"bo");
+          ddout_logit(buf2,0,"lh");
           some=1;
         }
       }
       if(some==0) {
-        ddout_logit("tnx/none",0,"bo");
+        ddout_logit("tnx/none",0,"lh");
       }
 
       goto Messenger;
@@ -828,7 +828,7 @@ Messenger:
       for(ptr=first;ptr!=NULL;ptr=ptr->next) {
         if(ptr->num == ix && memcmp(ptr->ch,buf,2)==0) {
           if(ptr->count!=0) {
-            ddout_logit(NULL,-317,"bo");
+            ddout_logit(NULL,-317,"lh");
             goto Messenger;
           }
           unlink_error(ptr, &last, &first);
@@ -836,7 +836,7 @@ Messenger:
         }
       }
       if(ptr==NULL)
-        ddout_logit(NULL,-318,"bo");
+        ddout_logit(NULL,-318,"lh");
       goto Messenger;
     }
     if (memcmp(cp2,"te",2)==0) {  /* TNX force */
@@ -848,7 +848,7 @@ Messenger:
       for(ptr=first;ptr!=NULL;ptr=ptr->next) {
         if(ptr->num == ix && memcmp(ptr->ch,buf,2)==0) {
           if(ptr->count==0) {
-            ddout_logit(NULL,-319,"bo");
+            ddout_logit(NULL,-319,"lh");
             goto Messenger;
           }
           else if(ptr->count==1) {
@@ -1011,7 +1011,7 @@ Ack:    ich = strtok(NULL, ",");
 
         if(strlen(ibur)!=0) {
           if(strlen(buf) > FIRST_CHAR+13)
-            ddout_logit(NULL,-320,"bo");
+            ddout_logit(NULL,-320,"lh");
           strcat(buf, " ");
           strcat(buf, ibur);
         }
@@ -1033,7 +1033,7 @@ Ack:    ich = strtok(NULL, ",");
               "WARNING: Log file '%s' is already larger than %ld MB.",
               sllog,warn_size);
 
-          ddout_logite(warn_size_msg,-999,"bo");
+          ddout_logite(warn_size_msg,-999,"lh");
           offset=-1;
         }
       }
