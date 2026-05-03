@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, 2022 NVI, Inc.
+ * Copyright (c) 2020, 2022, 2026 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -45,14 +45,14 @@ int ip[5];                           /* ipc parameters */
       void skd_run(), skd_par();      /* program scheduling utilities */
 
       if(DBBC==shm_addr->equip.rack &&
-         (25==itask || 30 == itask)) {
+         (25==itask || 30 == itask || 31 == itask)) {
           ierr=-303;
           goto error;
       } else if(DBBC3==shm_addr->equip.rack &&
           (20==itask || 22==itask)) {
           ierr=-302;
           goto error;
-      } else if (30==itask &&
+      } else if ((30==itask || 31==itask) &&
           (command->equal != '=' ||
           command->argv[0]==NULL || command->argv[1]==NULL)) {
           ierr=-304;
@@ -84,6 +84,17 @@ parse:
 	  strcat(outbuf,ptr);
 	  strcat(outbuf,",");
 	  ptr=arg_next(command,&ilast);
+      } else if (31 == itask) {
+	  int iboard;
+	  strcat(outbuf,"synth=");
+	  ierr=arg_int(ptr,&iboard,1,FALSE);
+	  if(ierr||iboard < 1||iboard > (shm_addr->dbbc3_ddc_ifs+1)/2) {
+	      ierr=-306;
+	      goto error;
+	  }
+	  strcat(outbuf,ptr);
+	  strcat(outbuf,",");
+	  ptr=arg_next(command,&ilast);
       }
 
       while( ptr != NULL) {
@@ -101,13 +112,13 @@ parse:
 dbbcn:
       if(22==itask || 24 == itask )
 	ip[0]=7;
-      else if(25==itask || 30 == itask)
+      else if(25==itask || 30 == itask || 31 == itask)
         ip[0]=8;
       else
 	ip[0]=1;
       ip[1]=out_class;
       ip[2]=out_recs;
-      if(20 == itask || 22 == itask || 25==itask || 30==itask)
+      if(20 == itask || 22 == itask || 25==itask || 30==itask || 31 == itask)
 	skd_run("dbbcn",'w',ip);
       else
 	skd_run("dbbc2",'w',ip);

@@ -1053,13 +1053,16 @@ BD -302
 dbbc and fila10g commands are not available for DBBC3 racks
 ""
 BD -303
-dbbc3 and core3h commands are not available for DBBC racks
+dbbc3, core3h, and synth commands are not available for DBBC racks
 ""
 BD -304
-Must specify at least 2 arguments for core3h command
+Must specify at least 2 arguments for core3h or synth command
 ""
 BD -305
-First core3h argument must be an integer 1 through the number of IFs in dbbc3.ctl.
+First 'core3h' argument must be '1' through the number of IFs in 'dbbc3.ctl'.
+""
+BD -306
+First 'synth' argument must be '1' through the ceiling of the number of IFs in 'dbbc3.ctl' over two: 1 ... (IFs+1)/2.
 ""
 BD -401
 error retrieving class

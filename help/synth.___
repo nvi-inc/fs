@@ -1,0 +1,34 @@
+               synth - general DBBC3 synthesizer communication
+
+  Syntax:     synth=n,data_to
+
+  Response:   synth/n,data_from
+
+
+Settable parameters:
+  n           Synthesizer number, 1-4
+  data_to     Complete message to be sent to synthesizer; no checking is
+              performed.
+
+Monitor-only parameters:
+  data_from   response of synthesizer, if any.
+
+Comments:
+
+IMPORTANT: The 'data_to' parameter should NOT include the string 'rst' (case
+insensitive). That string will cause the device to lose its factory
+calibration.
+
+This command sends a low-level communication message to a synthesizer and
+presents the response. The response may span multiple lines corresponding to
+the lines sent by the synthesizer. All lines except the final one will be
+labeled as '#dbbcn#dbbc3/' without the synthesizer number. The final response
+line will include the synthesizer prompt.
+
+Communication with the synthesizer is accomplished through the DBBC3. The user
+should not put 'synth=n,' at the start of the 'data_to' field as the command
+will do this automatically. Multiple synthesizer commands can be included in
+one 'data_to' by separating them with semicolons (';').
+
+The 'synth' command cannot be used if the rack type in 'equip.ctl' specifies a
+'dbbc' (DBBC2) type. Other rack types do not limit the use of this command.
