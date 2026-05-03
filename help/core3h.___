@@ -1,33 +1,29 @@
-       core3h - general Core3H board communication
+                 core3h - general Core3H board communication
 
-            Syntax:     coreh3=n,data_to
+  Syntax:     coreh3=n,data_to
 
-            Response:   core3h/n,data_from
+  Response:   core3h/n,data_from
 
 
 Settable parameters:
-            n           Core3H board number, 1-8
-            data_to     complete message to be sent to Core3H board
-                        No checking is done.
+  n           Core3H board number, 1-8
+  data_to     Complete message to be sent to Core3H board; no checking is
+              performed.
 
 Monitor-only parameters:
-            data_from   response of Core3H board, if any.
+  data_from   response of Core3H board, if any.
 
 Comments:
 
-This command sends low-level communication messages to a Core3H board
-and presents the response. The response may span multiple lines
-corresponding to the lines sent by the Core3H board. All lines except
-the final one will be labeled with #dbbcn#. The final response line
-will be the FiLa10G (which is what the Core3H board returns) prompt
-unless the output exceeds the internal buffer limits of the FS
-(currently 1024 characters). In the latter case, as much data as will
-fit will be presented and an error reported.
+This command sends a low-level communication message to a Core3H board and
+presents the response. The response may span multiple lines corresponding to
+the lines sent by the Core3H board. All lines except the final one will be
+labeled as '#dbbcn#dbbc3/' without the board number. The final response line
+will include the FiLa10G prompt (which is what the Core3H board returns).
 
-Communication with the Core3H board is accomplished through the DBBC3.
-However, the user should not put "core3h=n," at the start of the
-*data_to* field as the command will do this automatically.
+Communication with the Core3H board is accomplished through the DBBC3. The
+user should not put 'core3h=n,' at the start of the 'data_to' field as the
+command will do this automatically.
 
-The core3h command cannot be used if the rack type in equip.ctl
-specifies a DBBC2. Other rack types do not limit the use of this
-command.
+The 'core3h' command cannot be used if the rack type in 'equip.ctl' specifies a
+'dbbc' (DBBC2) type. Other rack types do not limit the use of this command.
