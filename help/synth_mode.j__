@@ -30,12 +30,18 @@ Settable Parameters:
             'ifX' input '2' is selected, the default is 'enable'; input '1',
             'disable'.
 
-  check     Either 'check' or 'force'. Default is 'check'. 'force' cannot be
-            used with 'next' (for the 'loX' parameter). 'check' cannot be used
-            with 'next' unless the 'freq' and 'output' are '*'s (previous
-            values). Using 'force' sets the device frequency and output
-            enable, except that the synthesizer frequency is not set if
-            'output' is 'disable'.
+  check     Either 'check', 'force' or 'force_more'. Default is 'check'.
+            'force' and 'force_more' cannot be used with 'next' (for the 'loX'
+            parameter). 'check' cannot be used with 'next' unless the 'freq'
+            and 'output' are '*'s (previous values). Using 'force' always sets
+            the output enable. If 'output' is 'enable', it also sets the
+            frequency.
+
+            It is recommended to NOT use 'force_more'. If it is used, it
+            behaves the same as 'force' except that if 'output' is 'enable',
+            it also sets the device to have the nominal values for 'mode',
+            'ref_source', 'ref_freq', 'ref_doubler' 'ref_divider', and
+            'freq_offset'.
 
             If parameter value is 'check', the state of the device output
             enable is always checked against the command parameter.
@@ -105,6 +111,8 @@ Monitor-only Parameters:
                  will be generated if the value is not 'locked'.
 
 Comments:
+CAUTION: It is recommended to NOT use 'force_more'.
+
 WARNING: This command should not be used when recording data since calibration
 data may lost.
 

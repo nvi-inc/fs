@@ -127,7 +127,8 @@ int ip[5];                           /* ipc parameters */
           } else if(*command->argv[1] == '?') {
               ierr=-302;
               goto error;
-          } else if(NULL != command->argv[2] && NULL != command->argv[3] && 0==strcmp(command->argv[3],"force")) {
+          } else if(NULL != command->argv[2] && NULL != command->argv[3] &&
+                  (0==strcmp(command->argv[3],"force")||0==strcmp(command->argv[3],"force_more"))) {
               ierr=-303;
               goto error;
           } else if(NULL != command->argv[2] && NULL != command->argv[3] && 0!=strcmp(command->argv[3],"check")) {
@@ -175,7 +176,8 @@ int ip[5];                           /* ipc parameters */
                       (0==strlen(command->argv[2]) &&
                       (NULL == command->argv[3] ||
                       0==strcmp(command->argv[3],"force") ||
-                      0==strcmp(command->argv[3],"check"))))) { /* defaults is a no-op for force/check */
+                      0==strcmp(command->argv[3],"force_more") ||
+                      0==strcmp(command->argv[3],"check"))))) { /* defaults is a no-op for force/force_more/check */
                   ip[0]=ip[1]=ip[2]=ip[3]=ip[4]=0;
                   return;
               }
@@ -187,11 +189,13 @@ int ip[5];                           /* ipc parameters */
                       break;
                   else if(0==strcmp(command->argv[i],"*")) {
                       if(NULL != command->argv[2] && NULL != command->argv[3] &&
-                         0!=strcmp(command->argv[3],"force") && 0!=strcmp(command->argv[3],"check")) {
+                         0!=strcmp(command->argv[3],"force") && 0!=strcmp(command->argv[3],"check") &&
+                         0!=strcmp(command->argv[3],"force_more")
+                         ) {
                           ierr=-204;
                           goto error;
                       }
-                      ip[0]=ip[1]=ip[2]=ip[3]=ip[4]=0; /* a previous value is a no-op for check/force */
+                      ip[0]=ip[1]=ip[2]=ip[3]=ip[4]=0; /* a previous value is a no-op for check/force/force_more */
                       return;
                   }
      }
@@ -225,7 +229,7 @@ parse:
       out_recs=0;
       out_class=0;
 
-      if(lcl.check.check) {
+      if(1==lcl.check.check) {
           add_check_queries(&out_recs, &out_class, ilo);
           kcheck=1;
           shm_addr->dbbc3_synthesizer_previous_lo=ilo;
@@ -234,19 +238,18 @@ parse:
       kmon=0;
 
       sprintf(outbuf,"synth=%d,s%d",1+ilo/2,1+ilo%2);
-      cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
-      out_recs++;
 
-      if(lcl.freq.state.known && lcl.output.state.known && 1==lcl.output.output) {
-        synthesizer_freq_2_dbbc3(outbuf,itask,&lcl,ilo);
-        cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
-        out_recs++;
+      synthesizer_output_2_dbbc3(outbuf,&lcl);
+
+      if(lcl.output.state.known && 1==lcl.output.output) {
+          if(lcl.freq.state.known)
+              synthesizer_freq_2_dbbc3(outbuf,&lcl);
+          if(2==lcl.check.check)
+             strcat(outbuf,";mod cw;refs 1;ref 10;refdb 1;refdiv 0;off 0");
       }
 
-      synthesizer_output_2_dbbc3(outbuf,itask,&lcl,ilo);
       cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
       out_recs++;
-
 dbbcn:
       ip[0]=9;
       ip[1]=out_class;

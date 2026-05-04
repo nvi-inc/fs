@@ -2703,7 +2703,7 @@ DM -203
 Synthesizer enable must be 'off' or 'on'. If previously undefined, '*' can't be used (for l?W).
 ""
 DM -204
-The 'check' parameter must be 'check' or 'force'.
+The 'check' parameter must be 'check', 'force' or 'force_more'.
 ""
 DM -212
 LO side-band not defined in 'synth_mode' (for l?W)
@@ -2739,7 +2739,7 @@ DM -302
 '?' is not permitted after 'next'.
 ""
 DM -303
-'force' cannot be used with 'next'.
+'force' and 'force_more' cannot be used with 'next'.
 ""
 DM -304
 No synthesizer configuration has been defined to select with 'next'.

@@ -30,7 +30,7 @@
 #include "../include/shm_addr.h"      /* shared memory pointer */
 
 static char *output_key[ ]={"disable","enable"};
-static char *check_key[ ]={"force","check"};
+static char *check_key[ ]={"force","check","force_more"};
 static char *sb_key[ ]={"all","usb","lsb"};
 
 static char *atten_key[ ]=
@@ -351,26 +351,22 @@ struct dbbc3_synthesizer_mon *lcl;
    return;
 }
 
-void synthesizer_freq_2_dbbc3(buff,itask,lcl,ilo)
+void synthesizer_freq_2_dbbc3(buff,lcl)
 char *buff;
-int itask;
 struct dbbc3_synthesizer_cmd *lcl;
-int ilo;
 {
 
-  sprintf(buff,"synth=%d,f %f MHz",1+ilo/2,lcl->freq.freq/2);
+  sprintf(buff+strlen(buff),";CW %f MHz",lcl->freq.freq/2);
 
   return;
 }
 
-void synthesizer_output_2_dbbc3(buff,itask,lcl,ilo)
+void synthesizer_output_2_dbbc3(buff,lcl)
 char *buff;
-int itask;
 struct dbbc3_synthesizer_cmd *lcl;
-int ilo;
 {
 
-  sprintf(buff,"synth=%d,oen %d",1+ilo/2,lcl->output.output);
+  sprintf(buff+strlen(buff),";oen %d",lcl->output.output);
 
   return;
 }
