@@ -98,8 +98,8 @@ void cshm_init2()
       shm_addr->dbbc3_synthesizer[j].setup=0;
       shm_addr->dbbc3_synthesizer[j].freq.freq=-1;
       m5state_init(&shm_addr->dbbc3_synthesizer[j].freq.state);
-      shm_addr->dbbc3_synthesizer[j].enable.enable=-1;
-      m5state_init(&shm_addr->dbbc3_synthesizer[j].enable.state);
+      shm_addr->dbbc3_synthesizer[j].output.output=-1;
+      m5state_init(&shm_addr->dbbc3_synthesizer[j].output.state);
   }
 
   shm_addr->dbbc3_ext_lo.count=0;

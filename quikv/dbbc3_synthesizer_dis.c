@@ -68,30 +68,35 @@ int kcheck;
 
       if (!kcom && !kmon) {
          ierr=logmsg_dbbc3(output,command,ip);
-	 if(ierr!=0) {
-	    ierr+=-450;
-	    goto error2;
-	 }
-	 return;
+         if(ierr!=0) {
+             ierr+=-450;
+             goto error2;
+         }
+         return;
       } else if(kcom)
          memcpy(&lclc,&shm_addr->dbbc3_synthesizer[ilo],sizeof(lclc));
       else {
-	for (i=0;i<ip[1];i++) {
-	  if ((nchars =
-	       cls_rcv(ip[0],inbuf,BUFSIZE-1,&rtn1,&rtn2,msgflg,save)) <= 0) {
-	    if(i<ip[1]-1) 
-	      cls_clr(ip[0]);
-	    ierr =  -401;
-	    goto error;
-	  }
-	  inbuf[nchars]=0;
-	  memcpy(inbuf2,inbuf,sizeof(inbuf2));
-          char *ptr=strrchr(inbuf,';');
+        for (i=0;i<ip[1];i++) {
+          if ((nchars =
+               cls_rcv(ip[0],inbuf,BUFSIZE-1,&rtn1,&rtn2,msgflg,save)) <= 0) {
+            if(i<ip[1]-1)
+              cls_clr(ip[0]);
+            ierr =  -401;
+            goto error;
+          }
+          inbuf[nchars]=0;
+          char *ptr=strrchr(inbuf,'\r');
           if(NULL!=ptr)
+             *ptr=0;
+          if(0!=i) {
+            ptr=strrchr(inbuf,';');
+            if(NULL!=ptr)
               *ptr=0;
+          }
+          memcpy(inbuf2,inbuf,sizeof(inbuf2));
           switch(i) {
               case 0:
-              case 8:
+              case 11:
                   ierr=0;
                   break;
               case 1:
@@ -99,16 +104,16 @@ int kcheck;
                   ierr=dbbc3_2_synthesizer_freq(&lclc,inbuf);
                   break;
               case 2:
-                  ierr=dbbc3_2_synthesizer_enable(&lclc,inbuf);
+                  ierr=dbbc3_2_synthesizer_output(&lclc,inbuf);
                   break;
               case 3:
-                  ierr=dbbc3_2_synthesizer_atten(&lclm,inbuf);
+                  ierr=dbbc3_2_synthesizer_lock(&lclm,inbuf);
                   break;
               case 4:
-                  ierr=dbbc3_2_synthesizer_mode(&lclm,inbuf);
+                  ierr=dbbc3_2_synthesizer_atten(&lclm,inbuf);
                   break;
               case 5:
-                  ierr=dbbc3_2_synthesizer_lock(&lclm,inbuf);
+                  ierr=dbbc3_2_synthesizer_mode(&lclm,inbuf);
                   break;
               case 6:
                   ierr=dbbc3_2_synthesizer_ref_source(&lclm,inbuf);
@@ -116,20 +121,30 @@ int kcheck;
               case 7:
                   ierr=dbbc3_2_synthesizer_ref_freq(&lclm,inbuf);
                   break;
+              case 8:
+                  ierr=dbbc3_2_synthesizer_freq_offset(&lclm,inbuf);
+                  break;
+              case 9:
+                  ierr=dbbc3_2_synthesizer_ref_doubler(&lclm,inbuf);
+                  break;
+              case 10:
+                  ierr=dbbc3_2_synthesizer_ref_divider(&lclm,inbuf);
+                  break;
               default:
                   ierr=-404;
                   break;
           }
           if(ierr!=0) {
-              if(i<ip[1]-1) 
+              if(i<ip[1]-1)
                   cls_clr(ip[0]);
               if(ierr!=-404) {
                   ierr=-403;
                   logite(inbuf2,-402,"dm");
               }
+              memcpy(ip+4,lo3_key[ilo]+1,2);
               goto error;
           }
-	}
+        }
       }
 
    /* format output buffer */
@@ -147,14 +162,14 @@ int kcheck;
       }
 
       if(!kcom) {
-	count=0;
-	while( count>= 0) {
-	  if (count > 0) strcat(output,",");
-	  count++;
-	  dbbc3_synthesizer_mon(output,&count,&lclm);
-	}
+        count=0;
+        while( count>= 0) {
+          if (count > 0) strcat(output,",");
+          count++;
+          dbbc3_synthesizer_mon(output,&count,&lclm);
+        }
       }
-      
+
       if(strlen(output)>0) output[strlen(output)-1]='\0';
 
 send:
@@ -170,22 +185,22 @@ send:
       ip[1]=out_recs;
 
       if(kcheck) {
-          if(shm_addr->dbbc3_synthesizer[ilo].freq.state.known &&
-             shm_addr->dbbc3_synthesizer[ilo].enable.state.known &&
-             shm_addr->dbbc3_synthesizer[ilo].enable.enable==1) {
+          if(shm_addr->dbbc3_synthesizer[ilo].output.state.known) {
+              if(shm_addr->dbbc3_synthesizer[ilo].output.output != lclc.output.output) {
+                  if(lclc.output.output)
+                      logita(NULL,-612,"dm",lo3_key[ilo]+1);
+                  else
+                      logita(NULL,-612,"dm",lo3_key[ilo]+1);
+                  ierr=-600;
+              }
+          }
+          if(shm_addr->dbbc3_synthesizer[ilo].output.state.known &&
+                  1 == shm_addr->dbbc3_synthesizer[ilo].output.output &&
+                  1 == lclc.output.output) {
               if(shm_addr->dbbc3_synthesizer[ilo].freq.freq != lclc.freq.freq) {
                   logita(NULL,-611,"dm",lo3_key[ilo]+1);
                   ierr=-600;
               }
-          }
-          if(shm_addr->dbbc3_synthesizer[ilo].enable.state.known) {
-              if(shm_addr->dbbc3_synthesizer[ilo].enable.enable != lclc.enable.enable) {
-                  logita(NULL,-612,"dm",lo3_key[ilo]+1);
-                  ierr=-600;
-              }
-          }
-          if(shm_addr->dbbc3_synthesizer[ilo].enable.state.known &&
-                  shm_addr->dbbc3_synthesizer[ilo].enable.enable==1) {
               if(lclm.mode.mode) {
                   logita(NULL,-613,"dm",lo3_key[ilo]+1);
                   ierr=-600;
@@ -198,11 +213,22 @@ send:
                   logita(NULL,-618,"dm",lo3_key[ilo]+1);
                   ierr=-600;
               }
+                if(0.0 != lclm.freq_offset.freq_offset) {
+                  logita(NULL,-619,"dm",lo3_key[ilo]+1);
+                  ierr=-600;
+                }
+              if(!lclm.ref_doubler.ref_doubler) {
+                  logita(NULL,-620,"dm",lo3_key[ilo]+1);
+                  ierr=-600;
+              }
+              if(lclm.ref_divider.ref_divider) {
+                  logita(NULL,-621,"dm",lo3_key[ilo]+1);
+                  ierr=-600;
+              }
               if(1!=lclm.lock.lock) {
                   logita(NULL,-614,"dm",lo3_key[ilo]+1);
                   ierr=-600;
               }
-
           }
           if(-600==ierr) {
               memcpy(ip+4,lo3_key[ilo]+1,2);

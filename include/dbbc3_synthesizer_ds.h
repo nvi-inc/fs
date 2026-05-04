@@ -26,9 +26,9 @@ struct dbbc3_synthesizer_cmd {
     struct m5state state;
   } freq;
   struct {
-    int enable;
+    int output;
     struct m5state state;
-  } enable;
+  } output;
   struct {
     int check;
     struct m5state state;
@@ -68,4 +68,16 @@ struct dbbc3_synthesizer_mon {
     int lock;
     struct m5state state;
   } lock;
+  struct {
+    int ref_doubler;
+    struct m5state state;
+  } ref_doubler;
+  struct {
+    int ref_divider;
+    struct m5state state;
+  } ref_divider;
+  struct {
+    double freq_offset;
+    struct m5state state;
+  } freq_offset;
 };

@@ -37,7 +37,7 @@ static void add_check_queries( out_recs, out_class, ilo)
 {
     char outbuf[BUFSIZE];
 
-    sprintf(outbuf,"synth=%d,s%d;f?;oen?;att?;mod?;lk%d?;refs?;ref?",1+ilo/2,1+ilo%2,1+ilo%2);
+    sprintf(outbuf,"synth=%d,s%d;cw?;oen?;lk%d?;att?;mod?;refs?;ref?;off?;refdb?;refdiv?",1+ilo/2,1+ilo%2,1+ilo%2);
     cls_snd(out_class, outbuf, strlen(outbuf) , 0, 0);
     ++*out_recs;
 
@@ -237,13 +237,13 @@ parse:
       cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
       out_recs++;
 
-      if(lcl.freq.state.known && lcl.enable.state.known && 1==lcl.enable.enable) {
+      if(lcl.freq.state.known && lcl.output.state.known && 1==lcl.output.output) {
         synthesizer_freq_2_dbbc3(outbuf,itask,&lcl,ilo);
         cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
         out_recs++;
       }
 
-      synthesizer_enable_2_dbbc3(outbuf,itask,&lcl,ilo);
+      synthesizer_output_2_dbbc3(outbuf,itask,&lcl,ilo);
       cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
       out_recs++;
 

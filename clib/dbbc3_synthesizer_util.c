@@ -29,7 +29,7 @@
 #include "../include/fscom.h"         /* shared memory definition */
 #include "../include/shm_addr.h"      /* shared memory pointer */
 
-static char *enable_key[ ]={"off","on"};
+static char *output_key[ ]={"disable","enable"};
 static char *check_key[ ]={"force","check"};
 static char *sb_key[ ]={"all","usb","lsb"};
 
@@ -47,7 +47,7 @@ static char *ref_source_key[ ]={"internal","external"};
 static char *lock_key[ ]={"unlocked","locked","unknown"};
 
 #define SB_KEY  sizeof(sb_key)/sizeof( char *)
-#define NENABLE_KEY sizeof(enable_key)/sizeof( char *)
+#define NOUTPUT_KEY sizeof(output_key)/sizeof( char *)
 #define NCHECK_KEY sizeof(check_key)/sizeof( char *)
 #define NATTEN_KEY sizeof(atten_key)/sizeof( char *)
 #define NMODE_KEY sizeof(mode_key)/sizeof( char *)
@@ -160,18 +160,18 @@ int ilo;
            idefault=0;
            kdefault=TRUE;
         }
-	ierr=arg_key(ptr,enable_key,NENABLE_KEY,&lcl->enable.enable,idefault,kdefault);
-        m5state_init(&lcl->enable.state);
-        if(ierr==0 && lcl->enable.enable<0)
+	ierr=arg_key(ptr,output_key,NOUTPUT_KEY,&lcl->output.output,idefault,kdefault);
+        m5state_init(&lcl->output.state);
+        if(ierr==0 && lcl->output.output<0)
             ierr=-200;
-        else if(ierr==0 && 1==lcl->enable.enable && lcl->freq.freq <= 0.0)
+        else if(ierr==0 && 1==lcl->output.output && lcl->freq.freq <= 0.0)
             ierr=-210;
-        else if(ierr==0 && 0==lcl->enable.enable && lcl->freq.freq > 0.0)
+        else if(ierr==0 && 0==lcl->output.output && lcl->freq.freq > 0.0)
             ierr=-220;
         if(ierr==0) {
-          lcl->enable.state.known=1;
+          lcl->output.state.known=1;
         } else {
-            lcl->enable.state.error=1;
+            lcl->output.state.error=1;
         }
         break;
       case 4:
@@ -204,7 +204,7 @@ struct dbbc3_synthesizer_cmd *lcl;
     switch (*count) {
       case 2:
         if(lcl->freq.state.known) {
-            if(lcl->enable.state.known && 0==lcl->enable.enable)
+            if(lcl->output.state.known && 0==lcl->output.output)
                 strcpy(output++,"(");
             sprintf(output,"%f",lcl->freq.freq);
             int len=strlen(output);
@@ -212,15 +212,15 @@ struct dbbc3_synthesizer_cmd *lcl;
                 output[len]=0;
             if(len>0 && '.'==output[len])
                 output[len]=0;
-            if(lcl->enable.state.known && 0==lcl->enable.enable)
+            if(lcl->output.state.known && 0==lcl->output.output)
                 strcat(output,")");
         }
         break;
       case 3:
-        if(lcl->enable.state.known) {
-          ivalue=lcl->enable.enable;
-          if (ivalue >=0 && ivalue <NENABLE_KEY)
-            strcpy(output,enable_key[ivalue]);
+        if(lcl->output.state.known) {
+          ivalue=lcl->output.output;
+          if (ivalue >=0 && ivalue <NOUTPUT_KEY)
+            strcpy(output,output_key[ivalue]);
           else
             strcpy(output,BAD_VALUE);
         }
@@ -310,6 +310,34 @@ struct dbbc3_synthesizer_mon *lcl;
         }
         break;
       case 5:
+        if(lcl->ref_doubler.state.known) {
+          ivalue=lcl->ref_doubler.ref_doubler;
+          if (ivalue >=0 && ivalue <NOUTPUT_KEY)
+            strcpy(output,output_key[ivalue]);
+          else
+            strcpy(output,BAD_VALUE);
+        }
+        break;
+      case 6:
+        if(lcl->ref_divider.state.known) {
+          ivalue=lcl->ref_divider.ref_divider;
+          if (ivalue >=0 && ivalue <NOUTPUT_KEY)
+            strcpy(output,output_key[ivalue]);
+          else
+            strcpy(output,BAD_VALUE);
+        }
+        break;
+      case 7:
+        if(lcl->freq_offset.state.known) {
+            sprintf(output,"%f",lcl->freq_offset.freq_offset);
+            int len=strlen(output);
+            while(--len>0 && '0' == output[len])
+                output[len]=0;
+            if(len>0 && '.'==output[len])
+                output[len]=0;
+        }
+        break;
+      case 8:
         ivalue=lcl->lock.lock;
         if (ivalue >=0 && ivalue <NLOCK_KEY)
           strcpy(output,lock_key[ivalue]);
@@ -335,14 +363,14 @@ int ilo;
   return;
 }
 
-void synthesizer_enable_2_dbbc3(buff,itask,lcl,ilo)
+void synthesizer_output_2_dbbc3(buff,itask,lcl,ilo)
 char *buff;
 int itask;
 struct dbbc3_synthesizer_cmd *lcl;
 int ilo;
 {
 
-  sprintf(buff,"synth=%d,oen %d",1+ilo/2,lcl->enable.enable);
+  sprintf(buff,"synth=%d,oen %d",1+ilo/2,lcl->output.output);
 
   return;
 }
@@ -363,18 +391,18 @@ char *buff;
 
   return 0;
 }
-int dbbc3_2_synthesizer_enable(lclc,buff)
+int dbbc3_2_synthesizer_output(lclc,buff)
 struct dbbc3_synthesizer_cmd *lclc;
 char *buff;
 {
-  m5state_init(&lclc->enable.state);
+  m5state_init(&lclc->output.state);
 
-  if(1!=sscanf(buff,"OEN %d",&lclc->enable.enable))
+  if(1!=sscanf(buff,"OEN %d",&lclc->output.output))
      return -1;
-  if(0!=lclc->enable.enable && 1!=lclc->enable.enable)
+  if(0!=lclc->output.output && 1!=lclc->output.output)
      return -1;
 
-  lclc->enable.state.known=1;
+  lclc->output.state.known=1;
 
   return 0;
 }
@@ -392,11 +420,7 @@ struct dbbc3_synthesizer_mon *lclm;
 char *buff;
 {
   if(arg_key(buff+5,mode_key,NMODE_KEY-1,&lclm->mode.mode,0,FALSE)) {
-      char buf[128];
-      int len=strlen(buff);
-      while (len-- >0 && NULL!=strchr("\r\n",buff[len]))
-          buff[len]=0;
-
+      char buf[256];
       sprintf(buf,"Unknown synthesizer mode is '%s'",buff);
       logite(buf,-615,"dm");
       lclm->mode.mode=3;
@@ -414,11 +438,7 @@ char *buff;
   else if(NULL!=strstr(buff," locked"))
      lclm->lock.lock=1;
   else {
-      char buf[128];
-      int len=strlen(buff);
-      while (len-- >0 && NULL!=strchr("\r\n",buff[len]))
-          buff[len]=0;
-
+      char buf[256];
       sprintf(buf,"Unknown synthesizer lock status is '%s'",buff);
       logite(buf,-616,"dm");
       lclm->lock.lock=2;
@@ -453,6 +473,51 @@ char *buff;
       return -1;
 
   lclm->ref_freq.state.known=1;
+
+  return 0;
+}
+int dbbc3_2_synthesizer_ref_doubler(lclm,buff)
+struct dbbc3_synthesizer_mon *lclm;
+char *buff;
+{
+  m5state_init(&lclm->ref_doubler.state);
+
+  if(1!=sscanf(buff,"REFDB %d",&lclm->ref_doubler.ref_doubler))
+     return -1;
+  if(0!=lclm->ref_doubler.ref_doubler && 1!=lclm->ref_doubler.ref_doubler)
+     return -1;
+
+  lclm->ref_doubler.state.known=1;
+
+  return 0;
+}
+int dbbc3_2_synthesizer_ref_divider(lclm,buff)
+struct dbbc3_synthesizer_mon *lclm;
+char *buff;
+{
+  m5state_init(&lclm->ref_divider.state);
+
+  if(1!=sscanf(buff,"REFDIV %d",&lclm->ref_divider.ref_divider))
+     return -1;
+  if(0!=lclm->ref_divider.ref_divider && 1!=lclm->ref_divider.ref_divider)
+     return -1;
+
+  lclm->ref_divider.state.known=1;
+
+  return 0;
+}
+
+int dbbc3_2_synthesizer_freq_offset(lclm,buff)
+struct dbbc3_synthesizer_mon *lclm;
+char *buff;
+{
+
+  m5state_init(&lclm->freq_offset.state);
+
+  if(1!=sscanf(buff,"OFFSET %lf",&lclm->freq_offset.freq_offset))
+      return -1;
+
+  lclm->freq_offset.state.known=1;
 
   return 0;
 }

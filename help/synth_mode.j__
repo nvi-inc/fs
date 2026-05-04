@@ -1,9 +1,9 @@
             synth_mode - IF synthesizer mode (DBBC3 racks)
 
- Syntax:     synth_mode=loX,freq,enable,check
+ Syntax:     synth_mode=loX,freq,output,check
              synth_mode=
              synth_mode=loX
- Response:   synth_mode/loX,freq,enable,ext_lo,pre-filer_sb,att,mode,ref_source,ref_freq,lock
+ Response:   synth_mode/loX,freq,output,ext_lo,pre-filer_sb,att,mode,ref_source,ref_freq,ref_doubler,ref_divider,offset,lock
 
 Settable Parameters:
 
@@ -12,36 +12,45 @@ Settable Parameters:
             or "next' to read the synthesizer after the previous one
             monitored/checked (wrapping after the last). 'next' cannot be used
             with 'force' (for the 'check' parameter) at all. 'next' cannot be
-            used with 'check' unless the 'freq' and 'enable' are '*'s
+            used with 'check' unless the 'freq' and 'output' are '*'s
             (previous values). No default. No previous value ('*') available
             for this parameter.
 
   freq      Frequency in MHZ for the synthesizer. No default unless 'ifX=...'
-            has been setup and/or 'enable' is 'off'. If 'ifX' input '2' is
+            has been setup and/or 'output' is 'disable'. If 'ifX' input '2' is
             selected and 'loX' has been defined with 'lo=loX,...', the
             frequency set for 'lo=loX,...' is the default unless an
             'external-LO' has been defined (see 'help=extlo'). If one has been
             defined, the default frequency is adjusted accordingly.  If 'ifX'
-            input '1' or enable is 'off', the default is "undefined." For
-            Monitoring and Checking (see below in Comments), the value is
-            shown in parentheses if 'enable' is 'off'.
+            input '1' or 'output' is 'disable', the default is "undefined."
+            For Monitoring and Checking (see below in Comments), the value is
+            shown in parentheses if 'output' is 'disable'.
 
-  enable    'off' or 'on'. No default unless 'ifX=...' is setup. If 'ifX'
-            input '2' is selected, the default is 'on'; input '1', 'off'.
+  output    'disable' or 'enable'. No default unless 'ifX=...' is setup. If
+            'ifX' input '2' is selected, the default is 'enable'; input '1',
+            'disable'.
 
   check     Either 'check' or 'force'. Default is 'check'. 'force' cannot be
-            used with 'next' (for the 'loX' parameter). 'check' cannot be
-            used with 'next' unless the 'freq' and 'enable' are '*'s (previous
-            values). Using 'force' sets the device frequency and enable,
-            except that the synthesizer frequency is not set if enable is
-            'off'.
+            used with 'next' (for the 'loX' parameter). 'check' cannot be used
+            with 'next' unless the 'freq' and 'output' are '*'s (previous
+            values). Using 'force' sets the device frequency and output
+            enable, except that the synthesizer frequency is not set if
+            'output' is 'disable'.
 
-            If 'check' and if 'enable' _should_ be 'on', the device is checked
-            to see if it agrees with the commanded parameters ('freq' and
-            'enable'), and that (i) 'mode' is 'CW", (ii) 'ref_source' is
-            'external', (iii) 'ref_freq' is '10', and (iv) 'lock' status is
-            'locked'. If 'enable' _should_ be 'off, only the state of 'enable'
-            is checked.
+            If parameter value is 'check', the state of the device output
+            enable is always checked against the command parameter.
+
+            If parameter value is 'check' and if 'output' _should_ be 'enable'
+            and _is_: the following parameters from the device are also
+            checked:
+                (i) 'freq'
+               (ii) 'mode' is 'CW",
+              (iii) 'ref_source' is 'external'
+               (iv) 'ref_freq' is '10'
+                (v) 'ref_doubler' is 'enable'
+               (vi) 'ref_divider' is 'disable'
+              (vii) 'offset' is '0'
+             (viii) 'lock' status is 'locked'.
 
 Monitor-only Parameters:
 
@@ -65,8 +74,8 @@ Monitor-only Parameters:
                 supplied externally.
 
                 If no external-LO applies, the parameter is null and the
-                external-LO, or direct receiver, output should be connected to
-                the GCoMo 'IF-in'.
+                direct receiver output should be connected to the GCoMo
+                'IF-in'.
 
                 See "Pre-filter Side-band" in Comments for more details.
 
@@ -74,22 +83,30 @@ Monitor-only Parameters:
 
   mode          'CW', 'SWEEP', or 'LIST' (or 'unknown', if not one of three
                 preceding values). For 'check', any value except 'CW' will
-                generate an error report.
+                generate an error.
 
   ref_source    The reference signal source: 'internal' or 'external'.  For
-                'check', any value except 'external' will generate an error
-                report.
+                'check', any value except 'external' will generate an error .
 
-  ref_freq      The reference signal frequency in MHz.  For 'check', any value
-                except '10' will generate an error report.
+  ref_freq      The reference signal frequency in MHz. For 'check', any value
+                except '10' will generate an error.
+
+  ref_doubler   Reference doubler: 'disable' or 'enable'. For 'check', any
+                value except 'enable' will generate an error.
+
+  ref_divider   Reference divider: 'disable' or 'enable'. For 'check', any
+                value except 'disable' will generate an error.
+
+  offset        Frequency offset in MHz. For 'check', any value except '0'
+                will generate an error.
 
   lock          Synthesizer status: 'locked' or 'unlocked' (or 'unknown', if
                 not one of the two preceding values).  For 'check', an error
-                report will be generated if the value is not 'locked'.
+                 will be generated if the value is not 'locked'.
 
 Comments:
-CAUTION: This command takes up to about two seconds per IF to execute and will
-interfere with multicast transmission.
+WARNING: This command should not be used when recording data since calibration
+data may lost.
 
 In addition to the normal 'setting' and 'monitoring' forms of most commands,
 this one has an additional 'checking' form. The details of these forms are
@@ -97,15 +114,15 @@ summarized below.
 
   Setting -- The setting form is invoked by using a literal 'force' for the
              'check' parameter and will command the device. The values of
-             'freq' and 'enable' also set the FS model (and hence the values
+             'freq' and 'output' also set the FS model (and hence the values
              for '*' in subsequent commands) for that IF. Using '*' if the
              synthesizer values for that IF has not previously been defined is
              an error for setting. Using 'next' is not permitted.
 
-             If 'enable' is 'off', no 'freq' value is sent to the device.
+             If 'output' is 'disable', no 'freq' value is sent to the device.
 
              The corresponding LO value ('lo=loX,...'), has not been set, and
-             the 'freq' and 'enable' parameters are default (null), the
+             the 'freq' and 'output' parameters are default (null), the
              command is a no-op.  See comments below about using a specific
              IF.
 
@@ -117,22 +134,31 @@ summarized below.
               literal 'check' (or null value, i.e., the default) for the
               'check' parameter.
 
-              In this case and if 'enable' _should_ be 'on' the device is
-              checked to see if it agrees with the commanded parameters
-              ('freq' and 'enable'), and that (i) it agrees with the commanded
-              parameters, (ii) 'mode' is 'CW", (iii) 'ref_source' is
-              'external', (iv) 'ref_freq' is '10', and (v) 'lock' status is
-              'locked'. If 'enable' _should_ be 'off, only the state of
-              'enable' is checked. Any deviations from what is expected are
-              reported as errors. Just as for Setting, the values of 'freq'
-              and 'enable' set the FS model for that IF.
+              The state of the device output enable is always checked against
+              the command parameter.
+
+              If 'output' _should_ be 'enable' and _is_: the following values
+              are also checked:
+                  (i) 'freq'
+                 (ii) 'mode' is 'CW",
+                (iii) 'ref_source' is 'external'
+                 (iv) 'ref_freq' is '10'
+                  (v) 'ref_doubler' is 'enable'
+                 (vi) 'ref_divider' is 'disable'
+                (vii) 'offset' is '0'
+               (viii) 'lock' status is 'locked'.
+
+              Any deviations from what is expected are reported as errors.
+
+              Just as for Setting, the values of 'freq' and 'output' set the
+              FS model for that IF.
 
               'next' can be specified for the IF for checking, with '*' for
-              'freq' and 'enable'. See below about the 'checkXXX' procedure.
+              'freq' and 'output'. See below about the 'checkXXX' procedure.
 
-              If a specific IF is used (not 'next') andd the corresponding LO
+              If a specific IF is used (not 'next') and the corresponding LO
               value ('lo=loX,...'), has not been set, and the 'freq' and
-              'enable' parameters are default (null), the command is a no-op.
+              'output' parameters are default (null), the command is a no-op.
               See comments below about using a specific IF.
 
               Similarly, if a specific IF is used (not 'next') and the
@@ -153,7 +179,7 @@ The IF for 'next' is the next one after the last IF monitored or checked. In
 other words, it is shared between monitor and checking. It advances even if
 there is a communication error so that it doesn't become stuck on one IF.
 
-For a specific IF, i.e., not 'next', if the 'freq' and 'mode' parameters are
+For a specific IF, i.e., not 'next', if the 'freq' and 'output' parameters are
 null (default) and the LO frequency has not been defined for this IF
 ('lo=...'), the command is a no-op. This allows which synthesizer are used to
 be controlled by which IFs are in use without modifying these commands in the
@@ -223,7 +249,7 @@ before the BBCs. This includes the effect of any external-LO and the DBBC3
 synthesizer, if used. The FS 'ext_lo' command describes the external-LO
 frequency, and output side-band, of the mixing steps before the DBBC3. Note
 that the external-LO may be the result of one or more mixing steps. The only
-thing that matters is the cumulative effect, which is what the 'ext_lo=...'
+thing that matters is their cumulative effect, which is what the 'ext_lo=...'
 command describes. The FS 'synth_mode=..' command describes the DBBC3
 synthesizer frequency and external pre-filter side-band required. The
 pre-filter must be supplied by the user.
@@ -252,7 +278,7 @@ Please note the restriction on the last row.
     ext_lo > lo     USB      USB   NO: up-conversion unavailable
     ext_lo > lo     USB      LSB     NO: no side-band overlap
     ext_lo > lo     LSB      USB              LSB
-    ext_lo > lo     LSB      LSB      USB (only for LO>0)
+    ext_lo > lo     LSB      LSB      USB (only for lo>0)
 
     If the synthesizer is used, its frequency is always positive, that is,
     |lo - ext_lo|, a pre-filter is used before 'RF-in', 'RF-out' is jumpered
@@ -289,7 +315,7 @@ Please note the restriction on the last row.
   included in the example procedure libraries 'd3fbstation.prc' and
   'dbbc3st.prc' in '/usr2/fs/st.default/proc'.
 
-  If appropriate, you can use non-default values for 'freq' and 'enable' in
+  If appropriate, you can use non-default values for 'freq' and 'output' in
   'dbbc3_synth'.
 
   If need be, you can use 'force' to command instead of just checking in
@@ -314,7 +340,7 @@ Please note the restriction on the last row.
 
   Only IFs with defined synthesizer setups will be checked. Using asterisks,
   '*', is required and allows it to work with previously set (or checked)
-  values of 'freq' and 'enable', whether defaults or not.
+  values of 'freq' and 'output', whether defaults or not.
 
   If you use this command in 'checkxxx', you should verify first that the time
   required doesn't delay schedule execution.
