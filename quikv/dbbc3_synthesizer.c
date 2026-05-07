@@ -128,7 +128,7 @@ int ip[5];                           /* ipc parameters */
               ierr=-302;
               goto error;
           } else if(NULL != command->argv[2] && NULL != command->argv[3] &&
-                  (0==strcmp(command->argv[3],"force")||0==strcmp(command->argv[3],"force_more"))) {
+                  (0==strcmp(command->argv[3],"force")||0==strcmp(command->argv[3],"force_plus"))) {
               ierr=-303;
               goto error;
           } else if(NULL != command->argv[2] && NULL != command->argv[3] && 0!=strcmp(command->argv[3],"check")) {
@@ -176,8 +176,8 @@ int ip[5];                           /* ipc parameters */
                       (0==strlen(command->argv[2]) &&
                       (NULL == command->argv[3] ||
                       0==strcmp(command->argv[3],"force") ||
-                      0==strcmp(command->argv[3],"force_more") ||
-                      0==strcmp(command->argv[3],"check"))))) { /* defaults is a no-op for force/force_more/check */
+                      0==strcmp(command->argv[3],"force_plus") ||
+                      0==strcmp(command->argv[3],"check"))))) { /* defaults is a no-op for force/force_plus/check */
                   ip[0]=ip[1]=ip[2]=ip[3]=ip[4]=0;
                   return;
               }
@@ -190,12 +190,12 @@ int ip[5];                           /* ipc parameters */
                   else if(0==strcmp(command->argv[i],"*")) {
                       if(NULL != command->argv[2] && NULL != command->argv[3] &&
                          0!=strcmp(command->argv[3],"force") && 0!=strcmp(command->argv[3],"check") &&
-                         0!=strcmp(command->argv[3],"force_more")
+                         0!=strcmp(command->argv[3],"force_plus")
                          ) {
                           ierr=-204;
                           goto error;
                       }
-                      ip[0]=ip[1]=ip[2]=ip[3]=ip[4]=0; /* a previous value is a no-op for check/force/force_more */
+                      ip[0]=ip[1]=ip[2]=ip[3]=ip[4]=0; /* a previous value is a no-op for check/force/force_plus */
                       return;
                   }
      }

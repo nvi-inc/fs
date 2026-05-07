@@ -30,7 +30,7 @@
 #include "../include/shm_addr.h"      /* shared memory pointer */
 
 static char *output_key[ ]={"disable","enable"};
-static char *check_key[ ]={"force","check","force_more"};
+static char *check_key[ ]={"force","check","force_plus"};
 static char *sb_key[ ]={"all","usb","lsb"};
 
 static char *atten_key[ ]=
