@@ -188,47 +188,46 @@ send:
           if(shm_addr->dbbc3_synthesizer[ilo].output.state.known) {
               if(shm_addr->dbbc3_synthesizer[ilo].output.output != lclc.output.output) {
                   if(lclc.output.output)
-                      logita(NULL,-612,"dm",lo3_key[ilo]+1);
+                      logita(NULL,-622,"dm",lo3_key[ilo]+1);
                   else
-                      logita(NULL,-612,"dm",lo3_key[ilo]+1);
+                      logita(NULL,-611,"dm",lo3_key[ilo]+1);
                   ierr=-600;
               }
           }
-          if(shm_addr->dbbc3_synthesizer[ilo].output.state.known &&
-                  1 == shm_addr->dbbc3_synthesizer[ilo].output.output &&
-                  1 == lclc.output.output) {
+
+          if(shm_addr->dbbc3_synthesizer[ilo].freq.state.known) {
               if(shm_addr->dbbc3_synthesizer[ilo].freq.freq != lclc.freq.freq) {
-                  logita(NULL,-611,"dm",lo3_key[ilo]+1);
+                  logita(NULL,-612,"dm",lo3_key[ilo]+1);
                   ierr=-600;
               }
-              if(lclm.mode.mode) {
-                  logita(NULL,-613,"dm",lo3_key[ilo]+1);
-                  ierr=-600;
-              }
-              if(1!=lclm.ref_source.ref_source) {
-                  logita(NULL,-617,"dm",lo3_key[ilo]+1);
-                  ierr=-600;
-              }
-              if(10.0 != lclm.ref_freq.ref_freq) {
-                  logita(NULL,-618,"dm",lo3_key[ilo]+1);
-                  ierr=-600;
-              }
-                if(0.0 != lclm.freq_offset.freq_offset) {
-                  logita(NULL,-619,"dm",lo3_key[ilo]+1);
-                  ierr=-600;
-                }
-              if(!lclm.ref_doubler.ref_doubler) {
-                  logita(NULL,-620,"dm",lo3_key[ilo]+1);
-                  ierr=-600;
-              }
-              if(lclm.ref_divider.ref_divider) {
-                  logita(NULL,-621,"dm",lo3_key[ilo]+1);
-                  ierr=-600;
-              }
-              if(1!=lclm.lock.lock) {
-                  logita(NULL,-614,"dm",lo3_key[ilo]+1);
-                  ierr=-600;
-              }
+          }
+          if(lclm.mode.mode) {
+              logita(NULL,-613,"dm",lo3_key[ilo]+1);
+              ierr=-600;
+          }
+          if(1!=lclm.ref_source.ref_source) {
+              logita(NULL,-616,"dm",lo3_key[ilo]+1);
+              ierr=-600;
+          }
+          if(10.0 != lclm.ref_freq.ref_freq) {
+              logita(NULL,-617,"dm",lo3_key[ilo]+1);
+              ierr=-600;
+          }
+          if(!lclm.ref_doubler.ref_doubler) {
+              logita(NULL,-618,"dm",lo3_key[ilo]+1);
+              ierr=-600;
+          }
+          if(lclm.ref_divider.ref_divider) {
+              logita(NULL,-619,"dm",lo3_key[ilo]+1);
+              ierr=-600;
+          }
+          if(0.0 != lclm.freq_offset.freq_offset) {
+              logita(NULL,-620,"dm",lo3_key[ilo]+1);
+              ierr=-600;
+          }
+          if(1!=lclm.lock.lock) {
+              logita(NULL,-621,"dm",lo3_key[ilo]+1);
+              ierr=-600;
           }
           if(-600==ierr) {
               memcpy(ip+4,lo3_key[ilo]+1,2);

@@ -166,8 +166,6 @@ int ilo;
             ierr=-200;
         else if(ierr==0 && 1==lcl->output.output && lcl->freq.freq <= 0.0)
             ierr=-210;
-        else if(ierr==0 && 0==lcl->output.output && lcl->freq.freq > 0.0)
-            ierr=-220;
         if(ierr==0) {
           lcl->output.state.known=1;
         } else {
@@ -418,7 +416,7 @@ char *buff;
   if(arg_key(buff+5,mode_key,NMODE_KEY-1,&lclm->mode.mode,0,FALSE)) {
       char buf[256];
       sprintf(buf,"Unknown synthesizer mode is '%s'",buff);
-      logite(buf,-615,"dm");
+      logite(buf,-614,"dm");
       lclm->mode.mode=3;
   }
 
@@ -436,7 +434,7 @@ char *buff;
   else {
       char buf[256];
       sprintf(buf,"Unknown synthesizer lock status is '%s'",buff);
-      logite(buf,-616,"dm");
+      logite(buf,-615,"dm");
       lclm->lock.lock=2;
   }
 

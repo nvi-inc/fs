@@ -99,8 +99,24 @@ int ip[5];                           /* ipc parameters */
           }
           return;
       } else if(NULL==command->argv[0]) {
-          for (i=0;i<shm_addr->dbbc3_ddc_ifs;i++)
+          for (i=0;i<shm_addr->dbbc3_ddc_ifs;i++) {
               shm_addr->dbbc3_synthesizer[i].setup=0;
+
+              shm_addr->dbbc3_synthesizer[i].freq.freq=-1;
+              m5state_init(&shm_addr->dbbc3_synthesizer[i].freq.state);
+
+              shm_addr->dbbc3_synthesizer[i].output.output=-1;
+              m5state_init(&shm_addr->dbbc3_synthesizer[i].output.state);
+
+              shm_addr->dbbc3_synthesizer[i].ext_lo_freq.ext_lo_freq=-1;
+              m5state_init(&shm_addr->dbbc3_synthesizer[i].ext_lo_freq.state);
+
+              shm_addr->dbbc3_synthesizer[i].ext_lo_sb.ext_lo_sb=-1;
+              m5state_init(&shm_addr->dbbc3_synthesizer[i].ext_lo_sb.state);
+
+              shm_addr->dbbc3_synthesizer[i].input_sb.input_sb=-1;
+              m5state_init(&shm_addr->dbbc3_synthesizer[i].input_sb.state);
+          }
           ip[0]=ip[1]=ip[2]=ip[3]=ip[4]=0;
           return;
       } else if(*command->argv[0] == '?') {
@@ -239,14 +255,14 @@ parse:
 
       sprintf(outbuf,"synth=%d,s%d",1+ilo/2,1+ilo%2);
 
-      synthesizer_output_2_dbbc3(outbuf,&lcl);
+      if(lcl.output.state.known)
+          synthesizer_output_2_dbbc3(outbuf,&lcl);
 
-      if(lcl.output.state.known && 1==lcl.output.output) {
-          if(lcl.freq.state.known)
-              synthesizer_freq_2_dbbc3(outbuf,&lcl);
-          if(2==lcl.check.check)
-             strcat(outbuf,";mod cw;refs 1;ref 10;refdb 1;refdiv 0;off 0");
-      }
+      if(lcl.freq.state.known)
+          synthesizer_freq_2_dbbc3(outbuf,&lcl);
+
+      if(2==lcl.check.check)
+          strcat(outbuf,";mod cw;refs 1;ref 10;refdb 1;refdiv 0;off 0");
 
       cls_snd(&out_class, outbuf, strlen(outbuf) , 0, 0);
       out_recs++;

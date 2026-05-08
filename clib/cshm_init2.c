@@ -96,10 +96,21 @@ void cshm_init2()
 
   for(j=0;j<MAX_DBBC3_IF;j++) {
       shm_addr->dbbc3_synthesizer[j].setup=0;
+
       shm_addr->dbbc3_synthesizer[j].freq.freq=-1;
       m5state_init(&shm_addr->dbbc3_synthesizer[j].freq.state);
+
       shm_addr->dbbc3_synthesizer[j].output.output=-1;
       m5state_init(&shm_addr->dbbc3_synthesizer[j].output.state);
+
+      shm_addr->dbbc3_synthesizer[j].ext_lo_freq.ext_lo_freq=-1;
+      m5state_init(&shm_addr->dbbc3_synthesizer[j].ext_lo_freq.state);
+
+      shm_addr->dbbc3_synthesizer[j].ext_lo_sb.ext_lo_sb=-1;
+      m5state_init(&shm_addr->dbbc3_synthesizer[j].ext_lo_sb.state);
+
+      shm_addr->dbbc3_synthesizer[j].input_sb.input_sb=-1;
+      m5state_init(&shm_addr->dbbc3_synthesizer[j].input_sb.state);
   }
 
   shm_addr->dbbc3_ext_lo.count=0;
