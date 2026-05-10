@@ -538,7 +538,7 @@ char *who;           /* 2-char string identifying the error  */
   if (*cp2 == 'b') { /*  it is an error or warning */
     format_error(ibur,buf,bufl,&ierrnum,ierrch);
     if(strlen(ibur)!=0) {
-      /* bo -320 can't occur here -- only in ddout_logite() -- so no need to log it and cause recursion */
+      /* LH -318 can't occur here -- only in ddout_logite() -- so no need to log it and cause recursion */
       strcat(buf, " ");
       strcat(buf, ibur);
     }
@@ -579,7 +579,7 @@ char *who;           /* 2-char string identifying the error  */
 
     if(strlen(ibur)!=0) {
       if(strlen(buf) > FIRST_CHAR+13)
-        ddout_logit(NULL,-320,"lh");
+        ddout_logit(NULL,-318,"lh");
       strcat(buf, " ");
       strcat(buf, ibur);
     }
@@ -784,7 +784,7 @@ Messenger:
               goto Messenger;
             }
           } else if(ptr->count == iy || iy < 0) {
-            if(iy > 0 && ptr->on == 0) {
+            if(iy >= 0 && ptr->on == 0) {
               ddout_logit(NULL,-312,"lh");
               goto Messenger;
             }
@@ -822,24 +822,7 @@ Messenger:
 
       goto Messenger;
     }
-    if (memcmp(cp2,"tu",2)==0) {  /* TNX unforce */
-      short ix;
-      memcpy(&ix,buf+2,2);
-      for(ptr=first;ptr!=NULL;ptr=ptr->next) {
-        if(ptr->num == ix && memcmp(ptr->ch,buf,2)==0) {
-          if(ptr->count!=0) {
-            ddout_logit(NULL,-317,"lh");
-            goto Messenger;
-          }
-          unlink_error(ptr, &last, &first);
-          break;
-        }
-      }
-      if(ptr==NULL)
-        ddout_logit(NULL,-318,"lh");
-      goto Messenger;
-    }
-    if (memcmp(cp2,"te",2)==0) {  /* TNX force */
+    if (memcmp(cp2,"td",2)==0) {  /* TNX add */
       short ix;
       char empty[]= {0};
       memcpy(&ix,buf+2,2);
@@ -848,7 +831,7 @@ Messenger:
       for(ptr=first;ptr!=NULL;ptr=ptr->next) {
         if(ptr->num == ix && memcmp(ptr->ch,buf,2)==0) {
           if(ptr->count==0) {
-            ddout_logit(NULL,-319,"lh");
+            ddout_logit(NULL,-317,"lh");
             goto Messenger;
           }
           else if(ptr->count==1) {
@@ -1011,7 +994,7 @@ Ack:    ich = strtok(NULL, ",");
 
         if(strlen(ibur)!=0) {
           if(strlen(buf) > FIRST_CHAR+13)
-            ddout_logit(NULL,-320,"lh");
+            ddout_logit(NULL,-318,"lh");
           strcat(buf, " ");
           strcat(buf, ibur);
         }

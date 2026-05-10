@@ -1521,16 +1521,16 @@ BO -301
 Error decoding error number in TNX.
 ""
 BO -302
-TNX action parameter must be 'on', 'off', 'force', or 'unforce'.
+TNX action parameter must be 'on', 'off', or 'add'.
 ""
 BO -305
-TNX=... command cannot be executed from a procedure.
+TNX=... command with on/off/add cannot be executed from a procedure.
 ""
 BO -306
-TNX=... command cannot be executed from time-list.
+TNX=... command with on/off/add cannot be executed from time-list.
 ""
 BO -307
-TNX=... command cannot be executed from the schedule.
+TNX=... command with on/off/add cannot be executed from the schedule.
 ""
 BO -308
 Internal error in help command.
@@ -4365,10 +4365,10 @@ LH   -2 Place Holder for tnx on
 
 ""
 LH -303
-This error has not occurred yet (or been set with 'force'), so its state can't be changed (trying to turn 'off').
+This error has not occurred yet (or been added with 'add'), so its state can't be changed (trying to turn 'off').
 ""
 LH -304
-This error has not occurred yet (or been set with 'force'), so its state can't be changed (trying to turn 'on').
+This error has not occurred yet (or been added with 'add'), so its state can't be changed (trying to turn 'on').
 ""
 LH -311
 Error already "on", for TNX.
@@ -4389,15 +4389,9 @@ LH -316
 Spaces are not allowed in the schedule name for IF command condition.
 ""
 LH -317
-Error was not set with 'force', can't 'unforce'.
+A default was already added for this error with 'add'.
 ""
 LH -318
-Error not found, can't 'unforce'.
-""
-LH -319
-Error was already set with 'force'.
-""
-LH -320
 ddout: program error, both internal and external errors are used in the next error message ('tnx' can't manage it).
 ""
 LH -999 Place holder for log size warning

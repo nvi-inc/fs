@@ -1289,10 +1289,8 @@ c
                  else if(0.eq.ichcm_ch(parm,1,'off').or.
      &                   ierr.eq.2) then
                     ioffon=0
-                 else if(0.eq.ichcm_ch(parm,1,'forc')) then
+                 else if(0.eq.ichcm_ch(parm,1,'add ')) then
                     ioffon=2
-                 else if(0.eq.ichcm_ch(parm,1,'unfo')) then
-                    ioffon=3
                  else
                     call logit7ci(0,0,0,0,-302,'bo',0)
                  endif
@@ -1322,9 +1320,7 @@ c
                        else if(ioffon.eq.0) then
                           call put_buf(iclbox,ibufd,-8,'fs','tf')
                        else if(ioffon.eq.2) then
-                          call put_buf(iclbox,ibufd,-8,'fs','te')
-                       else if(ioffon.eq.3) then
-                          call put_buf(iclbox,ibufd,-8,'fs','tu')
+                          call put_buf(iclbox,ibufd,-8,'fs','td')
                        endif
                     endif
                  endif

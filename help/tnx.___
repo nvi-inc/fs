@@ -2,8 +2,9 @@
 
   Syntax:     tnx=code,number,action,#num
               tnx=list
+              tnx
 
-  Response:   tnx/code,number,action,#num,string,example
+  Response:   tnx/code,number,action,#num,internal,external
 
 
 Settable parameters:
@@ -12,28 +13,35 @@ Settable parameters:
 
   number   Error message number, e.g., '-999'.
 
-  action   Display status: 'on', 'off' (default), 'force' ('forc'), or
-           'unforce' ('unfo'). Only the first four characters are checked.
-           'force' sets all errors with 'code,number' to 'off'. 'unforce'
-           removes an error set with 'force'. (See Comments about 'force' and
-           'unforce'.) In responses, only 'off' and 'on' can occur.
+  action   Display status: 'on', 'off', or 'add'. The default is 'off'. 'add'
+           creates a default of 'off' for all errors with 'code,number' that
+           have not been seen yet. See Comments about 'add'. In responses,
+           only 'off' and 'on' can occur.
 
   #num     literal '#' followed by an integer associated with the error
-           "string". Default is '#0', which will select the only instance of
-           an error 'code,number'. Negative values match all instances of
-           'code,number'. In responses, '#0' indicates an error set by
-           'force'.
+           "string" to act on. A '#0' indicates a default for 'code,number'
+           created by 'add'. Negative values match all instances of
+           'code,number', including '#0'. Default is null (empty), which will
+           select an only instance, '#1', of an error 'code,number', or if
+           there is no '#1', but there is '#0',it will select '#0'. You can
+           always specify a literal '#num' to remove any ambiguity.
 
 Monitor-only parameters:
-  string   the error message instance, in curly braces, '{}',
-           associated with 'code,number' and '#num'. This is null if the
-           'code,number' is not defined in 'fserr.ctl' or 'sterr.ctl'. It can
-           only be non-null if 'example' is null. Any curly braces within
-           'string' are not escaped, but should be rare.
+  internal The internal error message "string", in curly braces, '{}',
+           associated with 'code,number' and '#num'. The string is null for
+           '#0' or if the 'code,number' is NOT defined in 'fserr.ctl' or
+           'sterr.ctl'. It can only be non-null if the string in 'external' is
+           null. Any curly braces within 'string' are not escaped, but should
+           be rare.
 
-  example  example of message if not defined in 'fserr.ctl' or 'sterr.ctl'.
-           It can only be non-null if 'string' is null. Any curly braces
-           within 'example' are not escaped, but should be rare.
+  external The external error message "string", in curly braces, '{}',
+           associated with 'code,number' and '#num'. An external message is
+           one not defined in 'fserr.ctl' or 'sterr.ctl'. The string is null
+           for '#0' or if the 'code,number' is defined in 'fserr.ctl' or
+           'sterr.ctl'. It can only be non-null if the string in 'internal' is
+           null. Any curly braces within 'string' are not escaped, but should
+           be rare.
+
 
 Comments:
 This command is intended to provide a way to turn off display of specific
@@ -44,31 +52,34 @@ correct, the operator can suppress that one error message rather than
 unchecking the entire module. Even if the error message is suppressed for
 display, it is still written to the log.
 
-WARNING: This command must be used with great care. If misused it may turn off
-important error messages that the operator needs to know about. Consequently,
-its use (except for just 'tnx' and 'tnx=list') is blocked if it is executed
-from a procedure, schedule, or time-list. This command must be entered
-interactively (in a pinch, the 'op_stream' command or the 'inject_snap'
-program can be used to workaround this restriction). The list of suppressed
-error messages is cleared every time the FS is started. TURNING OFF AN ERROR
-MESSAGE IS NOT THE SAME AS CORRECTING THE UNDERLYING PROBLEM, WHICH IS THE
-PREFERRED METHOD OF DEALING WITH AN ISSUE.
+WARNING: This command must be used with great care. If misused, it may turn
+off important error messages that the operator needs to know about.
+Consequently, its use (except for just 'tnx' and 'tnx=list') is blocked if it
+is executed from a procedure, schedule, or time-list. This command must be
+entered interactively (in a pinch, the 'op_stream' command or the
+'inject_snap' program can be used to workaround this restriction). The list of
+suppressed error messages is cleared every time the FS is started. TURNING OFF
+AN ERROR MESSAGE IS NOT THE SAME AS CORRECTING THE UNDERLYING PROBLEM, WHICH
+IS THE PREFERRED METHOD OF DEALING WITH AN ISSUE.
+
+If you use this command to suppress display of any error messages, it is
+recommended that you place 'tnx' as the first command in the station
+'sched_initi' procedure to record which messages are already being suppressed
+at the start of each schedule.
+
+The form 'tnx=list' will show the status of all "recognized" errors. The
+recognized errors are all the encountered errors plus errors set with 'add'
+regardless if they are currently being suppressed. The form 'tnx' shows only
+suppressed messages.
 
 Normally, an error must have occurred before its display status can be
-manipulated with 'tnx'. However, for 'force' any previous instances of
-'error,code' are removed and all future instances are set to 'off', regardless
-of whether it has occurred yet or not. This provides two features: (i) it
-allows turning off an error in advance for an unattended systems if its being
-reported will cause a problem (perhaps needlessly waking someone in the
-middle-of-the-night) and (ii) turning off all instances of 'code,number'. The
-display status of an error set with 'force' can be manipulated with 'on' and
-'off'.
-
-The action 'unforce' can be used to remove a 'code,number' error set with
-'force' so that its display status can be manipulated normally after the next
-time the 'code,number' error occurs; in other words, you are starting over
-from scratch for that 'code,number'. Consequently, using 'force' followed by
-'unforce' removes the history of error instances for that 'error,code'.
+manipulated with 'tnx'. However, for 'add' a "default" if of 'off' is created
+for any instance of 'code,number' that have not already occurred. This provides
+a way to turn off an error in advance if its being reported will cause a
+problem for an unattended system (perhaps needlessly waking someone in the
+middle-of-the-night). The "default" entry is shown as instance '#0' in 'tnx'
+and 'tnx=list' output, when appropriate. The display status for new instances
+can be manipulated by using 'on' and 'off' for '#0'.
 
 If the 'action' parameter is 'on' display of the message is re-enabled.
 
@@ -76,32 +87,10 @@ Use of the "previous value" symbol "*" is not supported for any parameters of
 "tnx".
 
 The '#num' parameter is only needed if more than instance of an error with the
-specified 'code,number' has occurred. If there is more than one instance and
-'#num' is not specified, all instances that have occurred so far are displayed
-with their corresponding 'num' values along with a suggestion to use the
-'#num' form. If '#num' is negative, it will match all instances of the
-'code,number' that have occurred so far. In this case only, the FS will not
-complain if the display status of any of code,number errors are already in the
-requested state.
-
-Using just 'tnx', will display all errors that have been suppressed. Each
-error is listed in a separate log entry. Errors displayed with '#0' have been
-set with 'force'. 'string' and 'example' will both be null until the first
-instance of each has occurred.
-
-The form 'tnx=list' will show the status of all "recognized" errors. The
-recognized errors are all the encountered errors plus errors set with 'force'
-and not removed with 'unforce'.
-
-If the displayed error 'string' is null (empty) in the listing, but when the
-error occurs a string is displayed that is because the programmer is supplying
-the string in a call to 'logite()' along with the error 'code,number'. This
-may be because the string contents are variable. Note that in this case 'tnx'
-will not distinguish between such variable strings. It will suppress all
-errors with that code,number'. This is different from how it handles
-different error strings from 'fserr.ctl' and 'sterr.ctl' (when 'force' was not
-used), all of which are individually suppressible, but have a more limited
-range of variation. For 'code,number' errors  with completely variable error
-strings, the 'tnx' command prints an 'example' string to help identify it.
-This is most helpful if all the errors for this 'code,number' are related,
-differing only by a specific details in an otherwise fixed string.
+specified 'code,number' has occurred. If there is more than one instance (not
+including '#0') and '#num' is not specified, all instances that have occurred
+so far are displayed with their corresponding 'num' values along with a
+suggestion to use the '#num' form. If '#num' is negative, it will match all
+instances (including '#0' if it exists) of the 'code,number' that have
+occurred so far. In this case only, the FS will not complain if the display
+status of any of 'code,number' errors are already in the requested state.
