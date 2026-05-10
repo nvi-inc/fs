@@ -1,4 +1,4 @@
-            synth_mode - IF synthesizer mode (DBBC3 racks)
+                synth_mode - IF synthesizer mode (DBBC3 racks)
 
  Syntax:     synth_mode=loX,freq,output,check
              synth_mode=
@@ -16,15 +16,15 @@ Settable Parameters:
             (previous values). No default. No previous value ('*') available
             for this parameter.
 
-  freq      Frequency in MHZ for the synthesizer. No default unless 'ifX=...'
-            has been setup and/or 'output' is 'disable'. If 'ifX' input '2' is
-            selected and 'loX' has been defined with 'lo=loX,...', the
-            frequency set for 'lo=loX,...' is the default unless an
-            external-LO has been defined (see 'help=extlo'). If one has been
-            defined, the default frequency is adjusted accordingly. If 'ifX'
-            input '1' is selected or 'output' is 'disable', the default is
-            "undefined." For Monitoring and Checking (see below in Comments),
-            the value is shown in parentheses if 'output' is 'disable'.
+  freq      Frequency in MHz for the synthesizer. The default is "undefined"
+            unless ifX=...' has been setup and the LO side-band defined. If
+            'ifX' input '2' is selected, the default is "undefined" unless the
+            LO frequency is defined. If it is defined that is the default
+            unless an external-LO applies (see 'help=extlo'). If one applies,
+            the default frequency is adjusted accordingly. If 'ifX' input '1'
+            is selected the default is "undefined." For Monitoring and
+            Checking (see below in Comments), the value is shown in
+            parentheses if 'output' is 'disable'.
 
   output    'disable' or 'enable'. No default unless 'ifX=...' is setup. If
             'ifX' input '2' is selected, the default is 'enable'; input '1',
@@ -40,8 +40,8 @@ Settable Parameters:
             have the nominal values for 'mode', 'ref_source', 'ref_freq',
             'ref_doubler' 'ref_divider', and 'freq_offset'.
 
-            If the parameter value is 'check', the following settings of the
-            device are checked:
+            If this parameter's value is 'check', the following settings of
+            the device are checked:
                 (i) 'output' (if defined in the FS)
                (ii) 'freq' (if defined in the FS)
               (iii) 'mode' is 'CW",
@@ -56,26 +56,23 @@ Monitor-only Parameters:
 
   ext_lo        The frequency in MHz and the side-band ('usb' or 'lsb') of the
                 corresponding external-LO (from the 'ext_lo' command), if one
-                applies. If so, the information is shown in parenthesis
-                because it is not read from the device with a slash between
-                the frequency and side-band, for example, '(38100/usb)'. The
-                external-LO is determined when the synthesizer state is
-                defined with a default frequency when the corresponding 'ifX'
-                input is '2'. If no external-LO applies, the parameter is
-                null.
+                applies. If so, the information is shown in parentheses,
+                because it is not read from the device, with a slash between
+                the frequency and side-band, for example, '(38100/usb)'. If
+                the setup has not been defined, or it has and no external-LO
+                applies, or 'freq' was set explicitly, this parameter is null.
 
-  pre-filter_sb The inferred pre-filter side-band ('usb' or 'lsb'), relative,
-                to 'freq' that should be used with GCoMo 'RF-in' for the
-                corresponding external-LO (from the 'ext_lo' command) ,if one
-                applies. If so, the value is shown in parenthesis because it
-                is not read from the device; it is calculated when the
-                synthesizer state is defined with a default frequency and the
-                corresponding 'ifX' input is '2'. The pre-filter must be
-                supplied externally.
+  pre-filter_sb The external pre-filter side-band ('usb' or 'lsb'), relative
+                to 'freq' that should be used with the GCoMo 'RF-in' input,
+                when the corresponding 'ifX' input is '2'. The value is shown
+                in parentheses because it is not read from the device. The
+                pre-filter must be supplied externally.
 
-                If no external-LO applies, the parameter is null and the
-                direct receiver output should be connected to the GCoMo
-                'IF-in'.
+                If the setup has not been defined, or the 'ifX' input was '1'
+                when it was defined,, or 'freq' was set explicitly, this
+                parameter is null. If the 'ifX' input is '1', the direct
+                receiver, or external-LO, output should be connected to the
+                GCoMo 'IF-in' input.
 
                 See "Pre-filter Side-band" in Comments for more details.
 
@@ -106,10 +103,22 @@ Monitor-only Parameters:
 
 Comments:
 
+NOTE: If 'ifX=1,...' is commanded, the device's 'output' is set to 'disable'
+without the FS's model for the device being updated; likewise for 'ifX=2,...'
+and 'enable'.
+
 CAUTION: It is recommended to NOT use 'force_plus'.
 
 WARNING: This command should not be used when recording data since calibration
 data may be lost.
+
+Although it is expected that normally only default values (null) will be
+supplied for 'freq' and 'output' in mode setups, they can be set explicitly if
+need be. Using the defaults should automatically set the correct values. If
+they do not, there may be an issue with how the LO, external-LO, and 'ifX'
+setups are defined. The default for 'freq' is "undefined" if the LO
+configuration is not complete to allow 'output' to be manually controlled for
+those cases without providing a frequency.
 
 In addition to the normal 'setting' and 'monitoring' forms of most commands,
 this one has an additional 'checking' form. The details of these forms are
@@ -137,8 +146,7 @@ summarized below.
               literal 'check' (or null value, i.e., the default) for the
               'check' parameter.
 
-              If the parameter value is 'check', the following settings of the
-              device are checked:
+              The following settings of the device are checked:
                   (i) 'output' (if defined in the FS)
                  (ii) 'freq' (if defined in the FS)
                 (iii) 'mode' is 'CW",
@@ -239,8 +247,8 @@ The signal from the receiver, RF or an IF generated from an LO external to the
 DBBC3, can either be directly fed into the GCoMo 'IF-in' connector or through
 the DBBC3 double-side-band mixer for further down-conversion. If directly fed
 and RF, the signal is USB. If directly fed from an external LO, the incoming
-signal is either USB or LSB. For these direct fed cases, the 'ifX=1,...'
-command is used. If it is fed through the mixer, is connected through an
+signal can be either USB or LSB. For these direct fed cases, the 'ifX=1,...'
+command is used. If it is fed through the mixer, it is connected through an
 external USB or LSB pre-filter, relative to the DBBC3 synthesizer frequency,
 to the 'RF-in' connector; the 'RF-out' connector is jumpered to the 'IF-in'
 connector. For this case, the 'ifX=2,...' command is used.
@@ -262,7 +270,7 @@ side-bands. Only some cases are possible. Cases that are not possible are
 included in the table for completeness with 'NO' and an explanation in the
 Pre-filter SB column. Even for cases that are possible, the bandpasses of the
 external-LO output and the pre-filter must be compatible to get a useful
-result. Please note the restriction in the last row.
+result. Please note the restrictions in the last three rows.
 
     Frequencies  ext_lo SB  LO SB        Pre-filter SB
                                    (relative to |ext_lo-lo|)
@@ -281,11 +289,15 @@ result. Please note the restriction in the last row.
     ext_lo > lo     LSB      USB              LSB
     ext_lo > lo     LSB      LSB      USB (only for lo>0)
 
+    no external-lo           USB      USB (only for lo>0)
+    no external-lo           LSB      LSB (only for lo>0)
+
     If the synthesizer is used, its frequency is always positive, that is,
     |lo - ext_lo|, an external pre-filter is used before 'RF-in', 'RF-out' is
-    jumpered to 'IF-in' and FS command 'ifX=2,...' is used. If the synthesizer
-    is not used, that is, 'ext_lo and 'lo' are equal, the signal is connected
-    directly to 'IF-in' and FS command 'ifX=1,...' is used.
+    jumpered to 'IF-in', and FS command 'ifX=2,...' is used. If the
+    synthesizer is not used, that is, 'ext_lo and 'lo' are equal, or there is
+    no external-LO and 'lo' is zero, the signal is connected directly to
+    'IF-in' and FS command 'ifX=1,...' is used.
 
                          'dbbc3_synth' SNAP procedure
 

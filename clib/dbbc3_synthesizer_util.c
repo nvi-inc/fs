@@ -63,23 +63,13 @@ int ilo;
     int ierr, ind, arg_key();
 
     int idefault, kdefault;
-    double ddefault, ddum;
+    double ddum;
 
     ierr=0;
     if(ptr == NULL) ptr="";
 
     switch (*count) {
       case 2:
-        kdefault=FALSE;
-        if(2==shm_addr->dbbc3_ifx[ilo].input) {
-           if(shm_addr->lo.lo[ilo] >= 0.0) {
-             kdefault=TRUE;
-             ddefault=shm_addr->lo.lo[ilo];
-          }
-        } else if(1==shm_addr->dbbc3_ifx[ilo].input) {
-          kdefault=TRUE;
-          ddefault=-1.0;
-        }
 
         ddum=1.0;
         ierr=arg_dble(ptr,&ddum,0.0,FALSE);
@@ -87,22 +77,23 @@ int ilo;
           ierr=-200;
           break;
         }
-        ierr=arg_dble(ptr,&lcl->freq.freq,0.0,FALSE);
         m5state_init(&lcl->freq.state);
         m5state_init(&lcl->ext_lo_freq.state);
         m5state_init(&lcl->ext_lo_sb.state);
         m5state_init(&lcl->input_sb.state);
-        if(-100==ierr) {
-            if(kdefault) {
+
+        ierr=arg_dble(ptr,&lcl->freq.freq,0.0,FALSE);
+        if(-100==ierr) { /* default */
+            if(1!=shm_addr->dbbc3_ifx[ilo].input && 2 !=shm_addr->dbbc3_ifx[ilo].input ||
+                    shm_addr->lo.lo[ilo] < 0.0 && 2 ==shm_addr->dbbc3_ifx[ilo].input  ||
+                    shm_addr->lo.sideband[ilo]<1  || 2<shm_addr->lo.sideband[ilo]) {
+                lcl->freq.freq=-1.0;
+            } else {
                 double freq;
                 int sb;
                 int itable=find_ext_lo(ilo, &freq, &sb);
-                lcl->freq.freq=ddefault;
                 if(itable>=0) {
-                    if(shm_addr->lo.sideband[ilo]<1  || 2<shm_addr->lo.sideband[ilo]) {
-                            ierr=-210;
-                            break;
-                    } else if(shm_addr->lo.lo[ilo] < freq+0.001 &&
+                    if(shm_addr->lo.lo[ilo] < freq+0.001 &&
                             shm_addr->lo.lo[ilo] > freq-0.001) {  /* ext_lo == lo */
                         if(2==shm_addr->dbbc3_ifx[ilo].input) {
                             ierr=-220;
@@ -111,6 +102,7 @@ int ilo;
                             ierr=-230;
                             break;
                         }
+                        lcl->freq.freq=-1.0;
                     } else {  /* ext_lo != lo */
                         if(1==shm_addr->dbbc3_ifx[ilo].input) {
                             ierr=-240;
@@ -139,9 +131,19 @@ int ilo;
                     lcl->ext_lo_freq.state.known=1;
                     lcl->ext_lo_sb.ext_lo_sb=sb;
                     lcl->ext_lo_sb.state.known=1;
+                } else { /* no ext_lo */
+                    if(2==shm_addr->dbbc3_ifx[ilo].input) { /* synthesizer used */
+                        if(shm_addr->lo.lo[ilo] == 0.0) {
+                            ierr=-280;
+                            break;
+                        }
+                        lcl->input_sb.input_sb=shm_addr->lo.sideband[ilo];
+                        lcl->input_sb.state.known=1;
+                        lcl->freq.freq=shm_addr->lo.lo[ilo];
+                    } else
+                        lcl->freq.freq=-1.0;
                 }
-            } else
-                lcl->freq.freq=-1.0;
+            }
             ierr=0;
         }
 
@@ -164,8 +166,6 @@ int ilo;
         m5state_init(&lcl->output.state);
         if(ierr==0 && lcl->output.output<0)
             ierr=-200;
-        else if(ierr==0 && 1==lcl->output.output && lcl->freq.freq <= 0.0)
-            ierr=-210;
         if(ierr==0) {
           lcl->output.state.known=1;
         } else {

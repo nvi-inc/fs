@@ -67,15 +67,17 @@ int kcheck;
           *command->argv[0] == '?' && command->argv[1] == NULL;
 
       if (!kcom && !kmon) {
-         ierr=logmsg_dbbc3(output,command,ip);
-         if(ierr!=0) {
-             ierr+=-450;
-             goto error2;
-         }
-         return;
+        ierr=logmsg_dbbc3(output,command,ip);
+        if(ierr!=0) {
+           ierr+=-450;
+           goto error2;
+        }
+        return;
       } else if(kcom)
-         memcpy(&lclc,&shm_addr->dbbc3_synthesizer[ilo],sizeof(lclc));
+        memcpy(&lclc,&shm_addr->dbbc3_synthesizer[ilo],sizeof(lclc));
       else {
+        /* to get ext LO and input sideband values if defined */
+        memcpy(&lclc,&shm_addr->dbbc3_synthesizer[ilo],sizeof(lclc));
         for (i=0;i<ip[1];i++) {
           if ((nchars =
                cls_rcv(ip[0],inbuf,BUFSIZE-1,&rtn1,&rtn2,msgflg,save)) <= 0) {
@@ -197,7 +199,16 @@ send:
 
           if(shm_addr->dbbc3_synthesizer[ilo].freq.state.known) {
               if(shm_addr->dbbc3_synthesizer[ilo].freq.freq != lclc.freq.freq) {
-                  logita(NULL,-612,"dm",lo3_key[ilo]+1);
+                  char ibuf[256];
+                  int len;
+                  snprintf(ibuf,sizeof(ibuf)-2,"Synthesizer frequency (for l%2.2s) is not the expected '%f",lo3_key[ilo]+1,shm_addr->dbbc3_synthesizer[ilo].freq.freq);
+                  len=strlen(ibuf);
+                  while(--len>0 && '0' == ibuf[len])
+                      ibuf[len]=0;
+                  if(len>0 && '.'==ibuf[len])
+                      ibuf[len]=0;
+                  strcat(ibuf,"'.");
+                  logite(ibuf,-612,"dm");
                   ierr=-600;
               }
           }

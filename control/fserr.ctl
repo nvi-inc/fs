@@ -2685,10 +2685,10 @@ DM -101
 No default for synthesizer IF.
 ""
 DM -102
-No default for synthesizer frequency, corresponding 'ifX=2' and 'lo=loX' has not be setup (for l?W).
+No default for synthesizer frequency unless corresponding 'ifX=1', or 'ifX=2' and 'lo=loX', has been set (for l?W).
 ""
 DM -103
-No default for synthesizer output, corresponding 'ifX' has not been setup (for l?W).
+No default for synthesizer output unless corresponding 'ifX' has been set (for l?W).
 ""
 DM -111
 Can't use '*' (previous value) for synthesizer IF.
@@ -2708,9 +2708,6 @@ The 'check' parameter must be 'check', 'force', or 'force_plus'.
 DM -212
 LO side-band not defined in 'synth_mode' (for l?W)
 ""
-DM -213
-Can't enable synthesizer output if no frequency is set (for l?W).
-""
 DM -222
 External-LO and LO have the same frequency, but IF input is 2 (for l?W).
 ""
@@ -2728,6 +2725,9 @@ External-LO frequency is more than LO frequency, but external-LO side-band is no
 ""
 DM -272
 LO frequency is zero and LO side-band is lower (for l?W).
+""
+DM -282
+LO frequency is zero and no external-LO, but IF input is 2 (for l?W).
 ""
 DM -301
 No parameters are allowed after '?'.
@@ -2756,9 +2756,6 @@ Error decoding DBBC3 synthesizer response (for l?W), see error DN -402 for text.
 DM -404
 Too many responses from DBBC synthesizer (for l?W)
 ""
-DM -406 Place holder unknown lock response
-
-""
 DM -451
 Class buffer error from command response (for l?W).
 ""
@@ -2768,8 +2765,8 @@ Synthesizer configuration (for l?W) is not correct. Please see the preceding 'DM
 DM -611
 Synthesizer output (for l?W) is not enabled.
 ""
-DM -612
-Synthesizer frequency (for l?W) is not correct.
+DM -612 Place holder for bad synthesizer frequency
+
 ""
 DM -613
 Synthesizer mode (for l?W) is not CW.
@@ -2777,7 +2774,7 @@ Synthesizer mode (for l?W) is not CW.
 DM -614 Place holder for unknown synthesizer mode message
 
 ""
-DM -615 Place holder for known synthesizer lock status message
+DM -615 Place holder for unknown synthesizer lock status message
 
 ""
 DM -616
