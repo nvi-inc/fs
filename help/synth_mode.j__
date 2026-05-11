@@ -270,7 +270,7 @@ side-bands. Only some cases are possible. Cases that are not possible are
 included in the table for completeness with 'NO' and an explanation in the
 Pre-filter SB column. Even for cases that are possible, the bandpasses of the
 external-LO output and the pre-filter must be compatible to get a useful
-result. Please note the restrictions in the last three rows.
+result. Please note the restriction in the twelfth row.
 
     Frequencies  ext_lo SB  LO SB        Pre-filter SB
                                    (relative to |ext_lo-lo|)
@@ -289,8 +289,10 @@ result. Please note the restrictions in the last three rows.
     ext_lo > lo     LSB      USB              LSB
     ext_lo > lo     LSB      LSB      USB (only for lo>0)
 
-    no external-lo           USB      USB (only for lo>0)
-    no external-lo           LSB      LSB (only for lo>0)
+    no ext_lo; lo>0          USB              USB
+    no ext_lo; lo>0          LSB              LSB
+    no ext_lo; lo=0          USB       synthesizer not used
+    no ext_lo; lo=0          LSB        NO: doesn't exist
 
     If the synthesizer is used, its frequency is always positive, that is,
     |lo - ext_lo|, an external pre-filter is used before 'RF-in', 'RF-out' is
