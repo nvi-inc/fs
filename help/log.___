@@ -1,22 +1,32 @@
-                    log - start a new log file
+                            log - open a log file
 
-            Syntax:     log=name
+  Syntax:    log=name,new
 
-            Response:   log/name
+  Response:  log/name
 
 
 Settable parameters:
-            name        name of log file to be opened. If no directory
-            path is specified, /log is assumed. If no
-            extension is specified, .log is assumed.
+  name  name of log file (without extension) to be opened in '/usr2/log/'
+        The extension '.log' is automatically added. The maximum length of
+        'name' is currently 18 characters.
+
+  new   literal 'new' to create the named log if it doesn't already exist, but
+        reject the command if it does. Default (null) is to use the named log
+        if it already exists or create it if it doesn't. Not displayed in
+        monitor responses.
 
 Monitor-only parameters: none
 
-Comments: 
-When the Field System is initialized, log file station.log was
-opened or created in directory /usr2/log. If the log file
-requested by this command cannot be opened or created, the
-Field System returns to using the log file previously in use.
-If no log file can be successfully opened, execution of the
-schedule continues, but an error message is displayed on the
-screen every time an attempt is made to write into the log.
+Comments:
+
+When the Field System is initialized, log file 'station' (with extension
+'.log') is opened, or created, in directory '/usr2/log'.
+
+The 'new' parameter can be used to require that the named log not already
+exist. If it does, the command is rejected with an error. This can be useful,
+for example, if you want to make sure you use a new log to record a test.
+
+If the log file requested by this command cannot be opened or created the
+Field System returns to using the log file previously in use. If no log file
+can be successfully opened, execution of commands or a schedule continues, but
+an error message is displayed on the screen at every time to write to the log.

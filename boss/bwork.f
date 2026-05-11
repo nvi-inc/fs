@@ -544,6 +544,7 @@ C
         else
 C                   User requested log name, format response and log it.
           ic2 = iscn_ch(ibuf,ich,nchar,',')
+          ic3 = ic2
           if (ic2.eq.0) ic2 = nchar+1
           if(ic2-ich.gt.MAX_SKD) then
              call logit7ci(0,0,0,1,-262,'bo',MAX_SKD)
@@ -551,6 +552,31 @@ C                   User requested log name, format response and log it.
           endif
           llog2=' '
           llog2(1:ic2-ich) = ibc(ich:ic2-1)
+          if(ic3.ne.0) then
+            ic3=ic3+1
+            call gtprm2(ibuf,ic3,nchar,0,parm,ierr)
+            if(ierr.eq.2) then
+              continue
+            else if(ierr.ne.0.or.0.ne.ichcm_ch(parm,1,'new ')) then
+              call logit7ci(0,0,0,0,-233,'bo',0)
+              goto 600
+            else
+              call fc_access(
+     &            FS_root//'/log/'//ibc(ich:ic2-1)//'.log',' ',
+     &            ierr,perror)
+              if(ierr.eq.0) then
+                call logit7ci(0,0,0,0,-218,'bo',0)
+                goto 600
+              else if(ierr.ne.-4 .or. ierr.eq.-4.and.perror.ne.2) then
+                  if(ierr.gt.0.or.ierr.lt.-4) then
+                      call logit7ci(0,0,0,1,-217,'bo',ierr)
+                  else
+                      call logit7ci(0,0,0,1,-212+ierr,'bo',perror)
+                  endif
+                  goto 600
+              endif
+            endif
+          endif
           call char2hol(llog2,illog2,1,MAX_SKD)
           call fs_set_llog2(illog2)
           call char2hol(llog2,illog,1,8)

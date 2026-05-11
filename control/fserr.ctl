@@ -1383,7 +1383,7 @@ BO -203
 Can't access new procedure library, UNIX ?FFF
 ""
 BO -204
-Unrecognized error from caccess(), while checking .snp permissions/existence
+Unrecognized error from caccess(), while checking .prc permissions/existence
 ""
 BO -205
 File name too long in caccess(), while checking .snp permissions/existence
@@ -1408,6 +1408,24 @@ Can't open a new schedule when a procedure from the schedule procedure library i
 ""
 BO -212
 Can't change schedule procedure library when a procedure from the old library is executing
+""
+BO -213
+File name too long in caccess(), while checking .log existence
+""
+BO -214
+Mode length must be greater than zero in caccess(), while checking .log existence
+""
+BO -215
+Unrecognized mode caccess(), while checking .log existence
+""
+BO -216
+Can't access new log file, UNIX ?FFF
+""
+BO -217
+Unrecognized error, ?WWW, from caccess(), while checking .log existence
+""
+BO -218
+A new log was requested, but that one exists.
 ""
 BO -219
 Error opening drivev1.ctl ?FFF
@@ -1450,6 +1468,9 @@ Error opening rdbe.ctl ?FFF
 ""
 BO -232
 Error decoding rdbe.ctl line ?WWW
+""
+BO -233
+Error decoding log=... 'new' parameter
 ""
 BO -250
 Internal error: opnpf.f passed procedure library name too long, can only support?WW characters
