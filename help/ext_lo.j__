@@ -11,7 +11,7 @@ Settable parameters:
 
   loX       LO (IF) for this external-LO: 'loa', 'lob', ..., up to the last IF
             in the system ('loh' is the last possible) or 'all'. The default
-            is 'all'. No default. No previous value ('*') available.
+            is 'all'. No previous value ('*') available.
 
   freq      External-LO frequency for this IF, MHz. Must be positive. No
             default. No previous value ('*') available.
@@ -19,31 +19,63 @@ Settable parameters:
   sb        External-LO side-band for this channel, 'usb' or 'lsb'. No
             default. No previous value ('*') available.
 
-  lo_min    Minimum LO frequency (from 'lo=...) that this external-LO applies
-            to. Must be positive. Default is no minimum. No previous value
-            ('*') available.
+  lo_min    Minimum net-LO frequency (from 'lo=...) that this external-LO
+            applies to. Must be non-negative. Default is no minimum. No
+            previous value ('*') available.
 
-  lo_max    Maximum LO frequency (from 'lo=...) that this external-LO applies
-            to. Can't be set if 'lo_min' is not set. Must be positive.  Must
-            be greater or equal to 'lo_min'. Default is 'lo_min'.  No previous
-            value ('*') available.
+  lo_max    Maximum net-LO frequency (from 'lo=...) that this external-LO
+            applies to. Can't be set if 'lo_min' is not set. If set, must be
+            non-negative and greater than or equal to 'lo_min'. Default is
+            'lo_min' for an effective single frequency (or no maximum if
+            'lo_min' is not set). No previous value ('*') available. See
+            Comments for more details.
 
-  lo_sb     LO side-band (from 'lo=...) that this external-LO applies to,
+  lo_sb     net-LO side-band (from 'lo=...) that this external-LO applies to,
             'usb', 'lsb', or 'all'. Default is 'all'. No previous value ('*')
             available.
 
 Monitor-only Parameters: None.
 
 Comments:
-This command specifies the total external-LO, before the DBBC3, for a given
-IF. The total LO before the BBCs is still given by the 'lo=...' commands.
-This command does not set the external-LO; it just describes what is in use.
-The external-LO is used by the 'synth_mode=...' command to calculate the
-synthesizer frequency needed to achieve the total LO if the corresponding
-'ifX' input is '2'.
 
-Before defining the external-LOs for a mode, an initial,'ext_lo=' (no
-parameters) should be used to delete any previous defined entries.
+This command specifies the effective total external-LO, before the DBBC3, for
+a given IF. (The net-LO before the BBCs is still given by the 'lo=...'
+commands.) This command does not set the external-LO; it just describes what
+is expected. The external-LO table is used by the 'synth_mode=...' command to
+calculate the synthesizer frequency needed to achieve the net-LO if the
+corresponding 'ifX' input is '2'.
+
+Before defining the external-LOs in the mode setup, an initial,'ext_lo=' (no
+parameters) should be used to delete any previous defined entries. The
+external-LO definition usually occurs before the 'synth_mode=...' commands in
+the 'dbbc3_synth' local procedure.
+
+Generally speaking, it is recommended to make the 'lo_min', 'lo_max', and
+'lo_sb' parameters as restrictive as possible to reduce the risk of having a
+table entry apply when it is not wanted.
+
+Using 'all' for the IF is recommended in case the IF the signal goes to
+change; this also reduces the number of table entries for dual polarization
+modes. A maximum of 40 table entries are supported. Multiple table entries
+for a given external-LO can used if necessary.
+
+There are three options for 'lo_min' and 'lo_max': (i) both both are null for
+no restriction based on frequency, (ii) 'lo_min' is non-negative and 'lo_max'
+is null to select a single frequency, and (iii) 'lo_min' and 'lo_max' are
+non-negative and 'lo_min' is less than equal to 'lo_max' to select a range (a
+single frequency if 'lo_min' equals 'lo_max').
+
+If 'lo_sb' is null or 'all', it applies to a net-LO of either side-band.
+
+The monitor form 'ext_lo' will print the entire table. Using 'ext_lo=loX,?'
+will show all entries that could potentially apply to that LO (IF). Using
+'ext_lo=loX' with no additional parameters will show the table entry that
+currently applies for that IF (or all IFs for 'ext_lo=all',in which case all
+are shown in ascending IF order). These forms can be useful for debugging the
+table. (When debugging, it may be necessary to remove old table entries with
+'ext_lo=' before trying new entries: existing entries take precedence over new
+entries.) The output is all null parameters if none apply, including if the LO
+is not defined.
 
 The external-LOs can be defined explicitly by IF. For example:
 
@@ -52,40 +84,117 @@ The external-LOs can be defined explicitly by IF. For example:
     ext_lo=lob,20000,lsb
 
 For more complicated situations, a table of external-LO values that apply
-depending on the total LO for the IF can be used. The goal, when it is
-possible, is to allow stations to specify a table of values that does not need
-to be revised depending on which input signal is connected, and where. For
-example:
+depending on the net-LO for the IF can be used. The goal, when it is possible,
+is to allow stations to specify a table, in the local 'dbbc3_synth' SNAP
+procedure, that does not need to be revised depending on which input signal is
+connected, and where. For example:
 
     ext_lo=
-    ext_lo=loa,10000,usb,15000,16000
-    ext_lo=loa,20000,usb,25000,26600
+    ext_lo=all,10000,usb,15000,16000
+    ext_lo=all,20000,usb,25000,26600
 
-The above two statements would specify 10000 as the external-LO if the total
-LO is between 15000 and 16000 and 20000 if between 25000 and 26000.
+The above two statements would specify 10000 as the external-LO for any IF if
+the net-LO frequency is between 15000 and 16000 and 20000 otherwise if between
+25000 and 26000.
 
-If 'lo_min' and 'lo_max' are null, the table entry applies for all total LO
-frequencies for that IF. If 'lo_sb' is null or 'all', it applies to a total LO
-for either side-band. If 'loX' is null or 'all', the entry applies
-(conditionally, based on LO parameters) to all IFs.
-
-Generally speaking, it is recommended to make the 'lo_min', 'lo_max', and
-'lo_sb' parameters as restrictive as possible to reduce the risk of having a
-table entry apply when it is not wanted. Multiple table entries for a given
-external-LO can used if necessary. A maximum of 40 table entries are
-supported. A warning is given by the 'synth_mode' command if an entry would
-apply when the corresponding 'ifx' input is '1'.
-
-Multiple table entries may cover a given total LO. The first in the table that
-matches applies. Therefore you should enter the table with the most specific
-entries before less specific ones. For example:
+Multiple table entries may cover a given net-LO. The first in the table that
+matches applies. Therefore you should enter the table with the most restrictive
+entries before less restrictive ones. For example:
 
     ext_lo=
-    ext_lo=loa,10500,usb,20000,20000
-    ext_lo=loa,11000,usb,19000,21000
+    ext_lo=all,10500,usb,20000,20000
+    ext_lo=all,11000,usb,19000,21000
 
-The monitor form 'ext_lo' will print the entire table. Using 'ext_lo=loX' with
-no additional parameters will show the table entry that currently applies for
-that IF (or all IFs for 'ext_lo=all'). This can be useful for debugging the
-table. The output is all null parameters if none apply, including if the LO is
-not defined.
+The following is an example of the LO configuration for a tri-band
+dual-polarization configuration:
+
+  The contents of 'ifdXX' and 'dbbc3_synth' procedures that are called from
+  the 'setupXX' procedure are shown. The 'setupXX' and ifdXX' procedures are
+  generated by 'drudg'. The 'dbbc3_synth' procedure is a station procedure and
+  is in principle independent of the mode.
+
+  ifdXX:
+
+    ifa=1,agc,32000
+    ifb=1,agc,32000
+    ifc=2,agc,32000
+    ifd=2,agc,32000
+    ife=2,agc,32000
+    iff=2,agc,32000
+    lo=
+    lo=loa,20400.00,usb,lcp,10.000
+    lo=lob,20400.00,usb,rcp,10.000
+    lo=loc,45800.00,lsb,lcp,10.000
+    lo=lod,45800.00,lsb,rcp,10.000
+    lo=loe,84700.00,usb,lcp,10.000
+    lo=lof,84700.00,usb,rcp,10.000
+    dbbc3_synth
+
+
+  dbbc3_synth:
+
+    ext_lo=
+    ext_lo=all,20400,usb,20400,,usb
+    ext_lo=all,38100,usb,45800,,lsb
+    ext_lo=all,92400,lsb,84700,,usb
+    synth_mode=
+    synth_mode=loa,,,check
+    synth_mode=lob,,,check
+    synth_mode=loc,,,check
+    synth_mode=lod,,,check
+    synth_mode=loe,,,check
+    synth_mode=lof,,,check
+
+  The result of the 'synth_mode' commands is:
+
+    /synth_mode/loa,(7700),disable,(20400/usb),,15.0,CW,external,10,enable,disable,0,locked
+    /synth_mode/lob,(7700),disable,(20400/usb),,15.0,CW,external,10,enable,disable,0,locked
+    /synth_mode/loc,7700,enable,(38100/usb),(lsb),10.0,CW,external,10,enable,disable,0,locked
+    /synth_mode/lod,7700,enable,(38100/usb),(lsb),10.0,CW,external,10,enable,disable,0,locked
+    /synth_mode/loe,7700,enable,(92400/lsb),(lsb),10.0,CW,external,10,enable,disable,0,locked
+    /synth_mode/lof,7700,enable,(92400/lsb),(lsb),10.0,CW,external,10,enable,disable,0,locked
+
+  There are a few things to note here:
+
+   . There is only one line in dbbc3_synth' for each external-LO instead of a
+     separate line for each IF (LO). The one line for each external-LO will
+     match both polarizations. This simplifies what is needed and helps save
+     space in the 'ext_lo' internal table, which can support 40 entries total.
+
+   . If you want the 'synth_mode=...' commands to set the synthesizers as
+     opposed to just checking them, replace the 'synth_mode' commands with:
+
+       synth_mode=
+       synth_mode=loa,,,force
+       synth_mode=lob,,,force
+       synth_mode=loc,,,force
+       synth_mode=lod,,,force
+       synth_mode=loe,,,force
+       synth_mode=lof,,,force
+       synth_mode=loa,,,check
+       synth_mode=lob,,,check
+       synth_mode=loc,,,check
+       synth_mode=lod,,,check
+       synth_mode=loe,,,check
+       synth_mode=lof,,,check
+
+     That will both set and check the synthesizers.
+
+   . If your station has eight IFs, you could include the corresponding
+     'synth_mode=...' commands for the additional IFs ('log' and 'loh'). That
+     will cover all possible IFs. If there is no LO defined for an IF, the
+     command becomes a no-op.
+
+   . Although this example just gives the relevant external-LO ('ext_lo=...')
+     for these LOs ('lo=...'). It is recommended to include external-LOs for
+     all other receivers. This allows the 'dbbc3_synth' procedure to be mode
+     independent. The correct external-LO is selected using the net-LO
+     frequency range and side-band that it is specified for. For example, to
+     also cover external USB LOs for geodetic S/X, you might use:
+
+       ext_lo=
+       ext_lo=all,2020,usb,2020,,usb
+       ext_lo=all,8080,usb,8080,,usb
+       ext_lo=all,20400,usb,20400,,usb
+       ext_lo=all,38100,usb,45800,,lsb
+       ext_lo=all,92400,lsb,84700,,usb

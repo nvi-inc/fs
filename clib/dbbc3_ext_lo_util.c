@@ -50,7 +50,7 @@ char *ptr;
     switch (*count) {
       case 2:
         ierr=arg_key(ptr,star_key,STAR_KEY,&dum,0,FALSE);
-        if(ierr == 0 && dum == -1) {
+        if(ierr == 0 && dum == 0) {
            ierr=-110;
            break;
         }
@@ -60,8 +60,8 @@ char *ptr;
         break;
       case 3:
         ierr=arg_key(ptr,star_key,STAR_KEY,&dum,0,FALSE);
-        if(ierr == 0 && dum == -1) {
-           ierr=-210;
+        if(ierr == 0 && dum == 0) {
+           ierr=-110;
            break;
         }
 	ierr=arg_key(ptr,sb_key,SB_KEY,&lcl->sb,0,FALSE);
@@ -70,7 +70,7 @@ char *ptr;
         break;
       case 4:
         ierr=arg_key(ptr,star_key,STAR_KEY,&dum,0,FALSE);
-        if(ierr == 0 && dum == -1) {
+        if(ierr == 0 && dum == 0) {
            ierr=-110;
            break;
         }
@@ -84,7 +84,7 @@ char *ptr;
         break;
       case 5:
         ierr=arg_key(ptr,star_key,STAR_KEY,&dum,0,FALSE);
-        if(ierr == 0 && dum == -1) {
+        if(ierr == 0 && dum == 0) {
            ierr=-110;
            break;
         }
@@ -95,12 +95,12 @@ char *ptr;
           break;
         }
         ierr=arg_dble(ptr,&lcl->lo_max,lcl->lo_min,TRUE);
-        if(lcl->lo_max < lcl->lo_min || lcl->lo_min < 0.0 && lcl->lo_max > 0.0)
+        if(lcl->lo_max < lcl->lo_min || lcl->lo_min < 0.0 && lcl->lo_max >= 0.0)
            ierr=-200;
         break;
       case 6:
         ierr=arg_key(ptr,star_key,STAR_KEY,&dum,0,FALSE);
-        if(ierr == 0 && dum == -1) {
+        if(ierr == 0 && dum == 0) {
            ierr=-110;
            break;
         }

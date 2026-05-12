@@ -2931,7 +2931,7 @@ DO -111
 Can't use '*' (previous value) for external-LO IF.
 ""
 DO -201
-Ext-LO IF must be 'loa', 'lob', ... 'loh' up to the number of IFs defined in dbbc3.ctl.
+External-LO IF must be 'all' or 'loa', 'lob', ... 'loh' up to the number of IFs defined in dbbc3.ctl.
 ""
 DO -102
 No default for external-LO frequency.
@@ -2940,7 +2940,7 @@ DO -112
 Can't use '*' (previous value) for external-LO frequency.
 `""
 DO -202
-unable to decode external-LO frequency, must be positive.
+Unable to decode external-LO frequency, must be positive.
 ""
 DO -103
 No default for external-LO side-band.
@@ -2961,7 +2961,7 @@ DO -115
 Can't use '*' (previous value) for LO frequency range maximum.
 ""
 DO -205
-Maximum for LO frequency range can't be negative, less than minimum, or set if the minimum is not set.
+Maximum for LO frequency range can't be negative, less than the minimum, or set if the minimum is not set.
 ""
 DO -116
 Can't use '*' (previous value) for LO side-band.
