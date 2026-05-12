@@ -578,6 +578,8 @@ char *who;           /* 2-char string identifying the error  */
     format_error(ibur,buf,bufl,&ierrnum,ierrch);
 
     if(strlen(ibur)!=0) {
+// Since this is only used internally in ddout, there should be no
+//   worries about unhandled LWHAT values
       if(strlen(buf) > FIRST_CHAR+13)
         ddout_logit(NULL,-318,"lh");
       strcat(buf, " ");
@@ -993,8 +995,11 @@ Ack:    ich = strtok(NULL, ",");
         format_error(ibur,buf,bufl,&ierrnum,ierrch);
 
         if(strlen(ibur)!=0) {
-          if(strlen(buf) > FIRST_CHAR+13)
-            ddout_logit(NULL,-318,"lh");
+//  Deferred for now since this may add confusing additional errors
+//    if LWHAT is non-zero but the message doesn't have ?W...
+//    Hopefully those are gone, but any lingerers would be ugly.
+//          if(strlen(buf) > FIRST_CHAR+13)
+//            ddout_logit(NULL,-318,"lh");
           strcat(buf, " ");
           strcat(buf, ibur);
         }
