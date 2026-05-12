@@ -4415,6 +4415,9 @@ A default was already added for this error with 'add'.
 LH -318
 ddout: program error, both internal and external errors are used in the next error message ('tnx' can't manage it).
 ""
+LH -998 Place holder for attempt to use external logit*()
+
+""
 LH -999 Place holder for log size warning
 
 ""

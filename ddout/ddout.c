@@ -590,6 +590,73 @@ char *who;           /* 2-char string identifying the error  */
   data2disk(fd,serverfd,buf,TRUE,&last_sync,knl,sllog);
 
 }
+
+static void logita(msg,ierr,who, what)
+char *msg;           /* a message to be logged, NULL if none */
+int ierr;            /* error number, 0 if no error          */
+char *who;           /* 2-char string identifying the error  */
+char *what;          /* 2-char string with more info         */
+{
+   ddout_logite("Can't use non-internal logita in ddout; if needed, create/use an internal ddout_logita.",-998,"lh");
+}
+
+static void logit_nds(msg,ierr,who,lsor)
+char *msg;           /* a message to be logged, NULL if none */
+int ierr;            /* error number, 0 if no error          */
+char *who;           /* 2-char string identifying the error  */
+char lsor;           /* char identifying source usually ':' or '/' */
+{
+   ddout_logite("Can't use non-internal logit_nds in ddout; if needed, create/use an internal ddout_logit_nds.",-998,"lh");
+}
+
+static void logits(msg,ierr,who,lsor)
+char *msg;           /* a message to be logged, NULL if none */
+int ierr;            /* error number, 0 if no error          */
+char *who;           /* 2-char string identifying the error  */
+char lsor;           /* char identifying source usually ':' or '/' */
+{
+   ddout_logite("Can't use non-internal logits in ddout; if needed, create/use an internal ddout_logits.",-998,"lh");
+}
+
+static void logit(msg,ierr,who)
+char *msg;           /* a message to be logged, NULL if none */
+int ierr;            /* error number, 0 if no error          */
+char *who;           /* 2-char string identifying the error  */
+{
+   ddout_logite("Can't use non-internal logit in ddout; use internal ddout_logit instead.",-998,"lh");
+}
+
+static void logit_nd(msg,ierr,who)
+char *msg;           /* a message to be logged, NULL if none */
+int ierr;            /* error number, 0 if no error          */
+char *who;           /* 2-char string identifying the error  */
+{
+   ddout_logite("Can't use non-internal logit_nd in ddout; if needed, create/use an internal ddout_logit_nd.",-998,"lh");
+}
+
+static void logite(msg,ierr,who)
+char *msg;           /* a message to be logged, NULL if none */
+int ierr;            /* error number, 0 if no error          */
+char *who;           /* 2-char string identifying the error  */
+{
+   ddout_logite("Can't use non-internal logite in ddout; use internal ddout_logite instead.",-998,"lh");
+}
+
+static void logitf(msg)
+char *msg;           /* a message to be logged, NULL if none */
+{
+   ddout_logite("Can't use non-internal logitf in ddout; if needed, create/use an internal ddout_logitf.",-998,"lh");
+}
+
+static void logitn(msg,ierr,who, what)
+char *msg;           /* a message to be logged, NULL if none */
+int ierr;            /* error number, 0 if no error          */
+char *who;           /* 2-char string identifying the error  */
+int  what;          /* int with more info                   */
+{
+   ddout_logite("Can't use non-internal logitn in ddout; if needed, create/use an internal ddout_logitn.",-998,"lh");
+}
+
 main()
 {
     int i;
