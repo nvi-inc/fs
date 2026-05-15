@@ -45,6 +45,7 @@ static char *atten_key[ ]=
 static char *mode_key[ ]={"CW","SWEEP","LIST","unknown"};
 static char *ref_source_key[ ]={"internal","external"};
 static char *lock_key[ ]={"unlocked","locked","unknown"};
+static char *star_key[ ]={"*"};
 
 #define SB_KEY  sizeof(sb_key)/sizeof( char *)
 #define NOUTPUT_KEY sizeof(output_key)/sizeof( char *)
@@ -53,6 +54,7 @@ static char *lock_key[ ]={"unlocked","locked","unknown"};
 #define NMODE_KEY sizeof(mode_key)/sizeof( char *)
 #define NREF_SOURCE_KEY sizeof(lock_key)/sizeof( char *)
 #define NLOCK_KEY sizeof(lock_key)/sizeof( char *)
+#define STAR_KEY sizeof(star_key)/sizeof( char *)
 
 int dbbc3_synthesizer_dec(lcl,count,ptr,itask,ilo)
 struct dbbc3_synthesizer_cmd *lcl;
@@ -63,6 +65,7 @@ int ilo;
     int ierr, ind, arg_key();
 
     int idefault, kdefault;
+    int idum;
     double ddum;
 
     ierr=0;
@@ -77,6 +80,10 @@ int ilo;
           ierr=-200;
           break;
         }
+        ierr=arg_key(ptr,star_key,STAR_KEY,&idum,0,FALSE);
+        if(ierr == 0 && idum == 0)
+           break;
+
         m5state_init(&lcl->freq.state);
         m5state_init(&lcl->ext_lo_freq.state);
         m5state_init(&lcl->ext_lo_sb.state);
