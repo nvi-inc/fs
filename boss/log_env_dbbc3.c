@@ -39,6 +39,7 @@ void log_env_dbbc3__()
                    "FS_DBBC3_MULTICAST_CORE3H_TIME_INCLUDED",
                    "FS_DBBC3_MULTICAST_CORE3H_VDIF_EPOCH_INSERTED",
                    "FS_DBBC3_MULTICAST_VERSION_ERROR_MINUTES",
+                   "FS_DBBC3_MULTICAST_MAXIMUM_LOSS_PERCENT",
                    "FS_DBBC3_BBCNNN_TPI_USB_LSB_SWAP",
                    "FS_DBBC3_BBCNNN_GAIN_USB_LSB_SWAP",
                    "FS_DBBC3_BBCNNN_ON_OFF_SWAP",

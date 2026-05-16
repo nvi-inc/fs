@@ -1991,6 +1991,24 @@ multicast does not agree with the FS control files. The default is
 `1`.  It can be set to any value `1`-`10`. Any other values are
 interpreted as `1`.
 
+* `FS_DBBC3_MULTICAST_MAXIMUM_LOSS_PERCENT`
+
++
+
+It is expected that this variable will be introduced in FS _10.3_. It
+controls the threshold for percentage loss reports (warnings and
+errors) of multicast messages in the last minute, if there have been
+_no_ time-outs. (Getting a time-out is a more severe problem and will
+override percentage loss reports.) The default value is `10`. That is
+to say, if 10% or more of the expected messages are lost (with no
+time-out counting in the last minute), the loss is reported. When
+`data_valid` is `off`, a warning is issued; any DBBC3 command
+(including use of _fmset_) will restart the threshold period. If
+`data_valid` is `on`, an error is reported; there is no restart for
+DBBC3 commands. The percentage can be in the range `0`-`100`. For `0`,
+any loss will reported. Setting it to `100` disables the reports. Any
+values outside the range are interpreted as `10`.
+
 [appendix]
 
 == Verifying polarity and USB/LSB TPI swaps

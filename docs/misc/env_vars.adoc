@@ -19,7 +19,7 @@
 //
 
 = FS Environment Variables
-Version 2.0 - April 2026
+Version 2.1 - MAY 2026
 
 :sectnums:
 
@@ -368,6 +368,7 @@ writing, they consisted of:
 * `FS_DBBC3_MULTICAST_CORE3H_TIME_ADD_SECONDS`
 * `FS_DBBC3_MULTICAST_CORE3H_TIME_INCLUDED`
 * `FS_DBBC3_MULTICAST_VERSION_ERROR_MINUTES`
+* `FS_DBBC3_MULTICAST_MAXIMUM_LOSS_PERCENT`
 
 They are covered in the
 <<../releases/10/1/dbbc3_ops.adoc#_dbbc3_specific_environment_variables,DBBC3

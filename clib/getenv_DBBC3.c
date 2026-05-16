@@ -104,6 +104,14 @@ char *getenv_DBBC3( char *env, int *actual_p, int *nominal_p, int *error_p, int 
               actual=nominal;
         } else
             actual=nominal;
+    } else if(0==strcmp(env,"FS_DBBC3_MULTICAST_MAXIMUM_LOSS_PERCENT")) {
+        nominal=10;
+        if(NULL!=ptr) {
+            actual=atoi(ptr);
+            if(actual<0 || actual>100)
+              actual=nominal;
+        } else
+            actual=nominal;
     } else if(0==strcmp(env,"FS_DBBC3_BBCNNN_TPI_USB_LSB_SWAP")) {
         TYPICALB1
     } else if(0==strcmp(env,"FS_DBBC3_BBCNNN_GAIN_USB_LSB_SWAP")) {

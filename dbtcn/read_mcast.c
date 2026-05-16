@@ -42,6 +42,8 @@ extern struct fscom *shm_addr;
 
 #define MAX_RECV   60
 
+char *getenv_DBBC3( char *env, int *actual, int *nominal, int *error, int options);
+
 ssize_t read_mcast(int sock, char buf[], size_t buf_size, int it[6],
         int centisec[6],int data_valid, int *hsecs)
 {
@@ -71,6 +73,7 @@ ssize_t read_mcast(int sock, char buf[], size_t buf_size, int it[6],
     static int recv[MAX_RECV];
     static int irecv;
     static int recv_start;
+    static int percent=-1;
 
     if(!recv_start)
        rte_ticks(&recv_start);
@@ -166,13 +169,24 @@ ssize_t read_mcast(int sock, char buf[], size_t buf_size, int it[6],
         rte_sleep(100);
         return -1;
     }
+    if(0>percent) {
+        int actual, error;
+        char *ptr;
+        ptr=getenv_DBBC3("FS_DBBC3_MULTICAST_MAXIMUM_LOSS_PERCENT",&actual,NULL,&error,1);
+        if(0==error)
+            percent=actual;
+        else
+            percent=10;
+// debug percent:
+//      printf(" percent %d\n",percent);
+    }
 
-    int percent=10;
     if(percent >= 0 && percent < 100) {
-        //    int debug_ticks;
-        //    rte_ticks(&debug_ticks);
-        //    if(debug_ticks%6000 > 1500) {
-        //    printf(" debug_ticks%6000 %4d\n", debug_ticks%6000);
+// debug percent:
+//            int debug_ticks;
+//            rte_ticks(&debug_ticks);
+//            if(debug_ticks%6000 > 1500) {
+//            printf(" debug_ticks%6000 %4d\n", debug_ticks%6000);
         irecv=(irecv+1)%MAX_RECV;
         rte_ticks(recv+irecv);
         if(!data_valid)
@@ -183,8 +197,9 @@ ssize_t read_mcast(int sock, char buf[], size_t buf_size, int it[6],
             int i;
             int icount_recv=0;
             for(i=0;i<MAX_RECV;i++) {
-                //             printf(" i %2d recv[i] %d irecv %2d recv[irecv] %d recv[irecv]-60*10 %d \n",
-                //                      i,recv[i],recv,recv[irecv],recv[irecv]-60*10);
+// debug percent:
+//                             printf(" i %2d recv[i] %d irecv %2d recv[irecv] %d recv[irecv]-60*100 %d recv_start %d\n",
+//                                      i,recv[i],irecv,recv[irecv],recv[irecv]-60*100,recv_start);
                 if(recv[i] > recv[irecv]-60*100)
                     icount_recv++;
             }
@@ -193,7 +208,8 @@ ssize_t read_mcast(int sock, char buf[], size_t buf_size, int it[6],
             int limit=expected*factor+0.5;
             if(limit<1)
                 limit=1;
-            //          printf(" icount_recv %d max counr %d\n", icount_recv,limit);
+// debug percent:
+//                     printf(" icount_recv %d max count %d\n", icount_recv,limit);
             if(icount_recv<=limit && to_count < 0) {
                 if(data_valid)
                     logitn(NULL,-29,"dn",100*(expected-icount_recv)/expected);
@@ -203,7 +219,8 @@ ssize_t read_mcast(int sock, char buf[], size_t buf_size, int it[6],
             }
         }
         was_count_recv=shm_addr->dbbc3_command_count;
-        //    }
+// debug percent:
+//           }
     }
 
     if(to_try > -1) { /* summary if NOT a time-out */
