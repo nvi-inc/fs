@@ -175,9 +175,10 @@ ssize_t read_mcast(int sock, char buf[], size_t buf_size, int it[6],
         //    printf(" debug_ticks%6000 %4d\n", debug_ticks%6000);
         irecv=(irecv+1)%MAX_RECV;
         rte_ticks(recv+irecv);
-        if(shm_addr->dbbc3_command_active ||
-                shm_addr->dbbc3_command_count != was_count_recv)
-            rte_ticks(&recv_start);
+        if(!data_valid)
+            if(shm_addr->dbbc3_command_active ||
+                    shm_addr->dbbc3_command_count != was_count_recv)
+                rte_ticks(&recv_start);
         if(recv_start<=recv[irecv]-60*100) {
             int i;
             int icount_recv=0;
