@@ -190,11 +190,11 @@ ssize_t read_mcast(int sock, char buf[], size_t buf_size, int it[6],
             }
             int expected=60/(shm_addr->dbbc3_mcast_arrival/100+1);
             float factor=1-percent/100.0;
-            int limit=expected*factor;
+            int limit=expected*factor+0.5;
             if(limit<1)
                 limit=1;
             //          printf(" icount_recv %d max counr %d\n", icount_recv,limit);
-            if(icount_recv<limit && to_count < 0) {
+            if(icount_recv<=limit && to_count < 0) {
                 if(data_valid)
                     logitn(NULL,-29,"dn",100*(expected-icount_recv)/expected);
                 else
