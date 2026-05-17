@@ -38,7 +38,9 @@ Settable Parameters:
             It is recommended to NOT use 'force_plus'. If it is used, it
             behaves the same as 'force' except that it also sets the device to
             have the nominal values for 'mode', 'ref_source', 'ref_freq',
-            'ref_doubler' 'ref_divider', and 'freq_offset'.
+            'ref_doubler' 'ref_divider', and 'freq_offset'. The 'att' value is
+            NOT set because the FS does not know the factory determined value,
+            which can vary by board.
 
             If this parameter's value is 'check', the following settings of
             the device are checked:
@@ -51,6 +53,11 @@ Settable Parameters:
               (vii) 'ref_divider' is 'disable'
              (viii) 'offset' is '0'
                (ix) 'lock' status is 'locked'.
+
+            Any deviations from what is expected are reported as errors.
+
+            The 'att' setting is NOT checked because the FS does not know the
+            factory determined value, which can vary by board.
 
 Monitor-only Parameters:
 
@@ -158,6 +165,9 @@ summarized below.
                  (ix) 'lock' status is 'locked'.
 
               Any deviations from what is expected are reported as errors.
+
+              The 'att' setting is NOT checked because the FS does not know
+              the factory determined value, which can vary by board.
 
               Just as for Setting, the values of 'freq' and 'output' set the
               FS model for that IF.
