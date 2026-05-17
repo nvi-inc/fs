@@ -74,6 +74,7 @@ ssize_t read_mcast(int sock, char buf[], size_t buf_size, int it[6],
     static int irecv;
     static int recv_start;
     static int percent=-1;
+    static int was_recv_valid_error;
 
     if(!recv_start)
        rte_ticks(&recv_start);
@@ -189,10 +190,18 @@ ssize_t read_mcast(int sock, char buf[], size_t buf_size, int it[6],
 //            printf(" debug_ticks%6000 %4d\n", debug_ticks%6000);
         irecv=(irecv+1)%MAX_RECV;
         rte_ticks(recv+irecv);
-        if(!data_valid)
-            if(shm_addr->dbbc3_command_active ||
-                    shm_addr->dbbc3_command_count != was_count_recv)
+        if(shm_addr->dbbc3_command_active ||
+                shm_addr->dbbc3_command_count != was_count_recv) {
+// debug percent:
+//            printf(" irecv %d recv[irecv] %d >was_recv+500 %d\n",
+//                     irecv,recv[irecv],was_recv+500);
+            if(!data_valid)
                 rte_ticks(&recv_start);
+            else if(to_count <= 0 && recv[irecv]>=was_recv_valid_error+500) { /* <= for not counting OR none so far */
+                logit(NULL,-44,"dn");
+                was_recv_valid_error=recv[irecv];
+            }
+        }
         if(recv_start<=recv[irecv]-60*100) {
             int i;
             int icount_recv=0;
@@ -206,15 +215,15 @@ ssize_t read_mcast(int sock, char buf[], size_t buf_size, int it[6],
             int expected=60/(shm_addr->dbbc3_mcast_arrival/100+1);
             float factor=1-percent/100.0;
             int limit=expected*factor+0.5;
-            if(limit<1)
-                limit=1;
+            if (limit>=expected)
+                limit=expected-1;;
 // debug percent:
 //                     printf(" icount_recv %d max count %d\n", icount_recv,limit);
-            if(icount_recv<=limit && to_count < 0) {
+            if(icount_recv<=limit && to_count < 0) { /* < for not counting */
                 if(data_valid)
-                    logitn(NULL,-29,"dn",100*(expected-icount_recv)/expected);
+                    logitn(NULL,-29,"dn",(int) (0.5+100.0*(expected-icount_recv)/expected));
                 else
-                    logitn(NULL,29,"dn",100*(expected-icount_recv)/expected);
+                    logitn(NULL,29,"dn",(int) (0.5+100.0*(expected-icount_recv)/expected));
                 rte_ticks(&recv_start);
             }
         }
