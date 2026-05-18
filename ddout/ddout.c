@@ -894,6 +894,8 @@ Messenger:
     if (memcmp(cp2,"td",2)==0) {  /* TNX add */
       short ix;
       char empty[]= {0};
+      int header=TRUE;
+      int add=TRUE;
       memcpy(&ix,buf+2,2);
       memcpy(ierrch,buf,2);
       count=-1;
@@ -902,14 +904,30 @@ Messenger:
           if(ptr->count==0) {
             ddout_logit(NULL,-317,"lh");
             goto Messenger;
-          }
-          else if(ptr->count==1) {
+          } else if(ptr->count==1) {
             insert_error(ptr,ierrch,ix,count,&last,&first,empty,NULL);
-            break;
+            add=FALSE;
+          }
+          if(ptr->on) {
+            if(header) {
+              sprintf(buf2,"Existing instances of %2.2s,%d are 'on' (listed below); use 'tnx=%2.2s,%d,off,#-1' if you want them all 'off' also.",
+                  ptr->ch,ix,ptr->ch,ix);
+              ddout_logite(buf2,3,"lh");
+              header=FALSE;
+            }
+            if(ptr->example==NULL)
+              sprintf(buf2,"tnx/%2.2s,%d,%s,#%d,{%s},{}",
+                  ptr->ch,ptr->num,offon[ptr->on],
+                  ptr->count,ptr->string);
+            else
+              sprintf(buf2,"tnx/%2.2s,%d,%s,#%d,{%s},{%s}",
+                  ptr->ch,ptr->num,offon[ptr->on],
+                  ptr->count,ptr->string,ptr->example);
+            ddout_logit(buf2,0,"lh");
           }
         }
       }
-      if(ptr==NULL)
+      if(add)
         add_error(NULL,ierrch,ix,count,&last,&first,empty,NULL);
       goto Messenger;
     }

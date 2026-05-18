@@ -4382,6 +4382,9 @@ LG   -1 Place Holder for lgerr Error
 LG    1 Place Holder for lgerr Warning
 
 ""
+LH    3 Place Holder for tnx add hint
+
+""
 LH   -1 Place Holder for tnx off
 
 ""
