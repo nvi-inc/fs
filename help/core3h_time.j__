@@ -33,27 +33,27 @@ This command samples the 'time' of Core3H 'board' at the start of the next FS
 UTC second.
 
 If the 'difference' parameter is '0' ,the board's time aligns with the FS time
-at the one second level. A value of '0' should only be expected if (i) he
+at the one second level. A value of '0' should only be expected if (i) the
 'computer' FS time model is being used and the computer is accurately synced
-to NTP or (ii) the 'rete; model is being and has been synced to the formatter
+to NTP or (ii) the 'rete' model is being and has been synced to the formatter
 and has an accurate rate. If one of those two conditions is met and the value
 is not '0', the Core3H board probably has the wrong time.
 
 If 'board' is specified as 'next', the board requested is one greater than the
 previous board requested (wrapping back to '1' after the last board specified
-by the number of IFs in 'dbbc3.ctl').  This applies regardless of whether the
+by the number of IFs in 'dbbc3.ctl'). This applies regardless of whether the
 previous request used 'next' or specified a board explicitly. The board for
 'next' is determined by the previous request and not the previous board that
 had a successful response; this prevents' 'next' from getting stuck on a board
-with a problem.  After a FS restart, the 'next' board is '1'.
+with a problem. After a FS restart, the 'next' board is '1'.
 
 It may take more than one second for the board to respond. As a result, the
-board 'time' shown may not match the FS log time stamp.  However, 'difference'
+board 'time' shown may not match the FS log time stamp. However, 'difference'
 is calculated as the board time returned minus the FS time when the request
 was made. If it is '0', they agree at the one second level.
 
 Another consequence of the board sometimes taking more than one second to
-respond is that consecutive 'core3H_mode=...' commands may not return board
+respond is that consecutive 'core3h_mode=...' commands may not return board
 times that are consecutive.
 
 The '(nominal)' VDIF epoch value is not returned by the board. It is
