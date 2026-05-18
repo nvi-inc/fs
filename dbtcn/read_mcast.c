@@ -64,7 +64,7 @@ ssize_t read_mcast(int sock, char buf[], size_t buf_size, int it[6],
 
     static unsigned was_count_next = 0;
     unsigned was_count;
-    static unsigned was_count_recv = 0;;
+    static unsigned was_count_recv = 0;
 
     static int kfirst=TRUE;
 
@@ -217,7 +217,7 @@ ssize_t read_mcast(int sock, char buf[], size_t buf_size, int it[6],
             float factor=1-percent/100.0;
             int limit=expected*factor+0.5;
             if (limit>=expected)
-                limit=expected-1;;
+                limit=expected-1;
 // debug percent:
 //                     printf(" icount_recv %d max count %d\n", icount_recv,limit);
             if(icount_recv<=limit && to_count < 0) { /* < for not counting */
