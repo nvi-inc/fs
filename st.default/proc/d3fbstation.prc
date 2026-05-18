@@ -399,6 +399,7 @@ synth_mode=loh,*,*,force
 op_stream="Synthesizer setting complete. Only defined synthesizers were set."
 enddef
 define  dbbc3_synth   00000000000x
+ext_lo=
 synth_mode=
 synth_mode=loa,,,check
 synth_mode=lob,,,check
