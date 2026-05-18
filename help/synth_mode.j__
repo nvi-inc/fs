@@ -83,7 +83,8 @@ Monitor-only Parameters:
 
                 See "Pre-filter Side-band" in Comments for more details.
 
-  att           attenuation, '0.0' through '31.5' dB in '0.5' dB steps.
+  att           attenuation, '0.0' through '31.5' dB in '0.5' dB steps. For
+                reference only - is not checked, nor can it be set.
 
   mode          'CW', 'SWEEP', or 'LIST' (or 'unknown', if not one of three
                 preceding values). For 'check', any value except 'CW' will
