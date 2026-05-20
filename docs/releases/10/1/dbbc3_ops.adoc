@@ -1996,10 +1996,10 @@ interpreted as `1`.
 +
 
 This variable controls the threshold for percentage loss reports
-(warnings and errors) of multicast messages in the last 60 seconds, if
+(warnings or errors) of multicast messages in the last 60 seconds, if
 there have been _no_ time-outs. (Getting a time-out is a more severe
 problem and will override percentage loss reports.) The default value
-is `10`. That is to say, if 10% or more of the expected messages are
+is `10`. That is to say, if more than 10% of the expected messages are
 lost (with no time-outs, including since the last report of
 time-outs), the loss is reported. When `data_valid` is `off`, a
 warning is issued; any DBBC3 command (or use of _fmset_) will restart
