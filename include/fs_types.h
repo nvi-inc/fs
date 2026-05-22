@@ -115,3 +115,4 @@
 #include "dbbc3_core3h_time_ds.h"
 #include "dbbc3_synthesizer_ds.h"
 #include "dbbc3_ext_lo_ds.h"
+#include "dbbc3_pps_delay_ds.h"

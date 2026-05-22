@@ -47,7 +47,7 @@ dbbc3_cont_cal.o dbbc3_cont_cal_dis.o dbbc3_iftpx.o dbbc3_iftpx_dis.o\
 lo_config.o dbbc3_core3h_modex.o dbbc3_core3h_modex_dis.o\
 dbbc3_mcast_time.o dbbc3_core3h_time.o dbbc3_core3h_time_dis.o\
 dbbc3_synthesizer.o dbbc3_synthesizer_dis.o dbbc3_ext_lo.o dbbc3_ext_lo_dis.o\
-rxg_reload.o get_rxgain_files.o
+rxg_reload.o get_rxgain_files.o dbbc3_pps_delay.o dbbc3_pps_delay_dis.o
 #mk6_record.o mk6_record_dis.o 
 
 LDLIBS += -lm

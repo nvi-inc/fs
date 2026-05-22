@@ -491,6 +491,9 @@ loop:
       case 136:
 	rxg_reload(&command,itask,ip);
 	break;
+      case 137:
+	dbbc3_pps_delay(&command,itask,ip);
+	break;
 /* end modified mb */
       default:
 	ierr=-4;

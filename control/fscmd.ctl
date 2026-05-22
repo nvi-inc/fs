@@ -613,6 +613,7 @@ core3h_time  qkr 13301 01 4000FFFFFFFF
 synth_mode   qkr 13401 01 4000FFFFFFFF
 ext_lo       qkr 13501 01 4000FFFFFFFF
 rxg_reload   qkr 13601 01 4000FFFFFFFF
+pps_delay    qkr 13701 01 4000FFFFFFFF
 * boss internal
 cont         *xx 00000 02 FFFFFFFFFFFF
 halt         *xx 00000 03 FFFFFFFFFFFF

@@ -3452,6 +3452,18 @@ Error decoding dbbctpifX/ response, could be a DBBC3 version mis-match, see erro
 DT -451
 Class buffer error from command response.
 ""
+DU -301
+Np parameters allowed for pps_delay
+""
+DU -401
+Class buffer error from monitor response.
+""
+DU -402 Place holder for pps_delay response string
+
+""
+DU -403
+Error decoding pps_delay response, above DU -402 error shows the string that did not decode.
+""
 DV -201
 Error decoding channel number of parameter 1
 ""
