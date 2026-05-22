@@ -76,6 +76,8 @@ ssize_t read_mcast(int sock, char buf[], size_t buf_size, int it[6],
     static int percent=-1;
     static int was_recv_valid_error;
 
+    static int last_data_valid_no_dbbc3_cmd_to=0;
+
     if(!recv_start)
        rte_ticks(&recv_start);
 
@@ -133,7 +135,12 @@ ssize_t read_mcast(int sock, char buf[], size_t buf_size, int it[6],
                 rte_time(it,it+5);
                 seconds0=it[1]+60*it[2];
             }
-            logit(NULL,-27,"dn");
+            int now;
+            rte_ticks(&now);
+            if(last_data_valid_no_dbbc3_cmd_to==0 || now>last_data_valid_no_dbbc3_cmd_to+1000) {
+                logit(NULL,-27,"dn");
+                last_data_valid_no_dbbc3_cmd_to=now;
+            }
         } else {
 //            logite(";\" INFO: multicast time-out with DBBC3 commands (or FMSET) while data_valid=off",0,NULL);
             logit_nd(" INFO: multicast time-out with DBBC3 commands (or FMSET) while data_valid=off",0,NULL);
@@ -190,11 +197,11 @@ ssize_t read_mcast(int sock, char buf[], size_t buf_size, int it[6],
     rte_ticks(recv+irecv);
     if(shm_addr->dbbc3_command_active ||
             shm_addr->dbbc3_command_count != was_count_recv) {
-//            printf(" irecv %d recv[irecv] %d >was_recv+500 %d\n",
-//                     irecv,recv[irecv],was_recv+500);
+//            printf(" irecv %d recv[irecv] %d >was_recv+1000 %d\n",
+//                     irecv,recv[irecv],was_recv+1000);
         if(!data_valid)
             rte_ticks(&recv_start);
-        else if(to_count <= 0 && recv[irecv]>=was_recv_valid_error+500) { /* <= for not counting OR none so far */
+        else if(to_count <= 0 && recv[irecv]>=was_recv_valid_error+1000) { /* <= for not counting OR none so far */
             logit(NULL,-44,"dn");
             was_recv_valid_error=recv[irecv];
         }
