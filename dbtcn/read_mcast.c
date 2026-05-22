@@ -110,11 +110,11 @@ ssize_t read_mcast(int sock, char buf[], size_t buf_size, int it[6],
              * if we don't expect an error */
 
             if(!data_valid) {
-//                logite(";\" INFO: multicast time-out with no DBBC3 commands while data_valid=off",0,NULL);
-                logit_nd(" INFO: multicast time-out with no DBBC3 commands while data_valid=off",0,NULL);
+//                logite(";\" INFO: multicast time-out with no DBBC3 commands (nor FMSET) while data_valid=off",0,NULL);
+                logit_nd(" INFO: multicast time-out with no DBBC3 commands (nor FMSET) while data_valid=off",0,NULL);
             } else {
-//                logite(";\" INFO: multicast time-out with no DBBC3 commands while data_valid=on",0,NULL);
-                logit_nd(" INFO: multicast time-out with no DBBC3 commands while data_valid=on",0,NULL);
+//                logite(";\" INFO: multicast time-out with no DBBC3 commands (nor FMSET) while data_valid=on",0,NULL);
+                logit_nd(" INFO: multicast time-out with no DBBC3 commands (nor FMSET) while data_valid=on",0,NULL);
             }
             to_count++;
             if(to_count == 0) {
