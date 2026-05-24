@@ -123,6 +123,9 @@ int nRDBE;
 int clear_area=0;
 int vdif_epoch, vdif_should;
 int kfirst = 1;
+int pps_delay[MAX_DBBC3_IF];
+int iIndex, use_setcl;
+
  putpname("fmset");
 skd_set_return_name("fmset");
 setup_ids();         /* connect to shared memory segment */
@@ -273,7 +276,9 @@ build:
 mvwaddstr( maindisp, 2, 6, "fmset - VLBA/Mark IV/S2-DAS/S2-RT/Mark5B/FiLa10G/RDBE/DBBC3 time set" );
  if(source == DBBC3) {
    column=6;
-   hint_row=10;
+   hint_row=11;
+   if(shm_addr->dbbc3_ddc_ifs>4)
+     hint_row++;
    if(1==iCore3H) {
      form="Core3H-1";
      mvwaddstr( maindisp, 4, column, "Core3H-1    " );
@@ -351,25 +356,26 @@ irow=0;
 if (source==DBBC3) {
  sprintf(buffer, "Use '1'-'%d' for          Core3H board 1-%d.",nCore3H,nCore3H);
  mvwaddstr( maindisp, hint_row+0, column,buffer);
- sprintf(buffer, "Use 'n'     for next     Core3H board (wraps around).");
+ sprintf(buffer, "Use 'n'/'p' for next/previous Core3H board (wraps around).");
  mvwaddstr( maindisp, hint_row+1, column,buffer);
- sprintf(buffer, "Use 'p'     for previous Core3H board (wraps around).");
- mvwaddstr( maindisp, hint_row+2, column, buffer);
  sprintf(buffer, "Use '+'     to increment %s time by one second.",form);
- mvwaddstr( maindisp, hint_row+4, column,buffer);
+ mvwaddstr( maindisp, hint_row+3, column,buffer);
  sprintf(buffer,"    '-'     to decrement %s time by one second." ,form);
+ mvwaddstr( maindisp, hint_row+4, column, buffer);
+ sprintf(buffer, "    '='     to be prompted for a new %s time or use GPS.",form);
  mvwaddstr( maindisp, hint_row+5, column, buffer);
- sprintf(buffer, "    '='     to be prompted for a new %s time.",form);
- mvwaddstr( maindisp, hint_row+6, column, buffer);
  sprintf(buffer, "    '.'     to set %s time to Field System time.",form);
- mvwaddstr( maindisp, hint_row+7, column, buffer);
- irow=8;
+ mvwaddstr( maindisp, hint_row+6, column, buffer);
+ irow=7;
 } else {
  sprintf(buffer, "Use '+'     to increment %s time by one second.",form);
    mvwaddstr( maindisp, hint_row, column,buffer);
  sprintf(buffer,"    '-'     to decrement %s time by one second." ,form);
  mvwaddstr( maindisp, hint_row+1, column, buffer);
- sprintf(buffer, "    '='     to be prompted for a new %s time.",form);
+ if(source==DBBC)
+   sprintf(buffer, "    '='     to be prompted for a new %s time or use GPS.",form);
+ else
+   sprintf(buffer, "    '='     to be prompted for a new %s time.",form);
  mvwaddstr( maindisp, hint_row+2, column, buffer);
  sprintf(buffer, "    '.'     to set %s time to Field System time.",form);
  mvwaddstr( maindisp, hint_row+3, column, buffer);
@@ -447,7 +453,7 @@ do 	{
 		  mk5b_1pps,sizeof(mk5b_1pps),
 		  mk5b_clock_freq,sizeof(mk5b_clock_freq),
 		  mk5b_clock_source,sizeof(mk5b_clock_source),
-		  &vdif_epoch,&ierr); /* get times */
+		  &vdif_epoch,pps_delay,&ierr); /* get times */
 
 	vdif_should=-1;
 	if(formtime>=0) {
@@ -547,6 +553,36 @@ do 	{
 		  form,vdif_should);
 	  mvwaddstr( maindisp, 8, column, buffer );
 	  
+          if(source==DBBC3) {
+              int imax=4;
+              if(shm_addr->dbbc3_ddc_ifs<imax)
+                  imax=shm_addr->dbbc3_ddc_ifs;
+              if(imax==1)
+                  sprintf(buffer,"pps_delay: board    1:",imax);
+              else
+                  sprintf(buffer,"pps_delay: boards 1-%d:",imax);
+              for(i=0;i<imax;i++) {
+                  sprintf(buffer+strlen(buffer)," %10d",pps_delay[i]);
+                  if(i!=imax-1)
+                      strcat(buffer,",");
+              }
+              mvwaddstr( maindisp, 9, column, buffer );
+              if(4<shm_addr->dbbc3_ddc_ifs) {
+                  imax=8;
+                  if(shm_addr->dbbc3_ddc_ifs<imax)
+                      imax=shm_addr->dbbc3_ddc_ifs;
+                  if(imax==5)
+                      sprintf(buffer,"           board    5:",imax);
+                  else
+                      sprintf(buffer,"           boards 5-%d:",imax);
+                  for(i=4;i<imax;i++) {
+                      sprintf(buffer+strlen(buffer)," %10d",pps_delay[i]);
+                      if(i!=imax-1)
+                          strcat(buffer,",");
+                  }
+                  mvwaddstr( maindisp,10, column, buffer );
+              }
+          }
           if(kfirst) {
             kfirst=0;
             goto build;
@@ -738,11 +774,13 @@ do 	{
             kfirst=1;
 	  goto build;
 	case 'n':
+	case 'N':
 	  if(source== DBBC3)
 	    iCore3H=1+ iCore3H%nCore3H;
           kfirst=1;
 	  goto build;
 	case 'p':
+	case 'P':
 	  if(source== DBBC3)
               iCore3H=1+ (iCore3H-2+nCore3H)%nCore3H;
           kfirst=1;
@@ -830,28 +868,36 @@ if(rack == RDBE && changedfm) {
       }
 }
 endwin ();
- if(changedfm && rack !=RDBE) {
-   logit("Formatter time reset.",0,NULL);
-   if(shm_addr->time.model != 'c' && shm_addr->time.model!='n'
-      && shm_addr->time.icomputer[01 & shm_addr->time.index]==0)
-     if(formtime < 0) {
-       logit("Last FMSET formatter communication returned an error.",0,NULL);
-       logit("Please reset FS time manually.",0,NULL);
-       fprintf(stderr,"\n**\nLast FMSET formatter communication returned an error.\n");
-       fprintf(stderr,"Please reset FS time manually.\n**\n\n");
-       rte_sleep(SLEEP_TIME);
-       logit(NULL,-7,"fv");
+iIndex = 01 & shm_addr->time.index;
 
-     } else 
-       skd_run_arg("setcl",' ',ipr,"setcl offset");
-   else
-     if(formtime >0 )
-       skd_run_arg("setcl",' ',ipr,"setcl");
- }
- if(changeds2das) {
-   logit("S2DAS time reset.",0,NULL);
-   skd_run_arg("setcl",' ',ipr,"setcl s2das");
- }
+use_setcl=shm_addr->time.model != 'n' && shm_addr->time.model != 'c' &&
+shm_addr->time.icomputer[iIndex]==0;
+
+if(changedfm && rack !=RDBE) {
+    logit("Formatter time reset.",0,NULL);
+    if(use_setcl) {
+        if(formtime < 0) {
+            logit("Last FMSET formatter communication returned an error.",0,NULL);
+            logit("Please reset FS time manually.",0,NULL);
+            fprintf(stderr,"\n**\nLast FMSET formatter communication returned an error.\n");
+            fprintf(stderr,"Please reset FS time manually.\n**\n\n");
+            rte_sleep(SLEEP_TIME);
+            logit(NULL,-7,"fv");
+        } else {
+            logit("Resetting FS time with setcl.",0,NULL);
+            if(source==DBBC3)
+                rte_sleep(501);
+            skd_run_arg("setcl",' ',ipr,"setcl offset");
+        }
+    }
+}
+if(changeds2das) {
+    logit("S2DAS time reset.",0,NULL);
+    if(use_setcl) {
+        logit("Resetting FS time with setcl.",0,NULL);
+        skd_run_arg("setcl",' ',ipr,"setcl s2das");
+    }
+}
 exit(0);
 
 }

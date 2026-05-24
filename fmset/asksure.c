@@ -46,14 +46,24 @@ char buffer[80];
 nodelay ( maindisp, FALSE );
 echo ();
 
- if( sync) {
- sprintf(buffer,
-	 "Are you sure you want to sync the %9s (y/n) ?      ",
-       /* 0123456789012345678901234567890123456789012345678901234567890 */
-	 form);
- mvwprintw( maindisp, ROWA+1, COL0, buffer);
- mvwscanw(  maindisp, ROWA+1, COL0+52, "%1s", answer );
- }
+if( sync) {
+    if(source==DBBC3) {
+        wstandout(maindisp);
+        mvwprintw( maindisp, ROWA+0, COL0,
+                "CHECK TIME AND PPS_DELAY OF EACH CORE3H AFTER SYNCING.");
+        /* 0123456789012345678901234567890123456789012345678901234567890 */
+        wstandend(maindisp);
+        mvwprintw( maindisp, ROWA+1, COL0,
+        "Are you sure you want to sync the DBBC3 (y/n) ?      ");
+        /* 0123456789012345678901234567890123456789012345678901234567890 */
+    } else
+        sprintf(buffer,
+                "Are you sure you want to sync the %9s (y/n) ?      ",
+                /* 0123456789012345678901234567890123456789012345678901234567890 */
+                form);
+    mvwprintw( maindisp, ROWA+1, COL0, buffer);
+    mvwscanw(  maindisp, ROWA+1, COL0+52, "%1s", answer );
+}
  if ( m5rec && (answer[0] == 'Y' || answer[0] == 'y' || !sync)) {
    if(sync)
      sprintf(buffer,

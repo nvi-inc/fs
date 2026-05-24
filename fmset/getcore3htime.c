@@ -47,7 +47,7 @@ extern int iCore3H;
 
 void rte2secs();
 
-void getcore3htime(unixtime,unixhs,fstime,fshs,formtime,formhs,vdif_epoch)
+void getcore3htime(unixtime,unixhs,fstime,fshs,formtime,formhs,vdif_epoch,pps_delay)
 time_t *unixtime; /* computer time */
 int    *unixhs;
 time_t *fstime; /* field system time */
@@ -55,6 +55,7 @@ int    *fshs;
 time_t *formtime; /* formatter time received from mcbcn */
 int    *formhs;
 int    *vdif_epoch;
+int    pps_delay[ ];
 {
 	int centisec[6], centiavg, centidiff, hsdiff;
         int it[6], sleep;
@@ -67,6 +68,68 @@ int    *vdif_epoch;
 	char buff[80];
         int formtime32;
         int fstime32;
+        int i, iwait;
+
+        if(synch) {
+            synch=0;
+            iwait=0;
+            mvwaddstr( maindisp, 4, 10+11,
+                    "                                       ");
+            mvwaddstr( maindisp, 4, 10+11+39 , "               ");
+            mvwaddstr( maindisp, 5, 10+11,
+                    "                                       ");
+            mvwaddstr( maindisp, 5, 10+11+39 , "               ");
+            mvwaddstr( maindisp, 6, 10+11,
+                    "                                       ");
+            mvwaddstr( maindisp, 6, 10+11+39 , "               ");
+
+            out_recs=0;
+            out_class=0;
+
+            str="pps_sync";
+            cls_snd(&out_class, str, strlen(str) , 0, 0);
+            out_recs++;
+            logit("DBBC3 sync command sent.",0,NULL);
+
+            ip[0]=8;
+            ip[1]=out_class;
+            ip[2]=out_recs;
+
+            nsem_take("fsctl",0);
+            name="dbbcn";
+            while(skd_run_to(name,'w',ip,120)==1) {
+                if (nsem_test("fs   ") != 1) {
+                    endwin();
+                    fprintf(stderr,"Field System not running - fmset aborting\n");
+                    rte_sleep(SLEEP_TIME);
+                    exit(0);
+                }
+                name=NULL;
+            }
+
+            skd_par(ip);
+            nsem_put("fsctl");
+            if(ip[1]!=0)
+                cls_clr(ip[0]);
+            if(ip[2] != 0) {
+                logita(NULL,ip[2],ip+3,ip+4);
+                logit(NULL,-9,"fv");
+                *formtime=-1;
+                return;
+            }
+	    wstandout(maindisp);
+	    mvwaddstr( maindisp, 4, 21, "Allowing DBBC3 to settle ");
+	    leaveok ( maindisp, FALSE); /* leave cursor in place */
+	    wrefresh ( maindisp );
+	    for(i=0;i<30;i++) {  /*wait for 2nd next 1 PPS before continuing */
+	      rte_sleep(100);
+	      mvwaddstr( maindisp, 4,21+25+i, ".");
+	      leaveok ( maindisp, FALSE); /* leave cursor in place */
+	      wrefresh ( maindisp );
+	    }
+	    mvwaddstr( maindisp, 4,21+25+i, " ");
+	    wstandend(maindisp);
+        }
 
         if(synch) {
             synch=0;
@@ -107,7 +170,7 @@ int    *vdif_epoch;
         }
 
         nsem_take("fsctl",0);
-        if(get_core3htime(centisec,it,ip,1,iCore3H,vdif_epoch)!=0) {
+        if(get_core3htime(centisec,it,ip,1,iCore3H,vdif_epoch,pps_delay)!=0) {
 	  endwin();
 	  fprintf(stderr,"Field System not running - fmset aborting\n");
 	  exit(0);

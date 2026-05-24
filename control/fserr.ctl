@@ -983,6 +983,12 @@ error decoding VDIF epoch in get_core3htime
 10 -413
 error decoding time in get_core3htime
 ""
+10 -414
+error retrieving class for pps_delay query in get_core3htime
+""
+10 -415
+error decoding pps_delay in get_core3htime
+""
 AN   -1
 Illegal or unimplemented mode
 ""

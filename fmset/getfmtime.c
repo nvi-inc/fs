@@ -39,7 +39,8 @@ extern int s2type;
 extern char s2dev[2][3];
 
 void getfmtime(unixtime,unixhs,fstime,fshs,formtime,formhs,m5sync,sz_m5sync,
-	       m5pps,sz_m5pps,m5freq,sz_m5freq,m5clock,sz_m5clock,vdif_epoch,ierr)
+	       m5pps,sz_m5pps,m5freq,sz_m5freq,m5clock,sz_m5clock,vdif_epoch,
+               pps_delay,ierr)
 time_t *unixtime; /* computer time */
 int    *unixhs;
 time_t *fstime; /* field system time */
@@ -55,6 +56,7 @@ int sz_m5freq;
 char *m5clock;
 int sz_m5clock;
 int *vdif_epoch;
+int pps_delay[];
 int *ierr;
 {
   static int phase =-1;
@@ -110,7 +112,7 @@ int *ierr;
 	     ) {
     getfila10gtime(unixtime,unixhs,fstime,fshs,formtime,formhs);
   } else if (source == DBBC3) {
-    getcore3htime(unixtime,unixhs,fstime,fshs,formtime,formhs,vdif_epoch);
+    getcore3htime(unixtime,unixhs,fstime,fshs,formtime,formhs,vdif_epoch,pps_delay);
   }  else if (source == S2) {
     gets2time(s2dev[s2type],unixtime,unixhs,fstime,fshs,formtime,formhs);
   } else if(rack&VLBA)

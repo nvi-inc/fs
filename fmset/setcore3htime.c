@@ -62,7 +62,8 @@ int count;
    (void) strftime(outbuf+strlen(outbuf),sizeof(outbuf)-strlen(outbuf),
 		   "timesync %Y-%m-%dT%H:%M:%S",formtm);
  }
- logit(outbuf,0,NULL);
+ sprintf(inbuf,"Core3H-%d time-set command sent.",iCore3H);
+ logit(inbuf,0,NULL);
  
  count=strlen(outbuf);		
 
