@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, 2022, 2025 NVI, Inc.
+ * Copyright (c) 2020, 2022, 2025, 2026 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -82,6 +82,7 @@ int synch=0;
 int nanosec=-1;
 static int ipr[5] = { 0, 0, 0, 0, 0};
 int dbbc_sync=0;
+int nCore3H;
 
 main()  
 {
@@ -122,7 +123,6 @@ int nRDBE;
 int clear_area=0;
 int vdif_epoch, vdif_should;
 int kfirst = 1;
-int nCore3H;
  putpname("fmset");
 skd_set_return_name("fmset");
 setup_ids();         /* connect to shared memory segment */
@@ -238,7 +238,7 @@ else if (drive==S2) {
     fprintf(stderr,"fmset does not support LBA racks - fmset aborting\n");
   else
     fprintf(stderr,
-	    "fmset requires a VLBA/VLBA4/Mark IV/LBA4/S2-DAS/S2-RT/Mark5B/FILA10G or RDBE to set - fmset aborting\n");
+	    "fmset requires a VLBA/VLBA4/Mark IV/LBA4/S2-DAS/S2-RT/Mark5B/FILA10G/RDBE/DBBC3 - fmset aborting\n");
   rte_sleep(SLEEP_TIME);
   exit(0);
 } else {
@@ -270,7 +270,7 @@ build:
  clear_area=0;
  column=10;
  hint_row=8;
-mvwaddstr( maindisp, 2, 3, "fmset - VLBA & Mark IV formatter/S2-DAS/S2-RT/Mark5B/FiLa10G/RDBE time set" );
+mvwaddstr( maindisp, 2, 6, "fmset - VLBA/Mark IV/S2-DAS/S2-RT/Mark5B/FiLa10G/RDBE/DBBC3 time set" );
  if(source == DBBC3) {
    column=6;
    hint_row=10;
@@ -349,15 +349,21 @@ mvwaddstr( maindisp, 6, column,   "Computer" );
 
 irow=0;
 if (source==DBBC3) {
- sprintf(buffer, "FMSET cannot set Core3H (DBBC3) time, only display it");
- mvwaddstr( maindisp, hint_row+0, column,buffer);
  sprintf(buffer, "Use '1'-'%d' for          Core3H board 1-%d.",nCore3H,nCore3H);
- mvwaddstr( maindisp, hint_row+2, column,buffer);
+ mvwaddstr( maindisp, hint_row+0, column,buffer);
  sprintf(buffer, "Use 'n'     for next     Core3H board (wraps around).");
- mvwaddstr( maindisp, hint_row+3, column,buffer);
+ mvwaddstr( maindisp, hint_row+1, column,buffer);
  sprintf(buffer, "Use 'p'     for previous Core3H board (wraps around).");
- mvwaddstr( maindisp, hint_row+4, column, buffer);
- irow=6;
+ mvwaddstr( maindisp, hint_row+2, column, buffer);
+ sprintf(buffer, "Use '+'     to increment %s time by one second.",form);
+ mvwaddstr( maindisp, hint_row+4, column,buffer);
+ sprintf(buffer,"    '-'     to decrement %s time by one second." ,form);
+ mvwaddstr( maindisp, hint_row+5, column, buffer);
+ sprintf(buffer, "    '='     to be prompted for a new %s time.",form);
+ mvwaddstr( maindisp, hint_row+6, column, buffer);
+ sprintf(buffer, "    '.'     to set %s time to Field System time.",form);
+ mvwaddstr( maindisp, hint_row+7, column, buffer);
+ irow=8;
 } else {
  sprintf(buffer, "Use '+'     to increment %s time by one second.",form);
    mvwaddstr( maindisp, hint_row, column,buffer);
@@ -381,10 +387,13 @@ if (source==DBBC3) {
    mvwaddstr( maindisp, hint_row+irow++, column, buffer);
  }
  if(source != S2 && (rack& MK4 || rack &VLBA4 || source == MK5 ||
-		     source==DBBC 
+		     source==DBBC || source==DBBC3
     /* was:
      * rack==DBBC &&(rack_type==DBBC_DDC_FILA10G ||rack_type==DBBC_PFB_FILA10G) */
 		      || source==RDBE)) {
+   if(source==DBBC3)
+   sprintf(buffer, "    's'/'S' to send pps_sync to DBBC3 (VERY rarely needed)");
+   else
    sprintf(buffer, "    's'/'S' to SYNC %s (VERY rarely needed)",form);
    mvwaddstr( maindisp, hint_row+irow++, column, buffer);
  } 
@@ -415,6 +424,8 @@ if(source == RDBE && nRDBE > 1) {
 	       "    'd'/'D' to select rdbe-D.");
 }
 
+ if(source==DBBC3)
+    irow++;
  mvwaddstr( maindisp, hint_row+irow++, column,
 	    "Use <esc>   to quit: DON'T LEAVE FMSET RUNNING FOR LONG.");
 
@@ -601,8 +612,6 @@ do 	{
 	    shm_addr->disk_record.record.state.known==1;
 	  switch ( tolower(inc) ) {
 	case INC_KEY :  /* Increment seconds */
-          if(source==DBBC3)
-             goto build;
 	  if(m5rec)
 	    for (i=hint_row;i<hint_row+irow;i++)
 	      mvwaddstr( maindisp, i, 1, blank);
@@ -616,8 +625,6 @@ do 	{
 	  goto build;
 	  break;
 	case DEC_KEY :  /* Decrement seconds */
-          if(source==DBBC3)
-             goto build;
 	  if(m5rec)
 	    for (i=hint_row;i<hint_row+irow;i++)
 	      mvwaddstr( maindisp, i, 1, blank);
@@ -659,8 +666,6 @@ do 	{
 	  goto build;
 	  break;
 	case SET_KEY :  /* Get time from user */
-          if(source==DBBC3)
-             goto build;
 	  if(m5rec)
 	    for (i=hint_row;i<hint_row+irow;i++)
 	      mvwaddstr( maindisp, i, 1, blank);
@@ -679,8 +684,6 @@ do 	{
 	  goto build;
 	  break;
 	case EQ_KEY :  /* set form time to fs time */
-          if(source==DBBC3)
-             goto build;
 	  if(m5rec)
 	    for (i=hint_row;i<hint_row+irow;i++)
 	      mvwaddstr( maindisp, i, 1, blank);
@@ -788,7 +791,7 @@ do 	{
 	  for (i=hint_row;i<hint_row+irow;i++)
 	    mvwaddstr( maindisp, i, 1, blank);
 	  if(source != S2 && (rack& MK4 || rack &VLBA4 || source == MK5 ||
-			      source==DBBC 
+			      source==DBBC || source==DBBC3
    /* was:
     * rack==DBBC && (rack_type==DBBC_DDC_FILA10G ||rack_type==DBBC_PFB_FILA10G) */
 			       || source == RDBE) &&

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 NVI, Inc.
+ * Copyright (c) 2025, 2026 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -36,6 +36,7 @@
 
 extern int ip[5];           /* parameters for fs communications */
 extern unsigned char outbuf[512];     /* class i-o buffer */
+extern int synch;
 extern int rack, rack_type;
 extern int m5b_crate;
 extern int dbbcddcv;
@@ -66,6 +67,44 @@ int    *vdif_epoch;
 	char buff[80];
         int formtime32;
         int fstime32;
+
+        if(synch) {
+            synch=0;
+            out_recs=0;
+            out_class=0;
+
+            str="pps_sync";
+            cls_snd(&out_class, str, strlen(str) , 0, 0);
+            out_recs++;
+            logit("DBBC3 sync command sent.",0,NULL);
+
+            ip[0]=8;
+            ip[1]=out_class;
+            ip[2]=out_recs;
+
+            nsem_take("fsctl",0);
+            name="dbbcn";
+            while(skd_run_to(name,'w',ip,120)==1) {
+                if (nsem_test("fs   ") != 1) {
+                    endwin();
+                    fprintf(stderr,"Field System not running - fmset aborting\n");
+                    rte_sleep(SLEEP_TIME);
+                    exit(0);
+                }
+                name=NULL;
+            }
+
+            skd_par(ip);
+            nsem_put("fsctl");
+            if(ip[1]!=0)
+                cls_clr(ip[0]);
+            if(ip[2] != 0) {
+                logita(NULL,ip[2],ip+3,ip+4);
+                logit(NULL,-9,"fv");
+                *formtime=-1;
+                return;
+            }
+        }
 
         nsem_take("fsctl",0);
         if(get_core3htime(centisec,it,ip,1,iCore3H,vdif_epoch)!=0) {

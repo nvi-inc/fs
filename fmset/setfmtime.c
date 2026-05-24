@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020, 2026 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -57,6 +57,8 @@ if (nsem_test(NSEM_NAME) != 1) {
    * rack == DBBC && (rack_type == DBBC_DDC_FILA10G || rack_type == DBBC_PFB_FILA10G) */
 	   )
     setfila10gtime(formtime,delta);
+  else if (source == DBBC3)
+    setcore3htime(formtime,delta);
   else if (source == S2)
     sets2time(s2dev[s2type],formtime+delta);
   else if (rack & VLBA)

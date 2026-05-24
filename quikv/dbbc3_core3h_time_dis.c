@@ -102,6 +102,7 @@ int ip[5];
       }
       if(lclm.seconds_fm-lclm.seconds_fs != 0) {
         logitn(NULL,-406,"dl",lclm.iboard);
+        ip[2]=-408;
       }
     }
     shm_addr->dbbc3_core3h_time.previous_epoch = lclm.vdif_epoch;
