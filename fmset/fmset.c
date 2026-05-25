@@ -110,7 +110,7 @@ int changedfm=0;
  char *model;
  int epoch;
  int index,icomputer;
- int column,i;
+ int column,i,j;
 char mk5b_sync[13] ="";
 char mk5b_1pps[10] ="";
 char mk5b_clock_freq[10] ="";
@@ -471,7 +471,17 @@ do 	{
 		    disphs/10, vdif_epoch);
 	  disptm = gmtime(&disptime);
 	  strftime ( buffer, sizeof(buffer), fmt, disptm );
-	  mvwaddstr( maindisp, 4, column+15, buffer );
+	  if(source!=DBBC3)
+              mvwaddstr( maindisp, 4, column+15, buffer );
+	  else {
+              int differ=abs(fstime-formtime) > 1 || abs((fstime-formtime)*100 +fshs-formhs)>50;
+              wmove( maindisp, 4, column+15);
+              for(j=0;j<strlen(buffer);j++)
+                  if(differ && j<36)
+                      waddch(maindisp,buffer[j]|A_REVERSE);
+                  else
+                      waddch(maindisp,buffer[j]);
+	  }
 	  for(i=column+15+strlen(buffer); i<79;i++)
 	    mvwaddstr( maindisp, 4, i, " ");
 	  if(disptm->tm_year>99) {
