@@ -266,6 +266,9 @@ box ( maindisp, 0, 0 );  /* use default vertical/horizontal lines */
 
 /* build display screen */
 build:
+    if(source== DBBC3)
+        while (ERR!=wgetch( maindisp )) /* drain additional key presses */
+            ;
  if(clear_area) 
    for (i=4;i<hint_row+irow;i++)
      mvwaddstr( maindisp, i, 1, blank);
@@ -653,6 +656,9 @@ do 	{
 	wrefresh ( maindisp );
 
 	while (ERR!=(inc=wgetch( maindisp ))) {
+            if(source== DBBC3)
+                while (ERR!=wgetch( maindisp )) /* drain additional key presses */
+                    ;    /* this one is unlikely to be needed, but is safe */
 	  m5rec=source == MK5 &&
 	    shm_addr->disk_record.record.record==1 &&
 	    shm_addr->disk_record.record.state.known==1;
