@@ -574,12 +574,17 @@ do 	{
                   sprintf(buffer,"pps_delay: board    1:",imax);
               else
                   sprintf(buffer,"pps_delay: boards 1-%d:",imax);
+              mvwaddstr( maindisp, 9, column, buffer );
               for(i=0;i<imax;i++) {
-                  sprintf(buffer+strlen(buffer)," %10d",pps_delay[i]);
+                  sprintf(buffer," %10d",pps_delay[i]);
                   if(i!=imax-1)
                       strcat(buffer,",");
+                  for(j=0;j<strlen(buffer);j++)
+                      if(pps_delay[i]>100 && NULL!=strchr("01234567890-",buffer[j]))
+                          waddch(maindisp,buffer[j]|A_REVERSE);
+                      else
+                          waddch(maindisp,buffer[j]);
               }
-              mvwaddstr( maindisp, 9, column, buffer );
               if(4<shm_addr->dbbc3_ddc_ifs) {
                   imax=8;
                   if(shm_addr->dbbc3_ddc_ifs<imax)
@@ -588,12 +593,17 @@ do 	{
                       sprintf(buffer,"           board    5:",imax);
                   else
                       sprintf(buffer,"           boards 5-%d:",imax);
+                  mvwaddstr( maindisp,10, column, buffer );
                   for(i=4;i<imax;i++) {
-                      sprintf(buffer+strlen(buffer)," %10d",pps_delay[i]);
+                      sprintf(buffer," %10d",pps_delay[i]);
                       if(i!=imax-1)
                           strcat(buffer,",");
+                      for(j=0;j<strlen(buffer);j++)
+                          if(pps_delay[i]>100 && NULL!=strchr("01234567890-",buffer[j]))
+                              waddch(maindisp,buffer[j]|A_REVERSE);
+                          else
+                              waddch(maindisp,buffer[j]);
                   }
-                  mvwaddstr( maindisp,10, column, buffer );
               }
           }
           if(kfirst) {
