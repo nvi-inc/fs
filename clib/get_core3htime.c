@@ -54,6 +54,64 @@ int pps_delay[];
       out_recs=0;
       out_class=0;
 
+      str="pps_delay";
+      cls_snd(&out_class, str, strlen(str) , 0, 0);
+      out_recs++;
+
+      ip[0]=8;
+      ip[1]=out_class;
+      ip[2]=out_recs;
+
+      if(to!=0) {
+          char *name="dbbcn";
+          while(skd_run_to(name,'w',ip,120)==1) {
+              if (nsem_test("fs   ") != 1) {
+                  return 1;
+              }
+              name=NULL;
+          }
+      }	else
+          skd_run("dbbcn",'w',ip);
+
+      skd_par(ip);
+      if(ip[2] < 0) {
+          if(ip[1]!=0)
+              cls_clr(ip[0]);
+          return 0;
+      }
+
+      iclass=ip[0];
+      nrecs=ip[1];
+#ifdef DEBUG
+      printf(" get_core3htime: iclass %d nrecs %d\n",iclass,nrecs);
+#endif
+      for (irec=0;irec<nrecs;irec++) {
+          char *ptr;
+          if ((nchars =
+                      cls_rcv(iclass,inbuf,BUFSIZE,&rtn1,&rtn2,msgflg,save)) <= 0) {
+              ierr = -414;
+              goto error2;
+          }
+        inbuf[nchars]=0;
+#ifdef DEBUG
+          printf(" get_core3htime: irec %d inbuf '%s'\n",irec,inbuf);
+#endif
+          if(irec==0) {
+              int i;
+              ierr=dbbc3_2_pps_delay(i,&lclm,inbuf);
+              if(ierr!=0) {
+                  ierr=-415;
+                  goto error2;
+              }
+              for(i=0;i<MAX_DBBC3_IF;i++)
+                  pps_delay[i]=lclm.pps_delay[i];
+
+          }
+      }
+
+      out_recs=0;
+      out_class=0;
+
       sprintf(inbuf,"core3h=%d,time",iCore3H);
       cls_snd(&out_class, inbuf, strlen(inbuf) , 0, 0);
       out_recs++;
@@ -133,64 +191,6 @@ int pps_delay[];
 #endif
                   break;
 
-
-          }
-      }
-
-      out_recs=0;
-      out_class=0;
-
-      str="pps_delay";
-      cls_snd(&out_class, str, strlen(str) , 0, 0);
-      out_recs++;
-
-      ip[0]=8;
-      ip[1]=out_class;
-      ip[2]=out_recs;
-
-      if(to!=0) {
-          char *name="dbbcn";
-          while(skd_run_to(name,'w',ip,120)==1) {
-              if (nsem_test("fs   ") != 1) {
-                  return 1;
-              }
-              name=NULL;
-          }
-      }	else
-          skd_run("dbbcn",'w',ip);
-
-      skd_par(ip);
-      if(ip[2] < 0) {
-          if(ip[1]!=0)
-              cls_clr(ip[0]);
-          return 0;
-      }
-
-      iclass=ip[0];
-      nrecs=ip[1];
-#ifdef DEBUG
-      printf(" get_core3htime: iclass %d nrecs %d\n",iclass,nrecs);
-#endif
-      for (irec=0;irec<nrecs;irec++) {
-          char *ptr;
-          if ((nchars =
-                      cls_rcv(iclass,inbuf,BUFSIZE,&rtn1,&rtn2,msgflg,save)) <= 0) {
-              ierr = -414;
-              goto error2;
-          }
-        inbuf[nchars]=0;
-#ifdef DEBUG
-          printf(" get_core3htime: irec %d inbuf '%s'\n",irec,inbuf);
-#endif
-          if(irec==0) {
-              int i;
-              ierr=dbbc3_2_pps_delay(i,&lclm,inbuf);
-              if(ierr!=0) {
-                  ierr=-415;
-                  goto error2;
-              }
-              for(i=0;i<MAX_DBBC3_IF;i++)
-                  pps_delay[i]=lclm.pps_delay[i];
 
           }
       }

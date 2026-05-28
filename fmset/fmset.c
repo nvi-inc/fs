@@ -124,6 +124,7 @@ int clear_area=0;
 int vdif_epoch, vdif_should;
 int kfirst = 1;
 int pps_delay[MAX_DBBC3_IF];
+int dbbc3_comm_delay;
 int iIndex, use_setcl;
 
  putpname("fmset");
@@ -449,6 +450,8 @@ do 	{
 
 	char fmt[80];
 
+        if(source==DBBC3)
+            rte_sleep(75);
 	memset(mk5b_sync,' ',sizeof(mk5b_sync)-1);
 	mk5b_sync[sizeof(mk5b_sync)-1]=0;
 	getfmtime(&unixtime,&unixhs,&fstime, &fshs,
@@ -456,7 +459,7 @@ do 	{
 		  mk5b_1pps,sizeof(mk5b_1pps),
 		  mk5b_clock_freq,sizeof(mk5b_clock_freq),
 		  mk5b_clock_source,sizeof(mk5b_clock_source),
-		  &vdif_epoch,pps_delay,&ierr); /* get times */
+		  &vdif_epoch,pps_delay,&dbbc3_comm_delay,&ierr); /* get times */
 
 	vdif_should=-1;
 	if(formtime>=0) {
@@ -674,6 +677,8 @@ do 	{
 	    shm_addr->disk_record.record.state.known==1;
 	  switch ( tolower(inc) ) {
 	case INC_KEY :  /* Increment seconds */
+	  if(source==DBBC3)
+            formtime+=(dbbc3_comm_delay+50)/100;
 	  if(m5rec)
 	    for (i=hint_row;i<hint_row+irow;i++)
 	      mvwaddstr( maindisp, i, 1, blank);
@@ -687,6 +692,8 @@ do 	{
 	  goto build;
 	  break;
 	case DEC_KEY :  /* Decrement seconds */
+	  if(source==DBBC3)
+            formtime+=(dbbc3_comm_delay+50)/100;
 	  if(m5rec)
 	    for (i=hint_row;i<hint_row+irow;i++)
 	      mvwaddstr( maindisp, i, 1, blank);
@@ -750,7 +757,11 @@ do 	{
 	    for (i=hint_row;i<hint_row+irow;i++)
 	      mvwaddstr( maindisp, i, 1, blank);
 	  if(!m5rec ||asksure(maindisp,m5rec,0)) {
-	    setfmtime(formtime=fstime+(fshs+50)/100,0,vdif_epoch);
+	    if(source==DBBC3)
+              formtime=fstime+(fshs+dbbc3_comm_delay+50)/100;
+            else
+	       formtime=fstime+(fshs+50)/100;
+	    setfmtime(formtime,0,vdif_epoch);
 	    if(source == S2 && s2type == 1)
 	      changeds2das=1;
 	    else

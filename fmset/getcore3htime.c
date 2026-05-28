@@ -47,7 +47,8 @@ extern int iCore3H;
 
 void rte2secs();
 
-void getcore3htime(unixtime,unixhs,fstime,fshs,formtime,formhs,vdif_epoch,pps_delay)
+void getcore3htime(unixtime,unixhs,fstime,fshs,formtime,formhs,vdif_epoch,
+     pps_delay,dbbc3_comm_delay)
 time_t *unixtime; /* computer time */
 int    *unixhs;
 time_t *fstime; /* field system time */
@@ -56,6 +57,7 @@ time_t *formtime; /* formatter time received from mcbcn */
 int    *formhs;
 int    *vdif_epoch;
 int    pps_delay[ ];
+int    *dbbc3_comm_delay;
 {
 	int centisec[6], centiavg, centidiff, hsdiff;
         int it[6], sleep;
@@ -186,6 +188,7 @@ int    pps_delay[ ];
 
 	/* time before is more accurate */
 
+        *dbbc3_comm_delay=centisec[1]-centisec[0];
 	centisec[1]=centisec[0];
 	centisec[3]=centisec[2];
 	centisec[5]=centisec[4];
