@@ -569,7 +569,7 @@ do 	{
 	} else                             /* 123456789012345678901234567890123456789012345678901234 */
 	  mvwaddstr( maindisp, 6, column+15, "                                                      ");
 	if(source == RDBE || source==DBBC3) {
-	  sprintf(buffer,"Nominal VDIF Epoch for %s time is %d",
+	  sprintf(buffer,"Nominal VDIF Epoch for %s time is %d ",
 		  form,vdif_should);
 	  mvwaddstr( maindisp, 8, column, buffer );
 	  
