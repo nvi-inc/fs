@@ -127,6 +127,8 @@ int pps_delay[MAX_DBBC3_IF];
 int dbbc3_comm_delay;
 int iIndex, use_setcl;
 int pps_delay_display=1;
+int viewed[MAX_DBBC3_IF]= {0};
+int agree[MAX_DBBC3_IF]= {0};
 
  putpname("fmset");
 skd_set_return_name("fmset");
@@ -272,7 +274,7 @@ build:
         while (ERR!=wgetch( maindisp )) /* drain additional key presses */
             ;
  if(clear_area) 
-   for (i=4;i<hint_row+irow;i++)
+   for (i=4;i<hint_row+irow-2;i++)
      mvwaddstr( maindisp, i, 1, blank);
 
  clear_area=0;
@@ -281,7 +283,7 @@ build:
 mvwaddstr( maindisp, 2, 6, "fmset - VLBA/Mark IV/S2-DAS/S2-RT/Mark5B/FiLa10G/RDBE/DBBC3 time set" );
  if(source == DBBC3) {
    column=6;
-   hint_row=11;
+   hint_row=12;
    if(shm_addr->dbbc3_ddc_ifs>4 && pps_delay_display)
      hint_row++;
    if(1==iCore3H) {
@@ -440,7 +442,7 @@ if(source == RDBE && nRDBE > 1) {
 
  if(source==DBBC3)
     irow++;
- mvwaddstr( maindisp, hint_row+irow++, column,
+ mvwaddstr( maindisp, hint_row+irow, column,
 	    "Use <esc>   to quit: DON'T LEAVE FMSET RUNNING FOR LONG.");
 
  if(source==RDBE && vdif_epoch == vdif_should)
@@ -485,6 +487,8 @@ do 	{
               mvwaddstr( maindisp, 4, column+15, buffer );
 	  else {
               int differ=abs(fstime-formtime) > 1 || abs((fstime-formtime)*100 +fshs-formhs)>50;
+              viewed[iCore3H-1]=1;
+              agree[iCore3H-1]=!differ;
               wmove( maindisp, 4, column+15);
               for(j=0;j<strlen(buffer);j++)
                   if(differ && j<36)
@@ -620,7 +624,45 @@ do 	{
               wprintw( maindisp,"off");
               wstandend(maindisp);
               wprintw( maindisp, ", use 'z' to toggle on (updates every 2 seconds)");
-              irow=11;
+              irow=10;
+          }
+          if(source==DBBC3) {
+              int some=0;
+              for (i=0;i<shm_addr->dbbc3_ddc_ifs;i++)
+                  some=some|| !viewed[i];
+              mvwaddstr( maindisp,irow++, column, "Boards not viewed:");
+              if(some) {
+                  for (i=0;i<shm_addr->dbbc3_ddc_ifs;i++) {
+                      wprintw(maindisp," ");
+                      if(viewed[i])
+                          wprintw(maindisp," ");
+                      else {
+                          wstandout(maindisp);
+                          wprintw(maindisp,"%d",i+1);
+                          wstandend(maindisp);
+                      }
+                  }
+              } else
+                      wprintw(maindisp,"             none");
+
+              some=0;
+              for (i=0;i<shm_addr->dbbc3_ddc_ifs;i++)
+                  some=some|| viewed[i] && !agree[i];
+               wprintw( maindisp, "; Viewed, bad time:");
+              if(some) {
+                  for (i=0;i<shm_addr->dbbc3_ddc_ifs;i++) {
+                      wprintw(maindisp," ");
+                      if(!viewed[i] || agree[i])
+                          wprintw(maindisp," ");
+                      else {
+                          wstandout(maindisp);
+                          wprintw(maindisp,"%d",i+1);
+                          wstandend(maindisp);
+                      }
+                  }
+              } else
+                      wprintw(maindisp," none            ");
+              irow=12;
           }
           if(kfirst) {
             kfirst=0;
@@ -896,6 +938,11 @@ do 	{
 			       || source == RDBE) &&
 	     asksure( maindisp,m5rec,1)) {
 	    synch=1;
+            if(source==DBBC3)
+                for (i=0;i<shm_addr->dbbc3_ddc_ifs;i++) {
+                    viewed[i]=0;
+                    agree[i]=0;
+                }
 	    if(source == S2 && s2type == 1)
 	      changeds2das=1;
 	    else
