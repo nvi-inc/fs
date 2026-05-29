@@ -126,6 +126,7 @@ int kfirst = 1;
 int pps_delay[MAX_DBBC3_IF];
 int dbbc3_comm_delay;
 int iIndex, use_setcl;
+int pps_delay_display=1;
 
  putpname("fmset");
 skd_set_return_name("fmset");
@@ -281,7 +282,7 @@ mvwaddstr( maindisp, 2, 6, "fmset - VLBA/Mark IV/S2-DAS/S2-RT/Mark5B/FiLa10G/RDB
  if(source == DBBC3) {
    column=6;
    hint_row=11;
-   if(shm_addr->dbbc3_ddc_ifs>4)
+   if(shm_addr->dbbc3_ddc_ifs>4 && pps_delay_display)
      hint_row++;
    if(1==iCore3H) {
      form="Core3H-1";
@@ -358,19 +359,22 @@ mvwaddstr( maindisp, 6, column,   "Computer" );
 
 irow=0;
 if (source==DBBC3) {
+ irow=0;
  sprintf(buffer, "Use '1'-'%d' for          Core3H board 1-%d.",nCore3H,nCore3H);
- mvwaddstr( maindisp, hint_row+0, column,buffer);
+ mvwaddstr( maindisp, hint_row+irow++, column,buffer);
  sprintf(buffer, "Use 'n'/'p' for next/previous Core3H board (wraps around).");
- mvwaddstr( maindisp, hint_row+1, column,buffer);
- sprintf(buffer, "Use '+'     to increment %s time by one second.",form);
- mvwaddstr( maindisp, hint_row+3, column,buffer);
- sprintf(buffer,"    '-'     to decrement %s time by one second." ,form);
- mvwaddstr( maindisp, hint_row+4, column, buffer);
+ mvwaddstr( maindisp, hint_row+irow++, column,buffer);
+ if(pps_delay_display) {
+   sprintf(buffer, "Use 'z'     toggle pps_delay display off (updates every 1 second)");
+   mvwaddstr( maindisp, hint_row+irow++, column,buffer);
+ }
+ irow++;
+ sprintf(buffer, "Use '+'/'-' to increment/decrement %s time by one second.",form);
+ mvwaddstr( maindisp, hint_row+irow++, column, buffer);
  sprintf(buffer, "    '='     to be prompted for a new %s time or use GPS.",form);
- mvwaddstr( maindisp, hint_row+5, column, buffer);
+ mvwaddstr( maindisp, hint_row+irow++, column, buffer);
  sprintf(buffer, "    '.'     to set %s time to Field System time.",form);
- mvwaddstr( maindisp, hint_row+6, column, buffer);
- irow=7;
+ mvwaddstr( maindisp, hint_row+irow++, column, buffer);
 } else {
  sprintf(buffer, "Use '+'     to increment %s time by one second.",form);
    mvwaddstr( maindisp, hint_row, column,buffer);
@@ -402,9 +406,9 @@ if (source==DBBC3) {
      * rack==DBBC &&(rack_type==DBBC_DDC_FILA10G ||rack_type==DBBC_PFB_FILA10G) */
 		      || source==RDBE)) {
    if(source==DBBC3)
-   sprintf(buffer, "    's'/'S' to send pps_sync to DBBC3 (VERY rarely needed)");
+   sprintf(buffer, "    's'     to SYNC DBBC3 (only needed if pps_delays are large)");
    else
-   sprintf(buffer, "    's'/'S' to SYNC %s (VERY rarely needed)",form);
+   sprintf(buffer, "    's'     to SYNC %s (VERY rarely needed)",form);
    mvwaddstr( maindisp, hint_row+irow++, column, buffer);
  } 
 if(toggle) {
@@ -450,7 +454,7 @@ do 	{
 
 	char fmt[80];
 
-        if(source==DBBC3)
+        if(source==DBBC3 && pps_delay_display)
             rte_sleep(75);
 	memset(mk5b_sync,' ',sizeof(mk5b_sync)-1);
 	mk5b_sync[sizeof(mk5b_sync)-1]=0;
@@ -569,7 +573,7 @@ do 	{
 		  form,vdif_should);
 	  mvwaddstr( maindisp, 8, column, buffer );
 	  
-          if(source==DBBC3) {
+          if(source==DBBC3 && pps_delay_display) {
               int imax=4;
               if(shm_addr->dbbc3_ddc_ifs<imax)
                   imax=shm_addr->dbbc3_ddc_ifs;
@@ -588,6 +592,7 @@ do 	{
                       else
                           waddch(maindisp,buffer[j]);
               }
+              irow=10;
               if(4<shm_addr->dbbc3_ddc_ifs) {
                   imax=8;
                   if(shm_addr->dbbc3_ddc_ifs<imax)
@@ -607,7 +612,15 @@ do 	{
                           else
                               waddch(maindisp,buffer[j]);
                   }
+              irow=11;
               }
+          } else if(source==DBBC3) {
+              mvwaddstr( maindisp, 9, column, "pps_delay display is ");
+              wstandout(maindisp);
+              wprintw( maindisp,"off");
+              wstandend(maindisp);
+              wprintw( maindisp, ", use 'z' to toggle on (updates every 2 seconds)");
+              irow=11;
           }
           if(kfirst) {
             kfirst=0;
@@ -822,6 +835,16 @@ do 	{
               iCore3H=1+ (iCore3H-2+nCore3H)%nCore3H;
           kfirst=1;
 	  goto build;
+	case 'z':
+	case 'Z':
+	  if(source== DBBC3)
+              if(pps_delay_display)
+                pps_delay_display=0;
+              else
+                pps_delay_display=1;
+          kfirst=1;
+	  clear_area=1;
+	  goto build;
 	case '1':
 	  if(source== DBBC3 && 1 <= nCore3H)
               iCore3H=1;
@@ -863,6 +886,7 @@ do 	{
           kfirst=1;
 	  goto build;
 	case SYNCH_KEY:
+	case SYNCH2_KEY:
 	  for (i=hint_row;i<hint_row+irow;i++)
 	    mvwaddstr( maindisp, i, 1, blank);
 	  if(source != S2 && (rack& MK4 || rack &VLBA4 || source == MK5 ||
