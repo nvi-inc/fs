@@ -62,7 +62,7 @@ int count;
    (void) strftime(outbuf+strlen(outbuf),sizeof(outbuf)-strlen(outbuf),
 		   "timesync %Y-%m-%dT%H:%M:%S",formtm);
  }
- sprintf(inbuf,"Core3H-%d time-set command sent.",iCore3H);
+ sprintf(inbuf,"%s command sent.",outbuf);
  logit(inbuf,0,NULL);
  
  count=strlen(outbuf);		
@@ -93,7 +93,7 @@ nsem_take("fsctl",0);
 
 nsem_put("fsctl");
 
-/* get reply from mk5cn */
+/* get reply from dbbcn */
 skd_par(ip);
 
  if(ip[1]!=0)

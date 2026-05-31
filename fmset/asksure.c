@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, 2023 NVI, Inc.
+ * Copyright (c) 2020, 2023, 2026  NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -49,20 +49,22 @@ echo ();
 if( sync) {
     if(source==DBBC3) {
         wstandout(maindisp);
-        mvwprintw( maindisp, ROWA+0, COL0,
-                "CHECK TIME AND PPS_DELAY OF EACH CORE3H AFTER SYNCING.");
+        mvwprintw( maindisp, ROWA+1, COL0,
+                "CHECK TIME AND PPS_DELAY OF ALL CORE3H BOARDS AFTER SYNCING.");
         /* 0123456789012345678901234567890123456789012345678901234567890 */
         wstandend(maindisp);
-        mvwprintw( maindisp, ROWA+1, COL0,
+        mvwprintw( maindisp, ROWA+3, COL0,
         "Are you sure you want to sync the DBBC3 (y/n) ?      ");
         /* 0123456789012345678901234567890123456789012345678901234567890 */
-    } else
+        mvwscanw(  maindisp, ROWA+3, COL0+48, "%1s", answer );
+    } else {
         sprintf(buffer,
                 "Are you sure you want to sync the %9s (y/n) ?      ",
                 /* 0123456789012345678901234567890123456789012345678901234567890 */
                 form);
-    mvwprintw( maindisp, ROWA+1, COL0, buffer);
-    mvwscanw(  maindisp, ROWA+1, COL0+52, "%1s", answer );
+        mvwprintw( maindisp, ROWA+1, COL0, buffer);
+        mvwscanw(  maindisp, ROWA+1, COL0+52, "%1s", answer );
+      }
 }
  if ( m5rec && (answer[0] == 'Y' || answer[0] == 'y' || !sync)) {
    if(sync)

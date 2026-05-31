@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 NVI, Inc.
+ * Copyright (c) 2020, 2026 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -64,17 +64,14 @@ echo ();
   tp = gmtime( &ut);
 
   if (fila10g)
-    mvwprintw( maindisp, ROWA, COL0,
+    mvwprintw( maindisp, ROWA-1, COL0,
 	       "If your FiLa10G has GPS, you can use year -1 for GPS time.");
   else if (dbbc3) {
-      mvwprintw( maindisp, ROWA-2, COL0,
+      mvwprintw( maindisp, ROWA-1, COL0,
               "If your DBBC3 has GPS, you can use year -1 for GPS time.");
-      mvwprintw( maindisp, ROWA, COL0,
-              "Press <return> to keep present value. Use month 0 for day of year.");
   }
 
-  if (!dbbc3)
-      mvwprintw( maindisp, ROWA+1, COL0,
+      mvwprintw( maindisp, ROWA, COL0,
               "Press <return> to keep present value. Use month 0 for day of year.");
 
   kfirst = TRUE;
@@ -179,7 +176,7 @@ End:
 nodelay ( maindisp, TRUE );
 noecho ();
 
-for (i=0; i<9;i++)
+for (i=-1; i<9;i++)
    for(j=0;j<78-COL0;j++)
       mvwprintw(maindisp,ROWA+i,COL0+j," ");
 

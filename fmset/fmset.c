@@ -274,7 +274,7 @@ build:
         while (ERR!=wgetch( maindisp )) /* drain additional key presses */
             ;
  if(clear_area) 
-   for (i=4;i<hint_row+irow-2;i++)
+   for (i=4;i<hint_row+irow;i++)
      mvwaddstr( maindisp, i, 1, blank);
 
  clear_area=0;
@@ -283,9 +283,7 @@ build:
 mvwaddstr( maindisp, 2, 6, "fmset - VLBA/Mark IV/S2-DAS/S2-RT/Mark5B/FiLa10G/RDBE/DBBC3 time set" );
  if(source == DBBC3) {
    column=6;
-   hint_row=12;
-   if(shm_addr->dbbc3_ddc_ifs>4 && pps_delay_display)
-     hint_row++;
+   hint_row=13;
    if(1==iCore3H) {
      form="Core3H-1";
      mvwaddstr( maindisp, 4, column, "Core3H-1    " );
@@ -359,17 +357,17 @@ mvwaddstr( maindisp, 2, 6, "fmset - VLBA/Mark IV/S2-DAS/S2-RT/Mark5B/FiLa10G/RDB
 mvwaddstr( maindisp, 5, column,   "Field System" );
 mvwaddstr( maindisp, 6, column,   "Computer" );
 
-irow=0;
 if (source==DBBC3) {
  irow=0;
  sprintf(buffer, "Use '1'-'%d' for          Core3H board 1-%d.",nCore3H,nCore3H);
  mvwaddstr( maindisp, hint_row+irow++, column,buffer);
- sprintf(buffer, "Use 'n'/'p' for next/previous Core3H board (wraps around).");
+ sprintf(buffer, "    'n'/'p' for next/previous Core3H board (wraps around).");
  mvwaddstr( maindisp, hint_row+irow++, column,buffer);
  if(pps_delay_display) {
-   sprintf(buffer, "Use 'z'     toggle pps_delay display off (updates every 1 second)");
+   sprintf(buffer, "    'z'     toggle pps_delay display off (updates every 1 second)");
    mvwaddstr( maindisp, hint_row+irow++, column,buffer);
- }
+ } else
+   mvwaddstr( maindisp, hint_row+irow++, 1, blank);
  irow++;
  sprintf(buffer, "Use '+'/'-' to increment/decrement %s time by one second.",form);
  mvwaddstr( maindisp, hint_row+irow++, column, buffer);
@@ -442,7 +440,7 @@ if(source == RDBE && nRDBE > 1) {
 
  if(source==DBBC3)
     irow++;
- mvwaddstr( maindisp, hint_row+irow, column,
+ mvwaddstr( maindisp, hint_row+irow++, column,
 	    "Use <esc>   to quit: DON'T LEAVE FMSET RUNNING FOR LONG.");
 
  if(source==RDBE && vdif_epoch == vdif_should)
@@ -596,7 +594,6 @@ do 	{
                       else
                           waddch(maindisp,buffer[j]);
               }
-              irow=10;
               if(4<shm_addr->dbbc3_ddc_ifs) {
                   imax=8;
                   if(shm_addr->dbbc3_ddc_ifs<imax)
@@ -616,21 +613,21 @@ do 	{
                           else
                               waddch(maindisp,buffer[j]);
                   }
-              irow=11;
-              }
+              } else
+                  mvwaddstr( maindisp, 10, 1, blank);
           } else if(source==DBBC3) {
               mvwaddstr( maindisp, 9, column, "pps_delay display is ");
               wstandout(maindisp);
               wprintw( maindisp,"off");
               wstandend(maindisp);
               wprintw( maindisp, ", use 'z' to toggle on (updates every 2 seconds)");
-              irow=10;
+              mvwaddstr( maindisp, 10, 1, blank);
           }
           if(source==DBBC3) {
               int some=0;
               for (i=0;i<shm_addr->dbbc3_ddc_ifs;i++)
                   some=some|| !viewed[i];
-              mvwaddstr( maindisp,irow++, column, "Boards not viewed:");
+              mvwaddstr( maindisp,11, column, "Boards NOT viewed:");
               if(some) {
                   for (i=0;i<shm_addr->dbbc3_ddc_ifs;i++) {
                       wprintw(maindisp," ");
@@ -643,12 +640,12 @@ do 	{
                       }
                   }
               } else
-                      wprintw(maindisp,"             none");
+                      wprintw(maindisp,"            none");
 
               some=0;
               for (i=0;i<shm_addr->dbbc3_ddc_ifs;i++)
                   some=some|| viewed[i] && !agree[i];
-               wprintw( maindisp, "; Viewed, bad time:");
+               wprintw( maindisp, "; viewed, time BAD:");
               if(some) {
                   for (i=0;i<shm_addr->dbbc3_ddc_ifs;i++) {
                       wprintw(maindisp," ");
@@ -662,7 +659,6 @@ do 	{
                   }
               } else
                       wprintw(maindisp," none            ");
-              irow=12;
           }
           if(kfirst) {
             kfirst=0;
@@ -804,6 +800,7 @@ do 	{
 	      else
 		changedfm=1;
 	    }
+            clear_area=1;
 	  }
 	  goto build;
 	  break;
