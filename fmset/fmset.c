@@ -896,8 +896,14 @@ do 	{
 	  goto build;
 	  break;
 	case ESC_KEY :  /* ESC character */
-	  running = FALSE;
-	  break;
+	    for (i=hint_row;i<hint_row+irow;i++)
+	      mvwaddstr( maindisp, i, 1, blank);
+          if(source!=DBBC3 ||
+                  dbbc3_askexit(maindisp,viewed,agree,dbbc3_pps_delay,dbbc3_pps_delay_display,nCore3H))
+              running = FALSE;
+          else
+              goto build;
+          break;
 	case TOGGLE_KEY:
 	  if(toggle) {
 	    temp=source;
