@@ -123,12 +123,16 @@ int nRDBE;
 int clear_area=0;
 int vdif_epoch, vdif_should;
 int kfirst = 1;
-int pps_delay[MAX_DBBC3_IF];
-int dbbc3_comm_delay;
+int dbbc3_pps_delay[MAX_DBBC3_IF];
+int dbbc3_time_comm_delay;
 int iIndex, use_setcl;
-int pps_delay_display=1;
+int dbbc3_pps_delay_display = 1;
 int viewed[MAX_DBBC3_IF]= {0};
 int agree[MAX_DBBC3_IF]= {0};
+int was_some=1;
+int was_some_count=0;
+int need_view=1;
+
 
  putpname("fmset");
 skd_set_return_name("fmset");
@@ -284,7 +288,10 @@ mvwaddstr( maindisp, 2, 6, "fmset - VLBA/Mark IV/S2-DAS/S2-RT/Mark5B/FiLa10G/RDB
  if(source == DBBC3) {
    column=6;
    hint_row=13;
-   if(1==iCore3H) {
+   if(dbbc3_pps_delay_display) {
+     form="        ";
+     mvwaddstr( maindisp, 4, column, "            " );
+   } else if(1==iCore3H) {
      form="Core3H-1";
      mvwaddstr( maindisp, 4, column, "Core3H-1    " );
    } else if(2==iCore3H) {
@@ -358,23 +365,30 @@ mvwaddstr( maindisp, 5, column,   "Field System" );
 mvwaddstr( maindisp, 6, column,   "Computer" );
 
 if (source==DBBC3) {
- irow=0;
- sprintf(buffer, "Use '1'-'%d' for          Core3H board 1-%d.",nCore3H,nCore3H);
- mvwaddstr( maindisp, hint_row+irow++, column,buffer);
- sprintf(buffer, "    'n'/'p' for next/previous Core3H board (wraps around).");
- mvwaddstr( maindisp, hint_row+irow++, column,buffer);
- if(pps_delay_display) {
-   sprintf(buffer, "    'z'     toggle pps_delay display off (updates every 1 second)");
-   mvwaddstr( maindisp, hint_row+irow++, column,buffer);
- } else
-   mvwaddstr( maindisp, hint_row+irow++, 1, blank);
- irow++;
- sprintf(buffer, "Use '+'/'-' to increment/decrement %s time by one second.",form);
- mvwaddstr( maindisp, hint_row+irow++, column, buffer);
- sprintf(buffer, "    '='     to be prompted for a new %s time or use GPS.",form);
- mvwaddstr( maindisp, hint_row+irow++, column, buffer);
- sprintf(buffer, "    '.'     to set %s time to Field System time.",form);
- mvwaddstr( maindisp, hint_row+irow++, column, buffer);
+    irow=0;
+    if(!dbbc3_pps_delay_display) {
+        sprintf(buffer, "Use '1'-'%d' for Core3H board 1-%d.",nCore3H,nCore3H);
+        mvwaddstr( maindisp, hint_row+irow++, column,buffer);
+        sprintf(buffer, "    'n'/'p' for next/previous Core3H board (wraps around).");
+        mvwaddstr( maindisp, hint_row+irow++, column,buffer);
+        sprintf(buffer, "    'z'     toggle display between pps_delay and Core3H board time");
+        mvwaddstr( maindisp, hint_row+irow++, column,buffer);
+        irow++;
+        sprintf(buffer, "Use '+'/'-' to increment/decrement %s time by one second.",form);
+        mvwaddstr( maindisp, hint_row+irow++, column, buffer);
+        sprintf(buffer, "    '='     to be prompted for a new %s time or use GPS.",form);
+        mvwaddstr( maindisp, hint_row+irow++, column, buffer);
+        sprintf(buffer, "    '.'     to set %s time to Field System time.",form);
+        mvwaddstr( maindisp, hint_row+irow++, column, buffer);
+        sprintf(buffer, "    's'     to SYNC DBBC3 (only needed if pps_delays are large)");
+        mvwaddstr( maindisp, hint_row+irow++, column, buffer);
+    } else {
+        sprintf(buffer, "Use 'z'     toggle display between pps_delay and Core3H board time");
+        mvwaddstr( maindisp, hint_row+irow++, column,buffer);
+        irow+=1;
+        sprintf(buffer, "Use 's'     to SYNC DBBC3 (only needed if pps_delays are large)");
+        mvwaddstr( maindisp, hint_row+irow++, column, buffer);
+    }
 } else {
  sprintf(buffer, "Use '+'     to increment %s time by one second.",form);
    mvwaddstr( maindisp, hint_row, column,buffer);
@@ -401,13 +415,10 @@ if (source==DBBC3) {
    mvwaddstr( maindisp, hint_row+irow++, column, buffer);
  }
  if(source != S2 && (rack& MK4 || rack &VLBA4 || source == MK5 ||
-		     source==DBBC || source==DBBC3
+		     source==DBBC
     /* was:
      * rack==DBBC &&(rack_type==DBBC_DDC_FILA10G ||rack_type==DBBC_PFB_FILA10G) */
 		      || source==RDBE)) {
-   if(source==DBBC3)
-   sprintf(buffer, "    's'     to SYNC DBBC3 (only needed if pps_delays are large)");
-   else
    sprintf(buffer, "    's'     to SYNC %s (VERY rarely needed)",form);
    mvwaddstr( maindisp, hint_row+irow++, column, buffer);
  } 
@@ -447,15 +458,37 @@ if(source == RDBE && nRDBE > 1) {
    mvwaddstr( maindisp, hint_row+irow, 1, blank);
 
 leaveok ( maindisp, FALSE); /* leave cursor in place */
-wrefresh ( maindisp );
 
 
 do 	{
 
 	char fmt[80];
 
-        if(source==DBBC3 && pps_delay_display)
-            rte_sleep(75);
+        if(source==DBBC3 && !dbbc3_pps_delay_display && need_view) {
+            int some=0;
+            for (i=0;i<shm_addr->dbbc3_ddc_ifs;i++)
+                some=some|| !viewed[i];
+
+            for (i=0;i<shm_addr->dbbc3_ddc_ifs;i++)
+                some=some|| viewed[i] && !agree[i];
+
+            if(!some) {
+                if(was_some && was_some_count<=0)
+                    was_some_count=4;
+                if (was_some_count>0) {
+                    was_some_count--;
+                    if(was_some_count==0) {
+                        dbbc3_pps_delay_display=1;
+                        need_view=0;
+                        was_some=0;
+                        clear_area=1;
+                        goto build;
+                    }
+                }
+            }
+            was_some=some;
+        }
+
 	memset(mk5b_sync,' ',sizeof(mk5b_sync)-1);
 	mk5b_sync[sizeof(mk5b_sync)-1]=0;
 	getfmtime(&unixtime,&unixhs,&fstime, &fshs,
@@ -463,7 +496,8 @@ do 	{
 		  mk5b_1pps,sizeof(mk5b_1pps),
 		  mk5b_clock_freq,sizeof(mk5b_clock_freq),
 		  mk5b_clock_source,sizeof(mk5b_clock_source),
-		  &vdif_epoch,pps_delay,&dbbc3_comm_delay,&ierr); /* get times */
+		  &vdif_epoch,dbbc3_pps_delay_display,dbbc3_pps_delay,
+		  &dbbc3_time_comm_delay,&ierr); /* get times */
 
 	vdif_should=-1;
 	if(formtime>=0) {
@@ -507,164 +541,197 @@ do 	{
 	  wstandend(maindisp);
 	  mvwaddstr( maindisp, 4, column+15+31, "                       ");
  
+	} else if (source == DBBC3 && dbbc3_pps_delay_display) {
+          mvwaddstr( maindisp, 4, 1, blank);
+                                           /* 123456789012345678901234567890123456789012345678901234 */
+	  wstandout(maindisp);
+	  mvwaddstr( maindisp, 4, column+17, "pps_delay display selected, values are below");
+	  wstandend(maindisp);
 	} else {                           /* 123456789012345678901234567890123456789012345678901234 */
+          mvwaddstr( maindisp, 4, 1, blank);
 	  wstandout(maindisp);
 	  mvwaddstr( maindisp, 4, column+15, "Error reading device, see log for details.");
 	  wstandend(maindisp);
-	  mvwaddstr( maindisp, 4, column+15+42, "               ");
 	}
 
-	if(formtime >= 0) {
-	  disptime=fstime;
-	  disphs=fshs+5;
-	  
-	  if (disphs > 99) {
-	    disphs-=100;
-	    disptime++;
-	  }
-	  
-	  index=01 & shm_addr->time.index;
-	  epoch=shm_addr->time.epoch[index];
-	  icomputer=shm_addr->time.icomputer[index];
+	if(formtime < 0) {
+          int it[6];
+          rte_time(it,it+5);
+          rte2secs(it,&fstime);
+          fshs=it[0];
+        }
 
-	  if(shm_addr->time.model == 'c'||epoch==0||icomputer!=0)
-	    model="computer";
-	  else if(shm_addr->time.model=='n')
-	    model="none    ";
-	  else if(shm_addr->time.model=='o')
-	    model="offset  ";
-	  else if(shm_addr->time.model=='r')
-	    model="rate    ";
-	  else
-	    model="unknown ";
-	    
-	  sprintf( fmt, "%%H:%%M:%%S.%01d UT  %%d %%b (Day %%j) %%Y model: %s",
-		   disphs/10,model);
-	  disptm = gmtime(&disptime);
-	  strftime ( buffer, sizeof(buffer), fmt, disptm );
-	  mvwaddstr( maindisp, 5, column+15, buffer );
-	} else                             /* 123456789012345678901234567890123456789012345678901234 */
-	  mvwaddstr( maindisp, 5, column+15, "                                                      ");
+        disptime=fstime;
+        disphs=fshs+5;
 
-	if(formtime >= 0) {
-	  disptime=unixtime;
-	  disphs=unixhs+5;
-	  if (disphs > 99) {
-	    disphs-=100;
-	    disptime++;
-	  }
-	  
-	  intp=ntp_synch(0);
-	  if(intp==1)
-	    ntp="sync'd    ";
-	  else if(intp==0)
-	    ntp="not sync'd";
-	  else
-	    ntp="unknown   ";
-	  
-	  sprintf(fmt,
-		  "%%H:%%M:%%S.%01d %%Z %%d %%b (Day %%j) %%Y NTP: %s",
-		  disphs/10, ntp);
-	  disptm = gmtime(&disptime);
-	  strftime ( buffer, sizeof(buffer), fmt, disptm );
-	  mvwaddstr( maindisp, 6, column+15, buffer );
-	} else                             /* 123456789012345678901234567890123456789012345678901234 */
-	  mvwaddstr( maindisp, 6, column+15, "                                                      ");
-	if(source == RDBE || source==DBBC3) {
-	  sprintf(buffer,"Nominal VDIF Epoch for %s time is %d ",
-		  form,vdif_should);
-	  mvwaddstr( maindisp, 8, column, buffer );
-	  
-          if(source==DBBC3 && pps_delay_display) {
-              int imax=4;
-              if(shm_addr->dbbc3_ddc_ifs<imax)
-                  imax=shm_addr->dbbc3_ddc_ifs;
-              if(imax==1)
-                  sprintf(buffer,"pps_delay: board    1:",imax);
-              else
-                  sprintf(buffer,"pps_delay: boards 1-%d:",imax);
-              mvwaddstr( maindisp, 9, column, buffer );
-              for(i=0;i<imax;i++) {
-                  sprintf(buffer," %10d",pps_delay[i]);
-                  if(i!=imax-1)
-                      strcat(buffer,",");
-                  for(j=0;j<strlen(buffer);j++)
-                      if(pps_delay[i]>100 && NULL!=strchr("01234567890-",buffer[j]))
-                          waddch(maindisp,buffer[j]|A_REVERSE);
-                      else
-                          waddch(maindisp,buffer[j]);
-              }
-              if(4<shm_addr->dbbc3_ddc_ifs) {
-                  imax=8;
-                  if(shm_addr->dbbc3_ddc_ifs<imax)
-                      imax=shm_addr->dbbc3_ddc_ifs;
-                  if(imax==5)
-                      sprintf(buffer,"           board    5:",imax);
-                  else
-                      sprintf(buffer,"           boards 5-%d:",imax);
-                  mvwaddstr( maindisp,10, column, buffer );
-                  for(i=4;i<imax;i++) {
-                      sprintf(buffer," %10d",pps_delay[i]);
-                      if(i!=imax-1)
-                          strcat(buffer,",");
-                      for(j=0;j<strlen(buffer);j++)
-                          if(pps_delay[i]>100 && NULL!=strchr("01234567890-",buffer[j]))
-                              waddch(maindisp,buffer[j]|A_REVERSE);
-                          else
-                              waddch(maindisp,buffer[j]);
-                  }
-              } else
-                  mvwaddstr( maindisp, 10, 1, blank);
-          } else if(source==DBBC3) {
-              mvwaddstr( maindisp, 9, column, "pps_delay display is ");
-              wstandout(maindisp);
-              wprintw( maindisp,"off");
-              wstandend(maindisp);
-              wprintw( maindisp, ", use 'z' to toggle on (updates every 2 seconds)");
-              mvwaddstr( maindisp, 10, 1, blank);
-          }
-          if(source==DBBC3) {
-              int some=0;
-              for (i=0;i<shm_addr->dbbc3_ddc_ifs;i++)
-                  some=some|| !viewed[i];
-              mvwaddstr( maindisp,11, column, "Boards NOT viewed:");
-              if(some) {
-                  for (i=0;i<shm_addr->dbbc3_ddc_ifs;i++) {
-                      wprintw(maindisp," ");
-                      if(viewed[i])
-                          wprintw(maindisp," ");
-                      else {
-                          wstandout(maindisp);
-                          wprintw(maindisp,"%d",i+1);
-                          wstandend(maindisp);
-                      }
-                  }
-              } else
-                      wprintw(maindisp,"            none");
+        if (disphs > 99) {
+            disphs-=100;
+            disptime++;
+        }
 
-              some=0;
-              for (i=0;i<shm_addr->dbbc3_ddc_ifs;i++)
-                  some=some|| viewed[i] && !agree[i];
-               wprintw( maindisp, "; viewed, time BAD:");
-              if(some) {
-                  for (i=0;i<shm_addr->dbbc3_ddc_ifs;i++) {
-                      wprintw(maindisp," ");
-                      if(!viewed[i] || agree[i])
-                          wprintw(maindisp," ");
-                      else {
-                          wstandout(maindisp);
-                          wprintw(maindisp,"%d",i+1);
-                          wstandend(maindisp);
-                      }
-                  }
-              } else
-                      wprintw(maindisp," none            ");
-          }
-          if(kfirst) {
-            kfirst=0;
-            goto build;
-          }
-	} else if(source==MK5) {
+        index=01 & shm_addr->time.index;
+        epoch=shm_addr->time.epoch[index];
+        icomputer=shm_addr->time.icomputer[index];
+
+        if(shm_addr->time.model == 'c'||epoch==0||icomputer!=0)
+            model="computer";
+        else if(shm_addr->time.model=='n')
+            model="none    ";
+        else if(shm_addr->time.model=='o')
+            model="offset  ";
+        else if(shm_addr->time.model=='r')
+            model="rate    ";
+        else
+            model="unknown ";
+
+        sprintf( fmt, "%%H:%%M:%%S.%01d UT  %%d %%b (Day %%j) %%Y model: %s",
+                disphs/10,model);
+        disptm = gmtime(&disptime);
+        strftime ( buffer, sizeof(buffer), fmt, disptm );
+        mvwaddstr( maindisp, 5, column+15, buffer );
+
+        if(formtime < 0) {
+            struct timeval tv;
+            if(0!= gettimeofday(&tv, NULL)) {
+                endwin ();
+                perror("fmset, using gettimeofday(), fatal\n");
+                rte_sleep(SLEEP_TIME);
+                exit(-1);
+            }
+            unixtime=tv.tv_sec;
+            unixhs=tv.tv_usec/10000;
+        }
+        disptime=unixtime;
+        disphs=unixhs+5;
+        if (disphs > 99) {
+            disphs-=100;
+            disptime++;
+        }
+
+        intp=ntp_synch(0);
+        if(intp==1)
+            ntp="sync'd    ";
+        else if(intp==0)
+            ntp="not sync'd";
+        else
+            ntp="unknown   ";
+
+        sprintf(fmt,
+                "%%H:%%M:%%S.%01d %%Z %%d %%b (Day %%j) %%Y NTP: %s",
+                disphs/10, ntp);
+        disptm = gmtime(&disptime);
+        strftime ( buffer, sizeof(buffer), fmt, disptm );
+        mvwaddstr( maindisp, 6, column+15, buffer );
+
+        if(source == RDBE) {
+            sprintf(buffer,"Nominal VDIF Epoch for %s time is %d ",
+                    form,vdif_should);
+            mvwaddstr( maindisp, 8, column, buffer );
+
+            if(kfirst) {
+                kfirst=0;
+                goto build;
+            }
+        } else if(source==DBBC3) {
+            int some;
+            if(!dbbc3_pps_delay_display) {
+                sprintf(buffer,"Nominal VDIF Epoch for %s time is %d ",
+                        form,vdif_should);
+                mvwaddstr( maindisp, 8, column, buffer );
+                mvwaddstr( maindisp, 9, 1, blank);
+                mvwaddstr( maindisp, 9, column, "pps_delay: ");
+                wstandout(maindisp);
+                wprintw(maindisp,"time display selected, see %s time above",form);
+                wstandend(maindisp);
+                mvwaddstr( maindisp, 10, 1, blank);
+            } else {
+                mvwaddstr( maindisp, 9, 1, blank);
+                if(dbbc3_pps_delay[0]<0) {
+                    mvwaddstr( maindisp, 9, column, "pps_delay: ");
+                    wstandout(maindisp);
+                    mvwaddstr( maindisp, 4, column+15, "Error reading device, see log for details.");
+                    wstandend(maindisp);
+                    mvwaddstr( maindisp, 4, column+15+42, "               ");
+                    mvwaddstr( maindisp, 10, 1, blank);
+                } else {
+                    int imax=4;
+                    if(shm_addr->dbbc3_ddc_ifs<imax)
+                        imax=shm_addr->dbbc3_ddc_ifs;
+                    if(imax==1)
+                        sprintf(buffer,"pps_delay: board    1:",imax);
+                    else
+                        sprintf(buffer,"pps_delay: boards 1-%d:",imax);
+                    mvwaddstr( maindisp, 9, column, buffer );
+                    for(i=0;i<imax;i++) {
+                        sprintf(buffer," %10d",dbbc3_pps_delay[i]);
+                        if(i!=imax-1)
+                            strcat(buffer,",");
+                        for(j=0;j<strlen(buffer);j++)
+                            if(dbbc3_pps_delay[i]>100 && NULL!=strchr("01234567890-",buffer[j]))
+                                waddch(maindisp,buffer[j]|A_REVERSE);
+                            else
+                                waddch(maindisp,buffer[j]);
+                    }
+                    if(4<shm_addr->dbbc3_ddc_ifs) {
+                        imax=8;
+                        if(shm_addr->dbbc3_ddc_ifs<imax)
+                            imax=shm_addr->dbbc3_ddc_ifs;
+                        if(imax==5)
+                            sprintf(buffer,"           board    5:",imax);
+                        else
+                            sprintf(buffer,"           boards 5-%d:",imax);
+                        mvwaddstr( maindisp,10, column, buffer );
+                        for(i=4;i<imax;i++) {
+                            sprintf(buffer," %10d",dbbc3_pps_delay[i]);
+                            if(i!=imax-1)
+                                strcat(buffer,",");
+                            for(j=0;j<strlen(buffer);j++)
+                                if(dbbc3_pps_delay[i]>100 && NULL!=strchr("01234567890-",buffer[j]))
+                                    waddch(maindisp,buffer[j]|A_REVERSE);
+                                else
+                                    waddch(maindisp,buffer[j]);
+                        }
+                    } else
+                        mvwaddstr( maindisp, 10, 1, blank);
+                }
+            }
+
+            some=0;
+            for (i=0;i<shm_addr->dbbc3_ddc_ifs;i++)
+                some=some|| !viewed[i];
+            mvwaddstr( maindisp,11, column, "Boards NOT viewed:");
+            if(some) {
+                for (i=0;i<shm_addr->dbbc3_ddc_ifs;i++) {
+                    wprintw(maindisp," ");
+                    if(viewed[i])
+                        wprintw(maindisp," ");
+                    else {
+                        wstandout(maindisp);
+                        wprintw(maindisp,"%d",i+1);
+                        wstandend(maindisp);
+                    }
+                }
+            } else
+                wprintw(maindisp,"            none");
+
+            some=0;
+            for (i=0;i<shm_addr->dbbc3_ddc_ifs;i++)
+                some=some|| viewed[i] && !agree[i];
+            wprintw( maindisp, "; viewed, time BAD:");
+            if(some) {
+                for (i=0;i<shm_addr->dbbc3_ddc_ifs;i++) {
+                    wprintw(maindisp," ");
+                    if(!viewed[i] || agree[i])
+                        wprintw(maindisp," ");
+                    else {
+                        wstandout(maindisp);
+                        wprintw(maindisp,"%d",i+1);
+                        wstandend(maindisp);
+                    }
+                }
+            } else
+                wprintw(maindisp," none            ");
+        } else if(source==MK5) {
 	  char *pps_status,*freq_status,*source_status;
 	  if((rack == VLBA4 && rack_type == VLBA45) ||
 	     (rack == VLBA4 && rack_type == VLBA4C ) || 
@@ -726,10 +793,15 @@ do 	{
 	  m5rec=source == MK5 &&
 	    shm_addr->disk_record.record.record==1 &&
 	    shm_addr->disk_record.record.state.known==1;
+          if(source==DBBC3 && dbbc3_pps_delay_display &&
+              NULL!=strchr("+-=.np12345678",inc))
+                continue;
 	  switch ( tolower(inc) ) {
 	case INC_KEY :  /* Increment seconds */
+          if(formtime<0)
+            goto build;
 	  if(source==DBBC3)
-            formtime+=(dbbc3_comm_delay+50)/100;
+            formtime+=(dbbc3_time_comm_delay+50)/100;
 	  if(m5rec)
 	    for (i=hint_row;i<hint_row+irow;i++)
 	      mvwaddstr( maindisp, i, 1, blank);
@@ -743,8 +815,10 @@ do 	{
 	  goto build;
 	  break;
 	case DEC_KEY :  /* Decrement seconds */
+          if(formtime<0)
+            goto build;
 	  if(source==DBBC3)
-            formtime+=(dbbc3_comm_delay+50)/100;
+            formtime+=(dbbc3_time_comm_delay+50)/100;
 	  if(m5rec)
 	    for (i=hint_row;i<hint_row+irow;i++)
 	      mvwaddstr( maindisp, i, 1, blank);
@@ -810,7 +884,7 @@ do 	{
 	      mvwaddstr( maindisp, i, 1, blank);
 	  if(!m5rec ||asksure(maindisp,m5rec,0)) {
 	    if(source==DBBC3)
-              formtime=fstime+(fshs+dbbc3_comm_delay+50)/100;
+              formtime=fstime+(fshs+dbbc3_time_comm_delay+50)/100;
             else
 	       formtime=fstime+(fshs+50)/100;
 	    setfmtime(formtime,0,vdif_epoch);
@@ -877,10 +951,10 @@ do 	{
 	case 'z':
 	case 'Z':
 	  if(source== DBBC3)
-              if(pps_delay_display)
-                pps_delay_display=0;
+              if(dbbc3_pps_delay_display)
+                dbbc3_pps_delay_display=0;
               else
-                pps_delay_display=1;
+                dbbc3_pps_delay_display=1;
           kfirst=1;
 	  clear_area=1;
 	  goto build;
@@ -935,11 +1009,14 @@ do 	{
 			       || source == RDBE) &&
 	     asksure( maindisp,m5rec,1)) {
 	    synch=1;
-            if(source==DBBC3)
+            if(source==DBBC3) {
+                dbbc3_pps_delay_display=1;
                 for (i=0;i<shm_addr->dbbc3_ddc_ifs;i++) {
                     viewed[i]=0;
                     agree[i]=0;
                 }
+                need_view=1;
+            }
 	    if(source == S2 && s2type == 1)
 	      changeds2das=1;
 	    else

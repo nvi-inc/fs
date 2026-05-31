@@ -48,7 +48,7 @@ extern int iCore3H;
 void rte2secs();
 
 void getcore3htime(unixtime,unixhs,fstime,fshs,formtime,formhs,vdif_epoch,
-     pps_delay,dbbc3_comm_delay)
+     get_pps_delay,pps_delay,time_comm_delay)
 time_t *unixtime; /* computer time */
 int    *unixhs;
 time_t *fstime; /* field system time */
@@ -56,8 +56,9 @@ int    *fshs;
 time_t *formtime; /* formatter time received from mcbcn */
 int    *formhs;
 int    *vdif_epoch;
+int    get_pps_delay;
 int    pps_delay[ ];
-int    *dbbc3_comm_delay;
+int    *time_comm_delay;
 {
 	int centisec[6], centiavg, centidiff, hsdiff;
         int it[6], sleep;
@@ -116,7 +117,7 @@ int    *dbbc3_comm_delay;
             if(ip[2] != 0) {
                 logita(NULL,ip[2],ip+3,ip+4);
                 logit(NULL,-9,"fv");
-                *formtime=-1;
+                pps_delay[0]=-1;
                 return;
             }
 	    wstandout(maindisp);
@@ -172,7 +173,7 @@ int    *dbbc3_comm_delay;
         }
 
         nsem_take("fsctl",0);
-        if(get_core3htime(centisec,it,ip,1,iCore3H,vdif_epoch,pps_delay)!=0) {
+        if(get_core3htime(centisec,it,ip,1,iCore3H,vdif_epoch,get_pps_delay,pps_delay)!=0) {
 	  endwin();
 	  fprintf(stderr,"Field System not running - fmset aborting\n");
 	  exit(0);
@@ -188,7 +189,7 @@ int    *dbbc3_comm_delay;
 
 	/* time before is more accurate */
 
-        *dbbc3_comm_delay=centisec[1]-centisec[0];
+        *time_comm_delay=centisec[1]-centisec[0];
 	centisec[1]=centisec[0];
 	centisec[3]=centisec[2];
 	centisec[5]=centisec[4];
