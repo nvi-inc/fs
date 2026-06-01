@@ -116,7 +116,7 @@ int    *time_comm_delay;
                 cls_clr(ip[0]);
             if(ip[2] != 0) {
                 logita(NULL,ip[2],ip+3,ip+4);
-                logit(NULL,-9,"fv");
+                logit(NULL,-12,"fv");
                 pps_delay[0]=-1;
                 return;
             }
@@ -134,44 +134,6 @@ int    *time_comm_delay;
 	    wstandend(maindisp);
         }
 
-        if(synch) {
-            synch=0;
-            out_recs=0;
-            out_class=0;
-
-            str="pps_sync";
-            cls_snd(&out_class, str, strlen(str) , 0, 0);
-            out_recs++;
-            logit("DBBC3 sync command sent.",0,NULL);
-
-            ip[0]=8;
-            ip[1]=out_class;
-            ip[2]=out_recs;
-
-            nsem_take("fsctl",0);
-            name="dbbcn";
-            while(skd_run_to(name,'w',ip,120)==1) {
-                if (nsem_test("fs   ") != 1) {
-                    endwin();
-                    fprintf(stderr,"Field System not running - fmset aborting\n");
-                    rte_sleep(SLEEP_TIME);
-                    exit(0);
-                }
-                name=NULL;
-            }
-
-            skd_par(ip);
-            nsem_put("fsctl");
-            if(ip[1]!=0)
-                cls_clr(ip[0]);
-            if(ip[2] != 0) {
-                logita(NULL,ip[2],ip+3,ip+4);
-                logit(NULL,-9,"fv");
-                *formtime=-1;
-                return;
-            }
-        }
-
         nsem_take("fsctl",0);
         if(get_core3htime(centisec,it,ip,1,iCore3H,vdif_epoch,get_pps_delay,pps_delay)!=0) {
 	  endwin();
@@ -181,8 +143,12 @@ int    *time_comm_delay;
         nsem_put("fsctl");
 	if( ip[2] != 0 )
 		{
-                logita(NULL,ip[2],ip+3,ip+4);
-		logit(NULL,-9,"fv");
+		logita(NULL,ip[2],ip+3,ip+4);
+		if(get_pps_delay)
+		  logit(NULL,-13,"fv");
+		else
+		  logit(NULL,-9,"fv");
+		pps_delay[0]=-1;
 		*formtime=-1;
 		return;
 		}

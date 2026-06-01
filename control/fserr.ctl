@@ -1,4 +1,25 @@
 ""
+10 -401
+error retrieving class for time query in get_fila10gtime
+""
+10 -402
+error decoding time in get_fila10gtime
+""
+10 -411
+error retrieving class for time query in get_core3htime
+""
+10 -412
+error decoding VDIF epoch in get_core3htime
+""
+10 -413
+error decoding time in get_core3htime
+""
+10 -414
+error retrieving class for pps_delay query in get_core3htime
+""
+10 -415
+error decoding pps_delay in get_core3htime
+""
 2A -301
 Parameters must since single characters
 ""
@@ -967,27 +988,6 @@ query response not found
 ""
 5T -902
 program error: strdup() failed
-""
-10 -401
-error retrieving class for time query in get_fila10gtime
-""
-10 -402
-error decoding time in get_fila10gtime
-""
-10 -411
-error retrieving class for time query in get_core3htime
-""
-10 -412
-error decoding VDIF epoch in get_core3htime
-""
-10 -413
-error decoding time in get_core3htime
-""
-10 -414
-error retrieving class for pps_delay query in get_core3htime
-""
-10 -415
-error decoding pps_delay in get_core3htime
 ""
 AN   -1
 Illegal or unimplemented mode
@@ -3733,6 +3733,12 @@ fmset: Error from MATCN, please see messages above.
 ""
 FV  -11 FMSET place holder
 
+""
+FV  -12
+fmset: Error sending pps_synch, please see messages above.
+""
+FV  -13
+fmset: Error reading pps_delay, please see messages above.
 ""
 FV -401
 Program error: prematurely out of rclcn response_buffer for device ?W

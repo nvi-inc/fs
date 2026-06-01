@@ -552,6 +552,7 @@ do 	{
 	  wstandout(maindisp);
 	  mvwaddstr( maindisp, 4, column+15, "Error reading device, see log for details.");
 	  wstandend(maindisp);
+	  rte_sleep(200);
 	}
 
 	if(formtime < 0) {
@@ -647,12 +648,13 @@ do 	{
             } else {
                 mvwaddstr( maindisp, 9, 1, blank);
                 if(dbbc3_pps_delay[0]<0) {
+                    mvwaddstr( maindisp, 9, 1, blank);
                     mvwaddstr( maindisp, 9, column, "pps_delay: ");
                     wstandout(maindisp);
-                    mvwaddstr( maindisp, 4, column+15, "Error reading device, see log for details.");
+                    mvwaddstr( maindisp, 9, column+15, "Error reading device, see log for details.");
                     wstandend(maindisp);
-                    mvwaddstr( maindisp, 4, column+15+42, "               ");
                     mvwaddstr( maindisp, 10, 1, blank);
+                    rte_sleep(100);
                 } else {
                     int imax=4;
                     if(shm_addr->dbbc3_ddc_ifs<imax)
