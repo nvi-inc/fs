@@ -52,11 +52,13 @@ if( sync) {
         mvwprintw( maindisp, ROWA+1, COL0,
                 "CHECK TIME AND PPS_DELAY OF ALL CORE3H BOARDS AFTER SYNCING.");
         /* 0123456789012345678901234567890123456789012345678901234567890 */
-        wstandend(maindisp);
         mvwprintw( maindisp, ROWA+3, COL0,
+                "A 25 second pause will occur to allow the DBBC3 to settle.");
+        wstandend(maindisp);
+        mvwprintw( maindisp, ROWA+5, COL0,
         "Are you sure you want to sync the DBBC3 (y/n) ?      ");
         /* 0123456789012345678901234567890123456789012345678901234567890 */
-        mvwscanw(  maindisp, ROWA+3, COL0+48, "%1s", answer );
+        mvwscanw(  maindisp, ROWA+5, COL0+48, "%1s", answer );
     } else {
         sprintf(buffer,
                 "Are you sure you want to sync the %9s (y/n) ?      ",

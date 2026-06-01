@@ -124,7 +124,7 @@ int    *time_comm_delay;
 	    mvwaddstr( maindisp, 4, 21, "Allowing DBBC3 to settle ");
 	    leaveok ( maindisp, FALSE); /* leave cursor in place */
 	    wrefresh ( maindisp );
-	    for(i=0;i<30;i++) {  /*wait for 2nd next 1 PPS before continuing */
+	    for(i=0;i<25;i++) {  /*wait for 25th next 1 PPS before continuing */
 	      rte_sleep(100);
 	      mvwaddstr( maindisp, 4,21+25+i, ".");
 	      leaveok ( maindisp, FALSE); /* leave cursor in place */

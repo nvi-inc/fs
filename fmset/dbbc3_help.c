@@ -42,7 +42,7 @@ int start_row;
     mvwprintw( maindisp, start_row+irow++, COL0,
             "  If any of the pps_delays are not small (<100 ns), use 's' to sync");
     mvwprintw( maindisp, start_row+irow++, COL0,
-            "  After a sync, fmset will wait 30 seconds to let the DBBC3 settle");
+            "  After a sync, fmset will wait 25 seconds to let the DBBC3 settle");
     mvwprintw( maindisp, start_row+irow++, COL0,
             "  When the pps_delays are all small, use 'z' to enter time display mode");
     irow++;
