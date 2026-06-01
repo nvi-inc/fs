@@ -373,7 +373,8 @@ if (source==DBBC3) {
         mvwaddstr( maindisp, hint_row+irow++, column,buffer);
         sprintf(buffer, "    'z'     toggle display between pps_delay and Core3H board time");
         mvwaddstr( maindisp, hint_row+irow++, column,buffer);
-        irow++;
+        sprintf(buffer, "    'h'     for help on using fmset with DBBC3");
+        mvwaddstr( maindisp, hint_row+irow++, column,buffer);
         sprintf(buffer, "Use '+'/'-' to increment/decrement %s time by one second.",form);
         mvwaddstr( maindisp, hint_row+irow++, column, buffer);
         sprintf(buffer, "    '='     to be prompted for a new %s time or use GPS.",form);
@@ -385,7 +386,9 @@ if (source==DBBC3) {
     } else {
         sprintf(buffer, "Use 'z'     toggle display between pps_delay and Core3H board time");
         mvwaddstr( maindisp, hint_row+irow++, column,buffer);
-        irow+=1;
+        sprintf(buffer, "    'h'     for help on using fmset with DBBC3");
+        mvwaddstr( maindisp, hint_row+irow++, column,buffer);
+        irow++;
         sprintf(buffer, "Use 's'     to SYNC DBBC3 (only needed if pps_delays are large)");
         mvwaddstr( maindisp, hint_row+irow++, column, buffer);
     }
@@ -963,6 +966,17 @@ do 	{
                 dbbc3_pps_delay_display=0;
               else
                 dbbc3_pps_delay_display=1;
+          kfirst=1;
+	  clear_area=1;
+	  goto build;
+	case 'h':
+	case 'H':
+	  if(source==DBBC3) {
+            int start_row=4;
+	    for (i=start_row;i<hint_row+irow;i++)
+	      mvwaddstr( maindisp, i, 1, blank);
+              dbbc3_help(maindisp,start_row);
+          }
           kfirst=1;
 	  clear_area=1;
 	  goto build;
