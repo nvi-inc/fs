@@ -639,9 +639,13 @@ do 	{
         } else if(source==DBBC3) {
             int some;
             if(!dbbc3_pps_delay_display) {
-                sprintf(buffer,"Nominal VDIF Epoch for %s time is %d ",
+                mvwaddstr( maindisp, 8, 1, blank);
+                sprintf(buffer,"Nominal VDIF Epoch for %s time is %2d",
                         form,vdif_should);
                 mvwaddstr( maindisp, 8, column, buffer );
+                if(shm_addr->dbbc3_tsys_data.data[01 & shm_addr->dbbc3_tsys_data.iping].ifc[shm_addr->dbbc3_iscboard-1].time_included &&
+                        shm_addr->time.model != 'c' && shm_addr->time.model != 'n' && icomputer==0)
+                    wprintw(maindisp,"; setcl board is %d",shm_addr->dbbc3_iscboard);
                 mvwaddstr( maindisp, 9, 1, blank);
                 mvwaddstr( maindisp, 9, column, "pps_delay: ");
                 wstandout(maindisp);
