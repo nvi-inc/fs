@@ -434,7 +434,7 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
 
             printw(" DBBC3-FS ");
             if (!ifc.time_included) {
-                printw("-----");
+                printw("     ");
             } else if(tsys_cycle->no_mcast_since_restart || ifc.time <= 0) {
                 printw("%5s"," ");
             } else {
