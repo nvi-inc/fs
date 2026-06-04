@@ -423,7 +423,7 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
             move(irow++,icol);
             printw("Epoch ");
             if(!shm_addr->dbbc3_tsys_data.epoch_inserted) {
-                printw("%3s","---");
+                printw("%3s","   ");
             } else if(tsys_cycle->no_mcast_since_restart) {
                 printw("%3s"," ");
             } else {
