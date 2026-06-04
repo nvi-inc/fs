@@ -369,40 +369,57 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
                 print_tsys(ifc.tsys,ifc.clipped,reverse);
 
             move(irow++,icol);
-            printw("Time   ");
-
-        /* legitimate times start at the first VDIF epoch */
-
-            if(ifc.time > 0) {
-              disp_time=ifc.time+1;
-              if(ifc.time_error>=-shm_addr->dbbc3_mcast_arrival/100 && ifc.time_error <=0)
-                  disp_time-=ifc.time_error;
-              if(age <= shm_addr->dbbc3_mcast_arrival/100)
-                  disp_time+=age;
-              ptr=gmtime(&disp_time);
-            }
-
-            if(ifc.time <= 0 || NULL == ptr) {
-                printw("%17s"," ");
-            } else {
-                int time_error=ifc.time_error;
-                int tm_bad = time_error<-shm_addr->dbbc3_mcast_arrival/100 || time_error>0;
-                tm_bad = tm_bad || age >shm_addr->dbbc3_mcast_arrival/100;
-
-                if(tm_bad)
-                    standout();
-
-                printw("%4d.%03d.%02d:%02d:%02d",
-                        (ptr->tm_year+1900)%10000,
-                        ptr->tm_yday+1,
-                        ptr->tm_hour,
-                        ptr->tm_min,
-                        ptr->tm_sec);
-
-                if(tm_bad)
+            if (!ifc.time_included) {
+                printw("Packet Number ");
+                buf[0]=0;
+                uns2str2(buf,tsys_cycle->pkt_num,-10,0);
+                for(i=0;i<strlen(buf);i++) {
+                    if(buf[i]==' ')
+                        printw(" ");
+                    else {
+                        if(age >shm_addr->dbbc3_mcast_arrival/100)
+                            standout();
+                        printw("%s",buf+i);
+                        break;
+                    }
+                }
+                if(age >shm_addr->dbbc3_mcast_arrival/100)
                     standend();
-            }
+            }  else {
+                printw("Time   ");
 
+                /* legitimate times start at the first VDIF epoch */
+
+                if(ifc.time > 0) {
+                    disp_time=ifc.time+1;
+                    if(ifc.time_error>=-shm_addr->dbbc3_mcast_arrival/100 && ifc.time_error <=0)
+                        disp_time-=ifc.time_error;
+                    if(age <= shm_addr->dbbc3_mcast_arrival/100)
+                        disp_time+=age;
+                    ptr=gmtime(&disp_time);
+                }
+
+                if(ifc.time <= 0 || NULL == ptr) {
+                    printw("%17s"," ");
+                } else {
+                    int time_error=ifc.time_error;
+                    int tm_bad = time_error<-shm_addr->dbbc3_mcast_arrival/100 || time_error>0;
+                    tm_bad = tm_bad || age >shm_addr->dbbc3_mcast_arrival/100;
+
+                    if(tm_bad)
+                        standout();
+
+                    printw("%4d.%03d.%02d:%02d:%02d",
+                            (ptr->tm_year+1900)%10000,
+                            ptr->tm_yday+1,
+                            ptr->tm_hour,
+                            ptr->tm_min,
+                            ptr->tm_sec);
+
+                    if(tm_bad)
+                        standend();
+                }
+            }
             move(irow++,icol);
             printw("Epoch ");
             if(!shm_addr->dbbc3_tsys_data.epoch_inserted) {

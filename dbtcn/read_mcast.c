@@ -45,7 +45,7 @@ extern struct fscom *shm_addr;
 char *getenv_DBBC3( char *env, int *actual, int *nominal, int *error, int options);
 
 ssize_t read_mcast(int sock, char buf[], size_t buf_size, int it[6],
-        int centisec[6],int data_valid, int *hsecs)
+        int centisec[6],int data_valid, int *hsecs, unsigned *pkt_num)
 {
     ssize_t n;
     struct sockaddr_in from;
@@ -181,6 +181,9 @@ ssize_t read_mcast(int sock, char buf[], size_t buf_size, int it[6],
     }
 
     /* received */
+
+    ++*pkt_num;
+
     if(0>percent) {
         int actual, error;
         char *ptr;

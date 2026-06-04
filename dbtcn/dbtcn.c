@@ -43,6 +43,7 @@ int main(int argc, char *argv[])
     int centisec[6];
     int seconds;
     int hsecs;
+    unsigned pkt_num = 0;
 
     setup_ids();    /* attach to the shared memory */
     rte_prior(FS_PRIOR);
@@ -123,7 +124,7 @@ int main(int argc, char *argv[])
              if_param[i]=shm_addr->dbbc3_cont_cal.if_param[i];
 
         n = read_mcast(sock,buf,sizeof(buf),itmc,centisec,
-                dbtcn_control.data_valid.user_dv, &hsecs);
+                dbtcn_control.data_valid.user_dv, &hsecs, &pkt_num);
 
         if(n<0)
             continue;
@@ -147,7 +148,7 @@ int main(int argc, char *argv[])
         smooth_ts( &cycle, reset ||!cont_cal, samples, filter, if_param);
         reset=FALSE;
 
-        update_shm(&packet,&cycle, itmc, centisec, hsecs);
+        update_shm(&packet,&cycle, itmc, centisec, hsecs, pkt_num);
 
         /* check control to get the last state before logging */
 

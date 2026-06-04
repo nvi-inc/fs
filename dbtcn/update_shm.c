@@ -33,7 +33,7 @@
 extern struct fscom *shm_addr;
 
 void update_shm( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
-        int it[6], int centisec[6], int hsecs)
+        int it[6], int centisec[6], int hsecs, unsigned pkt_num)
 {
     int i;
     int seconds;
@@ -49,6 +49,7 @@ void update_shm( dbbc3_ddc_multicast_t *t, struct dbbc3_tsys_cycle *cycle,
     memcpy(cycle->centisec,centisec,sizeof(cycle->centisec));
     cycle->hsecs=hsecs;
     cycle->no_mcast_since_restart=0;
+    cycle->pkt_num=pkt_num;
 
     for (i=0;i<MAX_DBBC3_IF;i++) {
         cycle->ifc[i].lo=shm_addr->lo.lo[i];

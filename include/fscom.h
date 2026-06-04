@@ -509,6 +509,7 @@ typedef struct fscom {
           int centisec[6];
           int hsecs;
           int no_mcast_since_restart;
+          unsigned pkt_num;
           char version[33];
           char version_correct;
           struct dbbc3_tsys_ifc {
