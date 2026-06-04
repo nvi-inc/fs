@@ -2837,6 +2837,9 @@ DBBC3 multicast: error from select() cleared
 DN   20
 DBBC3 multicast: No time-outs in the last 60 seconds; counting stopped.
 ""
+DN   19
+DBBC3 multicast: Time-out with DBBC3 command (or FMSET) and data_valid=off; counting stopped.
+""
 DN   -1
 DBBC3 multicast: error unpacking, packet too small.
 ""

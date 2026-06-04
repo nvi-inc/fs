@@ -144,8 +144,12 @@ ssize_t read_mcast(int sock, char buf[], size_t buf_size, int it[6],
         } else {
 //            logite(";\" INFO: multicast time-out with DBBC3 commands (or FMSET) while data_valid=off",0,NULL);
             logit_nd(" INFO: multicast time-out with DBBC3 commands (or FMSET) while data_valid=off",0,NULL);
-            if(to_count > -1)
-                to_count++;
+            if(to_count > -1) {
+                logit(NULL,19,"dn");
+                to_count=-1;
+                to_try=-1;
+                rte_ticks(&recv_start);
+            }
         }
         if(to_count > -1) { /* only if there was a reportable time-out */
             if(to_try < 0)
