@@ -400,7 +400,6 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
                 } else {
                     int time_error=ifc.time_error;
                     int tm_bad = time_error<-shm_addr->dbbc3_mcast_arrival/100 || time_error>0;
-                    tm_bad = tm_bad || age >shm_addr->dbbc3_mcast_arrival/100;
 
                     if(tm_bad)
                         standout();
