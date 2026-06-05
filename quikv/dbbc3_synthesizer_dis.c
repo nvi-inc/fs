@@ -170,6 +170,10 @@ int kcheck;
           dbbc3_synthesizer_mon(output,&count,&lclm);
         }
       }
+      if(kcheck)
+        strcat(output,"checked,");
+     else
+        strcat(output,"\e[7mnot_checked\e[m,");
 
       if(strlen(output)>0) output[strlen(output)-1]='\0';
 

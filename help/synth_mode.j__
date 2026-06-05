@@ -3,7 +3,7 @@
  Syntax:     synth_mode=loX,freq,output,check
              synth_mode=
              synth_mode=loX
- Response:   synth_mode/loX,freq,output,ext_lo,pre-filer_sb,att,mode,ref_source,ref_freq,ref_doubler,ref_divider,offset,lock
+ Response:   synth_mode/loX,freq,output,ext_lo,pre-filer_sb,att,mode,ref_source,ref_freq,ref_doubler,ref_divider,offset,lock,checked
 
 Settable Parameters:
 
@@ -107,7 +107,14 @@ Monitor-only Parameters:
 
   lock          Synthesizer status: 'locked' or 'unlocked' (or 'unknown', if
                 not one of the two preceding values). For 'check', an error
-                 will be generated if the value is not 'locked'.
+                will be generated if the value is not 'locked'.
+
+  checked       Literal string: 'checked' or 'not_checked', indicating whether
+                the listed parameters that can be verified (checked) were or
+                were not. The 'not_checked' string is shown in inverse video
+                on the screen and inside parentheses in the log. This
+                parameter is intended to make it clearer whether the response
+                is for the Monitor or Checking.
 
 Comments:
 
