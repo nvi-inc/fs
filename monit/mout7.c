@@ -392,10 +392,6 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
 
                 if(ifc.time > 0) {
                     disp_time=ifc.time+1;
-                    if(ifc.time_error>=-shm_addr->dbbc3_mcast_arrival/100 && ifc.time_error <=0)
-                        disp_time-=ifc.time_error;
-                    if(age <= shm_addr->dbbc3_mcast_arrival/100)
-                        disp_time+=age;
                     ptr=gmtime(&disp_time);
                 }
 
@@ -440,8 +436,6 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
             } else {
                 int time_error=ifc.time_error;
                 int tm_bad = time_error<-shm_addr->dbbc3_mcast_arrival/100 || time_error>0;
-                if(time_error>=-shm_addr->dbbc3_mcast_arrival/100 && time_error<0)
-                    time_error=0;
                 buf[0]=0;
                 int2str(buf,time_error,-5,0);
                 for(i=0;i<strlen(buf);i++) {
