@@ -369,7 +369,7 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
                 print_tsys(ifc.tsys,ifc.clipped,reverse);
 
             move(irow++,icol);
-            if (!ifc.time_included) {
+            if (!ifc.time_included ||shm_addr->dbbc3_mcast_arrival/100) {
                 printw("Packet Number ");
                 buf[0]=0;
                 uns2str2(buf,tsys_cycle->pkt_num,-10,0);
@@ -428,7 +428,7 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
             }
 
             printw(" DBBC3-FS ");
-            if (!ifc.time_included) {
+            if (!ifc.time_included ||shm_addr->dbbc3_mcast_arrival/100) {
                 printw("     ");
             } else if(tsys_cycle->no_mcast_since_restart || ifc.time <= 0) {
                 printw("%5s"," ");
