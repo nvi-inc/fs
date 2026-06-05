@@ -2829,7 +2829,7 @@ DN   30
 DBBC3 multicast: version/personality issue resolved
 ""
 DN   29
-DBBC3 multicast: WARNING: Lost?WW% of the expected messages in the last minute (data_valid=off).
+DBBC3 multicast: WARNING: Lost?WW% of the expected packets in the last minute (data_valid=off).
 ""
 DN   21
 DBBC3 multicast: error from select() cleared
@@ -2889,10 +2889,10 @@ DN  -27
 DBBC3 multicast: Using DBBC3 commands (or FMSET) while recording is probably causing loss of calibration date (TO).
 ""
 DN  -28
-DBBC3 multicast: No messages were received in the last minute; continuing to count time-outs.
+DBBC3 multicast: No packets were received in the last minute; continuing to count time-outs.
 ""
 DN  -29
-DBBC3 multicast: Lost?WW% of the expected messages in the last minute (data_valid=on).
+DBBC3 multicast: Lost?WW% of the expected packets in the last minute (data_valid=on).
 ""
 DN  -30 Place holder for version string
 
