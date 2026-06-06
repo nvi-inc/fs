@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-/* mout7 - RDBE monitor
+/* mout7 - DBBC3 monitor
  *
  */
 #include <ncurses.h>
@@ -369,7 +369,7 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
                 print_tsys(ifc.tsys,ifc.clipped,reverse);
 
             move(irow++,icol);
-            if (!ifc.time_included ||shm_addr->dbbc3_mcast_arrival/100) {
+            if (!ifc.time_included) {
                 printw("Packet Number ");
                 buf[0]=0;
                 uns2str2(buf,tsys_cycle->pkt_num,-10,0);
@@ -392,6 +392,8 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
 
                 if(ifc.time > 0) {
                     disp_time=ifc.time+1;
+                    disp_time+=age;
+                    disp_time+=+tsys_cycle->hsecs/100-(int)((tsys_cycle->hsecs/8.0)*next-5)/100;
                     ptr=gmtime(&disp_time);
                 }
 
@@ -399,7 +401,8 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
                     printw("%17s"," ");
                 } else {
                     int time_error=ifc.time_error;
-                    int tm_bad = time_error<-shm_addr->dbbc3_mcast_arrival/100 || time_error>0;
+                    time_error+=+tsys_cycle->hsecs/100-(int)((tsys_cycle->hsecs/8.0)*next-5)/100;
+                    int tm_bad = time_error;
 
                     if(tm_bad)
                         standout();
@@ -428,13 +431,14 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
             }
 
             printw(" DBBC3-FS ");
-            if (!ifc.time_included ||shm_addr->dbbc3_mcast_arrival/100) {
+            if (!ifc.time_included) {
                 printw("     ");
             } else if(tsys_cycle->no_mcast_since_restart || ifc.time <= 0) {
                 printw("%5s"," ");
             } else {
                 int time_error=ifc.time_error;
-                int tm_bad = time_error<-shm_addr->dbbc3_mcast_arrival/100 || time_error>0;
+                time_error+=+tsys_cycle->hsecs/100-(int)((tsys_cycle->hsecs/8.0)*next-5)/100;
+                int tm_bad = time_error;
                 buf[0]=0;
                 int2str(buf,time_error,-5,0);
                 for(i=0;i<strlen(buf);i++) {
