@@ -357,8 +357,20 @@ void mout7( int next, struct dbbc3_tsys_cycle *tsys_cycle, int krf, int all,
             printw("Delay");
             buf[0]=0;
             if(UINT_MAX != ifc.delay) {
+                buf[0]=0;
                 uns2str2(buf,ifc.delay,-8,0);
-                printw("%8s",buf);
+                for(i=0;i<strlen(buf);i++) {
+                    if(buf[i]==' ')
+                        printw(" ");
+                    else {
+                        if(ifc.delay>100)
+                            standout();
+                        printw("%s",buf+i);
+                        break;
+                    }
+                }
+                if(ifc.delay>100)
+                    standend();
              } else
                 printw("%8s"," ");
 
