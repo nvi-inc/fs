@@ -5,7 +5,7 @@ Syntax:   core3h_mode=state,force,okay
           core3h_mode=n
           core3h_mode
 
-Response: core3h_mode/n,mask2,mask1,decimation,sample,clock,split,input,channels,width,payload,format,sync
+Response: core3h_mode/n,mask2,mask1,decimation,sample,clock,split,input,channels,width,payload,format,sync,checked
 
 Settable parameters:
 
@@ -66,6 +66,13 @@ format      data transmission format: 'stopped', 'vdif', 'mk5b', or
             'raw'. 'stopped' means no data is being sent
 
 sync        whether the board is synced: 'synced' or 'unsynced'
+
+checked     Literal string: 'checked' or 'not_checked', indicating
+            whether the listed parameters were verified (checked) or
+            were not. The 'not_checked' string is shown in inverse
+            video on the screen and inside parentheses in the log.
+            This parameter is intended to make it clearer whether the
+            response is for the Monitor or Checking.
 
 Comments:
 

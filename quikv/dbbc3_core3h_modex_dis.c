@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2025 NVI, Inc.
+ * Copyright (c) 2020-2026 NVI, Inc.
  *
  * This file is part of VLBI Field System
  * (see http://github.com/nvi-inc/fs).
@@ -182,6 +182,11 @@ void dbbc3_core3h_modex_dis(command,iboard,ip,force_set,options,kmon)
             dbbc3_core3h_modex_mon(output,&count,&lclc,&lclm);
         }
     }
+
+    if(!kcom && !kmon)
+        strcat(output,"checked,");
+     else
+        strcat(output,"\e[7mnot_checked\e[m,");
 
     if(strlen(output)>0) output[strlen(output)-1]='\0';
 
