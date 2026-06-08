@@ -181,12 +181,11 @@ void dbbc3_core3h_modex_dis(command,iboard,ip,force_set,options,kmon)
             count++;
             dbbc3_core3h_modex_mon(output,&count,&lclc,&lclm);
         }
+        if(!kmon)
+            strcat(output,"checked,");
+        else
+            strcat(output,"\e[7mnot_checked\e[m,");
     }
-
-    if(!kcom && !kmon)
-        strcat(output,"checked,");
-     else
-        strcat(output,"\e[7mnot_checked\e[m,");
 
     if(strlen(output)>0) output[strlen(output)-1]='\0';
 
