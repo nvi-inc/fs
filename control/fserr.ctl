@@ -2717,6 +2717,9 @@ No default for synthesizer frequency unless corresponding 'ifX=1', or 'ifX=2' an
 DM -103
 No default for synthesizer output unless corresponding 'ifX' has been set (for l?W).
 ""
+DM -104
+No default for synthesizer check parameter; use 'check', 'force', or 'force_plus'.
+""
 DM -111
 Can't use '*' (previous value) for synthesizer IF.
 ""
@@ -2770,6 +2773,12 @@ No synthesizer configuration has been defined to select with 'next'.
 ""
 DM -305
 'check' can only be used with 'next' if all settable parameters are '*'s (previous values).
+""
+DM -306
+Use 'synth=_mode=next,*,*,check' to check values (no-op if device is not setup) or 'synth_mode=next' to monitor.
+""
+DM -307
+Use 'synth=_mode=loX,*,*,check' to check values (no-op if device is not setup) or 'synth_mode=loX' to monitor.
 ""
 DM -401
 Class buffer error from monitor response (for l?W)

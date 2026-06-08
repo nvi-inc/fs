@@ -30,10 +30,10 @@ Settable Parameters:
             'ifX' input '2' is selected, the default is 'enable'; input '1',
             'disable'.
 
-  check     Either 'check', 'force' or 'force_plus'. Default is 'check'.
-            'force' and 'force_plus' cannot be used with 'next' (for the 'loX'
-            parameter). 'check' cannot be used with 'next' unless the 'freq'
-            and 'output' are '*'s (previous values).
+  check     Either 'check', 'force' or 'force_plus'. No default. 'force' and
+            'force_plus' cannot be used with 'next' (for the 'loX' parameter).
+            'check' cannot be used with 'next' unless the 'freq' and 'output'
+            are '*'s (previous values).
 
             It is recommended to NOT use 'force_plus'. If it is used, it
             behaves the same as 'force' except that it also sets the device to
@@ -157,9 +157,8 @@ summarized below.
              '*' for any parameter makes the command a no-op. See comments
              below about using a specific IF.
 
-  Checking -- The 'checking' form, which is the default, is invoked by using a
-              literal 'check' (or null value, i.e., the default) for the
-              'check' parameter.
+  Checking -- The 'checking' form is invoked by using a literal 'check' for
+              the 'check' parameter.
 
               The following settings of the device are checked:
                   (i) 'output' (if defined in the FS)

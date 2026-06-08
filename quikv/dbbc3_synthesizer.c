@@ -147,6 +147,9 @@ int ip[5];                           /* ipc parameters */
                   (0==strcmp(command->argv[3],"force")||0==strcmp(command->argv[3],"force_plus"))) {
               ierr=-303;
               goto error;
+          } else if(NULL == command->argv[2] || NULL != command->argv[2] && NULL == command->argv[3]) {
+              ierr=-306;
+              goto error;
           } else if(NULL != command->argv[2] && NULL != command->argv[3] && 0!=strcmp(command->argv[3],"check")) {
               ierr=-204;
               goto error;
@@ -168,8 +171,8 @@ int ip[5];                           /* ipc parameters */
           }
       } else {
           if(0==strcmp(command->argv[0],"*")) {
-             ierr=-111;
-             goto error;
+              ierr=-111;
+              goto error;
           }
           ierr=arg_key(command->argv[0],lo3_key,NLO3_KEY,&ilo,0,FALSE);
           if(ierr!=0) {
@@ -186,42 +189,39 @@ int ip[5];                           /* ipc parameters */
               dbbc3_synthesizer_dis(command,itask,ip,ilo,0,kmon,kcheck);
               return;
           }
-          if(shm_addr->lo.lo[ilo] < 0.0 && NULL != command->argv[1]){ /* lo is not defined */
-              if(0==strlen(command->argv[1]) &&
-                      (NULL == command->argv[2] ||
-                      (0==strlen(command->argv[2]) &&
-                      (NULL == command->argv[3] ||
-                      0==strcmp(command->argv[3],"force") ||
-                      0==strcmp(command->argv[3],"force_plus") ||
-                      0==strcmp(command->argv[3],"check"))))) { /* defaults is a no-op for force/force_plus/check */
-                  ip[0]=ip[1]=ip[2]=ip[3]=ip[4]=0;
-                  return;
-              }
-          }
-
-          if(0==shm_addr->dbbc3_synthesizer[ilo].setup) /* is not setup */
-              for(i=1;i<4;i++)
-                  if(NULL==command->argv[i])
-                      break;
-                  else if(0==strcmp(command->argv[i],"*")) {
-                      if(NULL != command->argv[2] && NULL != command->argv[3] &&
-                         0!=strcmp(command->argv[3],"force") && 0!=strcmp(command->argv[3],"check") &&
-                         0!=strcmp(command->argv[3],"force_plus")
-                         ) {
-                          ierr=-204;
-                          goto error;
-                      }
-                      ip[0]=ip[1]=ip[2]=ip[3]=ip[4]=0; /* a previous value is a no-op for check/force/force_plus */
+          if(shm_addr->lo.lo[ilo] < 0.0 && NULL != command->argv[1]) { /* lo is not defined */
+              if(0==strlen(command->argv[1]) && NULL != command->argv[2] && 0==strlen(command->argv[2])) {
+                  if(NULL == command->argv[3]) {
+                      ierr=-307;
+                      goto error;
+                  } else if( 0==strcmp(command->argv[3],"force") || 0==strcmp(command->argv[3],"force_plus") ||
+                          0==strcmp(command->argv[3],"check")) { /* all defaults is a no-op for force/force_plus/check */
+                      ip[0]=ip[1]=ip[2]=ip[3]=ip[4]=0;
                       return;
                   }
-     }
-     if(NULL == command->argv[1]) {
-         out_recs=0;
-         out_class=0;
-         add_check_queries(&out_recs, &out_class, ilo);
-         shm_addr->dbbc3_synthesizer_previous_lo=ilo;
-         goto dbbcn;
-     }
+              }
+          }
+          if(!shm_addr->dbbc3_synthesizer[ilo].setup) { /* device is not setup */
+              if(NULL!=command->argv[1] && 0==strcmp(command->argv[1],"*") &&
+                      NULL != command->argv[2] && 0==strcmp(command->argv[2],"*")) {
+                  if(NULL == command->argv[3]) {
+                      ierr=-307;
+                      goto error;
+                  } else if(0==strcmp(command->argv[3],"force") || 0==strcmp(command->argv[3],"check") ||
+                          0==strcmp(command->argv[3],"force_plus") ) {
+                      ip[0]=ip[1]=ip[2]=ip[3]=ip[4]=0; /* all previous values is a no-op for check/force/force_plus */
+                      return;
+                  }
+              }
+          }
+      }
+      if(NULL == command->argv[1]) {
+          out_recs=0;
+          out_class=0;
+          add_check_queries(&out_recs, &out_class, ilo);
+          shm_addr->dbbc3_synthesizer_previous_lo=ilo;
+          goto dbbcn;
+      }
 
 /* if we arrive here, it is a set-up command so parse it */
 

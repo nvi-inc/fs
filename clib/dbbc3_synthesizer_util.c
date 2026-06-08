@@ -180,7 +180,7 @@ int ilo;
         }
         break;
       case 4:
-	ierr=arg_key(ptr,check_key,NCHECK_KEY,&lcl->check.check,1,TRUE);
+	ierr=arg_key(ptr,check_key,NCHECK_KEY,&lcl->check.check,0,FALSE);
         m5state_init(&lcl->check.state);
         if(ierr==0) {
             lcl->check.state.known=1;
