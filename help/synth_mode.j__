@@ -11,18 +11,18 @@ Settable Parameters:
             ..., up to the last IF in the system ('loh' is the last possible),
             or "next' to read the synthesizer after the previous one
             monitored/checked (wrapping after the last). 'next' cannot be used
-            with 'force' (for the 'check' parameter) at all. 'next' cannot be
-            used with 'check' unless the 'freq' and 'output' are '*'s
-            (previous values). No default. No previous value ('*') available
-            for this parameter.
+            with 'force' or 'force_plus' (for the 'check' parameter). 'next'
+            cannot be used with 'check' unless the 'freq' and 'output' are
+            '*'s (previous values). No default. No previous value ('*')
+            available for this parameter.
 
   freq      Frequency in MHz for the synthesizer. The default is "undefined"
-            unless ifX=...' has been setup and the LO side-band defined. If
+            unless 'ifX=...' has been setup and the LO side-band defined. If
             'ifX' input '2' is selected, the default is "undefined" unless the
             LO frequency is defined. If it is defined that is the default
             unless an external-LO applies (see 'help=extlo'). If one applies,
             the default frequency is adjusted accordingly. If 'ifX' input '1'
-            is selected the default is "undefined." For Monitoring and
+            is selected, the default is "undefined". For Monitoring and
             Checking (see below in Comments), the value is shown in
             parentheses if 'output' is 'disable'.
 
@@ -43,7 +43,7 @@ Settable Parameters:
             which can vary by board.
 
             If this parameter's value is 'check', the following settings of
-            the device are checked:
+            the device ARE checked:
                 (i) 'output' (if defined in the FS)
                (ii) 'freq' (if defined in the FS)
               (iii) 'mode' is 'CW",
@@ -118,6 +118,12 @@ Monitor-only Parameters:
 
 Comments:
 
+TIP: This is a very complex command and challenging to use interactively. It
+is recommended that for normal situations that it only be used within the
+'dbbc3_synth', 'synth_check', 'checkXXX', and 'synth_force' SNAP procedures as
+described below (or others you devise). It has been structured to make those
+procedures work.
+
 NOTE: If 'ifX=1,...' is commanded, the device's 'output' is set to 'disable'
 without the FS's model for the device being updated; likewise for 'ifX=2,...'
 and 'enable'.
@@ -132,8 +138,8 @@ supplied for 'freq' and 'output' in mode setups, they can be set explicitly if
 need be. Using the defaults should automatically set the correct values. If
 they do not, there may be an issue with how the LO, external-LO, and 'ifX'
 setups are defined. The default for 'freq' is "undefined" if the LO
-configuration is not complete to allow 'output' to be manually controlled for
-those cases without providing a frequency.
+configuration is not complete. This allows 'output' to be set without
+providing a frequency for that case.
 
 In addition to the normal 'setting' and 'monitoring' forms of most commands,
 this one has an additional 'checking' form. The details of these forms are
@@ -149,7 +155,7 @@ summarized below.
              If the 'freq' or 'output' value is not defined, the corresponding
              device setting is not sent.
 
-             If the corresponding LO value ('lo=loX,...'), has not been set,
+             If the corresponding LO value ('lo=loX,...'), has not been set
              and the 'freq' and 'output' parameters are default (null), the
              command is a no-op. See comments below about using a specific IF.
 
@@ -160,7 +166,7 @@ summarized below.
   Checking -- The 'checking' form is invoked by using a literal 'check' for
               the 'check' parameter.
 
-              The following settings of the device are checked:
+              The following settings of the device ARE checked:
                   (i) 'output' (if defined in the FS)
                  (ii) 'freq' (if defined in the FS)
                 (iii) 'mode' is 'CW",
@@ -185,7 +191,7 @@ summarized below.
               If a specific IF is used (not 'next') and the corresponding LO
               value ('lo=loX,...'), has not been set, and the 'freq' and
               'output' parameters are default (null), the command is a no-op.
-              See comments below about using a specific IF.
+              See the comments below about using a specific IF.
 
               Similarly, if a specific IF is used (not 'next') and the
               synthesizer parameters have not been set, using '*' for any
@@ -210,7 +216,8 @@ null (default) and the LO frequency has not been defined for this IF
 ('lo=...'), the command is a no-op. This allows which synthesizer are used to
 be controlled by which IFs are in use without modifying these commands in the
 setup procedure. The synthesizer setup should start with a 'synth_mode='
-command, followed by commands similar to:
+command (possibly preceded by an external-LO setup), followed by commands
+similar to:
 
   synth_mode=loa,,,check
 
@@ -248,8 +255,8 @@ This allows the use of:
 
   synth_mode=next,*,*,check
 
-to cycle through only the setup IFs. See more about the 'checkXXX' procedure
-below.
+to cycle through only the setup synthesizers. See more about the 'checkXXX'
+procedure below.
 
 The frequency sent to, and read from, the device is half the value set/shown
 in this command, 'freq'. The latter is the effective frequency of the
@@ -324,7 +331,8 @@ result. Please note the restriction in the twelfth row.
   intended to be used in to check that the configuration of the synthesizers
   agrees with the settings of the 'lo=loX,...' and 'ifX=...' commands for each
   IF. It is called by 'drudg' generated setup procedure for DBBC3 racks (from
-  the 'ifdXX' procedure). The procedure should contain:
+  the 'ifdXX' procedure). The procedure should contain (possibly preceded by
+  an external-LO setup, see below):
 
     synth_mode=
     synth_mode=loa,,,check
@@ -336,8 +344,8 @@ result. Please note the restriction in the twelfth row.
   synthesizer will be a no-op.
 
   Any 'ext_lo=...' commands to define external-LOs that may used should
-  precede the 'synth_mode=' command above. See 'help=ext_lo' for information
-  on the 'ext_lo' command.
+  precede the 'synth_mode=' command above in this procedure. See 'help=ext_lo'
+  for information on the 'ext_lo' command.
 
   You should verify that the 'drudg' generated 'ifdXX' procedure works with
   the 'synth_mode=...' (and any needed 'ext_lo=...') commands in 'dbbc3_synth'
