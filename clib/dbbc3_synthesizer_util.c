@@ -95,6 +95,7 @@ int ilo;
                     shm_addr->lo.lo[ilo] < 0.0 && 2 ==shm_addr->dbbc3_ifx[ilo].input  ||
                     shm_addr->lo.sideband[ilo]<1  || 2<shm_addr->lo.sideband[ilo]) {
                 lcl->freq.freq=-1.0;
+                ierr=0;
             } else {
                 double freq;
                 int sb;
