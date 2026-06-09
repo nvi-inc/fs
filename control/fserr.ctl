@@ -2778,7 +2778,7 @@ DM -306
 Use 'synth=_mode=next,*,*,check' to check values (no-op if device is not setup) or 'synth_mode=next' to monitor.
 ""
 DM -307
-Use 'synth=_mode=loX,*,*,check' to check values (no-op if device is not setup) or 'synth_mode=loX' to monitor.
+Use 'synth=_mode=loX,*,*,check' to check values (no-op if device is not setup) or 'synth_mode=loX' to monitor (l?W).
 ""
 DM -401
 Class buffer error from monitor response (for l?W)

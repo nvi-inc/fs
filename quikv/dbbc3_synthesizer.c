@@ -202,16 +202,13 @@ int ip[5];                           /* ipc parameters */
               }
           }
           if(!shm_addr->dbbc3_synthesizer[ilo].setup) { /* device is not setup */
-              if(NULL!=command->argv[1] && 0==strcmp(command->argv[1],"*") &&
-                      NULL != command->argv[2] && 0==strcmp(command->argv[2],"*")) {
-                  if(NULL == command->argv[3]) {
-                      ierr=-307;
-                      goto error;
-                  } else if(0==strcmp(command->argv[3],"force") || 0==strcmp(command->argv[3],"check") ||
-                          0==strcmp(command->argv[3],"force_plus") ) {
-                      ip[0]=ip[1]=ip[2]=ip[3]=ip[4]=0; /* all previous values is a no-op for check/force/force_plus */
-                      return;
-                  }
+              if(NULL != command->argv[1] && 0==strcmp(command->argv[1],"*") &&
+                      NULL != command->argv[2] && 0==strcmp(command->argv[2],"*") &&
+                      NULL != command->argv[3] &&
+                      (0==strcmp(command->argv[3],"force") || 0==strcmp(command->argv[3],"check") ||
+                       0==strcmp(command->argv[3],"force_plus")) ) {
+                  ip[0]=ip[1]=ip[2]=ip[3]=ip[4]=0; /* all previous values is a no-op for check/force/force_plus */
+                  return;
               }
           }
       }
@@ -289,7 +286,7 @@ error:
       ip[1]=0;
       ip[2]=ierr;
       memcpy(ip+3,"dm",2);
-      if(-102==ierr || -103==ierr || (-300 < ierr && ierr < -201 && -204 != ierr))
+      if(-102==ierr || -103==ierr || -307 == ierr || (-300 < ierr && ierr < -201 && -204 != ierr))
         memcpy(ip+4,lo3_key[ilo]+1,2);
       return;
 }
