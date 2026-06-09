@@ -33,7 +33,8 @@ Settable Parameters:
   check     Either 'check', 'force' or 'force_plus'. No default. 'force' and
             'force_plus' cannot be used with 'next' (for the 'loX' parameter).
             'check' cannot be used with 'next' unless the 'freq' and 'output'
-            are '*'s (previous values).
+            are '*'s (previous values). No previous value ('*') available for
+            this parameter.
 
             It is recommended to NOT use 'force_plus'. If it is used, it
             behaves the same as 'force' except that it also sets the device to
@@ -152,8 +153,7 @@ summarized below.
              synthesizer values for that IF has not previously been defined is
              an error for setting. Using 'next' is not permitted.
 
-             If the 'freq' or 'output' value is not defined, the corresponding
-             device setting is not sent.
+             If the 'freq' value is undefined, it is not sent.
 
              If the corresponding LO value ('lo=loX,...'), has not been set
              and the 'freq' and 'output' parameters are default (null), the

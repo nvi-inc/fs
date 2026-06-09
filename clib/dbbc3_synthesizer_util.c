@@ -80,9 +80,13 @@ int ilo;
           ierr=-200;
           break;
         }
+        idum=1;
         ierr=arg_key(ptr,star_key,STAR_KEY,&idum,0,FALSE);
-        if(ierr == 0 && idum == 0)
+        if(ierr == 0 && idum == 0) {
+           if(!lcl->setup)
+             ierr=-120;
            break;
+        }
 
         m5state_init(&lcl->freq.state);
         m5state_init(&lcl->ext_lo_freq.state);
@@ -170,10 +174,15 @@ int ilo;
            idefault=0;
            kdefault=TRUE;
         }
+        idum=1;
+        ierr=arg_key(ptr,star_key,STAR_KEY,&idum,0,FALSE);
+        if(ierr == 0 && idum == 0) {
+           if(!lcl->setup)
+             ierr=-120;
+             break;
+        }
 	ierr=arg_key(ptr,output_key,NOUTPUT_KEY,&lcl->output.output,idefault,kdefault);
         m5state_init(&lcl->output.state);
-        if(ierr==0 && lcl->output.output<0)
-            ierr=-200;
         if(ierr==0) {
           lcl->output.state.known=1;
         } else {
@@ -181,6 +190,12 @@ int ilo;
         }
         break;
       case 4:
+        idum=1;
+        ierr=arg_key(ptr,star_key,STAR_KEY,&idum,0,FALSE);
+        if(ierr == 0 && idum == 0){
+             ierr=-110;
+             break;
+        }
 	ierr=arg_key(ptr,check_key,NCHECK_KEY,&lcl->check.check,0,FALSE);
         m5state_init(&lcl->check.state);
         if(ierr==0) {

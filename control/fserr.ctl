@@ -2723,14 +2723,23 @@ No default for synthesizer check parameter; use 'check', 'force', or 'force_plus
 DM -111
 Can't use '*' (previous value) for synthesizer IF.
 ""
+DM -114
+Can't use '*' (previous value) for synthesizer check parameter (l?W).
+""
+DM -122
+Synthesizer frequency not previously defined; '*' can't be used (l?W).
+""
+DM -123
+Synthesizer output enable not previously defined; '*' can't be used (l?W).
+""
 DM -201
 Synthesizer LO must 'next' or 'loa', 'lob', ... 'loh' up to the number of IFs defined in dbbc3.ctl.
 ""
 DM -202
-Unable to decode synthesizer frequency, must be positive (l?W)
+Error decoding synthesizer frequency, must be positive (l?W)
 ""
 DM -203
-Synthesizer output must be 'disable' or 'enable'. If previously undefined, '*' can't be used (l?W).
+Synthesizer output enable must be 'disable' or 'enable'.
 ""
 DM -204
 The 'check' parameter must be 'check', 'force', or 'force_plus'.
