@@ -2712,10 +2712,10 @@ DM -101
 No default for synthesizer IF.
 ""
 DM -102
-No default for synthesizer frequency unless corresponding 'ifX=1', or 'ifX=2' and 'lo=loX', has been set (for l?W).
+No default for synthesizer frequency unless corresponding 'ifX=1', or 'ifX=2' and 'lo=loX', has been set (l?W).
 ""
 DM -103
-No default for synthesizer output unless corresponding 'ifX' has been set (for l?W).
+No default for synthesizer output unless corresponding 'ifX' has been set (l?W).
 ""
 DM -104
 No default for synthesizer check parameter; use 'check', 'force', or 'force_plus'.
@@ -2727,37 +2727,37 @@ DM -201
 Synthesizer LO must 'next' or 'loa', 'lob', ... 'loh' up to the number of IFs defined in dbbc3.ctl.
 ""
 DM -202
-Unable to decode synthesizer frequency, must be positive (for l?W)
+Unable to decode synthesizer frequency, must be positive (l?W)
 ""
 DM -203
-Synthesizer output must be 'disable' or 'enable'. If previously undefined, '*' can't be used (for l?W).
+Synthesizer output must be 'disable' or 'enable'. If previously undefined, '*' can't be used (l?W).
 ""
 DM -204
 The 'check' parameter must be 'check', 'force', or 'force_plus'.
 ""
 DM -212
-LO side-band not defined in 'synth_mode' (for l?W)
+LO side-band not defined in 'synth_mode' (l?W)
 ""
 DM -222
-External-LO and LO have the same frequency, but IF input is 2 (for l?W).
+External-LO and LO have the same frequency, but IF input is 2 (l?W).
 ""
 DM -232
-External-LO and LO have the same frequency, but external-LO and LO have different side-bands (for l?W).
+External-LO and LO have the same frequency, but external-LO and LO have different side-bands (l?W).
 ""
 DM -242
-External-LO and LO have different frequencies, but IF input is 1 (for l?W).
+External-LO and LO have different frequencies, but IF input is 1 (l?W).
 ""
 DM -252
-External-LO frequency is less than LO frequency, but external-LO side-band is not upper (for l?W).
+External-LO frequency is less than LO frequency, but external-LO side-band is not upper (l?W).
 ""
 DM -262
-External-LO frequency is more than LO frequency, but external-LO side-band is not lower (for l?W).
+External-LO frequency is more than LO frequency, but external-LO side-band is not lower (l?W).
 ""
 DM -272
-LO frequency is zero and LO side-band is lower (for l?W).
+LO frequency is zero and LO side-band is lower (l?W).
 ""
 DM -282
-LO frequency is zero and no external-LO, but IF input is 2 (for l?W).
+LO frequency is zero and no external-LO, but IF input is 2 (l?W).
 ""
 DM -301
 No parameters are allowed after '?'.
@@ -2781,31 +2781,31 @@ DM -307
 Use 'synth=_mode=loX,*,*,check' to check values (no-op if device is not setup) or 'synth_mode=loX' to monitor (l?W).
 ""
 DM -401
-Class buffer error from monitor response (for l?W)
+Class buffer error from monitor response (l?W)
 ""
 DM -402 Placeholder for string not decoded from DBBC3 synthesizer
 
 ""
 DM -403
-Error decoding DBBC3 synthesizer response (for l?W), see error DN -402 for text.
+Error decoding DBBC3 synthesizer response (l?W), see error DN -402 for text.
 ""
 DM -404
-Too many responses from DBBC synthesizer (for l?W)
+Too many responses from DBBC synthesizer (l?W)
 ""
 DM -451
-Class buffer error from command response (for l?W).
+Class buffer error from command response (l?W).
 ""
 DM -600
-Synthesizer configuration (for l?W) is not correct. Please see the preceding 'DM -61x' errors for details.
+Synthesizer configuration (l?W) is not correct. Please see the preceding 'DM -61x' errors for details.
 ""
 DM -611
-Synthesizer output (for l?W) is not enabled.
+Synthesizer output (l?W) is not enabled.
 ""
 DM -612 Place holder for bad synthesizer frequency
 
 ""
 DM -613
-Synthesizer mode (for l?W) is not CW.
+Synthesizer mode (l?W) is not CW.
 ""
 DM -614 Place holder for unknown synthesizer mode message
 
@@ -2814,25 +2814,25 @@ DM -615 Place holder for unknown synthesizer lock status message
 
 ""
 DM -616
-Synthesizer reference source (for l?W) is not external.
+Synthesizer reference source (l?W) is not external.
 ""
 DM -617
-Synthesizer reference frequency (for l?W) is not 10 MHz.
+Synthesizer reference frequency (l?W) is not 10 MHz.
 ""
 DM -618
-Synthesizer reference doubler (for l?W) is not enabled.
+Synthesizer reference doubler (l?W) is not enabled.
 ""
 DM -619
-Synthesizer reference divider (for l?W) is not disabled.
+Synthesizer reference divider (l?W) is not disabled.
 ""
 DM -620
-Synthesizer frequency offset (for l?W) is not 0 MHz.
+Synthesizer frequency offset (l?W) is not 0 MHz.
 ""
 DM -621
-Synthesizer status (for l?W) is not locked.
+Synthesizer status (l?W) is not locked.
 ""
 DM -622
-Synthesizer output (for l?W) is not disabled.
+Synthesizer output (l?W) is not disabled.
 ""
 DN   30
 DBBC3 multicast: version/personality issue resolved
