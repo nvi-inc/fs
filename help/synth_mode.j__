@@ -36,15 +36,7 @@ Settable Parameters:
             are '*'s (previous values). No previous value ('*') available for
             this parameter.
 
-            It is recommended to NOT use 'force_plus'. If it is used, it
-            behaves the same as 'force' except that it also sets the device to
-            have the nominal values for 'mode', 'ref_source', 'ref_freq',
-            'ref_doubler' 'ref_divider', and 'freq_offset'. The 'att' value is
-            NOT set because the FS does not know the factory determined value,
-            which can vary by board.
-
-            If this parameter's value is 'check', the following settings of
-            the device ARE checked:
+            If 'check', the following settings of the device ARE checked:
                 (i) 'output' (if defined in the FS)
                (ii) 'freq' (if defined in the FS)
               (iii) 'mode' is 'CW",
@@ -59,6 +51,16 @@ Settable Parameters:
 
             The 'att' setting is NOT checked because the FS does not know the
             factory determined value, which can vary by board.
+
+            If 'force', the device is set with 'freq' and 'output' as
+            appropriate.
+
+            It is recommended to NOT use 'force_plus'. If it is used, it
+            behaves the same as 'force' except that it also sets the device to
+            have the nominal values for 'mode', 'ref_source', 'ref_freq',
+            'ref_doubler' 'ref_divider', and 'freq_offset'. The 'att' value is
+            NOT set because the FS does not know the factory determined value,
+            which can vary by board.
 
 Monitor-only Parameters:
 
@@ -115,7 +117,7 @@ Monitor-only Parameters:
                 were not. The 'not_checked' string is shown in inverse video
                 on the screen and inside parentheses in the log. This
                 parameter is intended to make it clearer whether the response
-                is for the Monitor or Checking.
+                values were checked or not.
 
 Comments:
 
@@ -148,10 +150,10 @@ summarized below.
 
   Setting -- The setting form is invoked by using a literal 'force' for the
              'check' parameter and will command the device. The values of
-             'freq' and 'output' also set the FS model (and hence the values
-             for '*' in subsequent commands) for that IF. Using '*' if the
-             synthesizer values for that IF has not previously been defined is
-             an error for setting. Using 'next' is not permitted.
+             'freq' and 'output' also define the FS model (and hence the
+             values for '*' in subsequent commands) for that IF. Using '*' if
+             the synthesizer values for that IF has not previously been
+             defined is an error for setting. Using 'next' is not permitted.
 
              If the 'freq' value is undefined, it is not sent.
 
@@ -182,8 +184,8 @@ summarized below.
               The 'att' setting is NOT checked because the FS does not know
               the factory determined value, which can vary by board.
 
-              Just as for Setting, the values of 'freq' and 'output' set the
-              FS model for that IF.
+              Just as for Setting, the values of 'freq' and 'output' define
+              the FS model for that IF.
 
               'next' can be specified for the IF for checking, with '*' for
               'freq' and 'output'. See below about the 'checkXXX' procedure.
@@ -200,7 +202,7 @@ summarized below.
 
   Monitoring -- The monitor forms are 'synth_mode' (for all IFs) or
                 'synth_mode=loX' (with no following parameters). This form
-                does not set the FS model or report errors in the device
+                does not define the FS model or report errors in the device
                 configuration. Using 'next' for 'loX' is permitted.
 
 Using 'synth_mode=' clears the FS model for all synthesizers. It should be
@@ -224,9 +226,10 @@ similar to:
 for all IFs in the system, whether being used or not. See details the
 'dbbc3_synth' procedure below.
 
-Also for a specific IF, i.e., not 'next', if synthesizer values have not been
-set and '*' is used for any of them, the command is a no-op. This allows a
-fixed procedure to check only the synthesizers in use. Commands similar to
+Also for a specific IF, i.e., not 'next', if synthesizer values have not
+defined and '*' is used for 'freq' and 'output', the command is a no-op. This
+allows a fixed procedure to check only the synthesizers in use. Commands
+similar to
 
   synth_mode=loa,*,*,check
 
@@ -319,11 +322,12 @@ result. Please note the restriction in the twelfth row.
     no ext_lo; lo=0          LSB        NO: doesn't exist
 
     If the synthesizer is used, its frequency is always positive, that is,
-    |lo - ext_lo|, an external pre-filter is used before 'RF-in', 'RF-out' is
-    jumpered to 'IF-in', and FS command 'ifX=2,...' is used. If the
-    synthesizer is not used, that is, 'ext_lo and 'lo' are equal, or there is
-    no external-LO and 'lo' is zero, the signal is connected directly to
-    'IF-in' and FS command 'ifX=1,...' is used.
+    |lo - ext_lo| (ext_lo is zero for no external-LO), and an external
+    pre-filter is used before 'RF-in', 'RF-out' is jumpered to 'IF-in', and FS
+    command 'ifX=2,...' is used. If the synthesizer is not used, that is,
+    'ext_lo and 'lo' are equal, or there is no external-LO and 'lo' is zero,
+    the signal is connected directly to 'IF-in' and FS command 'ifX=1,...' is
+    used.
 
                          'dbbc3_synth' SNAP procedure
 
