@@ -158,7 +158,7 @@ class Tools:
 
 	def openLog(self):
 		import tkFileDialog
-		MainGui.filename = tkFileDialog.askopenfilename()
+		MainGui.filename = tkFileDialog.askopenfilename(initialdir='/usr2/log',title='Open Log File',filetypes=[('log files','*.log')])
 
 
 	def findFile(self):

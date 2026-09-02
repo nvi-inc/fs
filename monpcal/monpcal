@@ -158,7 +158,7 @@ class Tools:
 
     def openLog(self):
         import tkinter.filedialog
-        MainGui.filename = tkinter.filedialog.askopenfilename()
+        MainGui.filename = tkinter.filedialog.askopenfilename(initialdir='/usr2/log',title='Open Log File',filetypes=[('log files','*.log')])
 
 
     def findFile(self):
