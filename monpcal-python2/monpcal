@@ -99,7 +99,10 @@ class MainGui:
 		for i in range(15):
 			w.append(Frame(frame, borderwidth = 0))
 			w[i].pack(side = TOP, fill = X)
-			Label(w[i], text = i, width = 3, pady=0, bd=0).pack(side=LEFT)
+			if i == 0:
+			    Label(w[i], text = 'Cn', width = 3, pady=0, bd=0).pack(side=LEFT)
+			else:
+			    Label(w[i], text = i, width = 3, pady=0, bd=0).pack(side=LEFT)
 			Label(w[i], textvariable = label[i][0], width = 10, pady=0, bd=0).pack(side=LEFT)
 			Label(w[i], textvariable = label[i][1], width = 6, pady=0, bd=0).pack(side=LEFT)
 			Label(w[i], textvariable = label[i][2], pady=0, bd=0, width = 9).pack(side=LEFT)
