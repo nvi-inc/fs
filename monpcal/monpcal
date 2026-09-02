@@ -44,6 +44,10 @@ class MainGui:
         global master
         #make Tk object:
         master = Tk()
+# for some reason half to add 67 to xwininfo y-value, title bar?
+#		master.geometry("+1226-90")
+        if len(sys.argv) > 1:
+             master.geometry(sys.argv[1])
         signal.signal(signal.SIGINT, keyboardInterruptHandler)
 
         #make tools, make it global so object has the same reference to all classes
