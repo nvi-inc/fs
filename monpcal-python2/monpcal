@@ -38,7 +38,7 @@ class MainGui:
 	filename = ''
 	pid = 0
 	
-	def __init__(self, title = 'Logreader'):
+	def __init__(self, title = 'Mark IV Decoder PCal'):
 
 
 		global master
