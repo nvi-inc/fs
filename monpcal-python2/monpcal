@@ -184,7 +184,7 @@ class FileReader(threading.Thread):
 		lr = LineReader()
 		#try to open file, on fail, display error
 		try:
-			child = popen2.Popen3('tail -f -n 200 '+ MainGui.filename)
+			child = popen2.Popen3('tail -f -n 200 '+ MainGui.filename + ' 2>/dev/null')
 			output = child.fromchild
 			MainGui.pid = child.pid
 		#in case of an error:
