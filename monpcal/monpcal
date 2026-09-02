@@ -184,7 +184,7 @@ class FileReader(threading.Thread):
         lr = LineReader()
         #try to open file, on fail, display error
         try:
-            child = subprocess.Popen(['tail', '-f', MainGui.filename],stdout=subprocess.PIPE,stderr=None,text=True,close_fds=True)
+            child = subprocess.Popen(['tail', '-f', '-n 200', MainGui.filename],stdout=subprocess.PIPE,stderr=None,text=True,close_fds=True)
         except:
             tools.stop()
             tools.message("Failed to run tail!")
