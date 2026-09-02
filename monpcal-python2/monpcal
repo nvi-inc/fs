@@ -1,6 +1,6 @@
 #!/usr/bin/python
 #
-# Copyright (c) 2020 NVI, Inc.
+# Copyright (c) 2020, 2023, 2026  NVI, Inc.
 #
 # This file is part of VLBI Field System
 # (see http://github.com/nvi-inc/fs).
@@ -26,7 +26,11 @@ import time
 import threading
 import os
 import popen2
+import signal
 
+def keyboardInterruptHandler(signal, frame):
+#    print("KeyboardInterrupt (ID: {}) has been caught. Cleaning up...".format(signal))
+    exit(0)
 
 class MainGui:
 	"""MainGui makes graphic stuf...
@@ -40,6 +44,7 @@ class MainGui:
 		global master
 		#make Tk object:
 		master = Tk()
+		signal.signal(signal.SIGINT, keyboardInterruptHandler)
 
 		#make tools, make it global so object has the same reference to all classes
 		global tools
