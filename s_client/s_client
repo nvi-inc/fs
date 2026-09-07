@@ -31,13 +31,28 @@ from subprocess import call
 parms = {'-h': '127.0.0.1', '-p':5000, '-t':1,'-c': "dbe_atten?;",
          '-n': os.path.basename(__file__)}
 try:
-    opts, pargs = getopt.getopt(sys.argv[1:], "Fh:p:c:t:n:")
+    opts, pargs = getopt.getopt(sys.argv[1:], "FHh:p:c:t:n:")
 except getopt.GetoptError as msg:
     sys.exit(msg)
 
 for o,v in opts:
     #print o,v
     parms[o] = v
+
+if '-H' in parms:
+     sys.exit("""
+Usage %s [-FHhptcn]
+Socket client to write command to host/port and read response
+
+Options (defaults):
+  -F      -- use non-FS error messages
+  -H      -- help, this output
+  -h host -- hostname (127.0.0.1)
+  -p port -- port (5000)
+  -c cmd  -- command to send (dbe_atten?;), new-line appended if not present
+  -t to   -- time-out in seconds (1)
+  -n name -- name for FS error messages (%s)"""
+%(os.path.basename(__file__),os.path.basename(__file__)))
 
 host = str(parms['-h'])
 port = int(parms['-p'])
