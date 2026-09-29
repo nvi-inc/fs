@@ -891,6 +891,11 @@ Messenger:
 
       goto Messenger;
     }
+    if (memcmp(cp2,"tp",2)==0) {  /* TNX on, all set to on */
+      for(ptr=first;ptr!=NULL;ptr=ptr->next)
+         ptr->on = 1;
+      goto Messenger;
+    }
     if (memcmp(cp2,"td",2)==0) {  /* TNX add */
       short ix;
       char empty[]= {0};

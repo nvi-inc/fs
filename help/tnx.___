@@ -2,6 +2,7 @@
 
   Syntax:     tnx=code,number,action,#num
               tnx=list
+              tnx=fon
               tnx
 
   Response:   tnx/code,number,action,#num,internal,external
@@ -9,7 +10,9 @@
 
 Settable parameters:
   code     Two character error code, e.g., 'sp', or 'list' to show the status
-           of all "recognized" errors (see Comments about 'tnx=list').
+           of all "recognized" errors (see Comments about 'tnx=list'), or
+           'fon' to force the action for all errors to 'on' (see Comments
+           about 'tnx=fon').
 
   number   Error message number, e.g., '-999'.
 
@@ -54,9 +57,9 @@ display, it is still written to the log.
 
 WARNING: This command must be used with great care. If misused, it may turn
 off important error messages that the operator needs to know about.
-Consequently, its use (except for just 'tnx' and 'tnx=list') is blocked if it
-is executed from a procedure, schedule, or time-list. This command must be
-entered interactively (in a pinch, the 'op_stream' command or the
+Consequently, its use (except for 'tnx','tnx=list', and 'tnx=fon') is blocked
+if it is executed from a procedure, schedule, or time-list. This command must
+be entered interactively (in a pinch, the 'op_stream' command or the
 'inject_snap' program can be used to workaround this restriction). The list of
 suppressed error messages is cleared every time the FS is started. TURNING OFF
 AN ERROR MESSAGE IS NOT THE SAME AS CORRECTING THE UNDERLYING PROBLEM, WHICH
@@ -71,6 +74,9 @@ The form 'tnx=list' will show the status of all "recognized" errors. The
 recognized errors are all the encountered errors plus errors set with 'add'
 regardless if they are currently being suppressed. The form 'tnx' shows only
 suppressed messages.
+
+The form 'tnx=fon' will force all errors to 'on'. This can be useful to make
+sure all errors are being displayed.
 
 Normally, an error must have occurred before its display status can be
 manipulated with 'tnx'. However, for 'add' a "default" if of 'off' is created

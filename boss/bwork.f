@@ -1289,6 +1289,8 @@ c
               call logit7ci(0,0,0,0,-300,'bo',0)
            else if(0.eq.ichcm_ch(parm,1,'list')) then
              call put_buf(iclbox,ibuf,-1,'fs','tl')
+           else if(0.eq.ichcm_ch(parm,1,'fon ')) then
+             call put_buf(iclbox,ibuf,-1,'fs','tp')
            else if(cjchar(lsor,1).eq.'$') then
               call logit7ci(0,0,0,0,-305,'bo',0)
            else if(cjchar(lsor,1).eq.'@') then
