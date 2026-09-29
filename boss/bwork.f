@@ -1297,6 +1297,8 @@ c
               call logit7ci(0,0,0,0,-306,'bo',0)
            else if(cjchar(lsor,2).eq.':') then
               call logit7ci(0,0,0,0,-307,'bo',0)
+           else if(cjchar(parm,3).ne.' '.or.cjchar(parm,4).ne.' ') then
+              call logit7ci(0,0,0,0,-300,'bo',0)
            else
               ibufd(1)=iparm(1)
               call gtprm2(ibuf,ich,nchar,1,parm,ierr)

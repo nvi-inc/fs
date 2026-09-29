@@ -1542,7 +1542,7 @@ BO -299
 More than ?WWW RDBEs requires mods to binit.f (plus fspgm.ctl, fserr.ctl, fmset.c, and rdbcn.c).
 ""
 BO -300
-There must be two character error mnemonic or 'list' as the first parameter for TNX.
+There must be a two character error mnemonic, 'list', or 'fon' as the first parameter for TNX.
 ""
 BO -301
 Error decoding error number in TNX.
